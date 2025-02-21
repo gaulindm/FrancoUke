@@ -62,11 +62,11 @@ def normalize_chord(chord):
 def transpose_chord(chord, semitones):
     """Transpose a chord by a given number of semitones, but keep [N.C.] unchanged."""
     
-    print(f"DEBUG: Received chord='{chord}'")  # 🔍 Debugging statement
+    #print(f"DEBUG: Received chord='{chord}'")  # 🔍 Debugging statement
 
     # ✅ Ensure [N.C.] is returned immediately
     if chord.strip().upper() == "[N.C.]":
-        print("DEBUG: Detected [N.C.], returning early")  # 🔍 Debugging statement
+        #print("DEBUG: Detected [N.C.], returning early")  # 🔍 Debugging statement
         return "[N.C.]"  # ✅ No processing, just return it
 
     root, suffix = "", ""
@@ -78,11 +78,11 @@ def transpose_chord(chord, semitones):
         root, suffix = chord[:1], chord[1:]
 
     # ✅ Debug unexpected root note issue
-    print(f"DEBUG: Extracted root='{root}', suffix='{suffix}'")  # 🔍 Debugging statement
+    #print(f"DEBUG: Extracted root='{root}', suffix='{suffix}'")  # 🔍 Debugging statement
 
     # ✅ Ensure root is valid (fix for unexpected inputs)
     if root not in NOTES_SHARP and root not in NOTES_FLAT:
-        print(f"DEBUG: Invalid root '{root}', returning original chord")  # 🔍 Debugging statement
+        #print(f"DEBUG: Invalid root '{root}', returning original chord")  # 🔍 Debugging statement
         return chord  # ✅ Return the original chord instead of crashing
 
     # ✅ Normalize root note

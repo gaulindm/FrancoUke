@@ -121,24 +121,36 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
                 "variation": chord["variations"][1]
             })
 
-
-    # Calculate diagrams per row and rows needed
-    chord_spacing = 20 if instrument == "ukulele" else 70  # Adjust spacing per instrument
+    # Adjust chord spacing and layout
+    chord_spacing = 20 if instrument == "ukulele" else 70  
     page_width, page_height = letter
-    max_chords_per_row = int((page_width - 2 * doc.leftMargin) / chord_spacing)
-    total_diagrams = len(relevant_chords) * (2 if len(relevant_chords) < 7 else 1)  # Include 2 variations if < 7 chords
-    rows_needed = (total_diagrams + max_chords_per_row - 1) // max_chords_per_row  # Calculate rows needed
+
+    # Correctly determine max_chords_per_row
+    max_chords_per_row = 12 if not secondary_instrument else 6  # 6 per instrument if secondary is present
+
+    # Separate chord counts for primary & secondary instruments
+    primary_diagrams = len([chord for chord in relevant_chords if chord.get("instrument") == instrument])
+    secondary_diagrams = len([chord for chord in relevant_chords if secondary_instrument and chord.get("instrument") == secondary_instrument])
+
+    # Include 2 variations if < 7 chords
+    total_primary = primary_diagrams * (2 if primary_diagrams < 7 else 1)
+    total_secondary = secondary_diagrams * (2 if secondary_diagrams < 7 else 1)
+
+    # Calculate rows per instrument
+    primary_rows = (total_primary + max_chords_per_row - 1) // max_chords_per_row
+    secondary_rows = (total_secondary + max_chords_per_row - 1) // max_chords_per_row
+
+    # Take max of both since they stack
+    rows_needed = max(primary_rows, secondary_rows)
 
     row_spacing = 72  # Space between rows
     diagram_height = rows_needed * row_spacing
 
     # Adjust bottom margin dynamically
-    if rows_needed > 1:
-        doc.bottomMargin = max(80, diagram_height + 20)  # Ensure there's enough space for diagrams
+    doc.bottomMargin = max(80, diagram_height + 20)
 
     # Debugging output
-    print(f"Total diagrams for calculatingmargin: {total_diagrams}, Rows needed: {rows_needed}, Bottom margin: {doc.bottomMargin}")
-
+    print(f"Primary diagrams: {total_primary}, Secondary diagrams: {total_secondary}, Max chords per row: {max_chords_per_row}, Rows needed: {rows_needed}, Bottom margin: {doc.bottomMargin}")
 
 
     songwriter_style = ParagraphStyle(
@@ -422,26 +434,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     chord_spacing = available_width / max_chords_per_row
     row_spacing = 72
 
-    ### Before adding dual instruments
-    # Update the doc.build section to include acknowledgements
-    #doc.build(
-    #    elements,
-    #    onFirstPage=lambda c, d: draw_footer(
-    #        c, d, relevant_chords, chord_spacing, row_spacing, is_lefty,
-    #        instrument=instrument,
-    #        secondary_instrument=secondary_instrument,  # Pass secondary instrument
-    #        is_printing_alternate_chord=user.userpreference.is_printing_alternate_chord,
-    #        acknowledgement=songs[0].acknowledgement if hasattr(songs[0], 'acknowledgement') else ''
-    #    ),
-    #    onLaterPages=lambda c, d: draw_footer(
-    #        c, d, relevant_chords, chord_spacing, row_spacing, is_lefty,
-    #        instrument=instrument,
-    #        secondary_instrument=secondary_instrument,  # Pass secondary instrument
-    #        is_printing_alternate_chord=user.userpreference.is_printing_alternate_chord,
-    #        acknowledgement=songs[0].acknowledgement if hasattr(songs[0], 'acknowledgement') else ''
-    #    )
 
-    #)
       # Build PDF with custom footer handling
     doc.build(
         elements,
