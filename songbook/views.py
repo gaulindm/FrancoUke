@@ -51,7 +51,47 @@ from .utils.transposer import transpose_lyrics  # Import your transposer functio
 @login_required
 @permission_required("songbook.change_songformatting", raise_exception=True)
 def edit_song_formatting(request, song_id):
-    formatting = get_object_or_404(SongFormatting, user=request.user, song_id=song_id)
+    
+    # ✅ Try to get the user's formatting
+    formatting = SongFormatting.objects.filter(user=request.user, song_id=song_id).first()
+
+    if not formatting:
+        # 🚀 If the user has no formatting, check if Gaulind has one
+        gaulind_formatting = SongFormatting.objects.filter(user__username="Gaulind", song_id=song_id).first()
+
+        if gaulind_formatting:
+            print(f"DEBUG: Creating formatting for {request.user.username} based on Gaulind's settings.")
+
+            # ✅ Create a new formatting entry for the user based on Gaulind's settings
+            formatting = SongFormatting.objects.create(
+                user=request.user,
+                song_id=song_id,
+                intro=gaulind_formatting.intro,
+                verse=gaulind_formatting.verse,
+                chorus=gaulind_formatting.chorus,
+                bridge=gaulind_formatting.bridge,
+                interlude=gaulind_formatting.interlude,
+                outro=gaulind_formatting.outro,
+            )
+        else:
+            print(f"DEBUG: No formatting found for Gaulind. Creating an empty formatting entry for {request.user.username}.")
+            formatting = SongFormatting.objects.create(user=request.user, song_id=song_id)
+
+    # ✅ Now formatting is guaranteed to exist, so we can proceed normally
+    if request.method == "POST":
+        form = SongFormattingForm(request.POST, instance=formatting)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Formatting updated successfully!")
+            return redirect("score", pk=song_id)
+    else:
+        form = SongFormattingForm(instance=formatting)
+
+    return render(request, "songbook/edit_formatting.html", {"form": form, "pk": song_id})
+
+
+
+
 
     # 🔍 Debugging - Check if song_id is empty or None
     print(f"DEBUG: song_id before passing to template: {song_id}")
@@ -79,8 +119,27 @@ def preview_pdf(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
     user = request.user
 
+    # ✅ Debug: Check existing formatting before retrieving
+    existing_formatting = SongFormatting.objects.filter(user=user, song=song).exists()
+    print(f"DEBUG: Before retrieval - Formatting exists for {user.username}? {existing_formatting}")
 
-    formatting, _ = SongFormatting.objects.get_or_create(user=user, song=song)
+    # ✅ Try to get the logged-in user's formatting without creating a new one
+    formatting = SongFormatting.objects.filter(user=user, song=song).first()
+
+    if not formatting:
+        print(f"DEBUG: No formatting found for {user.username}, trying Gaulind's formatting.")
+        # 🚀 If no formatting exists for the user, use Gaulind’s formatting as the default
+        formatting = SongFormatting.objects.filter(user__username="Gaulind", song=song).first()
+
+    # ✅ Debug: Confirm what formatting is being used
+    if formatting:
+        print(f"DEBUG: Using formatting from user {formatting.user.username}")
+    else:
+        print("DEBUG: No formatting found for preview.")
+
+    # ✅ Debug: Check if a new entry appears after preview
+    after_retrieval_formatting = SongFormatting.objects.filter(user=user, song=song).exists()
+    print(f"DEBUG: After retrieval - Formatting exists for {user.username}? {after_retrieval_formatting}")
 
     # ✅ Get transpose value (default to 0)
     transpose_value = int(request.GET.get("transpose", 0))
@@ -89,14 +148,12 @@ def preview_pdf(request, song_id):
     if transpose_value != 0:
         song.lyrics_with_chords = transpose_lyrics(song.lyrics_with_chords, transpose_value)
     
-    
-    
-    
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="{song.songTitle}_preview.pdf"'
 
     generate_songs_pdf(response, [song], user, transpose_value, formatting)  
     return response
+
 
 
 

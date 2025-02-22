@@ -99,15 +99,15 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     doc.is_printing_alternate_chord = is_printing_alternate_chord
     doc.acknowledgement = songs[0].acknowledgement if hasattr(songs[0], 'acknowledgement') else ""
 
+    # ✅ Retrieve existing formatting without creating a new one
+    formatting = SongFormatting.objects.filter(user=user, song=songs[0]).first()
 
+    if not formatting:
+        # 🚀 If the user has no formatting, try to use Gaulind's formatting as a default
+        formatting = SongFormatting.objects.filter(user__username="Gaulind", song=songs[0]).first()
 
+    # ⚠️ If no formatting exists, do NOT create a new one here!
 
-
-
-
-
-    # Get user formatting settings or create defaults
-    formatting, _ = SongFormatting.objects.get_or_create(user=user, song=songs[0])
 
     diagrams_to_draw = []
     for chord in relevant_chords:
