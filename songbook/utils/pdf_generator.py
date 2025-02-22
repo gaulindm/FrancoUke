@@ -195,8 +195,8 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
                 if config.get("font_family", "Helvetica") in ["Helvetica", "Times-Roman", "Courier"] 
                 else "Helvetica",
             leading=config.get("line_spacing", 1.2) * config.get("font_size", 13),
-            spaceBefore=config.get("spacing_before", 12),
-            spaceAfter=config.get("spacing_after", 12),
+            #spaceBefore=config.get("spacing_before", 24),
+            #spaceAfter=config.get("spacing_after", 24),
             alignment={
                 "left": TA_LEFT,
                 "center": TA_CENTER,
@@ -216,28 +216,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
 
 
     for song in songs:
-        #preferences = user.userpreference
-        #primary_instrument = user.userpreference.primary_instrument
-        #secondary_instrument = user.userpreference.secondary_instrument  # Optional
-
-        #is_lefty = user.userpreference.is_lefty
-
-        # Load chords for both instruments
-        #chords_primary = load_chords(primary_instrument)
-        #chords_secondary = load_chords(secondary_instrument) if secondary_instrument else []
-
-        # Merge the lists instead of using a dictionary merge
-        #chords = chords_primary + chords_secondary
-
-        #used_chords = extract_used_chords(song.lyrics_with_chords)
-        #relevant_chords = [chord for chord in chords if chord["name"].lower() in map(str.lower, used_chords)]
-        #relevant_chords = [
-        #    chord for chord in chords 
-        #    if chord["name"].lower() in map(str.lower, transposed_chords) and chord["name"] != "[N.C.]"  # ✅ Exclude [N.C.]
-        #]
-
-
-        # Header Section
+            # Header Section
         metadata = song.metadata or {}
         artist = metadata.get('artist', 'Unknown Artist')
         album = metadata.get('album', 'Unknown')
@@ -277,7 +256,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             #('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines for debugging
         ]))
         elements.append(header_table)
-        elements.append(Spacer(1, 12))
+        #elements.append(Spacer(1, 12))
 
       # Lyrics Section with section handling
         lyrics_with_chords = song.lyrics_with_chords or []
@@ -297,7 +276,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
                         # Store any buffered verse before switching sections
                         if paragraph_buffer:
                             elements.append(Paragraph(" ".join(paragraph_buffer), verse_style))
-                            elements.append(Spacer(1, 12))
+                            #elements.append(Spacer(1, 12))
                             paragraph_buffer = []
 
                         # Set section type
@@ -326,8 +305,25 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
                                     else interlude_style)  # New Interlude Formatting
                             ])
 
+                        # Determine which style applies to the section
+                        style = (
+                            chorus_style if section_type == "Chorus"
+                            else intro_style if section_type == "Intro"
+                            else bridge_style if section_type == "Bridge"
+                            else outro_style if section_type == "Outro"
+                            else interlude_style
+                        )
+
+                        # Extract spacing values from the style
+                        spacing_before = style.spaceBefore
+                        spacing_after = style.spaceAfter
 
                         if section_type and section_table_data:
+                            # Retrieve user-defined formatting from Django model
+                            section_format = getattr(formatting, section_type.lower(), {})  # Example: formatting.chorus
+                            spacing_before = section_format.get("spacing_before", 12)
+                            spacing_after = section_format.get("spacing_after", 12)
+
                             # Insert section name at (0,0)
                             section_table_data.insert(0, [
                                 Paragraph(f"<b>{section_type}:</b>", base_style), 
@@ -339,12 +335,12 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
                                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                                 ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
                                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                                ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-                                #('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines for debugging
+                                ('TOPPADDING', (0, 0), (-1, 0), spacing_before),  # Simulates spaceBefore
+                                ('BOTTOMPADDING', (0, 0), (-1, -1), 0),  # Simulates line spacing within table
+                                ('BOTTOMPADDING', (0, -1), (-1, -1), spacing_after),  # Simulates spaceAfter
                             ]))
-
                             elements.append(section_table)
-                            elements.append(Spacer(1, 12))
+                            #elements.append(Spacer(1, 12))
 
                         # Reset section tracking
                         section_type = None
@@ -370,7 +366,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
                             paragraph_text = " ".join(paragraph_buffer)
                             style = verse_style  # Verses always use verse_style
                             elements.append(Paragraph(paragraph_text, style))
-                            elements.append(Spacer(1, 12))
+                            elements.append(Spacer(1, 48))
                             paragraph_buffer = []
 
                 elif "lyric" in item:
@@ -415,12 +411,12 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             ]))
 
             elements.append(section_table)
-            elements.append(Spacer(1, 12))
+            #elements.append(Spacer(1, 24))
 
         # Ensure any remaining verse is added as a paragraph
         if paragraph_buffer:
             elements.append(Paragraph(" ".join(paragraph_buffer), verse_style))
-            elements.append(Spacer(1, 12))
+            #elements.append(Spacer(1, 24))
             paragraph_buffer = []
 
 
