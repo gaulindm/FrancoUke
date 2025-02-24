@@ -136,8 +136,8 @@ def build_song_elements(song, styles, styles_dict):
         parent=styles['Normal'],  # Inherit other properties from the Normal style
         alignment=1,  # Center alignment
         fontSize=14,  # Adjust size if needed
-        spaceBefore=6,
-        spaceAfter=6
+        spaceBefore=2,
+        spaceAfter=2
     )
 
     recording_style = ParagraphStyle(
@@ -167,28 +167,30 @@ def build_song_elements(song, styles, styles_dict):
 
 
     header_data = [
-            [
-                Paragraph(f"{metadata.get('timeSignature', '')}", styles['Normal']),
-                Paragraph(f"<b>{song.songTitle or 'Untitled Song'}</b>", styles['Title']),
-                Paragraph(f"First Vocal Note: {metadata.get('1stnote', 'N/A')}", first_vocal_note_style),
-            ],
-            [Paragraph(f"{metadata.get('songwriter', '')}", songwriter_style),  "","",],
-            [Paragraph(recorded_by_text, recording_style), "","",],
-        ]
+        [
+            Paragraph(f"{metadata.get('timeSignature', '')}", styles['Normal']),
+            Paragraph(f"<b>{song.songTitle or 'Untitled Song'}</b>", styles['Title']),
+            Paragraph(f"1e note vocale: {metadata['1stnote']}", first_vocal_note_style) if metadata.get('1stnote') else Paragraph("", first_vocal_note_style),
+        ],
+        [Paragraph(f"{metadata.get('songwriter', '')}", songwriter_style), "", "",],
+        [Paragraph(recorded_by_text, recording_style), "", "",],
+    ]
 
-    header_table = Table(header_data, colWidths=[120, 360, 120])
+
+    header_table = Table(header_data, colWidths=[110, 380, 110])
     header_table.setStyle(TableStyle([
             ('SPAN', (0, 1), (2, 1)),  # Merge all three cells in the second row
             ('SPAN', (0, 2), (2, 2)),  # Merge all three cells in the third row
-            
             ('TOPPADDING', (0, 0), (-1, -1), 0),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center align all cells as a base
             ('VALIGN', (1, 1), (1, 1), 'MIDDLE'),  # Specifically center align the songwriter cell
-            ('LEFTPADDING', (1, 1), (1, 1), 10),
-            ('RIGHTPADDING', (1, 1), (1, 1), 10),
+            ('LEFTPADDING', (1, 1), (1, 1),0),
+            ('RIGHTPADDING', (1, 1), (1, 1), 0),
             ('TOPPADDING', (1, 1), (2, 2), 0),
-            ('BOTTOMPADDING', (1, 1), (1, 1), 5),
+            ('BOTTOMPADDING', (1, 0), (1, 0), 0),
+            ('TOPPADDING', (1, 1), (1, 1), 0),
+            ('BOTTOMPADDING', (1, 1), (1, 2), 1),
             #('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines for debugging
     ]))
     elements.append(header_table)
@@ -206,7 +208,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style):
 
     directive_map = {
         "{soi}": "Intro",
-        "{soc}": "Chorus",
+        "{soc}": "Refrain",
         "{sov}": "Verse",
         "{sob}": "Bridge",
         "{soo}": "Outro",
@@ -231,11 +233,11 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style):
                             # Non-verse sections in a table with section name
                             section_table = Table([
                                 [Paragraph(f"<b>{section_type}:</b>", base_style), Paragraph(paragraph_text, style)]
-                            ], colWidths=[80, 440], hAlign='LEFT')
+                            ], colWidths=[60, 460], hAlign='LEFT')
                             section_table.setStyle(TableStyle([
                                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                                
+                                ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines for debugging
                                 #('BOX', (0, 0), (-1, -1), 0.5, colors.grey)
                             ]))
                             elements.append(section_table)
@@ -259,7 +261,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style):
         if section_type and section_type.lower() != "verse":
             section_table = Table([
                 [Paragraph(f"<b>{section_type}:</b>", base_style), Paragraph(paragraph_text, style)]
-            ], colWidths=[80, 440], hAlign='LEFT')
+            ], colWidths=[70, 450], hAlign='LEFT')
             section_table.setStyle(TableStyle([
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
