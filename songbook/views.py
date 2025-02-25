@@ -406,7 +406,11 @@ class SongCreateView(LoginRequiredMixin, CreateView):
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Song
     fields = ['songTitle', 'songChordPro', 'lyrics_with_chords', 'metadata','tags','acknowledgement']
-    success_url = reverse_lazy('songbook-home')  # Redirect after success
+    #success_url = reverse_lazy('songbook-home')  # Redirect after success
+
+    def get_success_url(self):
+        # Redirect to the updated song's detail page
+        return reverse('score', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
         # Assign the contributor to the current user
