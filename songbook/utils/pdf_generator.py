@@ -237,7 +237,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style):
                             section_table.setStyle(TableStyle([
                                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                                ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines for debugging
+                                #('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines for debugging
                                 #('BOX', (0, 0), (-1, -1), 0.5, colors.grey)
                             ]))
                             elements.append(section_table)
