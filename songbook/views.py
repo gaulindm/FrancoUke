@@ -16,6 +16,7 @@ from taggit.models import Tag
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
+from collections import defaultdict
 
 # Import project-specific modules
 from .models import Song, SongFormatting
@@ -64,26 +65,49 @@ def edit_song_formatting(request, song_id):
 
     return render(request, "songbook/edit_formatting.html", {"form": form, "pk": song_id})
 
-
 class ArtistListView(ListView):
     template_name = "songbook/artist_list.html"
     context_object_name = "artists"
 
     def get_queryset(self):
         """
-        Get unique artists from the metadata field in Song while keeping original capitalization.
+        Get unique artists and filter by first letter if provided.
         """
-        return (
+        queryset = (
             Song.objects.exclude(metadata__artist__isnull=True)
             .exclude(metadata__artist="")
-            .annotate(
-                lower_artist_name=Lower(Cast("metadata__artist", CharField()))  # Use for distinct()
-            )
-            .values_list("metadata__artist", flat=True)  # Keep original case for display
+            .annotate(artist_name=Lower(Cast("metadata__artist", CharField())))
+            .values_list("metadata__artist", flat=True)
             .distinct()
-            .order_by("lower_artist_name")  # Sort ignoring case but display with original case
+            .order_by("artist_name")
         )
 
+        # Get the letter from the URL if filtering by letter
+        letter = self.kwargs.get("letter")
+        if letter:
+            queryset = [artist for artist in queryset if artist[0].upper() == letter.upper()]
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """Organize artists into multiple columns with a max of 20 names per column."""
+        context = super().get_context_data(**kwargs)
+
+        # Get all artists
+        all_artists = list(context["artists"])  # Convert QuerySet to list
+        artists_per_column = 20  # Max number of names per column
+
+        # Split artists into chunks of 20
+        artist_columns = [all_artists[i:i + artists_per_column] for i in range(0, len(all_artists), artists_per_column)]
+
+        # Extract available first letters
+        first_letters = sorted(set(artist[0].upper() for artist in all_artists if artist))
+
+        context["artist_columns"] = artist_columns  # ✅ Now contains properly split columns
+        context["first_letters"] = first_letters  # ✅ Keeps the jump navigation
+        context["selected_letter"] = self.kwargs.get("letter", None)  # ✅ Keeps selected letter
+
+        return context
 
 
 def preview_pdf(request, song_id):

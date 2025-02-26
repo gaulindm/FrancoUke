@@ -1,16 +1,76 @@
 {% extends "songbook/base.html" %}
 
 {% block content %}
-<h2>Browse by Artist</h2>
+<style>
+.letter-nav {
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
 
-<ul>
-    {% for artist in artists %}
-        <li>
-            <a href="{% url 'artist_songs' artist %}">{{ artist }}</a>
-        </li>
-    {% empty %}
-        <li>No artists found.</li>
+.letter-nav a {
+    margin-right: 10px;
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.letter-nav a.active {
+    color: #fff;
+    background-color: #007bff;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.artist-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.artist-column {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.artist-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.artist-column li {
+    margin-bottom: 5px;
+}
+</style>
+<h2>Parcourir par artiste</h2>
+
+<!-- Navigation alphabétique -->
+<div class="letter-nav">
+    {% for letter in first_letters %}
+        <a href="{% url 'artist_by_letter' letter %}" class="{% if letter == selected_letter %}active{% endif %}">
+            {{ letter }}
+        </a>
     {% endfor %}
-</ul>
+</div>
+
+<!-- Afficher les artistes filtrés -->
+{% if selected_letter %}
+    <h3>Artistes commençant par "{{ selected_letter }}"</h3>
+    <a href="{% url 'artist_list' %}" class="btn btn-secondary">Afficher tous les artistes</a>
+{% endif %}
+
+<!-- Liste des artistes en colonnes -->
+<div class="artist-columns">
+    {% for column in artist_columns %}
+        <div class="artist-column">
+            <ul>
+                {% for artist in column %}
+                    <li><a href="{% url 'artist_songs' artist %}">{{ artist }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
 
 {% endblock %}
