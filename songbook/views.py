@@ -25,7 +25,7 @@ from .utils.transposer import extract_chords, transpose_lyrics
 from songbook.utils.pdf_generator import generate_songs_pdf, load_chords
 from songbook.utils.ABC2audio import convert_abc_to_audio
 from users.models import UserPreference
-
+import urllib.parse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -64,20 +64,26 @@ def edit_song_formatting(request, song_id):
 
     return render(request, "songbook/edit_formatting.html", {"form": form, "pk": song_id})
 
+
 class ArtistListView(ListView):
     template_name = "songbook/artist_list.html"
     context_object_name = "artists"
 
     def get_queryset(self):
         """
-        Get unique artists from the metadata field in Song.
+        Get unique artists from the metadata field in Song while keeping original capitalization.
         """
-        return (Song.objects.exclude(metadata__artist__isnull=True)
-                .exclude(metadata__artist="")
-                .annotate(artist_name=Lower(Cast("metadata__artist", CharField())))
-                .values_list("artist_name", flat=True)
-                .distinct()
-                .order_by("artist_name"))
+        return (
+            Song.objects.exclude(metadata__artist__isnull=True)
+            .exclude(metadata__artist="")
+            .annotate(
+                lower_artist_name=Lower(Cast("metadata__artist", CharField()))  # Use for distinct()
+            )
+            .values_list("metadata__artist", flat=True)  # Keep original case for display
+            .distinct()
+            .order_by("lower_artist_name")  # Sort ignoring case but display with original case
+        )
+
 
 
 def preview_pdf(request, song_id):
@@ -186,8 +192,8 @@ class SongListView(ListView):
         if selected_tag:  # Filter by tag if a tag is selected
             queryset = queryset.filter(tags__name=selected_tag)
 
-        if artist_name:  # If browsing by artist
-                    queryset = queryset.filter(metadata__artist__iexact=artist_name)
+        if artist_name:
+            queryset = queryset.filter(metadata__artist__iexact=artist_name)  # ✅ No need to decode
 
         return queryset
 
@@ -204,7 +210,7 @@ class SongListView(ListView):
         Add filtered song data, chords, and tags to the template context.
         """
         context = super().get_context_data(**kwargs)
-        context['selected_artist'] = self.kwargs.get('artist_name', None)  # Pass artist name to template
+        context['selected_artist'] = self.kwargs.get('artist_name')
         search_query = self.request.GET.get('q', '')
         selected_tag = self.request.GET.get('tag', '')  # Selected tag
         song_data = []
