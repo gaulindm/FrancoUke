@@ -164,8 +164,6 @@ def build_song_elements(song, styles, styles_dict):
     if metadata.get('year', ''):
         recorded_by_text += f" en {metadata['year']}"
 
-
-
     header_data = [
         [
             Paragraph(f"{metadata.get('timeSignature', '')}", styles['Normal']),
@@ -175,7 +173,6 @@ def build_song_elements(song, styles, styles_dict):
         [Paragraph(f"{metadata.get('songwriter', '')}", songwriter_style), "", "",],
         [Paragraph(recorded_by_text, recording_style), "", "",],
     ]
-
 
     header_table = Table(header_data, colWidths=[110, 380, 110])
     header_table.setStyle(TableStyle([
@@ -208,7 +205,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style):
 
     directive_map = {
         "{soi}": "Intro",
-        "{soc}": "Refrain",
+        "{soc}": "Chorus",
         "{sov}": "Verse",
         "{sob}": "Bridge",
         "{soo}": "Outro",
@@ -231,9 +228,16 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style):
                         style = styles_dict.get(section_type.lower(), styles_dict["verse"]) if section_type else styles_dict["verse"]
                         if section_type and section_type.lower() != "verse":
                             # Non-verse sections in a table with section name
+                            
+                            section_labels = {"chorus": "Refrain", "verse": "Couplet        ", "bridge": "Pont", "outro": "Outro"}
+                            display_name = section_labels.get(section_type.lower(), section_type)  # Default to section_type if not mapped
+
                             section_table = Table([
-                                [Paragraph(f"<b>{section_type}:</b>", base_style), Paragraph(paragraph_text, style)]
+                                [Paragraph(f"<b>{display_name}:</b>", base_style), Paragraph(paragraph_text, style)]
                             ], colWidths=[60, 460], hAlign='LEFT')
+
+
+
                             section_table.setStyle(TableStyle([
                                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),

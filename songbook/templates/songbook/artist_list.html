@@ -1,0 +1,12 @@
+{% extends "songbook/base.html" %}
+
+{% block content %}
+<h2>Browse by Artist</h2>
+<ul>
+    {% for artist in artists %}
+        <li><a href="{% url 'artist_songs' artist %}">{{ artist }}</a></li>
+    {% empty %}
+        <li>No artists found.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

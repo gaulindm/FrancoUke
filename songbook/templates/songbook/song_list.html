@@ -28,7 +28,12 @@
     </div>
 </form>
 
-
+{% if selected_artist %}
+    <h2>Songs by {{ selected_artist }}</h2>
+    <a href="{% url 'artist_list' %}" class="btn btn-secondary">Browse All Artists</a>
+{% else %}
+    <h2>All Songs</h2>
+{% endif %}
 
 <!-- Song List Table -->
 <div class="table-responsive">

@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models.functions import Lower
+from django.db.models import CharField
+from django.db.models.functions import Cast
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -61,28 +64,35 @@ def edit_song_formatting(request, song_id):
 
     return render(request, "songbook/edit_formatting.html", {"form": form, "pk": song_id})
 
+class ArtistListView(ListView):
+    template_name = "songbook/artist_list.html"
+    context_object_name = "artists"
+
+    def get_queryset(self):
+        """
+        Get unique artists from the metadata field in Song.
+        """
+        return (Song.objects.exclude(metadata__artist__isnull=True)
+                .exclude(metadata__artist="")
+                .annotate(artist_name=Lower(Cast("metadata__artist", CharField())))
+                .values_list("artist_name", flat=True)
+                .distinct()
+                .order_by("artist_name"))
+
 
 def preview_pdf(request, song_id):
     """Generate a transposed PDF with user-defined font sizes stored in JSON fields."""
     song = get_object_or_404(Song, pk=song_id)
     user = request.user
 
-    # ✅ Debug: Check existing formatting before retrieving
     existing_formatting = SongFormatting.objects.filter(user=user, song=song).exists()
-    
-
-    # ✅ Try to get the logged-in user's formatting without creating a new one
     formatting = SongFormatting.objects.filter(user=user, song=song).first()
 
     if not formatting:
         # 🚀 If no formatting exists for the user, use Gaulind’s formatting as the default
         formatting = SongFormatting.objects.filter(user__username="Gaulind", song=song).first()
 
-    
-    # ✅ Debug: Check if a new entry appears after preview
     after_retrieval_formatting = SongFormatting.objects.filter(user=user, song=song).exists()
-    
-    # ✅ Get transpose value (default to 0)
     transpose_value = int(request.GET.get("transpose", 0))
     
     # Transpose the song if needed
@@ -125,10 +135,6 @@ def generate_single_song_pdf(request, song_id):
     
     return generate_pdf_response(song.songTitle, [song], request.user)
 
-
-
-
-
 def get_chord_definition(request, chord_name):
     """
     Django view to fetch the definition of a specific chord.
@@ -139,7 +145,6 @@ def get_chord_definition(request, chord_name):
             return JsonResponse({"success": True, "chord": chord})
     return JsonResponse({"success": False, "error": f"Chord '{chord_name}' not found."})
 
-
 def chord_dictionary(request):
     instruments = ["ukulele", "guitar", "mandolin", "banjo", "baritone_ukulele"]
     chord_data = {instrument: load_chords(instrument) for instrument in instruments}
@@ -148,16 +153,11 @@ def chord_dictionary(request):
 from django.shortcuts import render
 
 
-
-
-
 def home(request):
     context = {
         'songs':Song.objects.all()
     }
     return render(request, 'songbook/home.html',context)
-
-
 
 class SongListView(ListView):
     model = Song
@@ -173,18 +173,21 @@ class SongListView(ListView):
         queryset = super().get_queryset()
         search_query = self.request.GET.get('q', '')  # Search query
         selected_tag = self.request.GET.get('tag', '')  # Selected tag
+        artist_name = self.kwargs.get('artist_name')  # Get artist from URL
 
         # Apply filters
         if search_query:
             queryset = queryset.filter(
                 Q(songTitle__icontains=search_query) |
                 Q(metadata__artist__icontains=search_query) |
-                Q(metadata__composer__icontains=search_query) |
-                Q(metadata__lyricist__icontains=search_query)
+                Q(metadata__songwriter__icontains=search_query)
             )
 
         if selected_tag:  # Filter by tag if a tag is selected
             queryset = queryset.filter(tags__name=selected_tag)
+
+        if artist_name:  # If browsing by artist
+                    queryset = queryset.filter(metadata__artist__iexact=artist_name)
 
         return queryset
 
@@ -201,6 +204,7 @@ class SongListView(ListView):
         Add filtered song data, chords, and tags to the template context.
         """
         context = super().get_context_data(**kwargs)
+        context['selected_artist'] = self.kwargs.get('artist_name', None)  # Pass artist name to template
         search_query = self.request.GET.get('q', '')
         selected_tag = self.request.GET.get('tag', '')  # Selected tag
         song_data = []
@@ -224,9 +228,6 @@ class SongListView(ListView):
         context['selected_tag'] = selected_tag  # Pass the selected tag
         context['all_tags'] = all_tags  # Add all tags to context
         return context
-
-
-
     
 class UserSongListView (ListView):
     model = Song
@@ -257,10 +258,6 @@ class ScoreView(DetailView):
             context["preferences"] = None  # Handle unauthenticated users if necessary
         
         return context
-
-
-
-
 
 class SongCreateView(LoginRequiredMixin, CreateView):
     model = Song

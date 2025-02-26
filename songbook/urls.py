@@ -4,7 +4,8 @@ from .views import (
     SongListView, 
     SongCreateView,
     SongUpdateView,
-    SongDeleteView,
+    SongDeleteView, 
+    ArtistListView,  # Import new view
     ScoreView,
     edit_song_formatting
 )
@@ -17,6 +18,8 @@ urlpatterns = [
     path('', SongListView.as_view(), name='songbook-home'),
     path('score/<int:pk>/', ScoreView.as_view(),name='score'),
     path('song/new/', SongCreateView.as_view(), name='song-create'),
+    path('artists/', ArtistListView.as_view(), name='artist_list'),
+    path('artists/<str:artist_name>/', SongListView.as_view(), name='artist_songs'),  # Keep this   
     path("preview_pdf/<int:song_id>/", preview_pdf, name="preview_pdf"),
     path('song/<int:pk>/update/', SongUpdateView.as_view(), name='song-update'),
     path('song/<int:pk>/delete/', SongDeleteView.as_view(), name='song-delete'),
