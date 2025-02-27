@@ -8,9 +8,9 @@
         <div class="col-md-3">
             <div class="input-group">
                 <input type="text" name="q" class="form-control" 
-                       placeholder="Search by title, artist, lyricist or composer"
+                       placeholder="Recherche par title, compositeur et interprete"
                        value="{{ search_query }}">
-                <button class="btn btn-primary" type="submit">Search</button>
+                <button class="btn btn-primary" type="submit">Recherche</button>
             </div>
         </div>
         <!-- Tags Section -->
@@ -30,9 +30,9 @@
 
 {% if selected_artist %}
     <h2>Songs by {{ selected_artist }}</h2>
-    <a href="{% url 'artist_list' %}" class="btn btn-secondary">Browse All Artists</a>
+    <a href="{% url 'artist_list' %}" class="btn btn-secondary">Parcourir tous les interprètes</a>
 {% else %}
-    <h2>All Songs</h2>
+    <h2>Toutes les partition</h2>
 {% endif %}
 
 <!-- Song List Table -->

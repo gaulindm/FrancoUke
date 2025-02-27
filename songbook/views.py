@@ -84,30 +84,50 @@ class ArtistListView(ListView):
 
         # Get the letter from the URL if filtering by letter
         letter = self.kwargs.get("letter")
+        
         if letter:
-            queryset = [artist for artist in queryset if artist[0].upper() == letter.upper()]
+            # ✅ Ensure None values are filtered out before accessing the first character
+            queryset = [artist for artist in queryset if artist and artist[0].upper() == letter.upper()]
 
         return queryset
 
+
     def get_context_data(self, **kwargs):
-        """Organize artists into multiple columns with a max of 20 names per column."""
+        """Ensure letter navigation is always visible."""
         context = super().get_context_data(**kwargs)
 
-        # Get all artists
-        all_artists = list(context["artists"])  # Convert QuerySet to list
-        artists_per_column = 20  # Max number of names per column
+        # ✅ Get all unique artist names (not just filtered ones)
+        all_artists = (
+            Song.objects.exclude(metadata__artist__isnull=True)
+            .exclude(metadata__artist="")
+            .annotate(artist_name=Lower(Cast("metadata__artist", CharField())))
+            .values_list("metadata__artist", flat=True)
+            .distinct()
+        )
 
-        # Split artists into chunks of 20
-        artist_columns = [all_artists[i:i + artists_per_column] for i in range(0, len(all_artists), artists_per_column)]
-
-        # Extract available first letters
+        # ✅ Extract all first letters from all artists
         first_letters = sorted(set(artist[0].upper() for artist in all_artists if artist))
 
-        context["artist_columns"] = artist_columns  # ✅ Now contains properly split columns
-        context["first_letters"] = first_letters  # ✅ Keeps the jump navigation
-        context["selected_letter"] = self.kwargs.get("letter", None)  # ✅ Keeps selected letter
+        # ✅ Ensure filtered artists are shown correctly
+        letter = self.kwargs.get("letter")
+        if letter:
+            filtered_artists = [artist for artist in all_artists if artist and artist[0].upper() == letter.upper()]
+        else:
+            filtered_artists = list(all_artists)  # Show all artists if no letter selected
+
+        # ✅ Split into columns (max 20 per column)
+        artists_per_column = 20
+        artist_columns = [filtered_artists[i:i + artists_per_column] for i in range(0, len(filtered_artists), artists_per_column)]
+
+        context["artist_columns"] = artist_columns  # ✅ Keep artists split into columns
+        context["first_letters"] = first_letters  # ✅ Ensure letters always appear
+        context["selected_letter"] = letter  # ✅ Track selected letter
+
+        # ✅ Debugging print (Check this in PythonAnywhere error logs)
+        print("DEBUG: First Letters Passed to Template:", first_letters)
 
         return context
+
 
 
 def preview_pdf(request, song_id):

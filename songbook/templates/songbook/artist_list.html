@@ -2,22 +2,32 @@
 
 {% block content %}
 <style>
+.letter-nav-container {
+    display: flex;
+    align-items: center;  /* ✅ Keep everything aligned */
+    gap: 10px;
+    flex-wrap: nowrap;  /* ✅ Prevents wrapping */
+    justify-content: space-between;  /* ✅ Ensures space is distributed */
+    margin-bottom: 20px;  /* ✅ Adds space below the navigation bar */
+}
+
 .letter-nav {
-    margin-bottom: 20px;
-    font-size: 1.2em;
+    display: flex;
+    flex-wrap: wrap;  /* ✅ Allows letters to wrap if needed */
+    gap: 5px;
+    flex-grow: 1;  /* ✅ Allows letters to take up space */
 }
 
 .letter-nav a {
-    margin-right: 10px;
     text-decoration: none;
     color: #007bff;
     font-weight: bold;
+    padding: 5px 8px;
 }
 
 .letter-nav a.active {
     color: #fff;
     background-color: #007bff;
-    padding: 5px 10px;
     border-radius: 5px;
 }
 
@@ -42,25 +52,36 @@
 .artist-column li {
     margin-bottom: 5px;
 }
+
+/* ✅ Ensure the button stays on the same row */
+.all-artists-btn {
+    margin-left: auto;  /* ✅ Pushes button to the right */
+    white-space: nowrap;  /* ✅ Prevents button from wrapping */
+}
 </style>
 <h2>Parcourir par artiste</h2>
 
-<!-- Navigation alphabétique -->
-<div class="letter-nav">
-    {% for letter in first_letters %}
-        <a href="{% url 'artist_by_letter' letter %}" class="{% if letter == selected_letter %}active{% endif %}">
-            {{ letter }}
+
+<!-- ✅ Letter Navigation + Button in the Same Row -->
+<div class="letter-nav-container">
+    <div class="letter-nav">
+        {% for letter in first_letters %}
+            <a href="{% url 'artist_by_letter' letter %}" 
+               class="{% if letter == selected_letter %}active{% endif %}">
+                {{ letter }}
+            </a>
+        {% endfor %}
+    </div>
+
+    {% if selected_letter %}
+        <a href="{% url 'artist_list' %}" class="btn btn-secondary all-artists-btn">
+            Afficher tous les artistes
         </a>
-    {% endfor %}
+    {% endif %}
 </div>
 
-<!-- Afficher les artistes filtrés -->
-{% if selected_letter %}
-    <h3>Artistes commençant par "{{ selected_letter }}"</h3>
-    <a href="{% url 'artist_list' %}" class="btn btn-secondary">Afficher tous les artistes</a>
-{% endif %}
 
-<!-- Liste des artistes en colonnes -->
+<!-- ✅ Artist List in Columns -->
 <div class="artist-columns">
     {% for column in artist_columns %}
         <div class="artist-column">
@@ -72,5 +93,4 @@
         </div>
     {% endfor %}
 </div>
-
 {% endblock %}
