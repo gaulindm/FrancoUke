@@ -58,7 +58,7 @@ def fetch_and_convert_chord_pro(url, login_url, username, password):
 {{composer: }}
 {{lyricist: }}
 {{key: }}
-{{recording: }}
+{{keymatch: }}
 {{year: }}
 {{1stnote: }}
 {{tempo: }}

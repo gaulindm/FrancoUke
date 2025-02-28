@@ -22,7 +22,7 @@ class Command(BaseCommand):
 {capo: }
 {songwriter: }
 {key: }
-{recording: }
+{keymatch: }
 {year: }
 {1stnote: }
 {tempo: }

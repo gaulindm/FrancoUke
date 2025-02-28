@@ -140,8 +140,8 @@ def build_song_elements(song, styles, styles_dict):
         spaceAfter=2
     )
 
-    recording_style = ParagraphStyle(
-        'RecordingStyle',
+    keymatch_style = ParagraphStyle(
+        'keymatchStyle',
         parent=styles['Normal'],  # Inherit other properties from the Normal style
         alignment=1,  # Center alignment
         fontSize=13,  # Adjust size if needed
@@ -158,7 +158,7 @@ def build_song_elements(song, styles, styles_dict):
         spaceAfter=6,  # Optional: Add space below the paragraph
     )
 
-    recorded_by_text = f"{metadata.get('recording', 'Unknown')} au clip par {metadata.get('artist', 'Unknown Artist')}"
+    recorded_by_text = f"{metadata.get('keymatch', 'Unknown')} au clip par {metadata.get('artist', 'Unknown Artist')}"
         #if metadata.get('album', ''):
         #    recorded_by_text += f" on {metadata['album']}"
     if metadata.get('year', ''):
@@ -171,7 +171,7 @@ def build_song_elements(song, styles, styles_dict):
             Paragraph(f"1e note vocale: {metadata['1stnote']}", first_vocal_note_style) if metadata.get('1stnote') else Paragraph("", first_vocal_note_style),
         ],
         [Paragraph(f"{metadata.get('songwriter', '')}", songwriter_style), "", "",],
-        [Paragraph(recorded_by_text, recording_style), "", "",],
+        [Paragraph(recorded_by_text, keymatch_style), "", "",],
     ]
 
     header_table = Table(header_data, colWidths=[110, 380, 110])
