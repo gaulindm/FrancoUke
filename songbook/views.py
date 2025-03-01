@@ -220,6 +220,11 @@ class SongListView(ListView):
     ordering = ['songTitle']
     paginate_by = 25
 
+    def dispatch(self, request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return render(request, "users/auth_modal.html", {"next_url": request.path})
+            return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         """
         Override to filter the song queryset based on search query and tag.

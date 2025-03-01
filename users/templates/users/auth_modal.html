@@ -1,17 +1,18 @@
 {% extends "songbook/base.html" %}
 
 {% block content %}
-<!-- Bootstrap Authentication Modal -->
 <div class="modal fade show" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="false" style="display: block; background: rgba(0,0,0,0.5);">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="authModalLabel">Authentication Requis</h5>
+        <h5 class="modal-title" id="authModalLabel">Authentication requise</h5>
       </div>
       <div class="modal-body">
-        <p>Vous devez être authentifié pour utiliser FrancoUke.</p>
+        <p>Vous devez être authentifié pour accéder la page <strong>{{ request.path }}</strong>.</p>
+      </div>
+      <div class="modal-footer">
         <a href="{% url 'login' %}?next={{ next_url }}" class="btn btn-primary">Login</a>
-        <a href="{% url 'register' %}" class="btn btn-secondary">S'inscrire</a>
+        <a href="{% url 'register' %}" class="btn btn-secondary">S'inscire</a>
       </div>
     </div>
   </div>
