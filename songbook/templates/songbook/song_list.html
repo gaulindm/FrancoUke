@@ -93,12 +93,50 @@
     </table>
 </div>
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <!-- Left-aligned Button -->
-    <form method="post" action="{% url 'generate_multi_song_pdf' %}" class="mb-0">
-        {% csrf_token %}
-        <input type="hidden" name="tag_name" value="{{ selected_tag }}">
-        <button type="submit" class="btn btn-primary">Generate Multi-Song Report</button>
-    </form>
+<!-- Generate Multi-Song Report Button -->
+<button type="button" class="btn btn-primary" id="generateReportBtn">
+    Generate Multi-Song Report
+</button>
+
+<!-- Warning Modal -->
+<div class="modal fade" id="tagWarningModal" tabindex="-1" aria-labelledby="tagWarningModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tagWarningModalLabel">Select a Tag</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please select a tag before generating the multi-song report.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Form (Only Submitted if a Tag is Selected) -->
+<form id="multiSongReportForm" method="POST" action="{% url 'generate_multi_song_pdf' %}">
+    {% csrf_token %}
+    <input type="hidden" name="tag_name" id="selectedTag" value="{{ selected_tag }}">
+</form>
+
+<script>
+document.getElementById("generateReportBtn").addEventListener("click", function() {
+    var selectedTag = document.getElementById("selectedTag").value;
+    
+    if (!selectedTag) {
+        // Show the warning modal if no tag is selected
+        var modal = new bootstrap.Modal(document.getElementById("tagWarningModal"));
+        modal.show();
+    } else {
+        // Submit the form if a tag is selected
+        document.getElementById("multiSongReportForm").submit();
+    }
+});
+</script>
+
 
     <!-- Right-aligned Pagination -->
     {% if is_paginated %}
