@@ -94,3 +94,11 @@
     {% endfor %}
 </div>
 {% endblock %}
+{% if not user.is_authenticated %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var authModal = new bootstrap.Modal(document.getElementById('authModal'));
+        authModal.show();
+    });
+</script>
+{% endif %}

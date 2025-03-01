@@ -121,7 +121,14 @@
     {% csrf_token %}
     <input type="hidden" name="tag_name" id="selectedTag" value="{{ selected_tag }}">
 </form>
-
+{% if not user.is_authenticated %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var authModal = new bootstrap.Modal(document.getElementById('authModal'));
+        authModal.show();
+    });
+</script>
+{% endif %}
 <script>
 document.getElementById("generateReportBtn").addEventListener("click", function() {
     var selectedTag = document.getElementById("selectedTag").value;

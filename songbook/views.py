@@ -65,9 +65,13 @@ def edit_song_formatting(request, song_id):
 
     return render(request, "songbook/edit_formatting.html", {"form": form, "pk": song_id})
 
-class ArtistListView(ListView):
+class ArtistListView(LoginRequiredMixin, ListView):
     template_name = "songbook/artist_list.html"
     context_object_name = "artists"
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return render(request, "users/auth_modal.html", {"next_url": request.path})
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         """
@@ -292,10 +296,12 @@ class UserSongListView (ListView):
 
 
 #This is second column of home.html
-class ScoreView(DetailView):
+class ScoreView(LoginRequiredMixin, DetailView):
     model = Song
-    template_name = 'songbook/song_simplescore.html'  # Temporary template for experiments 
+    template_name = 'songbook/song_simplescore.html'
     context_object_name = 'score'
+    login_url = "/users/login/"
+    redirect_field_name = "next"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
