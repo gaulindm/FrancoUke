@@ -46,7 +46,7 @@ class Song(models.Model):
             "comment": re.search(r'{(?:comment|c):\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             "artist": re.search(r'{artist:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             "songwriter": re.search(r'{songwriter:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "keymatch": re.search(r'{keymatch:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
+            "capo": re.search(r'{capo:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             "album": re.search(r'{album:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             "year": re.search(r'{year:\s*(\d{4})}', self.songChordPro, re.IGNORECASE),
             "key": re.search(r'{key:\s*(.+?)}', self.songChordPro, re.IGNORECASE),

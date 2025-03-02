@@ -51,7 +51,7 @@ class Command(BaseCommand):
 {{capo: }}
 {{songwriter: }}
 {{key: }}
-{{keymatch: }}
+{{capo: }}
 {{year: }}
 {{1stnote: }}
 {{tempo: }}

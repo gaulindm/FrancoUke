@@ -41,7 +41,7 @@ def convert_chord_pro_format(file_path):
 {{composer: }}
 {{lyricist: }}
 {{key: }}
-{{keymatch: }}
+{{capo: }}
 {{year: }}
 {{1stnote: }}
 {{tempo: }}

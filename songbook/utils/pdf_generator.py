@@ -140,8 +140,8 @@ def build_song_elements(song, styles, styles_dict):
         spaceAfter=2
     )
 
-    keymatch_style = ParagraphStyle(
-        'keymatchStyle',
+    capo_style = ParagraphStyle(
+        'capoStyle',
         parent=styles['Normal'],  # Inherit other properties from the Normal style
         alignment=1,  # Center alignment
         fontSize=13,  # Adjust size if needed
@@ -158,7 +158,19 @@ def build_song_elements(song, styles, styles_dict):
         spaceAfter=6,  # Optional: Add space below the paragraph
     )
 
-    recorded_by_text = f"{metadata.get('keymatch', 'Unknown')} au clip par {metadata.get('artist', 'Unknown Artist')}"
+    capo_value = metadata.get('capo')
+
+    # Convert capo_value to an integer if possible, default to 0 if conversion fails
+    try:
+        capo_value = int(capo_value)
+    except (TypeError, ValueError):
+        capo_value = 0
+
+    capo_text = f"Capo ({capo_value}) pour correspondre" if capo_value > 0 else "Correspond"
+
+    recorded_by_text = f"{capo_text} au clip par {metadata.get('artist', 'Unknown Artist')}"
+
+
         #if metadata.get('album', ''):
         #    recorded_by_text += f" on {metadata['album']}"
     if metadata.get('year', ''):
@@ -166,12 +178,12 @@ def build_song_elements(song, styles, styles_dict):
 
     header_data = [
         [
-            Paragraph(f"{metadata.get('timeSignature', '')}", styles['Normal']),
+            Paragraph(f"{metadata.get('timeSignature', '') or ''}", styles['Normal']),
             Paragraph(f"<b>{song.songTitle or 'Untitled Song'}</b>", styles['Title']),
             Paragraph(f"1e note vocale: {metadata['1stnote']}", first_vocal_note_style) if metadata.get('1stnote') else Paragraph("", first_vocal_note_style),
         ],
         [Paragraph(f"{metadata.get('songwriter', '')}", songwriter_style), "", "",],
-        [Paragraph(recorded_by_text, keymatch_style), "", "",],
+        [Paragraph(recorded_by_text, capo_style), "", "",],
     ]
 
     header_table = Table(header_data, colWidths=[110, 380, 110])
