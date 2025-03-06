@@ -166,7 +166,7 @@ def build_song_elements(song, styles, styles_dict):
     except (TypeError, ValueError):
         capo_value = 0
 
-    capo_text = f"Capo ({capo_value}) pour correspondre" if capo_value > 0 else "Correspond"
+    capo_text = f"Capo {capo_value} pour correspondre" if capo_value > 0 else "Correspond"
 
     recorded_by_text = f"{capo_text} au clip par {metadata.get('artist', 'Unknown Artist')}"
 

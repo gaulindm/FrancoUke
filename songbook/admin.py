@@ -48,7 +48,7 @@ class SongFormattingAdmin(admin.ModelAdmin):
 
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
-    list_display = ['songTitle', 'get_artist', 'get_year', 'get_youtube', 'get_tags']
+    list_display = ['songTitle', 'id','get_artist', 'get_year', 'get_youtube', 'get_tags']
     search_fields = ['songTitle', 'metadata__artist']
     ordering = ('metadata__artist',)
 

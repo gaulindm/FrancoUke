@@ -38,9 +38,9 @@ def edit_song_formatting(request, song_id):
     
     # Try to get user's formatting, or use Gaulind's as fallback
     formatting, created = SongFormatting.objects.get_or_create(
-        user=request.user, song_id=song_id,
-        defaults={'intro': None, 'verse': None, 'chorus': None, 'bridge': None, 'interlude': None, 'outro': None}
-    )
+    user=request.user, song_id=song_id,
+    defaults={'intro': {}, 'verse': {}, 'chorus': {}, 'bridge': {}, 'interlude': {}, 'outro': {}}
+)
 
     if created:
         gaulind_formatting = SongFormatting.objects.filter(user__username="Gaulind", song_id=song_id).first()
@@ -112,12 +112,12 @@ class ArtistListView(LoginRequiredMixin, ListView):
         # ✅ Extract all first letters from all artists
         first_letters = sorted(set(artist[0].upper() for artist in all_artists if artist))
 
-        # ✅ Ensure filtered artists are shown correctly
+        # ✅ Filtrer les artistes si une lettre est sélectionnée
         letter = self.kwargs.get("letter")
         if letter:
-            filtered_artists = [artist for artist in all_artists if artist and artist[0].upper() == letter.upper()]
+            filtered_artists = sorted([artist for artist in all_artists if artist and artist[0].upper() == letter.upper()])
         else:
-            filtered_artists = list(all_artists)  # Show all artists if no letter selected
+            filtered_artists = sorted(all_artists)  # ✅ Toujours trier alphabétiquement
 
         # ✅ Split into columns (max 20 per column)
         artists_per_column = 20
