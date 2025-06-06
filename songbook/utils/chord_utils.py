@@ -1,12 +1,15 @@
+
 import os
 import json
+from django.conf import settings
 from reportlab.graphics.shapes import Drawing, Line
 from reportlab.graphics import renderPDF
 from reportlab.platypus import Table, TableStyle, Spacer, Flowable
 from reportlab.lib import colors
+from reportlab.lib.units import inch
 
 class ChordDiagram(Flowable):
-    def __init__(self, chord_name, variation, scale=0.65, is_lefty=False):
+    def __init__(self, chord_name, variation, scale=0.5, is_lefty=False):
         super().__init__()
         self.chord_name = chord_name
         self.variation = variation  # e.g., [0, 0, 0, 3]
@@ -33,8 +36,10 @@ class ChordDiagram(Flowable):
 
         # Draw nut or offset label
         if needs_offset:
-            self.canv.setFont("Helvetica-Bold", 8)
-            self.canv.drawString(-10, fret_spacing * (num_frets - 1), f"{fret_offset}")
+            self.canv.setFont("Helvetica-Bold", 10)  # Slightly larger font
+            self.canv.setFillColor(colors.red)  # Use a distinct color
+            self.canv.drawString(-15, fret_spacing * (num_frets - 1) + 5, f"{fret_offset}")
+            self.canv.setFillColor(colors.black)  # Reset color for other elements
         else:
             self.canv.setLineWidth(2)
             self.canv.line(0, fret_spacing * num_frets, string_spacing * (num_strings - 1), fret_spacing * num_frets)
@@ -54,7 +59,7 @@ class ChordDiagram(Flowable):
         self.canv.setFont("Helvetica-Bold", 12)
         self.canv.drawCentredString(
             (num_strings - 1) * string_spacing / 2,
-            fret_spacing * (num_frets + 1),
+            fret_spacing * (num_frets + 1)+2,
             self.chord_name
         )
 
@@ -65,9 +70,11 @@ class ChordDiagram(Flowable):
         self.canv.setFillColor(colors.black)
         for string_idx, fret in enumerate(self.variation):
             if fret > 0:  # Ignore open strings
-                x = flip_x(string_idx * string_spacing)
-                y = max_height - ((fret - fret_offset) - 0.5) * fret_spacing  # Adjust for offset
-                self.canv.circle(x, y, 4 * self.scale, fill=1)
+                adjusted_fret = fret - fret_offset
+                if adjusted_fret > 0:  # Only draw if the fret is within the diagram
+                    x = flip_x(string_idx * string_spacing)
+                    y = max_height - ((adjusted_fret - 0.5) * fret_spacing)
+                    self.canv.circle(x, y, 4 * self.scale, fill=1)
 
         # Draw open strings
         self.canv.setFillColor(colors.white)
@@ -80,17 +87,22 @@ class ChordDiagram(Flowable):
 
 
 
-
 def load_chords(instrument):
     """
     Load chord definitions based on the selected instrument.
     """
+    # Dynamically locate the directory where chord files are stored
+    #base_dir = os.path.dirname(os.path.abspath(__file__))  # Current file's directory
+    #chord_files_dir = os.path.join(base_dir, '..', 'chord_definitions')  # Adjust path
+    static_dir = os.path.join(settings.BASE_DIR, 'static', 'js')  # Adjust path for static location
+
+
     file_map = {
-        'ukulele': os.path.join('static', 'js', 'ukulele_chords.json'),
-        'guitar': os.path.join('static', 'js', 'guitar_chords.json'),
-        'mandolin': os.path.join('static', 'js', 'mandolin_chords.json'),
-        "banjo": os.path.join("static", "js", "banjo_chords.json"),
-        "baritone_ukulele": os.path.join("static", "js", "baritoneUke_chords.json"),
+        'ukulele': os.path.join(static_dir, 'ukulele_chords.json'),
+        'guitar': os.path.join(static_dir, 'guitar_chords.json'),
+        'mandolin': os.path.join(static_dir, 'mandolin_chords.json'),
+        "banjo": os.path.join(static_dir, "banjo_chords.json"),
+        "baritone_ukulele": os.path.join(static_dir, "baritoneUke_chords.json"),
     }
 
     file_path = file_map.get(instrument, file_map['ukulele'])  # Default to ukulele
@@ -98,10 +110,10 @@ def load_chords(instrument):
         with open(file_path, 'r') as file:
             return json.load(file)
     except FileNotFoundError:
-        print(f"Error: Chord file not found for {instrument}")
+        #print(f"Error: Chord file not found for {instrument}")
         return []
     except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON format in {file_path}: {e}")
+        #print(f"Error: Invalid JSON format in {file_path}: {e}")
         return []
     
 def extract_used_chords(lyrics_with_chords):
@@ -136,69 +148,97 @@ def extract_used_chords(lyrics_with_chords):
     # Return the chords as a sorted list
     return sorted(chords)
 
-
-def add_chord_diagrams(elements, relevant_chords, is_lefty=False, chord_spacing=100, row_spacing=24):
-    """
-    Add ukulele chord diagrams to the PDF, with adjustable spacing between chords and rows.
-    """
-    max_chords_per_row = 8  # Max chords per row
-    diagram_rows = []
-
-    # Create diagram rows
-    for i in range(0, len(relevant_chords), max_chords_per_row):
-        row = [
-            UkuleleDiagram(chord["name"], chord["variations"][0], is_lefty=is_lefty)
-            for chord in relevant_chords[i:i + max_chords_per_row]
-        ]
-        diagram_rows.append(row)
-
-    # Create a table for each row of diagrams
-    for row in diagram_rows:
-        diagram_table = Table([row], colWidths=[chord_spacing] * len(row))
-
-        # Style the table
-        diagram_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ]))
-
-        elements.append(diagram_table)
-        elements.append(Spacer(1, row_spacing))  # Spacer between rows
-
-def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing, is_lefty):
-    """
-    Draw footer with chord diagrams at the bottom of the page.
-    """
-    page_width, page_height = doc.pagesize
-    footer_height = 10  # Height reserved for the footer
+def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing, 
+                 is_lefty, instrument="ukulele", secondary_instrument=None,
+                 is_printing_alternate_chord=False, acknowledgement='',
+                 rows_needed=1, diagram_height=0):
     
-    # Calculate maximum number of chords that can fit in a row
-    max_chords_per_row = int((page_width - 2 * doc.leftMargin) / chord_spacing)
+    page_width, _ = doc.pagesize
+    max_per_row = 12 if not secondary_instrument else 6
+    footer_height = 100
     
-    # Only include the first row of diagrams in the footer
-    diagrams_to_draw = relevant_chords[:max_chords_per_row]
 
-    # Calculate the starting x-coordinate to center the diagrams
-    total_chords = len(diagrams_to_draw)
-    total_diagram_width = total_chords * chord_spacing
-    start_x = (page_width - total_diagram_width) / 2
+    # Instrument-specific adjustments
+    #min_chord_spacing = 10 if instrument == "ukulele" else 70
+
+    
+    def prepare_chords(chords):
+        diagrams = []
+        for chord in chords:
+            diagrams.append({
+                "name": chord["name"],
+                "variation": chord["variations"][0]
+            })
+            if is_printing_alternate_chord and len(chord["variations"]) > 1:
+                diagrams.append({
+                    "name": chord["name"],
+                    "variation": chord["variations"][1]
+                })
+        return diagrams
+
+
+    max_chords_per_row = 12 if not secondary_instrument else 6  # 6 per instrument if two
+
+    primary_diagrams = prepare_chords([chord for chord in relevant_chords if chord.get("instrument") == instrument])
+    secondary_diagrams = prepare_chords([chord for chord in relevant_chords if secondary_instrument and chord.get("instrument") == secondary_instrument])
+
+    if secondary_instrument:
+        primary_rows = (len(primary_diagrams) + max_chords_per_row - 1) // max_chords_per_row  # Per instrument
+        secondary_rows = (len(secondary_diagrams) + max_chords_per_row - 1) // max_chords_per_row  # Per instrument
+        rows_needed = max(primary_rows, secondary_rows)  # Take the max since they stack
+    else:
+        rows_needed = (len(primary_diagrams) + max_chords_per_row - 1) // max_chords_per_row  # Full page
+
+    #print(f"DEBUG: Number of chords={len(primary_diagrams)}, max_chords_per_row={max_chords_per_row}, rows_needed={rows_needed}")
 
 
 
-    # Move to the bottom of the page
-    canvas.saveState()
-    canvas.translate(start_x, footer_height)
+    def draw_diagrams(diagrams, start_x, start_y):
+        rows = [diagrams[i:i + max_per_row] for i in range(0, len(diagrams), max_per_row)]
+        
+        first_row_y = start_y  # Capture the original top position
+        
+        y_offset = start_y - (len(rows) - 1) * row_spacing  # Adjust for multiple rows
+        
+        for row in rows:
+            x_offset = start_x + (page_width / 4 - len(row) * chord_spacing / 2)
+            for chord in row:
+                diagram = ChordDiagram(chord["name"], chord["variation"], scale=0.5, is_lefty=is_lefty)
+                diagram.canv = canvas
+                canvas.saveState()
+                canvas.translate(x_offset, y_offset)
+                diagram.draw()
+                canvas.restoreState()
+                x_offset += chord_spacing
+            y_offset -= row_spacing
 
-    # Draw the chord diagrams
-    x_offset = 0
-    for chord in diagrams_to_draw:
-        diagram = ChordDiagram(chord["name"], chord["variations"][0], is_lefty=is_lefty)
-        diagram.canv = canvas
-        canvas.saveState()
-        canvas.translate(x_offset, 0)
-        diagram.draw()
-        canvas.restoreState()
-        x_offset += chord_spacing    
-   
-    canvas.restoreState()
+        return first_row_y  # Always return the original start position
+    
 
+    start_y = 34 if rows_needed == 1 else 172
+    #print(f"DEBUG: start_y calculated from pdf_generator {start_y}")
+    if not secondary_instrument:
+        label_y = draw_diagrams(primary_diagrams, page_width / 4, start_y)
+    else:
+        label_y = draw_diagrams(primary_diagrams, page_width / 4 - 140, start_y)
+        draw_diagrams(secondary_diagrams, 3 * page_width / 4 - 140, start_y)
+
+
+
+    
+
+    if secondary_instrument:
+        label_y = 96 if rows_needed == 1 else 165  # Keep it simple!
+        canvas.setFont("Helvetica-Bold", 10)
+        canvas.drawCentredString(page_width / 4, label_y, instrument.title())
+        if secondary_instrument:
+            canvas.drawCentredString(3 * page_width / 4, label_y, secondary_instrument.title())
+
+
+#Acknowledgment 
+    if acknowledgement:
+        canvas.setFont("Helvetica-Oblique", 10)
+        canvas.drawCentredString(
+            doc.pagesize[0] / 2, 0.2 * inch,  #changer .5 a .25
+            f"Ackowledgement: {acknowledgement}"
+        )

@@ -1,0 +1,38 @@
+<div class="modal fade show d-block" id="userPreferencesModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">User Preferences</h5>
+          <button type="button" class="btn-close" onclick="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form method="post" hx-post="{% url 'users:user_preferences' %}" 
+                hx-target="#modal-container"
+                hx-swap="outerHTML">
+            {% csrf_token %}
+  
+            <label for="id_primary_instrument">Primary Instrument:</label>
+            {{ form.primary_instrument }}
+  
+            <label for="id_secondary_instrument">Secondary Instrument (Optional):</label>
+            {{ form.secondary_instrument }}
+  
+            <label for="id_is_lefty">Are you left-handed?</label>
+            {{ form.is_lefty }}
+  
+            <label for="id_is_printing_alternate_chord">Show Alternate Chords?</label>
+            {{ form.is_printing_alternate_chord }}
+  
+            <button type="submit" class="btn btn-success">Save Preferences</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+  function closeModal() {
+      document.getElementById("userPreferencesModal").remove();
+  }
+  </script>
+  

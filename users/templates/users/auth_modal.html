@@ -1,0 +1,27 @@
+{% extends "songbook/base.html" %}
+
+{% block content %}
+<div class="modal fade show" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="false" style="display: block; background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="authModalLabel">Authentication requise</h5>
+      </div>
+      <div class="modal-body">
+        <p>Vous devez être authentifié pour accéder la page <strong>{{ request.path }}</strong>.</p>
+      </div>
+      <div class="modal-footer">
+        <a href="{% url 'users:login' %}?next={{ next_url }}" class="btn btn-primary">Login</a>
+        <a href="{% url 'users:register' %}" class="btn btn-secondary">S'inscire</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var authModal = new bootstrap.Modal(document.getElementById('authModal'));
+        authModal.show();
+    });
+</script>
+{% endblock %}

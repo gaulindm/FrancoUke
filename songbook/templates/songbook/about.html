@@ -1,4 +1,111 @@
-{% extends "songbook/base_sb.html" %}
+{% extends "songbook/base.html" %}
 {% block content %}
-   <h1>Songbook about!</h1>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #ffcc00;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            /*font-size: 1.5em;*/
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 2em;
+        }
+        h2 {
+            color: #ff6600;
+            border-bottom: 2px solid #ff6600;
+            padding-bottom: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #ffeb99;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.2em;
+        }
+        strong {
+            color: #cc3300;
+        }
+        p {
+            font-size: 1.2em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% if site_name == "FrancoUke" %}
+        <h1>Bienvenue sur FrancoUke</h1>
+        <p>Un outil éducatif et récréatif conçu pour les membres de clubs d'Ukulélé francophones.</p>
+    
+        {% else %}    
+            <h1>Welcome to StrumSphere</h1>
+            <p>Your ultimate online songbook designed for ukulele clubs and strummers of all kinds! Whether you play ukulele, baritone ukulele, banjo, or guitar—including left-handed versions—we've got you covered.</p>
+        {% endif %}
+    </header>
+    <main>
+        <section>
+            {% if site_name == "FrancoUke" %}
+            <h2>Ce que vous pouvez faire sur FrancoUke :</h2>
+            <ul>
+                <li>
+                    <strong>Gérer des chansonniers</strong> : Une solution pratique pour les leaders de clubs d'Ukulélé 
+                    afin d'organiser et centraliser les chansons.
+                </li>
+                <li>
+                    <strong>Transposer facilement des chansons</strong> : Ajustez les tonalités pour qu'elles conviennent 
+                    parfaitement à votre voix ou à votre style de jeu.
+                </li>
+                <li>
+                    <strong>Adapter des partitions</strong> : Proposez des morceaux accessibles à des musiciens de tous âges 
+                    et de tous niveaux de compétence.
+                </li>
+                <li>
+                    <strong>Partager des partitions</strong> : Tout en respectant les droits d'auteur 
+                    et en reconnaissant les contributions des auteurs-compositeurs.
+                </li>
+                <li>
+                  <strong>Multitude d'instruments à corde</strong> : Accéder aux diagrams d'accords aux autres instruments
+                   à corde (mandoline, banjo, Ukulele Bariton, guitare) qui peuvent être adapté aux musiciens gauchés.
+               </li>
+
+            </ul>
+            <p>FrancoUke aimerait remercier <strong>Heather J. Topps du</strong> du <a href="https://northbayukulelegroup.wordpress.com">North Bay Ukulele Group</a> pour son gabarit des chansons</p>
+            {% else %}    
+                <h2>What You'll Find on StrumSphere:</h2>
+                <ul>
+                    <li>A growing collection of songs <strong>with easy-to-read chord diagrams.</strong></li>
+                    <li>Support for multiple instruments, so <strong>everyone</strong> can play along.</li>
+                    <li>Clear, bolded chords to keep you in sync while strumming.</li>
+                    <li>A fun and engaging space for musicians of all skill levels.</li>
+                </ul>
+                <p>No matter what you play or how you strum, <strong>StrumSphere</strong> is here to bring music lovers together. Stay tuned and get ready to <strong>strum along with us!</strong></p>
+                <p>StrumSphere wants to thank <strong>Heather J. Topps </strong> of the <a href="https://northbayukulelegroup.wordpress.com">North Bay Ukulele Club</a> for her well tought out scores well prepared PDF layout.</p>
+
+                <p><strong>Let’s make music, together!</strong></p>
+            {% endif %}
+        </section>
+    </main>
+</body>
 {% endblock content %}

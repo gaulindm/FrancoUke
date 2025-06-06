@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-31v71%x^441-$wdk*9vmkqq^5xnfk!e0%6+_-_^6paegiqe$_1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'  # Allows embedding on the same domain
 
 
 # Application definition
@@ -122,6 +124,8 @@ import os
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
 
 
 STATIC_URL = '/static/'
@@ -147,8 +151,13 @@ CCRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-LOGIN_REDIRECT_URL = 'songbook-home'
+#Pour desactive la version strumsphere
+ENABLE_STRUMSPHERE = False
 
-LOGIN_URL = 'login'
+#LOGIN_REDIRECT_URL = 'songbook-home'
+
+LOGIN_URL = '/users/login/'  # ✅ Fix the redirect issue
+LOGIN_REDIRECT_URL = '/'  # ✅ Ensure users go to home after login
+LOGOUT_REDIRECT_URL = '/'  # ✅ Ensure users go home after logout
 
 TAGGIT_CASE_INSENSITIVE = True

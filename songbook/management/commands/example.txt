@@ -1,57 +1,43 @@
-Peter, Paul and Mary
-Tell It On The Mountain
-  {{%Em}}   {{%A}}   {{%D}}   {{%A}} 
+Paul Piché
+Un château de sable
+  Intro : {{%F#m}} 
  
  
- {{D}}Go tell it on the {{Bm}}mountain,
- {{Em}}Over the {{A}}hill and {{D}}ever{{F#m}}ywhere{{G}},  {{A}}
- {{D}}Go t{{F#}}ell it on the m{{G}}ount{{E7}}ain,
- To {{D}}let my {{A7}}people {{D}}go. {{A7}}
+ {{F#m}}Je lègue à la mer un château de {{A}}sabl{{A(add9)}}e,       {{A}}
+ {{F#m}}Un ruisseau creusé à même une {{A}}fabl{{A(add9)}}e.       {{A}}
+ {{D}}Que je ne pourr{{E}}ai racon{{C#m}}ter, tout mon roy{{F#m}}aume est
+ empor{{D}}té, avec{{E}} ses paroles.
  
  
- {{D}}Who's that yonder {{Bm}}dressed in red?
- {{G}}Let my {{A}}people {{D}}go ;{{A7}}
- {{D}}Must be the children that {{Bm}}Moses led ;
- {{Em}}Let my {{Em7}}people {{A7}}go.
- {{D}}Who's that yonder {{D7}}dressed in red ?
- {{G}}Must be the children that {{Em}}Moses led ;
- {{D}}Go tell it on the {{G}}mountain,
- To {{D}}let my {{A7}}people {{D}}go.  {{A7}}
+ {{F#m}}Et l'encre des mots se noie sur ma {{A}}page{{A(add9)}},        {{A}}
+ {{F#m}}Quand j'essaie d'écrire dans leur langue {{A}}sage{{A(add9)}}.        {{A}}
+ {{D}}Sur le rivage{{E}} il n'est resté{{C#m}}, qu'un goût de n{{F#m}}aufrage et
+ une {{D}}clé, éro{{E}}dée par la maré{{A}}e.
  
  
- {{D}}Go tell it on the {{Bm}}mountain,
- {{Em}}Over the {{A}}hill and {{D}}ever{{F#m}}ywhere{{G}},  {{A}}
- {{D}}Go t{{F#}}ell it on the m{{G}}ount{{E7}}ain,
- To {{D}}let my {{A7}}people {{D}}go. {{A7}}
+ {{A}}Le secret des mo{{D}}ts glisse en{{E}}tre mes d{{E(sus4)}}oigts,
+ {{A}}De sable et d'{{D}}eau à la {{E}}fois {{E(sus4)}}oh oh
+ {{A}}Comme une i{{D}}mage délav{{E}}ée, d'un{{E(sus4)}} monde oubli{{F#m}}é
  
  
- {{D}}Who's that yonder {{Bm}}dressed in white ?
- {{G}}Let my {{A}}people {{D}}go ;{{A7}}
- {{D}}Must be the children of {{Bm}}the Israelite ;
- {{Em}}Let my {{Em7}}people {{A7}}go.
- {{D}}Who's that yonder {{D7}}dressed in white ?
- {{G}}Must be the children of {{Em}}the Israelite ;
- {{D}}Go tell it on the {{G}}mountain,
- To {{D}}let my {{A7}}people {{D}}go. {{A7}}
+ {{F#m}}Tengo una casa no puedo do{{A}}rmir{{A(add9)}},        {{A}}
+ {{F#m}}pagina en blanco no puedo escri{{A}}bir{{A(add9)}}          {{A}}
+ {{D}}No teng{{E}}o palabras, n{{A}}i santo y signa, nillave de lengu{{F#m}}a
  
  
- {{D}}Go tell it on the {{Bm}}mountain,
- {{Em}}Over the {{A}}hill and {{D}}ever{{F#m}}ywhere{{G}},  {{A}}
- {{D}}Go t{{F#}}ell it on the m{{G}}ount{{E7}}ain,
- To {{D}}let my {{A7}}people {{D}}go. {{A7}}
+ {{A}}Il reste un cachot, et je suis seul au rivage,
+ {{A}}Cherchant le secret des mots{{F#m}},
+ cherchant la clé du la{{B7/4}}ngage.
  
  
- {{D}}Who's that yonder {{Bm}}dressed in black ?
- {{G}}Let my {{A}}people {{D}}go ;{{A7}}
- {{D}}Must be the hypocrites {{Bm}}turnin' back ;
- {{Em}}Let my {{Em7}}people {{A7}}go.
- {{D}}Who's that yonder {{D7}}dressed in black ?
- {{G}}Must be the hypocrites {{Em}}turnin' back ;
+ {{F#m}}Si je fais demain un château de {{A}}sabl{{A(add9)}}e,       {{A}}
+ {{F#m}}J'apprendrai les mots, j'apprendrai la {{A}}fabl{{A(add9)}}e        {{A}}
+ {{D}}Si ma jeun{{E}}esse a tout {{C#m}}revu, pour dire ce q{{F#m}}u'elle aura
+ {{D}}vécu, elle a tro{{E}}p peu de parole{{A}}s
  
  
- {{D}}Go tell it on the {{G}}mountain,
- To {{D}}let my {{A7}}people
- {{D}}Go tell it on the {{Bm}}mountain,
- {{Em}}Over the {{A}}hill and {{D}}ever{{F#m}}ywhere{{G}},  {{A}}
- {{D}}Go t{{F#}}ell it on the m{{G}}ount{{E7}}ain,
- To {{D}}let...  {{A7}}my peo..{{G}}. pl{{A}}e go{{D}} ...
+ {{A}}Le secret des mot{{D}}s glisse en{{E}}tre mes doigt{{E(sus4)}}s,
+ {{A}}De sable et d'ea{{D}}u à la f{{E}}ois o{{E(sus4)}}h oh
+ {{A}}Comme une ima{{D}}ge délav{{E}}ée, w{{E(sus4)}}o oh
+ {{A}}Comme une ima{{D}}ge délav{{E}}ée, d{{E(sus4)}}'un monde oublié{{F#m}}      {{A}}
+ oubl{{F#m}}ié, oubl{{A}}ié, oubl{{F#m}}ié, oubl{{A}}ié, oubl{{F#m}}ié, oubl{{A}}ié. . .

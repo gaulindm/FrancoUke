@@ -1,0 +1,128 @@
+{% extends "songbook/base.html" %}
+
+{% block content %}
+<style>
+.letter-nav-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.letter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    flex-grow: 1;
+}
+
+.letter-nav a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    padding: 5px 8px;
+}
+
+.letter-nav a.active {
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+}
+
+.artist-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.artist-column {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.artist-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.artist-column li {
+    margin-bottom: 5px;
+}
+
+.all-artists-btn {
+    margin-left: auto;
+    white-space: nowrap;
+}
+</style>
+
+<!-- ✅ Dynamic Heading -->
+<h2>
+    {% if site_name == "FrancoUke" %}
+        Parcourir par artiste
+    {% else %}
+        Browse by Artist
+    {% endif %}
+</h2>
+
+<!-- ✅ Letter Navigation -->
+<div class="letter-nav-container">
+    <div class="letter-nav">
+        {% for letter in first_letters %}
+            {% if site_name == "FrancoUke" %}
+                <a href="{% url 'francouke_artist_by_letter' letter=letter %}"
+                   class="{% if letter == selected_letter %}active{% endif %}">
+                    {{ letter }}
+                </a>
+            {% else %}
+                <a href="{% url 'strumsphere_artist_by_letter' letter=letter %}"
+                   class="{% if letter == selected_letter %}active{% endif %}">
+                    {{ letter }}
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if selected_letter %}
+        {% if site_name == "FrancoUke" %}
+            <a href="{% url 'francouke_artist_list' %}" class="btn btn-secondary all-artists-btn">
+                Afficher tous les artistes
+            </a>
+        {% else %}
+            <a href="{% url 'strumsphere_artist_list' %}" class="btn btn-secondary all-artists-btn">
+                Show All Artists
+            </a>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- ✅ Artist List -->
+<div class="artist-columns">
+    {% for column in artist_columns %}
+        <div class="artist-column">
+            <ul>
+                {% for artist in column %}
+                    {% if site_name == "FrancoUke" %}
+                        <li><a href="{% url 'francouke_artist_songs' artist_name=artist %}">{{ artist }}</a>
+                        </li>
+                    {% else %}
+                        <li><a href="{% url 'strumsphere_artist_songs' artist_name=artist %}">{{ artist }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% if not user.is_authenticated %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var authModal = new bootstrap.Modal(document.getElementById('authModal'));
+        authModal.show();
+    });
+</script>
+{% endif %}

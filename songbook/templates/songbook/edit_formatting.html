@@ -1,0 +1,136 @@
+{% extends "songbook/base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <!-- Left Section (Form) - 8 columns -->
+        <div class="col-md-8">
+            <h2>{% if site_name == "FrancoUke" %} Modifier le formatage {% else %} Edit Song Formatting {% endif %}</h2>
+            <form method="POST" class="formatting-form" action="?site={{ site_name }}">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button type="submit">
+                    {% if site_name == "FrancoUke" %} Enregistrer les modifications {% else %} Save Changes {% endif %}
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Section (Guide) - 4 columns -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>{% if site_name == "FrancoUke" %} Guide de formatage {% else %} Formatting Guide {% endif %}</h4>
+                </div>
+                <div class="card-body">
+                    {% if site_name == "FrancoUke" %}
+                        <p>Vous n'avez besoin d'inclure que les valeurs que vous souhaitez modifier.</p>
+                        <p>Les valeurs absentes utiliseront les paramètres par défaut ci-dessous.</p>
+                        <ul>
+                            <li><strong>font_size</strong> : Taille du texte (Défaut : <code>13</code>).</li>
+                            <li><strong>text_color</strong> : Couleur du texte (Défaut : <code>"#000000"</code>).</li>
+                            <li><strong>alignment</strong> : <code>"left"</code>, <code>"center"</code>, <code>"right"</code> (Défaut : <code>"left"</code>).</li>
+                            <li><strong>line_spacing</strong> : Espacement des lignes (Défaut : <code>1.2</code>).</li>
+                            <li><strong>spaceBefore</strong> : Espace avant une section (Défaut : <code>12</code>).</li>
+                            <li><strong>spaceAfter</strong> : Espace après une section (Défaut : <code>12</code>).</li>
+                        </ul>
+                        <p>✅ Exemple : Si vous souhaitez seulement modifier la taille du texte, entrez :</p>
+                        <pre>
+{
+    "font_size": 16
+}
+                        </pre>
+                        <p>⚠️ Toutes les autres valeurs resteront par défaut.</p>
+                        <p><strong>⚠️ Important :</strong> Ne supprimez pas entièrement les <code>{}</code> !</p>
+                        <p>Si vous ne souhaitez pas apporter de modifications, laissez le champ vide ou conservez <code>{}</code>.</p>
+                    {% else %}
+                        <p>You only need to include values you want to change.</p>
+                        <p>Any missing values will use the defaults below.</p>
+                        <ul>
+                            <li><strong>font_size</strong>: Adjusts text size (Default: <code>13</code>).</li>
+                            <li><strong>text_color</strong>: Changes text color (Default: <code>"#000000"</code>).</li>
+                            <li><strong>alignment</strong>: Can be <code>"left"</code>, <code>"center"</code>, or <code>"right"</code> (Default: <code>"left"</code>).</li>
+                            <li><strong>line_spacing</strong>: Controls space between lines (Default: <code>1.2</code>).</li>
+                            <li><strong>spaceBefore</strong>: Space before a section (Default: <code>12</code>).</li>
+                            <li><strong>spaceAfter</strong>: Space after a section (Default: <code>12</code>).</li>
+                        </ul>
+                        <p>✅ Example: If you only want to change the font size, enter:</p>
+                        <pre>
+{
+    "font_size": 16
+}
+                        </pre>
+                        <p>⚠️ All other values will remain at their defaults.</p>
+                        <p><strong>⚠️ Important:</strong> Do <u>not</u> delete the <code>{}</code> completely!</p>
+                        <p>If you don’t need any changes, leave the field <code>{}</code> or empty—it will be automatically handled.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div> <!-- Close Row -->
+</div> <!-- Close Container -->
+
+<!-- Styles -->
+<style>
+    .container {
+        margin-top: 20px;
+    }
+
+    .card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    pre {
+        background: #eee;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .formatting-form {
+        max-width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    button {
+        margin-top: 10px;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+{% endblock %}

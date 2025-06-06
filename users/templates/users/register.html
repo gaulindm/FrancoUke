@@ -1,21 +1,54 @@
-{% extends "songbook/base_sb.html" %}
+{% extends "users/base_auth.html" %}
 {% load crispy_forms_tags %}
+
 {% block content %}
     <div class="content-section">
         <form method="POST">
             {% csrf_token %}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Join Today</legend>
+                <legend class="border-bottom mb-4">
+                    {% if site_name == "FrancoUke" %}
+                        Rejoignez FrancoUke dès aujourd'hui
+                    {% else %}
+                        Join StrumSphere Today
+                    {% endif %}
+                </legend>
                 {{ form|crispy }}
             </fieldset>
             <div class="form-group">
-                <button class="btn btn-outline-info" type="submit">Sign Up</button>
+                <button class="btn btn-outline-info" type="submit">
+                    {% if site_name == "FrancoUke" %}
+                        S'inscrire
+                    {% else %}
+                        Sign Up
+                    {% endif %}
+                </button>
             </div>
         </form>
         <div class="border-top pt-3">
             <small class="text-muted">
-                Already Have An Account? <a class="ml-2" href="#">Sign In</a>
+                {% if site_name == "FrancoUke" %}
+                    Vous avez déjà un compte ? <a class="ml-2" href="{% url 'users:login' %}?site=FrancoUke">Connectez-vous</a>
+                {% else %}
+                    Already have an account? <a class="ml-2" href="{% url 'users:login' %}?site=StrumSphere">Login</a>
+                {% endif %}
             </small>
         </div>
     </div>
+
+    <div class="alert alert-info mt-4">
+        <p>
+            {% if site_name == "FrancoUke" %}
+                Vous prévoyez de créer des fichiers PDF avec des diagrammes d'accords ?
+                Vous pouvez définir vos préférences après vous être inscrit(e) !
+                Visitez votre page
+                <a href="{% url 'users:user_preferences' %}?site=FrancoUke">Préférences</a>.
+            {% else %}
+                Planning to generate PDFs with chord diagrams?
+                You can set your preferences after signing up!
+                Visit your <a href="{% url 'users:user_preferences' %}?site=StrumSphere">Preferences</a>.
+            {% endif %}
+        </p>
+    </div>
+
 {% endblock content %}

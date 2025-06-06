@@ -36,8 +36,10 @@ def parse_song_data(data):
             for i, part in enumerate(parts):
                 if part.startswith("["):  # Chord
                     # Get the corresponding lyric
-                    lyric = parts[i + 1].strip() if i + 1 < len(parts) else ""
-                    current_part.append({"chord": part[1:-1], "lyric": lyric})
+                    prev = parts[i - 1].rstrip() if i > 0 else ""
+                    lyric = parts[i + 1].lstrip() if i + 1 < len(parts) else ""
+                    current_part.append({"chord": part[1:-1].strip(), "lyric": lyric})
+
                 elif i == 0 or not parts[i - 1].startswith("["):  # Intro text or lyric without preceding chord
                     current_part.append({"chord": "", "lyric": part.strip()})
 

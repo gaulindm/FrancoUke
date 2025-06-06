@@ -1,0 +1,183 @@
+{% extends "songbook/base.html" %}
+{% block content %}<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+
+    header {
+        background-color: #ffe4e1;
+        color: #8b0000;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 2px solid #8b0000;
+    }
+
+    header h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    header p {
+        margin: 5px 0;
+    }
+
+    main {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    section {
+        margin-bottom: 20px;
+    }
+
+    section h2 {
+        font-size: 1.5rem;
+        color: #8b0000;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    ul {
+        list-style: disc;
+        padding-left: 20px;
+    }
+
+    ul li {
+        margin-bottom: 10px;
+    }
+
+    ul li strong {
+        color: #333;
+    }
+
+    footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    a {
+        color: #8b0000;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+<body>
+    <header>
+        <h1>Avertissement.  Sous construction</h1>
+        <p>Le site est encore en construction, mais je fais de mon mieux pour limiter les petits pépins.  En ce moment, je m'attarde surtout à l’optimisation de la génération des PDF. </p>
+        <h2>Bonne nouvelle ! 🌟</h2>
+        <p></p>Les problèmes restants sont mineurs et ne devraient pas trop gêner votre expérience.  Cependant, si vous remarquez quelque chose d’inhabituel, n’hésitez pas à me le signaler !  Vos retours sont précieux et m’aident à améliorer le site pour vous offrir la meilleure expérience possible.</p>
+        <p>Merci pour votre patience et votre soutien ! 🎵😊</p>
+    </header>
+    <main>
+        <section>
+            <h2>Quoi de neuf ?</h2>
+            <ul>
+                <li>
+                    🗓️ 26 février 2025 : <p><strong>Parcourir par artiste</strong> : Les utilisateurs peuvent maintenant parcourir les chansons par artiste.</p>
+                </li>
+                <li>
+                    🗓️ 22 février 2025 : <p><strong>Hériter du Formatage de Gaulind</strong> : Lorsqu'un utilisateur visite une chanson pour la première fois, il voit automatiquement le formatage créé par Gaulind.</p>
+                    <p><strong>Éditions Personnalisées</strong> : Les utilisateurs peuvent maintenant modifier et enregistrer leur propre formatage sans impacter les autres.</p>
+                </li>
+                <li>
+                    🗓️ 21 février 2025 : <p>Amélioré <strong>le contrôle l'espacement</strong> entre les lignes, et avant/après les différentes section des chansons </p>
+                    <p.>Personnalisation des <strong>choix de police</strong> dans les differentes sections des chansons</p>
+                </li>
+
+                <li>
+                    🗓️ 21 février 2025 : Amélioré <strong>le contrôle l'espacement</strong> entre les lignes, et avant/après les différentes section des chansons </p>
+                </li>
+
+                <li>
+                    🗓️ 20 février 2025 : Amélioré la gestion des <strong>marges inférieures</strong> pour garantir un affichage correct des <strong>diagrammes d'accords</strong> dans le pied de page, que vous utilisiez <strong>un ou deux instruments.</strong> </p>
+                </li>
+
+                <li>
+                    🗓️ 18 février 2025 : <strong>Transposition des accords 🎶</strong> <p> Besoin d’adapter une chanson à votre voix ou à votre instrument ?
+                    Vous pouvez maintenant transposer les accords jusqu’à ±7 demi-tons, tout en conservant la tonalité d’origine de la partition. </p>
+                    <p>Essayez-le et jouez plus confortablement ! </p>
+                </li>
+                <li>
+                    🗓️ 17 février 2025 : <strong>Diagrammes d’accords pour deux instruments 🎸🎻</strong>
+                    <p>Vous animez un club de musique ? Vous jouez de plusieurs instruments ?
+                    Vous pouvez désormais générer un PDF contenant les diagrammes d’accords pour deux instruments différents !</p>
+                    <p>Rendez-vous dans votre profil pour configurer votre préférence et profitez d’une expérience sur mesure.</p>
+                </li>
+
+                <li>
+                    🗓️ 13 février 2025 : <strong>Mise en forme des chansons ✨</strong>
+                    <p>Personnalisez l’affichage de vos chansons et améliorez vos PDF !
+                    Vous pouvez ajuster la taille de la police, les couleurs, l’espacement, et bien plus encore, pour un rendu optimal et agréable à lire.</p>
+                </li>
+
+
+
+            </ul>
+        </section>
+        <section>
+            <h2>Prochain pépins a régler :</h2>
+            <ul>
+
+                <li>
+                    <strong>Rapport chansons taggées</strong> : Le rapport montre seulement les accords de la première chanson du rapport.
+                </li>
+
+
+            </ul>
+        </section>
+
+         <section>
+            <h2>Améliorations à venir :</h2>
+            <ul>
+
+                <li>
+                    <strong>Dropbox</strong> : Exportation automatique au Dropbox pour facilement utiliser une tablette pour lire les partitions.
+                </li>
+
+                <li>
+                    <strong>Permission pour les leaders</strong> : Accorder permission d'admin pour les enseignants, entraineurs, chef de clubs.
+                </li>
+                <li>
+                    <strong>Diagramme supplémentaire</strong> : L'ajout des differentes façons de jouer l'accord.
+                </li>
+                <li>
+                    <strong>Ajouter des vérifications des partitions</strong> : Tonalité, année, première note, auteur-compositeur, comparaison avec le clip youtube.
+                </li>
+                <li>
+                    <strong>Outil d'ajout</strong> : Améliorer l'outil d'ajout de partitions.
+                </li>
+                <li>
+                    <strong>Taggit</strong> : Améliorer l'outil de tags de chansons.
+                </li>
+
+
+            </ul>
+        </section>
+        <section>
+            <p>Je continue d’améliorer le site pour vous offrir la meilleure expérience possible.  Si vous souhaitez signaler un problème, n’hésitez pas à m’écrire à l’adresse suivante :
+                📧 gaulindm@gmail.com</p>
+            <P>Votre aide est précieuse, et j’apprécie énormément vos retours ! 😊✨</p>
+        </section>
+
+    </main>
+</body>
+
+
+
+{% endblock content %}

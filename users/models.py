@@ -1,7 +1,15 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
+from django.conf import settings
+
+
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+
+    def __str__(self):
+        return self.username
 
 @receiver(post_save, sender=User)
 def create_user_preference(sender, instance, created, **kwargs):
@@ -23,26 +31,36 @@ class Profile(models.Model):
         
 
 class UserPreference(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userpreference')
-    transpose_value = models.IntegerField(default=0)  # e.g., semitone adjustments
-    font_size = models.CharField(max_length=5, default="14px")
-    line_spacing = models.FloatField(default=1.2)
-    text_color = models.CharField(max_length=7, default="#000000")  # Hex color
-    chord_color = models.CharField(max_length=7, default="#FF0000")  # Hex color
-    chord_weight = models.CharField(max_length=10, default="normal")
-    instrument = models.CharField(
-           max_length=20,
-            choices=[
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='userpreference')
+    transpose_value = models.IntegerField(default=0)  # e.g., semiton
+    primary_instrument = models.CharField(
+        max_length=20,
+        choices=[
             ("guitar", "Guitar"),
             ("ukulele", "Ukulele"),
             ("baritone_ukulele", "Baritone Ukulele"),
             ("banjo", "Banjo"),
             ("mandolin", "Mandolin"),
-        ],        
-           default="ukulele")
+        ],
+        default="ukulele"
+    )
+    secondary_instrument = models.CharField(
+        max_length=20,
+        choices=[
+            ("guitar", "Guitar"),
+            ("ukulele", "Ukulele"),
+            ("baritone_ukulele", "Baritone Ukulele"),
+            ("banjo", "Banjo"),
+            ("mandolin", "Mandolin"),
+        ],
+        default=None,  # No secondary instrument by default
+        null=True,
+        blank=True  # Allows the field to be optional
+    )
     is_lefty = models.BooleanField(default=False)
-    chord_diagram_position = models.CharField(max_length=10, default="bottom")
-    chord_placement = models.CharField(max_length=20, default="inline")
+    is_printing_alternate_chord = models.BooleanField(default=False)
 
-def __str__(self):
-        return f"Preferences for {self.user.username}"
+
+
+    def __str__(self):
+        return f"{self.instrument} - Lefty: {self.is_lefty}, Alt Chords: {self.is_printing_alternate_chord}"

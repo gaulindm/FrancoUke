@@ -5,8 +5,12 @@ from .models import UserPreference
 admin.site.register(Profile)
 
 
+
+
 @admin.register(UserPreference)
 class UserPreferencesAdmin(admin.ModelAdmin):
-    list_display = ('user', 'font_size', 'line_spacing', 'text_color', 'instrument', 'is_lefty')
+    list_display = ('user', 'primary_instrument','secondary_instrument', 'is_lefty','is_printing_alternate_chord')
+    list_editable = ('is_lefty', 'is_printing_alternate_chord')
     search_fields = ('user__username', 'user__email')
-    list_filter = ('font_size', 'instrument', 'is_lefty')
+    list_filter = ('primary_instrument','secondary_instrument', 'is_lefty')
+

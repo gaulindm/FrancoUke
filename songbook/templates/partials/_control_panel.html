@@ -1,20 +1,64 @@
 {% load static %}
+
 <div class="content-section">
-    {% if object.contributor == user %}<h3>Modify</h3>(must be contributor of song)<br> 
-                <a class="btn btn-secondary btn-sm-mt-1 mb-1" href ="{% url 'song-update' object.id %}">Update</a>
-                <a class="btn btn-danger btn-sm-mt-1 mb-1" href ="{% url 'song-delete' object.id %}">Delete</a>
-            {% endif%}
+    {% if user.is_authenticated %}
     
-    
-    
-    
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-    <p class='text-muted'>
-      <ul class="list-group">
-        <li class="list-group-item list-group-item-heavy"><h3>Control Panel</h3>
-        </li>
-        <li class="list-group-item list-group-item-heavy">Transpose    
-          <select id="transpose-select" onchange="transposeSong(this.value)">
+        {% if site_name == "FrancoUke" %}
+            <h3>Éditeur de partition</h3>
+            <p class="text-muted">Modifier le contenu de la chanson sans modifier l'apparence</p>
+
+            <div class="d-flex gap-2">
+                <a class="btn btn-secondary btn-sm" href="{% url 'francouke_song_update' pk=song.pk %}" title="Modifier le fichier Chordpro">
+                    Modifier les données ChordPro
+                </a>
+
+            </div>    
+        {% else %}
+            <h3>Song Editor</h3>
+            <p class="text-muted">Edit the song's content without changing appearance</p>
+
+            <div class="d-flex gap-2">
+                <a class="btn btn-secondary btn-sm" href="{% url 'strumsphere_song_update' pk=song.pk %}" title="Edit the original ChordPro file">
+                    Modify ChordPro Data
+                </a>
+
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <hr>
+
+    <!-- 🎸 Transposition Section -->
+    {% if site_name == "FrancoUke" %}
+        <h3>🎸 Transposer les accords</h3>
+        <p class="text-muted">Changer la tonalité de la chanson pour mieux s'adapter à votre voix ou pour un meilleur choix d'accord</p>
+        <label for="transpose-select">Transpose:</label>
+        <select id="transpose-select" class="form-control w-auto d-inline-block">
+            <option value="0">Tonalité originale</option>
+            <option value="-7">-7 demi-tons</option>
+            <option value="-6">-6 demi-tons</option>
+            <option value="-5">-5 demi-tons</option>
+            <option value="-4">-4 demi-tons</option>
+            <option value="-3">-3 demi-tons</option>
+            <option value="-2">-2 demi-tons</option>
+            <option value="-1">-1 demi-ton</option>
+            <option value="1">+1 demi-ton</option>
+            <option value="2">+2 demi-tons</option>
+            <option value="3">+3 demi-tons</option>
+            <option value="4">+4 demi-tons</option>
+            <option value="5">+5 demi-tons</option>
+            <option value="6">+6 demi-tons</option>
+            <option value="7">+7 demi-tons</option>
+        </select>
+        
+        <button id="update-preview" class="btn btn-primary btn-sm mt-2">
+            🔄 Appliquer la Transposition
+        </button>
+        {% else %}
+        <h3>Transpose Chords</h3>
+        <p class="text-muted">Change the key of the song to adapt to your voice or to use different chords</p>
+        <label for="transpose-select">Transpose:</label>
+        <select id="transpose-select" class="form-control w-auto d-inline-block">
             <option value="0">Original Key</option>
             <option value="-7">-7 semitone</option>
             <option value="-6">-6 semitone</option>
@@ -31,130 +75,157 @@
             <option value="6">+6 semitone</option>
             <option value="7">+7 semitone</option>
         </select>
-        </li>
-        <!-- Lyrics and Chords Appearance -->
-        <li class="list-group-item list-group-item-heavy">
-            <strong>Lyrics and Chords Appearance</strong>
-            <div class="control-panel mt-12 d-flex flex-wrap align-items-center">
-                <!-- Font Size -->
-                <div class="me-3">
-                    <label for="fontSize" class="form-label">Font Size:</label>
-                    <select id="fontSize" onchange="updateStyle('fontSize', this.value)" class="form-control form-control-sm">
-                        <option value="12px" {% if preferences.font_size == "12px" %}selected{% endif %}>12px</option>
-                        <option value="14px" {% if preferences.font_size == "14px" %}selected{% endif %}>14px</option>
-                        <option value="16px" {% if preferences.font_size == "16px" %}selected{% endif %}>16px</option>
-                        <option value="18px" {% if preferences.font_size == "18px" %}selected{% endif %}>18px</option>
-                        <option value="20px" {% if preferences.font_size == "20px" %}selected{% endif %}>20px</option>
-                    </select>
-                </div>
-          
-                <!-- Line Spacing -->
-                <div class="me-3">
-                    <label for="lineSpacing" class="form-label">Line Spacing:</label>
-                    <select id="lineSpacing" onchange="updateStyle('lineHeight', this.value)" class="form-control form-control-sm">
-                        <option value="1.0" {% if preferences.line_spacing == "1.0" %}selected{% endif %}>1.0</option>
-                        <option value="1.2" {% if preferences.line_spacing == "1.2" %}selected{% endif %}>1.2</option>
-                        <option value="1.4" {% if preferences.line_spacing == "1.4" %}selected{% endif %}>1.4</option>
-                        <option value="1.6" {% if preferences.line_spacing == "1.6" %}selected{% endif %}>1.6</option>
-                        <option value="1.8" {% if preferences.line_spacing == "1.8" %}selected{% endif %}>1.8</option>
-                    </select>
-                </div>
-                <!-- Text Color -->
-                <div class="me-8">
-                    <label for="textColor" class="form-label">Text Color:</label>
-                    <input type="color" id="textColor" onchange="updateStyle('color', this.value)" class="form-control form-control-sm">
-                </div>
-                <!-- Chord Color -->
-                <div class="me-8">
-                    <label for="chordColor" class="form-label">Chord Color:</label>
-                    <input type="color" id="chordColor" onchange="updateStyle('chordColor', this.value)" class="form-control form-control-sm">
-                </div>
-
-
-                  <!-- Chord Font Weight -->
-                <div class="me-8">
-                    <label for="chordWeight" class="form-label">Chord Font Weight:</label>
-                    <select id="chordWeight" onchange="updateStyle('chordWeight', this.value)" class="form-control form-control-sm">
-                        <option value="normal">Normal</option>
-                        <option value="bold">Bold</option>
-                        <option value="lighter">Lighter</option>
-                        <option value="bolder">Bolder</option>
-                    </select>
-                </div>
-            
-          </div>
-      </li>
-
-      <!-- Instrument Selection -->
-      <li class="list-group-item list-group-item-heavy">
-          <strong>Instrument Selection</strong>
-          <div class="control-panel mt-2">
-              <label for="instrument-selector">Select Instrument:</label>
-              <select id="instrument-selector" class="form-control">
-                <option value="guitar" {% if preferences.instrument == "guitar" %}selected{% endif %}>Guitar</option>
-                <option value="ukulele" {% if preferences.instrument == "ukulele" %}selected{% endif %}>Ukulele</option>
-                <option value="baritone_ukulele" {% if preferences.instrument == "baritone_ukulele" %}selected{% endif %}>Baritone Ukulele</option>
-                <option value="banjo" {% if preferences.instrument == "banjo" %}selected{% endif %}>Banjo</option>
-                <option value="mandolin" {% if preferences.instrument == "mandolin" %}selected{% endif %}>Mandolin</option>
-            </select>
-
-          </div>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="isLeftyToggle" onchange="updateLeftyMode()">
-            <label class="form-check-label" for="isLeftyToggle">Left-handed Mode</label>
-        </div>
-      </li>
-
-
-      <!-- Chord Diagram Position -->
-      <li class="list-group-item list-group-item-heavy">
-          <strong>Chord Diagram Position</strong>
-          <form id="layout-form" class="mt-2">
-              <label>
-                  <input type="radio" name="diagram-position" value="left"> Left
-              </label>
-              <label>
-                  <input type="radio" name="diagram-position" value="right"> Right
-              </label>
-              <label>
-                  <input type="radio" name="diagram-position" value="top"> Top
-              </label>
-              <label>
-                  <input type="radio" name="diagram-position" value="bottom" checked> Bottom
-              </label>
-              <label>
-                <input type="radio" name="diagram-position" value="none"> None
-            </label>
-          </form>
-      </li>
-      <li class="list-group-item list-group-item-heavy">
-        <strong>Chord Placement</strong>
-        <div class="control-panel mt-2">
-            <label for="chord-placement">Select Placement:</label>
-            <select id="chord-placement" class="form-control" onchange="updateChordPlacement(this.value)">
-                <option value="lyrics_only" >Lyrics only - no chords</option>
-                <option value="inline" selected>Inline (Default)</option>
-                <option value="above">Above Lyrics</option>
-                <option value="above_with_diagram">Above Lyrics with Mini Chord Diagram</option>
-            </select>
-        </div>
         
-    </li>
-    <li class="list-group-item list-group-item-heavy">test {{ item.song.metadata.youtube }}
-    </li>
-  </ul>
-</div>
-<div>
-{% if score.metadata.youtube %}
-    <p>YouTube Link: <a href="{{ score.metadata.youtube }}" target="_blank">Watch on YouTube</a></p>
-    <button onclick="playSong('{{ score.metadata.youtube }}')">Play Video</button>
-</div>
+        <button id="update-preview" class="btn btn-primary btn-sm mt-2">
+            🔄 Apply Transposition
+        </button>
+    {% endif %}
 
-<div id="youtube-player-container" style="margin-top: 20px;"></div>
+
+    <hr>
+
+    <!-- 🎨 Edit Song Formatting (Handled Separately) -->
+    {% if site_name == "FrancoUke" %}
+    <h3>🎨 Mise en Forme des Chansons</h3>
+    <p class="text-muted">Ajustez la taille de la police, les couleurs et l’espacement via l’Éditeur de Mise en Forme</p>
+
+    <div class="me-3">
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'francouke_edit_formatting' score.id %}" class="btn btn-warning">
+                Modifier la mise en forme
+            </a>
+        {% else %}
+            {% for group in user.groups.all %}
+                {% if group.name == "Power Users" %}
+                {% if site_name == "FrancoUke" %}
+                {% url 'francouke_edit_formatting' score.id as edit_url %}
+            {% else %}
+                {% url 'strumsphere_edit_formatting' score.id as edit_url %}
+            {% endif %}
+            
+            <p>DEBUG: site_name = {{ site_name }}</p>
+            <p>DEBUG: Generated URL = {{ edit_url }}</p>
+            <a href="{{ edit_url }}" class="btn btn-warning">Modifier la mise en forme</a>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        {% if not user.is_superuser and not "Power Users" in user.groups.all|join:", " %}
+            <p>Veuillez envoyer un message à gaulindm@gmail.com pour demander la permission Power User.</p>
+        {% endif %}
+    </div>
+
 {% else %}
-    <p>No YouTube video available for this song.</p>
+    <h3>🎨 Song Formatting</h3>
+    <p class="text-muted">Adjust font size, colors, and spacing via the Song Formatting Editor</p>
+
+    <div class="me-3">
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'strumsphere_edit_formatting' score.id %}" class="btn btn-warning">
+                Edit Song Formatting
+            </a>
+        {% else %}
+            {% for group in user.groups.all %}
+                {% if group.name == "Power Users" %}
+                    <a href="{% url 'strumsphere_edit_formatting' score.id %}" class="btn btn-warning">
+                        Edit Song Formatting
+                    </a>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        {% if not user.is_superuser and not "Power Users" in user.groups.all|join:", " %}
+            <p>Please send an email to gaulindm@gmail.com to request Power User permission.</p>
+        {% endif %}
+    </div>
 {% endif %}
 
-</div>
 
 
+
+            </div>
+            <!-- 🎥 YouTube Player Section -->
+            {% if site_name == "FrancoUke" %}
+                <div>
+                    {% if score.metadata.youtube %}
+                    <p>Lien YouTube: <a href="{{ score.metadata.youtube }}" target="_blank">Visionner sur YouTube</a></p>
+                </div>
+                
+                <!-- The YouTube player will be embedded here on page load -->
+                <div id="youtube-player-container" style="margin-top: 20px; max-width: 320px; position: relative;"></div>
+                {% else %}
+                    <p>Pas de clip Youtube de la chanson.</p>
+                {% endif %}
+            {% else %}
+                <div>
+                    {% if score.metadata.youtube %}
+                    <p>Lien YouTube: <a href="{{ score.metadata.youtube }}" target="_blank">Visionner sur YouTube</a></p>
+                </div>
+                
+                <!-- The YouTube player will be embedded here on page load -->
+                <div id="youtube-player-container" style="margin-top: 20px; max-width: 320px; position: relative;"></div>
+                {% else %}
+                    <p>No YouTube video available for this song.</p>
+                {% endif %}
+            {% endif %}
+            </div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    let youtubeUrl = "{{ score.metadata.youtube }}";
+
+    if (!youtubeUrl) {
+        console.warn("No YouTube URL found.");
+        return;
+    }
+
+    function extractVideoId(url) {
+        if (url.includes("youtu.be/")) {
+            return url.split("youtu.be/")[1]?.split("?")[0];
+        } else if (url.includes("youtube.com/watch?v=")) {
+            return url.split("v=")[1]?.split("&")[0];
+        } else if (url.includes("youtube.com/embed/")) {
+            return url.split("embed/")[1]?.split("?")[0];
+        }
+        return null;
+    }
+
+    let videoId = extractVideoId(youtubeUrl);
+
+    if (!videoId) {
+        console.error("Invalid YouTube URL");
+        return;
+    }
+
+    let playerContainer = document.getElementById("youtube-player-container");
+    if (playerContainer) {
+        playerContainer.innerHTML = `
+            <iframe width="320" height="180" 
+                    src="https://www.youtube.com/embed/${videoId}" 
+                    title="YouTube video player" frameborder="0" 
+                    style="border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+            </iframe>`;
+        console.log("YouTube player embedded successfully.");
+    } else {
+        console.error("YouTube player container not found.");
+    }
+});
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    let updatePreviewBtn = document.getElementById("update-preview");
+    let transposeSelect = document.getElementById("transpose-select");
+
+    if (updatePreviewBtn && transposeSelect) {
+        updatePreviewBtn.addEventListener("click", function() {
+            let transposeValue = transposeSelect.value;
+            let pdfIframe = document.getElementById("pdf-preview");
+            if (pdfIframe) {
+                pdfIframe.src = `/preview_pdf/{{ score.id }}/?transpose=${transposeValue}`;
+            }
+        });
+    }
+});
+</script>

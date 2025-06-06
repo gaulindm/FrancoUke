@@ -41,8 +41,15 @@
         {% include "partials/_navbar.html" %}
       </header>
       <br><br>
-    <h1>All Chord Diagrams</h1>
-    <h2>Customize View</h2>
+
+      
+        {% if site_name == "FrancoUke" %}
+            <h2>Les diagrammes d'accords</h2>
+        {% else %}
+            <h2>All Chord diagrams</h2>
+        {% endif %}
+    
+
     <form id="instrument-form">
         <label for="instrument-select">Choose an instrument:</label>
         <select id="instrument-select" name="instrument">

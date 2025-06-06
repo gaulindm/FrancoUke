@@ -1,0 +1,11 @@
+<footer class="text-center mt-4 py-3 bg-light border-top">
+    <p>
+        {% if site_name == "FrancoUke" %}
+            Vous cherchez des chansons en anglais? 🎸 
+            <a href="{% url 'strumsphere_songs' %}" class="btn btn-outline-primary btn-sm">Visitez StrumSphere</a>
+        {% else %}
+            Êtes-vous à la recherche de chansons françaises? 🎵  
+            <a href="{% url 'francouke_songs' %}" class="btn btn-outline-success btn-sm">Visitez FrancoUke</a>
+        {% endif %}
+    </p>
+</footer>

@@ -49,13 +49,13 @@ class Command(BaseCommand):
 {{album: }}
 {{youtube:}}
 {{capo: }}
-{{songwriter: }}
+{{composer: }}
+{{lyricist: }}
 {{key: }}
 {{recording: }}
 {{year: }}
 {{1stnote: }}
 {{tempo: }}
-{{youtube: }}
 {{timeSignature: }}"""
 
             # Combine metadata and converted content

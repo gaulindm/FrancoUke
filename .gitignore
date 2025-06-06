@@ -1,0 +1,58 @@
+# 🐍 Python bytecode
+__pycache__/
+*.py[cod]
+*.so
+
+# 🌐 Django stuff
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.mo
+*.pyd
+
+# 🔐 Secret files
+.env
+*.env
+
+# 📦 Virtual environments
+venv/
+env/
+.francoenv/
+.francoenv*/    # Catch any variations
+
+# 🧪 Test DBs / temp files
+db.sqlite3
+*.sqlite3-journal
+*.tmp
+*.swp
+*.swo
+
+# 📂 Editor/project settings
+.vscode/
+.idea/
+*.code-workspace
+
+# 🍏 macOS junk
+.DS_Store
+__MACOSX/
+
+# 💥 Compiled migrations (safe to ignore if you reset often)
+**/__pycache__/
+**/*.pyc
+
+# 🎵 Project-specific junk
+songbook_backup.json
+songbook_mapped.json
+
+# 🔍 Node/npm (if you ever add JS tooling)
+node_modules/
+
+# 🧾 Coverage, linting, debug
+htmlcov/
+coverage.xml
+*.cover
+*.tox
+.pytest_cache/
+.mypy_cache/

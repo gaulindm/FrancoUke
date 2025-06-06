@@ -1,0 +1,22 @@
+{% extends "songbook/base.html" %}
+
+{% block content %}
+<h2>User Preferences</h2>
+<form method="post">
+    {% csrf_token %}
+
+    <label for="id_primary_instrument">Primary Instrument:</label>
+    {{ form.primary_instrument }}
+
+    <label for="id_secondary_instrument">Secondary Instrument (Optional):</label>
+    {{ form.secondary_instrument }}
+
+    <label for="id_is_lefty">Are you left-handed?</label>
+    {{ form.is_lefty }}
+
+    <label for="id_is_printing_alternate_chord">Show Alternate Chords?</label>
+    {{ form.is_printing_alternate_chord }}
+
+    <button type="submit">Save Preferences</button>
+</form>
+{% endblock %}
