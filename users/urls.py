@@ -9,4 +9,5 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),  # ✅ Ensure login has a single path
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('preferences/', user_preferences_view, name='user_preferences'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 ]
