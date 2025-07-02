@@ -50,7 +50,71 @@ def parse_song_data(data):
 
     return song_parts
 
-# Example usage:
-# data = "your song text here"
-# parsed_data = parse_song_data(data)
-# print(parsed_data)
+import re
+
+def parse_chordpro_text(chordpro_text):
+    lines = chordpro_text.splitlines()
+    result = []
+    metadata = {}
+    inside_tab_block = False
+    tab_lines = []
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Handle metadata like {title: Hello}
+        meta_match = re.match(r'{(.*?):\s*(.*)}', stripped)
+        if meta_match and not inside_tab_block:
+            key, value = meta_match.groups()
+            metadata[key.lower()] = value
+            continue
+
+        # TAB BLOCK START
+        if stripped == '{start_of_tab}':
+            inside_tab_block = True
+            tab_lines = []
+            continue
+
+        # TAB BLOCK END
+        if stripped == '{end_of_tab}':
+            inside_tab_block = False
+            result.append({
+                "type": "tab",
+                "lines": tab_lines
+            })
+            continue
+
+        # Inside a tab block
+        if inside_tab_block:
+            tab_lines.append(line)
+            continue
+
+        # Handle regular chord/lyric lines
+        chord_line = ""
+        lyric_line = ""
+        i = 0
+
+        while i < len(line):
+            if line[i] == '[':
+                end = line.find(']', i)
+                if end != -1:
+                    chord = line[i+1:end]
+                    chord_line += chord.ljust(end - i)
+                    lyric_line += ' ' * (end - i + 1)
+                    i = end + 1
+                else:
+                    # malformed chord - skip
+                    i += 1
+            else:
+                chord_line += ' '
+                lyric_line += line[i]
+                i += 1
+
+        if line.strip():
+            result.append({
+                "type": "lyrics_with_chords",
+                "chords": chord_line.rstrip(),
+                "lyrics": lyric_line.rstrip()
+            })
+
+    return metadata, result

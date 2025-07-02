@@ -1,16 +1,20 @@
 from django.contrib import admin
-from .models import Profile
-from .models import UserPreference
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser, UserPreference
 
-admin.site.register(Profile)
+# Inline for preferences
+class UserPreferenceInline(admin.StackedInline):
+    model = UserPreference
+    can_delete = False
+    verbose_name_plural = 'User Preferences'
+    fk_name = 'user'
 
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    inlines = (UserPreferenceInline,)
+    list_display = ('username', 'email', 'is_staff', 'is_superuser')
+    search_fields = ('username', 'email')
 
-
-
-@admin.register(UserPreference)
-class UserPreferencesAdmin(admin.ModelAdmin):
-    list_display = ('user', 'primary_instrument','secondary_instrument', 'is_lefty','is_printing_alternate_chord')
-    list_editable = ('is_lefty', 'is_printing_alternate_chord')
-    search_fields = ('user__username', 'user__email')
-    list_filter = ('primary_instrument','secondary_instrument', 'is_lefty')
-
+# Optional: Clean up this if Profile is unused
+# admin.site.unregister(Profile)  # If previously registered
+# or just don't import it at all

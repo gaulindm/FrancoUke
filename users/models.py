@@ -63,4 +63,5 @@ class UserPreference(models.Model):
 
 
     def __str__(self):
-        return f"{self.instrument} - Lefty: {self.is_lefty}, Alt Chords: {self.is_printing_alternate_chord}"
+        sec = f", Secondary: {self.secondary_instrument}" if self.secondary_instrument else ""
+        return f"{self.primary_instrument}{sec} - Lefty: {self.is_lefty}, Alt Chords: {self.is_printing_alternate_chord}"
