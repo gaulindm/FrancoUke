@@ -100,9 +100,11 @@ def load_chords(instrument):
     file_map = {
         'ukulele': os.path.join(static_dir, 'ukulele_chords.json'),
         'guitar': os.path.join(static_dir, 'guitar_chords.json'),
+        'guitalele': os.path.join(static_dir, 'guitalele_chords.json'),
         'mandolin': os.path.join(static_dir, 'mandolin_chords.json'),
         "banjo": os.path.join(static_dir, "banjo_chords.json"),
         "baritone_ukulele": os.path.join(static_dir, "baritoneUke_chords.json"),
+        
     }
 
     file_path = file_map.get(instrument, file_map['ukulele'])  # Default to ukulele

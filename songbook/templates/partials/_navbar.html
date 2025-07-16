@@ -1,60 +1,62 @@
-{% load static %}  <!-- ✅ Load static files -->
+{% load static %}
+
 <nav class="navbar navbar-expand-md navbar-dark 
   {% if site_name == 'FrancoUke' %} bg-success {% else %} bg-primary {% endif %} fixed-top">
   <div class="container">
 
-    <!-- 🔹 Dynamic Site Branding with Correct URL -->
-    {% if site_name == "FrancoUke" %}
-      <a class="navbar-brand mr-4" href="{% url 'francouke_songs' %}">
-        🎵 Chansonnier FrancoUke
-      </a>
-    {% else %}
-      <a class="navbar-brand mr-4" href="#">
-        🎸 StrumSphere Songbook
-      </a>
-    {% endif %}
+    {% with site_namespace|add:":home" as home_view %}
+    <a class="navbar-brand mr-4" href="{% url home_view %}">
+      🎵 Chansonnier {{ site_name }}
+    </a>
+  {% endwith %}
 
-    <!-- 🔹 Mobile Menu Button -->
+    <!-- 🔹 Mobile Toggle -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
       aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    
-    <!-- 🔹 Navbar Links -->
+
     <div class="collapse navbar-collapse" id="navbarToggle">
       <div class="navbar-nav mr-auto">
-        {% if site_name == "FrancoUke" %}
-          <a class="nav-item nav-link" href="{% url 'francouke_songs' %}">Partitions</a>
-          <a class="nav-item nav-link" href="{% url 'francouke_artist_list' %}">Artistes</a>
-          <a class="nav-item nav-link" href="{% url 'francouke_chord_dictionary' %}">Dictionnaire d'accord</a>
-          <a class="nav-item nav-link" href="{% url 'francouke_about' %}">À propos</a>
-          <a class="nav-item nav-link" href="{% url 'francouke_whats_new' %}">En développement</a>
-        {% else %}
-          <a class="nav-item nav-link" href="#">Songs</a>
-          <a class="nav-item nav-link" href="#">Artists</a>
-          <a class="nav-item nav-link" href="#">Chord Dictionary</a>
-          <a class="nav-item nav-link" href="#">About Us</a>
-          <a class="nav-item nav-link" href="#">Under Development</a>
-        {% endif %}
-        
+        {% with site_namespace|add:":song-list" as songs_url %}
+        <a class="nav-item nav-link" href="{% url songs_url %}">
+          {% if site_name == "FrancoUke" %} Partitions {% else %} Songs {% endif %}
+        </a>
+        {% endwith %}
 
+        {% with site_namespace|add:":artist_list" as artist_url %}
+        <a class="nav-item nav-link" href="{% url artist_url %}">
+          {% if site_name == "FrancoUke" %} Artistes {% else %} Artists {% endif %}
+        </a>
+        {% endwith %}
+
+        {% with site_namespace|add:":chord-dictionary" as chord_url %}
+        <a class="nav-item nav-link" href="{% url chord_url %}">
+          {% if site_name == "FrancoUke" %} Dictionnaire d'accord {% else %} Chord Dictionary {% endif %}
+        </a>
+        {% endwith %}
+
+       
       </div>
 
-<!-- 🔹 User Authentication Section -->
-<div class="navbar-nav ms-auto">
-  {% if user.is_authenticated %}
-      <div class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <!-- 🔹 Auth Section -->
+      <div class="navbar-nav ms-auto">
+        {% if user.is_authenticated %}
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Welcome, {{ user.username }}
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
               <li><a class="dropdown-item" href="#">Name: {{ user.first_name }} {{ user.last_name }}</a></li>
-              
-              {% if site_name == "FrancoUke" %}
-                  <li><a class="dropdown-item" href="{% url 'francouke_song_create' %}">Créer une chanson</a></li>
-              {% else %}
-                  <li><a class="dropdown-item" href="{% url 'strumsphere_song_create' %}">New Song</a></li>
-              {% endif %}
+
+              {% with site_namespace|add:":song-create" as create_url %}
+              <li>
+                <a class="dropdown-item" href="{% url create_url %}">
+                  {% if site_name == "FrancoUke" %} Créer une chanson {% else %} New Song {% endif %}
+                </a>
+              </li>
+              {% endwith %}
+
               <li>
                 <a class="dropdown-item"
                    hx-get="{% url 'users:user_preferences' %}"
@@ -63,27 +65,27 @@
                    User Preferences
                 </a>
               </li>
-              
 
               <li><hr class="dropdown-divider"></li>
               <li>
-                  <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                      Logout
-                  </a>
+                <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                  Logout
+                </a>
               </li>
-          </ul>
+            </ul>
+          </div>
+          <form id="logout-form" action="{% url 'users:logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+          </form>
+        {% else %}
+          <a class="nav-item nav-link" href="{% url 'users:login' %}?site={{ site_name }}"> 
+            {% if site_name == "FrancoUke" %} Connexion {% else %} Login {% endif %}
+          </a>
+          <a class="nav-item nav-link" href="{% url 'users:register' %}?site={{ site_name }}"> 
+            {% if site_name == "FrancoUke" %} S'inscrire {% else %} Sign Up {% endif %}
+          </a>
+        {% endif %}
       </div>
-      <form id="logout-form" action="{% url 'users:logout' %}" method="post" style="display: none;">
-          {% csrf_token %}
-      </form>
-  {% else %}
-  {% if site_name == "FrancoUke" %}
-  <a class="nav-item nav-link" href="{% url 'users:login' %}?site=FrancoUke">Connexion</a>
-  <a class="nav-item nav-link" href="{% url 'users:register' %}?site=FrancoUke">S'inscrire</a>
-{% else %}
-  <a class="nav-item nav-link" href="{% url 'users:login' %}?site=StrumSphere">Login</a>
-  <a class="nav-item nav-link" href="{% url 'users:register' %}?site=StrumSphere">Sign Up</a>
-{% endif %}
-  {% endif %}
-</div>
-
+    </div>
+  </div>
+</nav>

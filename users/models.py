@@ -37,6 +37,7 @@ class UserPreference(models.Model):
         max_length=20,
         choices=[
             ("guitar", "Guitar"),
+            ("guitalele", "Guitalele"),
             ("ukulele", "Ukulele"),
             ("baritone_ukulele", "Baritone Ukulele"),
             ("banjo", "Banjo"),
@@ -48,6 +49,7 @@ class UserPreference(models.Model):
         max_length=20,
         choices=[
             ("guitar", "Guitar"),
+            ("guitalele", "Guitalele"),
             ("ukulele", "Ukulele"),
             ("baritone_ukulele", "Baritone Ukulele"),
             ("banjo", "Banjo"),

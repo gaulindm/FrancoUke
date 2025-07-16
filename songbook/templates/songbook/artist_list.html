@@ -72,31 +72,23 @@
 <div class="letter-nav-container">
     <div class="letter-nav">
         {% for letter in first_letters %}
-            {% if site_name == "FrancoUke" %}
-                <a href="{% url 'francouke_artist_by_letter' letter=letter %}"
-                   class="{% if letter == selected_letter %}active{% endif %}">
-                    {{ letter }}
-                </a>
-            {% else %}
-                <a href="{% url 'strumsphere_artist_by_letter' letter=letter %}"
-                   class="{% if letter == selected_letter %}active{% endif %}">
-                    {{ letter }}
-                </a>
-            {% endif %}
+            <a href="{% url site_namespace|add:':artist_by_letter' letter=letter %}"
+               class="{% if letter == selected_letter %}active{% endif %}">
+                {{ letter }}
+            </a>
         {% endfor %}
     </div>
+    
 
     {% if selected_letter %}
+    <a href="{% url site_namespace|add:':artist_list' %}" class="btn btn-secondary all-artists-btn">
         {% if site_name == "FrancoUke" %}
-            <a href="{% url 'francouke_artist_list' %}" class="btn btn-secondary all-artists-btn">
-                Afficher tous les artistes
-            </a>
+            Afficher tous les artistes
         {% else %}
-            <a href="{% url 'strumsphere_artist_list' %}" class="btn btn-secondary all-artists-btn">
-                Show All Artists
-            </a>
+            Show All Artists
         {% endif %}
-    {% endif %}
+    </a>
+{% endif %}
 </div>
 
 <!-- ✅ Artist List -->
@@ -105,13 +97,13 @@
         <div class="artist-column">
             <ul>
                 {% for artist in column %}
-                    {% if site_name == "FrancoUke" %}
-                        <li><a href="{% url 'francouke_artist_songs' artist_name=artist %}">{{ artist }}</a>
-                        </li>
-                    {% else %}
-                        <li><a href="{% url 'strumsphere_artist_songs' artist_name=artist %}">{{ artist }}</a></li>
-                    {% endif %}
-                {% endfor %}
+                <li>
+                    <a href="{% url site_namespace|add:':artist_songs' artist_name=artist %}">
+                        {{ artist }}
+                    </a>
+                </li>
+            {% endfor %}
+            
             </ul>
         </div>
     {% endfor %}

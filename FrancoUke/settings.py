@@ -48,7 +48,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'songbook.core.middleware.disable_strumsphere.DisableStrumSphereMiddleware',
+#    'songbook.core.middleware.disable_strumsphere.DisableStrumSphereMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -71,6 +71,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'songbook.context_processors.site_namespace',
+
             ],
         },
     },
@@ -153,7 +155,7 @@ CCRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 #Pour desactive la version strumsphere
-ENABLE_STRUMSPHERE = False
+ENABLE_STRUMSPHERE = True
 
 #LOGIN_REDIRECT_URL = 'songbook-home'
 

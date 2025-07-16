@@ -26,7 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Instrument chord data files
     const chordFiles = {
         guitar: "/static/js/guitar_chords.json",
+        
         ukulele: "/static/js/ukulele_chords.json",
+
         baritone_ukulele: "/static/js/baritoneUke_chords.json",
         banjo: "/static/js/banjo_chords.json",
         mandolin: "/static/js/mandolin_chords.json"

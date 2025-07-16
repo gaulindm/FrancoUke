@@ -2,29 +2,29 @@
 
 <div class="content-section">
     {% if user.is_authenticated %}
-    
+
         {% if site_name == "FrancoUke" %}
             <h3>Éditeur de partition</h3>
             <p class="text-muted">Modifier le contenu de la chanson sans modifier l'apparence</p>
-
-            <div class="d-flex gap-2">
-                <a class="btn btn-secondary btn-sm" href="{% url 'francouke_song_update' pk=song.pk %}" title="Modifier le fichier Chordpro">
-                    Modifier les données ChordPro
-                </a>
-
-            </div>    
         {% else %}
             <h3>Song Editor</h3>
             <p class="text-muted">Edit the song's content without changing appearance</p>
-
-            <div class="d-flex gap-2">
-                <a class="btn btn-secondary btn-sm" href="{% url 'strumsphere_song_update' pk=song.pk %}" title="Edit the original ChordPro file">
-                    Modify ChordPro Data
-                </a>
-
-            </div>
         {% endif %}
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-secondary btn-sm" 
+            href="{% url site_namespace|add:':song_update' pk=song.pk %}" 
+            title="{% if site_name == 'FrancoUke' %}Modifier le fichier Chordpro{% else %}Edit the original ChordPro file{% endif %}">
+                {% if site_name == "FrancoUke" %}
+                    Modifier les données ChordPro
+                {% else %}
+                    Modify ChordPro Data
+                {% endif %}
+            </a>
+        </div>
+
     {% endif %}
+
 
     <hr>
 
@@ -85,66 +85,68 @@
     <hr>
 
     <!-- 🎨 Edit Song Formatting (Handled Separately) -->
+
+        <!-- 🎨 Song Formatting Section (Multi-language & Namespace Safe) -->
+<h3>
+    🎨 {% if site_name == "FrancoUke" %}
+      Mise en Forme des Chansons
+    {% else %}
+      Song Formatting
+    {% endif %}
+  </h3>
+  
+  <p class="text-muted">
     {% if site_name == "FrancoUke" %}
-    <h3>🎨 Mise en Forme des Chansons</h3>
-    <p class="text-muted">Ajustez la taille de la police, les couleurs et l’espacement via l’Éditeur de Mise en Forme</p>
-
-    <div class="me-3">
-        {% if user.is_authenticated and user.is_superuser %}
-            <a href="{% url 'francouke_edit_formatting' score.id %}" class="btn btn-warning">
-                Modifier la mise en forme
-            </a>
-        {% else %}
-            {% for group in user.groups.all %}
-                {% if group.name == "Power Users" %}
-                {% if site_name == "FrancoUke" %}
-                {% url 'francouke_edit_formatting' score.id as edit_url %}
+      Ajustez la taille de la police, les couleurs et l’espacement via l’Éditeur de Mise en Forme
+    {% else %}
+      Adjust font size, colors, and spacing via the Song Formatting Editor
+    {% endif %}
+  </p>
+  
+  <div class="me-3">
+    {% if user.is_authenticated %}
+      {% with site_namespace|add:':edit_formatting' as edit_url_name %}
+        {% if user.is_superuser %}
+          <a href="{% url edit_url_name score.id %}" class="btn btn-warning">
+            {% if site_name == "FrancoUke" %}
+              Modifier la mise en forme
             {% else %}
-                {% url 'strumsphere_edit_formatting' score.id as edit_url %}
+              Edit Song Formatting
             {% endif %}
-            
-            <p>DEBUG: site_name = {{ site_name }}</p>
-            <p>DEBUG: Generated URL = {{ edit_url }}</p>
-            <a href="{{ edit_url }}" class="btn btn-warning">Modifier la mise en forme</a>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-        
-        {% if not user.is_superuser and not "Power Users" in user.groups.all|join:", " %}
-            <p>Veuillez envoyer un message à gaulindm@gmail.com pour demander la permission Power User.</p>
-        {% endif %}
-    </div>
-
-{% else %}
-    <h3>🎨 Song Formatting</h3>
-    <p class="text-muted">Adjust font size, colors, and spacing via the Song Formatting Editor</p>
-
-    <div class="me-3">
-        {% if user.is_authenticated and user.is_superuser %}
-            <a href="{% url 'strumsphere_edit_formatting' score.id %}" class="btn btn-warning">
-                Edit Song Formatting
-            </a>
+          </a>
         {% else %}
-            {% for group in user.groups.all %}
-                {% if group.name == "Power Users" %}
-                    <a href="{% url 'strumsphere_edit_formatting' score.id %}" class="btn btn-warning">
-                        Edit Song Formatting
-                    </a>
+          {% for group in user.groups.all %}
+            {% if group.name == "Power Users" %}
+              <a href="{% url edit_url_name score.id %}" class="btn btn-warning">
+                {% if site_name == "FrancoUke" %}
+                  Modifier la mise en forme
+                {% else %}
+                  Edit Song Formatting
                 {% endif %}
-            {% endfor %}
+              </a>
+            {% endif %}
+          {% endfor %}
         {% endif %}
-        
-        {% if not user.is_superuser and not "Power Users" in user.groups.all|join:", " %}
-            <p>Please send an email to gaulindm@gmail.com to request Power User permission.</p>
-        {% endif %}
-    </div>
-{% endif %}
+      {% endwith %}
+  
+      {% if not user.is_superuser and not user.groups.all|dictsort:"name"|join:", "%}
+        <p>
+          {% if site_name == "FrancoUke" %}
+            Veuillez envoyer un message à gaulindm@gmail.com pour demander la permission Power User.
+          {% else %}
+            Please send an email to gaulindm@gmail.com to request Power User permission.
+          {% endif %}
+        </p>
+      {% endif %}
+    {% endif %}
+  </div>
+  
 
 
 
 
-            </div>
-            <!-- 🎥 YouTube Player Section -->
+
+    <!-- 🎥 YouTube Player Section -->
             {% if site_name == "FrancoUke" %}
                 <div>
                     {% if score.metadata.youtube %}

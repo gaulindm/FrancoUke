@@ -295,6 +295,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
     selected_directive_map = directive_map.get(site_name, directive_map["StrumSphere"])
 
     for group in lyrics_with_chords:
+        
         for item in group:
             if "directive" in item:
                 directive = item["directive"].lower()

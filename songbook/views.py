@@ -70,9 +70,9 @@ def edit_song_formatting(request, song_id, site_name=None):
 
             # 🔹 Redirect back to the correct ScoreView after formatting update
             if site_name == "FrancoUke":
-                return redirect("francouke_score", pk=song_id)
+                return redirect("francouke:score-view", pk=song_id)
             else:
-                return redirect("strumsphere_score", pk=song_id)
+                return redirect("strumsphere:score-view", pk=song_id)
     else:
         form = SongFormattingForm(instance=formatting)
 
@@ -250,7 +250,7 @@ from django.shortcuts import render
 
 def chord_dictionary(request, site_name="FrancoUke"):
     """Load chord data and adapt for FrancoUke or StrumSphere."""
-    instruments = ["ukulele", "guitar", "mandolin", "banjo", "baritone_ukulele"]
+    instruments = ["ukulele", "guitar", "guitalele", "mandolin", "banjo", "baritone_ukulele"]
     chord_data = {instrument: load_chords(instrument) for instrument in instruments}
 
     return render(
@@ -264,108 +264,16 @@ def chord_dictionary(request, site_name="FrancoUke"):
 def home(request, site_name):
     return render(request, 'index.html', {'site_name': site_name})
 
-class SongListView(ListView):
-    model = Song
-    template_name = 'songbook/song_list.html'
-    context_object_name = 'songs'
-    ordering = ['songTitle']
-    paginate_by = 25
+from django.views.generic import ListView
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.db.models import Q
+from taggit.models import Tag
 
-    def dispatch(self, request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                return render(request, "users/auth_modal.html", {"next_url": request.path})
-            return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        """Filter songs based on search query, tag, and site_name."""
-        queryset = super().get_queryset()
-
-        # 🔹 Determine site name from URL
-        site_name = self.kwargs.get('site_name')  # Should be passed in `urls.py`
-        if site_name:
-            queryset = queryset.filter(site_name=site_name)
-
-        # ✅ Apply filter for formatted songs
-        if self.request.GET.get("formatted") == "1":
-            queryset = queryset.filter(songformatting__isnull=False)  # ✅ Check if formatting exists
+from songbook.models import Song, SongFormatting
+from songbook.utils.transposer import extract_chords
 
 
-
-        # Apply additional filters
-        search_query = self.request.GET.get('q', '')  # Search query
-        selected_tag = self.request.GET.get('tag', '')  # Selected tag
-        artist_name = self.kwargs.get('artist_name')  # Get artist from URL
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(songTitle__icontains=search_query) |
-                Q(metadata__artist__icontains=search_query) |
-                Q(metadata__songwriter__icontains=search_query)
-            )
-
-        if selected_tag:
-            queryset = queryset.filter(tags__name=selected_tag)
-
-        if artist_name:
-            queryset = queryset.filter(metadata__artist__iexact=artist_name)
-
-        return queryset
-
-
-    def post(self, request, *args, **kwargs):
-        tag_id = request.POST.get('tag')
-        if tag_id:
-            return redirect(reverse('generate_titles_pdf') + f'?tag={tag_id}')
-        return self.get(request, *args, **kwargs)
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # 🔹 Ensure site_name is passed to the template
-        site_name = self.kwargs.get('site_name', 'FrancoUke')
-        context['site_name'] = site_name
-
-        context['selected_artist'] = self.kwargs.get('artist_name')
-        search_query = self.request.GET.get('q', '')
-        selected_tag = self.request.GET.get('tag', '')
-
-        # 🔹 Get filtered songs based on site
-        site_songs = Song.objects.filter(site_name=site_name)
-
-        # 🔹 Extract only the relevant tags for the current site
-        all_tags = Tag.objects.filter(song__in=site_songs).distinct().values_list('name', flat=True)
-
-        # ✅ Filtering by formatted/unformatted songs
-        show_formatted = self.request.GET.get('formatted') == 'true'  # Check filter parameter
-        show_unformatted = self.request.GET.get('formatted') == 'false'
-
-
-
-        song_data = []
-        for song in context['songs']:
-            parsed_data = song.lyrics_with_chords or ""
-            chords = extract_chords(parsed_data, unique=True) if parsed_data else []
-            tags = [tag.name for tag in song.tags.all()]
-
-            # ✅ Check if the song has been formatted
-            is_formatted = SongFormatting.objects.filter(song=song).exists()
-
-            song_data.append({
-                'song': song,
-                'chords': ', '.join(chords),
-                'tags': ', '.join(tags),
-                'is_formatted': is_formatted,
-            })
-
-
-
-        context['song_data'] = song_data
-        context['search_query'] = search_query
-        context['selected_tag'] = selected_tag
-        context['all_tags'] = all_tags  # ✅ Pass the filtered tags only
-
-        return context
 
 
 class UserSongListView(ListView):
@@ -415,6 +323,81 @@ class ScoreView(LoginRequiredMixin, DetailView):
         return context  # ✅ Return context at the end
 
 
+class SongListView(ListView):
+    model = Song
+    template_name = 'songbook/song_list.html'
+    context_object_name = 'songs'
+    ordering = ['songTitle']
+    paginate_by = 25
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return render(request, "users/auth_modal.html", {"next_url": request.path})
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_site_name(self):
+        return "FrancoUke" if self.request.resolver_match.namespace == "francouke" else "StrumSphere"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        site_name = self.get_site_name()
+        queryset = queryset.filter(site_name=site_name)
+
+        # Filters
+        if self.request.GET.get("formatted") == "1":
+            queryset = queryset.filter(songformatting__isnull=False)
+
+        search_query = self.request.GET.get('q', '')
+        selected_tag = self.request.GET.get('tag', '')
+        artist_name = self.kwargs.get('artist_name')
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(songTitle__icontains=search_query) |
+                Q(metadata__artist__icontains=search_query) |
+                Q(metadata__songwriter__icontains=search_query)
+            )
+
+        if selected_tag:
+            queryset = queryset.filter(tags__name=selected_tag)
+
+        if artist_name:
+            queryset = queryset.filter(metadata__artist__iexact=artist_name)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        site_name = self.get_site_name()
+        context['site_name'] = site_name
+        context['selected_artist'] = self.kwargs.get('artist_name')
+        context['search_query'] = self.request.GET.get('q', '')
+        context['selected_tag'] = self.request.GET.get('tag', '')
+
+        # Tags for the current site
+        site_songs = Song.objects.filter(site_name=site_name)
+        all_tags = Tag.objects.filter(song__in=site_songs).distinct().values_list('name', flat=True)
+        context['all_tags'] = all_tags
+
+        # Song parsing
+        song_data = []
+        for song in context['songs']:
+            parsed_data = song.lyrics_with_chords or ""
+            chords = extract_chords(parsed_data, unique=True) if parsed_data else []
+            tags = [tag.name for tag in song.tags.all()]
+            is_formatted = SongFormatting.objects.filter(song=song).exists()
+
+            song_data.append({
+                'song': song,
+                'chords': ', '.join(chords),
+                'tags': ', '.join(tags),
+                'is_formatted': is_formatted,
+            })
+
+        context['song_data'] = song_data
+        return context
 
 
 class SongCreateView(LoginRequiredMixin, CreateView):
@@ -440,10 +423,9 @@ class SongCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         """Redirect to the correct song list based on the site edition."""
         site_name = self.kwargs.get('site_name', 'FrancoUke')
-        if site_name == "FrancoUke":
-            return reverse('francouke_songs')
-        else:
-            return reverse('strumsphere_songs')
+        
+        return reverse(f"{site_name.lower()}:song-list")
+
 
 
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -453,10 +435,9 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         """Ensure the user is redirected to the correct site after updating."""
         site_name = self.kwargs.get('site_name', 'FrancoUke')  # Default to FrancoUke if missing
-        if site_name == "FrancoUke":
-            return reverse('francouke_score', kwargs={'pk': self.object.pk})
-        else:
-            return reverse('strumsphere_score', kwargs={'pk': self.object.pk})
+        
+        return reverse(f"{site_name.lower()}:score-view", kwargs={'pk': self.object.pk})
+
 
     def form_valid(self, form):
         """Ensure song updates respect Dual Edition logic."""
