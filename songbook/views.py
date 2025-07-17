@@ -17,6 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from collections import defaultdict
+from django.core.exceptions import PermissionDenied
 
 # Import project-specific modules
 from .models import Song, SongFormatting
@@ -427,25 +428,22 @@ class SongCreateView(LoginRequiredMixin, CreateView):
         return reverse(f"{site_name.lower()}:song-list")
 
 
-
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Song
     fields = ['songTitle', 'songChordPro', 'lyrics_with_chords', 'metadata', 'tags', 'acknowledgement']
 
     def get_success_url(self):
-        """Ensure the user is redirected to the correct site after updating."""
-        site_name = self.kwargs.get('site_name', 'FrancoUke')  # Default to FrancoUke if missing
-        
+        # ✅ Redirect using the song's real site_name, not the one from the URL
+        site_name = self.object.site_name or 'FrancoUke'
         return reverse(f"{site_name.lower()}:score-view", kwargs={'pk': self.object.pk})
 
 
     def form_valid(self, form):
-        """Ensure song updates respect Dual Edition logic."""
-        form.instance.contributor = self.request.user  # Assign contributor
+        form.instance.contributor = self.request.user  # Still set contributor
 
-        # 🔹 Ensure song stays in the correct site
-        site_name = self.kwargs.get('site_name', 'FrancoUke')
-        form.instance.site_name = site_name
+        # ❌ Do NOT reassign site_name during updates
+        # site_name = self.kwargs.get('site_name', 'FrancoUke')
+        # form.instance.site_name = site_name
 
         # 🔹 Parse ChordPro data
         raw_lyrics = form.cleaned_data['songChordPro']
@@ -458,30 +456,19 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         form.instance.lyrics_with_chords = parsed_lyrics
         return super().form_valid(form)
 
+
     def test_func(self):
         return self.request.user.is_authenticated
 
     def get_object(self, queryset=None):
-        """Ensure song updates are restricted to the correct site."""
-        song = super().get_object(queryset)
-        site_name = self.kwargs.get('site_name', 'FrancoUke')
-
-        # 🔹 Prevent users from updating a song from the wrong site
-        if song.site_name != site_name:
-            raise PermissionDenied("You cannot edit songs from another site.")
-
-        return song
+        """No longer restrict song updates based on site name."""
+        return super().get_object(queryset)
 
     def get_context_data(self, **kwargs):
-        """Ensure `site_name` is available in the template."""
         context = super().get_context_data(**kwargs)
-
-        # 🔹 Extract `site_name` from the URL parameters
-        site_name = self.kwargs.get('site_name', 'FrancoUke')  # Default to FrancoUke
-        context['site_name'] = site_name  # ✅ Add `site_name` to the template context
-
-        print(f"DEBUG: site_name in SongUpdateView = {site_name}")  # ✅ Print site_name in console
-
+        site_name = self.kwargs.get('site_name', 'FrancoUke')
+        context['site_name'] = site_name
+        print(f"DEBUG: site_name in SongUpdateView = {site_name}")
         return context
 
 

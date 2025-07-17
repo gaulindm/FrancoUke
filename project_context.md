@@ -107,6 +107,23 @@ Significant improvements were made to user authentication and recovery:
 
 
 
+### July 16 : Major update
+
+Site Routing Strategy
+We implemented namespaced URLs for each edition:
+
+Namespace	    Path Prefix	    Purpose
+francouke	    /FrancoUke/	    French song edition
+strumsphere	  /StrumSphere/	  English song edition
+
+# FrancoUke/urls.py
+path("FrancoUke/", include(("songbook.urls", "songbook"), namespace="francouke")),
+path("StrumSphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
+Each version of the site uses the same songbook app, but templates and views adapt based on the active site_name.
+
+## July 14:
+Added chord definition and support for guitalele
+
 
 ## Affichage des accords amélioré dans les paroles hyphénées (mai 2025)
 

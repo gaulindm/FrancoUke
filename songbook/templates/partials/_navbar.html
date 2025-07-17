@@ -4,9 +4,15 @@
   {% if site_name == 'FrancoUke' %} bg-success {% else %} bg-primary {% endif %} fixed-top">
   <div class="container">
 
-    {% with site_namespace|add:":home" as home_view %}
+  {% with site_namespace|add:":home" as home_view %}
     <a class="navbar-brand mr-4" href="{% url home_view %}">
-      🎵 Chansonnier {{ site_name }}
+      {% if site_name == "FrancoUke" %}
+        🎵 Chansonnier FrancoUke
+      {% elif site_name == "StrumSphere" %}
+        🎵 StrumSphere Songbook
+      {% else %}
+        🎵 Songbook
+      {% endif %}
     </a>
   {% endwith %}
 
