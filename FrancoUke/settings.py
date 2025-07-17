@@ -44,11 +44,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'taggit',
+    'django.contrib.sites'
+    
 
 ]
 
+SITE_ID = 1
+
 MIDDLEWARE = [
-#    'songbook.core.middleware.disable_strumsphere.DisableStrumSphereMiddleware',
+    'FrancoUke.core.middleware.path_based_site.PathBasedSiteMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

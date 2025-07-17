@@ -61,20 +61,48 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
+## Multi-site Editing Logic Update (2025-07-16)
 
-### Temporarily disabled StrumSphere
-The StrumSphere site routes have been temporarily disabled to prioritize and promote the FrancoUke experience. This change is fully reversible and has been implemented without removing core logic.
+### Summary
+We have removed the previous restriction that prevented editing songs across site namespaces (e.g., FrancoUke vs. StrumSphere).
 
-Implementation Details:
-- A custom middleware (DisableStrumSphereMiddleware) was added at songbook/core/middleware/disable_strumsphere.py.
-- All requests starting with /StrumSphere/ now return a custom 403 Forbidden page using the strumsphere_disabled.html template.
-- Existing logic, models, and view functions remain intact for future reactivation.
-- Template located at songbook/templates/songbook/strumsphere_disabled.html.
+### Changes:
+- Songs can now be edited regardless of `site_name` in the URL.
+- The `site_name` value on the `Song` model is preserved on save (it is no longer overwritten).
+- Redirects after song update now use the actual `Song.site_name`, ensuring correct namespace.
+- Navbar now dynamically shows:
+  - "Chansonnier FrancoUke" for FrancoUke
+  - "StrumSphere Songbook" for StrumSphere
 
-Reactivation Guide:
-- Remove or comment out the middleware reference in MIDDLEWARE inside settings.py.
-- Optionally adjust routing or toggle logic for staged reintroduction. 
-- Ref: Disabling Strumsphere on francouke@gmail.com account of chatgpt
+### Rationale:
+We needed editorial flexibility across sites while preserving content ownership and context integrity.
+
+### Next Steps:
+- Consider adding a context processor for global `site_name`
+- Monitor for accidental cross-site edits in logs (optional)
+
+🎉 This update simplifies UX and improves cross-site workflow dramatically.
+
+
+
+### July 16 : Major update
+
+Site Routing Strategy
+We implemented namespaced URLs for each edition:
+
+Namespace	    Path Prefix	    Purpose
+francouke	    /FrancoUke/	    French song edition
+strumsphere	  /StrumSphere/	  English song edition
+
+# FrancoUke/urls.py
+path("FrancoUke/", include(("songbook.urls", "songbook"), namespace="francouke")),
+path("StrumSphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
+Each version of the site uses the same songbook app, but templates and views adapt based on the active site_name.
+
+## July 14:
+Added chord definition and support for guitalele
+
+
 
 ### User Authentication Enhancements (June 2025)
 Significant improvements were made to user authentication and recovery:
@@ -107,22 +135,6 @@ Significant improvements were made to user authentication and recovery:
 
 
 
-### July 16 : Major update
-
-Site Routing Strategy
-We implemented namespaced URLs for each edition:
-
-Namespace	    Path Prefix	    Purpose
-francouke	    /FrancoUke/	    French song edition
-strumsphere	  /StrumSphere/	  English song edition
-
-# FrancoUke/urls.py
-path("FrancoUke/", include(("songbook.urls", "songbook"), namespace="francouke")),
-path("StrumSphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
-Each version of the site uses the same songbook app, but templates and views adapt based on the active site_name.
-
-## July 14:
-Added chord definition and support for guitalele
 
 
 ## Affichage des accords amélioré dans les paroles hyphénées (mai 2025)
