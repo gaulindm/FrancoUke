@@ -55,6 +55,7 @@ urlpatterns = [
 
     # 🔹 PDF Generation
     path('preview_pdf/<int:song_id>/', preview_pdf, name='preview_pdf'),
+
     path('generate-song-pdf/<int:song_id>/', views.generate_single_song_pdf, name='generate_single_song_pdf'),
     path('generate_multi_song_pdf/', views.generate_multi_song_pdf, name='generate_multi_song_pdf'),
 

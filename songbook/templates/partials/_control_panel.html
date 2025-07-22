@@ -225,8 +225,9 @@ document.addEventListener("DOMContentLoaded", function() {
             let transposeValue = transposeSelect.value;
             let pdfIframe = document.getElementById("pdf-preview");
             if (pdfIframe) {
-                pdfIframe.src = `/preview_pdf/{{ score.id }}/?transpose=${transposeValue}`;
-            }
+              let url = new URL(pdfIframe.src);
+              url.searchParams.set("transpose", transposeValue);
+              pdfIframe.src = url.toString();            }
         });
     }
 });

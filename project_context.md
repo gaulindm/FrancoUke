@@ -83,6 +83,16 @@ We needed editorial flexibility across sites while preserving content ownership 
 
 🎉 This update simplifies UX and improves cross-site workflow dramatically.
 
+### July 22 : Fixed transposition:
+Fix: Song transposition preview now respects site namespace (FrancoUke, StrumSphere).
+
+Issue: Applying transposition reset the iframe source to a path missing the namespace, causing a 404
+
+Fix: Updated JS in _control_panel.html to dynamically update only the query params of the iframe URL using URL.searchParams
+
+Result: Transposition preview now works consistently across both site contexts
+
+
 
 
 ### July 16 : Major update

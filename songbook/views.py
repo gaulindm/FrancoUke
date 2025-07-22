@@ -23,7 +23,7 @@ from django.core.exceptions import PermissionDenied
 from .models import Song, SongFormatting
 from .forms import SongForm, TagFilterForm, SongFormattingForm
 from .parsers import parse_song_data
-from .utils.transposer import extract_chords, transpose_lyrics
+from songbook.utils.transposer import extract_chords, transpose_lyrics
 from songbook.utils.pdf_generator import generate_songs_pdf, load_chords
 from songbook.utils.ABC2audio import convert_abc_to_audio
 from users.models import UserPreference
@@ -161,6 +161,14 @@ class ArtistListView(LoginRequiredMixin, ListView):
 
         return context
 
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from .models import Song
+from songbook.utils.transposer import transpose_chord # <- assuming this exists
+
+from django.http import HttpResponse
+
+
 def preview_pdf(request, song_id):
     """Generate a transposed PDF with user-defined font sizes stored in JSON fields."""
     song = get_object_or_404(Song, pk=song_id)
@@ -193,6 +201,7 @@ def preview_pdf(request, song_id):
 
     generate_songs_pdf(response, [song], user, 0, None, site_name=site_name)
     return response
+
 
 
 
