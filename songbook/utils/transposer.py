@@ -1,6 +1,11 @@
 # transposer.py
 from collections import Counter
 import re
+
+CHORD_REGEX = re.compile(r"\[([A-G][#b]?[^/\]\s]*)\]")  # you may already have this!
+
+
+
 def detect_key(parsed_data):
     key_chords = {
         'C': ['C', 'Dm', 'Em', 'F', 'G', 'Am'],
@@ -27,6 +32,14 @@ def detect_key(parsed_data):
     detected_key = max(key_scores, key=key_scores.get)
 
     return detected_key
+
+def transpose_chord_line(line, semitones):
+    return CHORD_REGEX.sub(lambda match: f"[{transpose_chord(match.group(1), semitones)}]", line)
+
+def transpose_chordpro(text, semitones):
+    lines = text.splitlines()
+    return "\n".join(transpose_chord_line(line, semitones) for line in lines)
+
 
 def clean_chord(chord):
     """Removes strumming indicators (slashes) from chords."""

@@ -9,6 +9,8 @@ from .parsers import parse_song_data  # Import the parse_song_data function
 from .utils.transposer import detect_key
 from taggit.managers import TaggableManager
 from django.conf import settings
+from django.utils import timezone
+from .parsers import parse_song_data  # adjust as per your structure
 
 class Song(models.Model):
     SITE_CHOICES = [
@@ -27,6 +29,7 @@ class Song(models.Model):
     acknowledgement = models.CharField(max_length=100, blank=True, null=True)
     site_name = models.CharField(max_length=20, choices=SITE_CHOICES, default='FrancoUke')  # NEW FIELD
 
+
     def save(self, *args, **kwargs):
         # Check if the song exists and retrieve old data
         if self.pk:
@@ -34,17 +37,24 @@ class Song(models.Model):
             if old_song.songChordPro != self.songChordPro:
                 self.date_posted = timezone.now().date()  # Update date_posted when content changes
 
-        # Only parse title if songTitle is not manually set
-        if not self.songTitle:
-            self.songTitle, self.metadata = self.parse_metadata_from_chordpro()
-        else:
-            # Only update metadata
-            _, self.metadata = self.parse_metadata_from_chordpro()
+        # Only run metadata + lyrics parsing if songChordPro is valid
+        if self.songChordPro:
+            # Only parse title if songTitle is not manually set
+            if not self.songTitle:
+                self.songTitle, self.metadata = self.parse_metadata_from_chordpro()
+            else:
+                # Only update metadata
+                _, self.metadata = self.parse_metadata_from_chordpro()
 
-        # Parse the songChordPro content of the song
-        self.lyrics_with_chords = parse_song_data(self.songChordPro)
+            # Parse the songChordPro content of the song
+            self.lyrics_with_chords = parse_song_data(self.songChordPro)
+        else:
+            # Failsafe: Clear metadata and lyrics if songChordPro is missing
+            self.metadata = {}
+            self.lyrics_with_chords = []
 
         super().save(*args, **kwargs)
+
 
     def parse_metadata_from_chordpro(self):
         tags = {
@@ -71,7 +81,7 @@ class Song(models.Model):
         return f"{self.songTitle} ({self.site_name})" if self.songTitle else f"Untitled Song ({self.site_name})"
 
     def get_absolute_url(self):
-        return reverse('score', kwargs={'pk': self.pk})
+        return reverse("songbook:score-view", kwargs={"pk": self.pk})
 
     def get_used_chords(self):
         def flatten_lyrics(lyrics):

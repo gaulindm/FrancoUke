@@ -1,0 +1,25 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block object-tools %}
+  {{ block.super }}
+
+  {% if original %}
+    <div class="object-tools" style="margin-top: 10px;">
+      <form method="post"
+            action="{% url 'admin:songbook_song_transpose' original.pk -1 %}"
+            style="display:inline;">
+        {% csrf_token %}
+        <input type="submit" value="Transpose ↓ 1 semitone" class="button" style="margin-right: 5px;">
+      </form>
+
+      <form method="post"
+            action="{% url 'admin:songbook_song_transpose' original.pk 1 %}"
+            style="display:inline;">
+        {% csrf_token %}
+        <input type="submit" value="Transpose ↑ 1 semitone" class="button">
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}
+

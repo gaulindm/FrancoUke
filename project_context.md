@@ -61,27 +61,14 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
-## Multi-site Editing Logic Update (2025-07-16)
 
-### Summary
-We have removed the previous restriction that prevented editing songs across site namespaces (e.g., FrancoUke vs. StrumSphere).
 
-### Changes:
-- Songs can now be edited regardless of `site_name` in the URL.
-- The `site_name` value on the `Song` model is preserved on save (it is no longer overwritten).
-- Redirects after song update now use the actual `Song.site_name`, ensuring correct namespace.
-- Navbar now dynamically shows:
-  - "Chansonnier FrancoUke" for FrancoUke
-  - "StrumSphere Songbook" for StrumSphere
 
-### Rationale:
-We needed editorial flexibility across sites while preserving content ownership and context integrity.
+### July 23 : Added permanent transpose button to admin panel
+- Admins can transpose by 1 semitone up or down from Chang Song admin form
+- Admins can also transpose by 1 semitone up or down in bulk in song list
 
-### Next Steps:
-- Consider adding a context processor for global `site_name`
-- Monitor for accidental cross-site edits in logs (optional)
 
-🎉 This update simplifies UX and improves cross-site workflow dramatically.
 
 ### July 22 : Fixed transposition:
 Fix: Song transposition preview now respects site namespace (FrancoUke, StrumSphere).
@@ -108,6 +95,29 @@ strumsphere	  /StrumSphere/	  English song edition
 path("FrancoUke/", include(("songbook.urls", "songbook"), namespace="francouke")),
 path("StrumSphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
 Each version of the site uses the same songbook app, but templates and views adapt based on the active site_name.
+
+## Multi-site Editing Logic Update (2025-07-16)
+
+### Summary
+We have removed the previous restriction that prevented editing songs across site namespaces (e.g., FrancoUke vs. StrumSphere).
+
+### Changes:
+- Songs can now be edited regardless of `site_name` in the URL.
+- The `site_name` value on the `Song` model is preserved on save (it is no longer overwritten).
+- Redirects after song update now use the actual `Song.site_name`, ensuring correct namespace.
+- Navbar now dynamically shows:
+  - "Chansonnier FrancoUke" for FrancoUke
+  - "StrumSphere Songbook" for StrumSphere
+
+### Rationale:
+We needed editorial flexibility across sites while preserving content ownership and context integrity.
+
+### Next Steps:
+- Consider adding a context processor for global `site_name`
+- Monitor for accidental cross-site edits in logs (optional)
+
+🎉 This update simplifies UX and improves cross-site workflow dramatically.
+
 
 ## July 14:
 Added chord definition and support for guitalele
