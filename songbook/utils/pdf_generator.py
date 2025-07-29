@@ -102,8 +102,8 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     doc.relevant_chords = relevant_chords
     doc.instrument = user_prefs["primary_instrument"]
     doc.secondary_instrument = user_prefs["secondary_instrument"]
-    doc.chord_spacing = 50 if user_prefs["primary_instrument"] == "ukulele" else 70
-    doc.row_spacing = 72
+    doc.chord_spacing = 45 if user_prefs["primary_instrument"] == "ukulele" else 60
+    doc.row_spacing = 70
     doc.is_lefty = user_prefs["is_lefty"]
     doc.is_printing_alternate_chord = user_prefs["is_printing_alternate_chord"]
     doc.acknowledgement = songs[0].acknowledgement if hasattr(songs[0], 'acknowledgement') else ""

@@ -74,9 +74,10 @@ body {
   
   .table-condensed td,
   .table-condensed th {
-      padding: 5px; /* Adjust padding for compact rows */
-      line-height: 1.2; /* Tighten the line spacing */
+      padding: 1px; /* Adjust padding for compact rows */
+      line-height: 1.0; /* Tighten the line spacing */
       font-size: 0.9rem; /* Optionally reduce font size */
+      vertical-align: middle; /* Ensures vertical centering */
   }
 
 
@@ -126,6 +127,11 @@ body {
   padding: 10px;
   max-width: 800px;
   margin: 10px auto;
+}
+
+.btn-compact {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .lyrics-container {

@@ -1,3 +1,25 @@
+/* 🔹 FrancoUke Theme */
+.francouke-theme {
+    background-color: #f7e1d7;  /* Light beige */
+    color: #4b2e83;  /* Dark purple */
+}
+
+.francouke-theme h1 {
+    font-family: 'Cursive', sans-serif;
+    color: #7b3f00; /* Warm brown */
+}
+
+/* 🔹 StrumSphere Theme */
+.strumsphere-theme {
+    background-color: #e0f7fa;  /* Light cyan */
+    color: #00796b;  /* Teal */
+}
+
+.strumsphere-theme h1 {
+    font-family: 'Arial', sans-serif;
+    color: #004d40; /* Dark green */
+}
+
 /* General Styling */
 body {
     font-family: Arial, sans-serif;
@@ -229,7 +251,7 @@ input:checked + .slider:before {
     display: inline-flex; /* Align chords and lyrics tightly */
     flex-wrap: wrap; /* Allow wrapping if content exceeds container width */
     align-items: baseline; /* Align chords with lyrics */
-    gap: 2px; /* Small spacing between elements */
+    gap: 0px; /* Small spacing between elements */
 }
 
 .chords-inline .chord {
@@ -264,13 +286,13 @@ input:checked + .slider:before {
 /* General Chord Styling */
 .chord {
     display: inline-block;
-    margin-right: 5px; /* Spacing for inline chords */
+    margin-right: -1px; /* Spacing for inline chords */
     font-weight: bold;
 }
 
 .lyric {
     display: inline-block;
-    margin-right: 2px; /* Minimal spacing */
+    margin-right: -1px; /* Minimal spacing */
 }
 
 
@@ -301,12 +323,14 @@ input:checked + .slider:before {
 
 .chord {
     display: inline-block;
-    margin-right: 8px; /* Spacing between chords */
+    margin-left: 0px;
+    margin-right: 0px; /* Spacing between chords */
 }
 
 .lyric {
     display: inline-block;
-    margin-right: 2px; /* Adjust as needed */
+    margin-right: 0px; /* Adjust as needed */
+    margin-left: 0px;
 }
 
 @media print {

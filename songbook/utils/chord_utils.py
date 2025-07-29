@@ -8,20 +8,30 @@ from reportlab.platypus import Table, TableStyle, Spacer, Flowable
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 
+
+
+
+from reportlab.platypus import Flowable
+
 class ChordDiagram(Flowable):
     def __init__(self, chord_name, variation, scale=0.5, is_lefty=False):
         super().__init__()
         self.chord_name = chord_name
-        self.variation = variation  # e.g., [0, 0, 0, 3]
+        self.variation = normalize_variation(variation)
         self.scale = scale
-        self.is_lefty = is_lefty  # New parameter to handle left-handed diagrams
+        self.is_lefty = is_lefty  # not used yet; we can add mirroring later if you want
 
     def draw(self):
-        string_spacing = 15 * self.scale
-        fret_spacing = 15 * self.scale
-        num_frets = 5
-        num_strings = len(self.variation)
+        self.canv.saveState()
+        self.canv.scale(self.scale, self.scale)
+        # Draw at (0, 0); draw_footer already translates to correct spot
+        draw_chord_diagram(self.canv, 0, 0, self.variation, self.chord_name)
+        self.canv.restoreState()
 
+
+
+
+'''
         # Detect if the chord needs an offset (all non-open frets above the 3rd fret)
         non_open_frets = [fret for fret in self.variation if fret > 0]
         min_fret = min(non_open_frets, default=0)  # Use default=0 if no valid frets
@@ -85,37 +95,38 @@ class ChordDiagram(Flowable):
                 y = max_height + 5  # Position above the first fret
                 self.canv.circle(x, y, 4 * self.scale, fill=1)
 
-
+'''
 
 def load_chords(instrument):
     """
     Load chord definitions based on the selected instrument.
     """
-    # Dynamically locate the directory where chord files are stored
-    #base_dir = os.path.dirname(os.path.abspath(__file__))  # Current file's directory
-    #chord_files_dir = os.path.join(base_dir, '..', 'chord_definitions')  # Adjust path
-    static_dir = os.path.join(settings.BASE_DIR, 'static', 'js')  # Adjust path for static location
-
-
+    static_dir = os.path.join(settings.BASE_DIR, 'static', 'js')
     file_map = {
-        'ukulele': os.path.join(static_dir, 'ukulele_chords.json'),
-        'guitar': os.path.join(static_dir, 'guitar_chords.json'),
-        'guitalele': os.path.join(static_dir, 'guitalele_chords.json'),
-        'mandolin': os.path.join(static_dir, 'mandolin_chords.json'),
-        "banjo": os.path.join(static_dir, "banjo_chords.json"),
-        "baritone_ukulele": os.path.join(static_dir, "baritoneUke_chords.json"),
-        
+        'ukulele': os.path.join(static_dir, 'ukulele_chords_backend.json'),
+        'guitar': os.path.join(static_dir, 'guitar_chords_backend.json'),
+        'guitalele': os.path.join(static_dir, 'guitalele_chords_backend.json'),
+        'mandolin': os.path.join(static_dir, 'mandolin_chords_backend.json'),
+        "banjo": os.path.join(static_dir, "banjo_chords_backend.json"),
+        "baritone_ukulele": os.path.join(static_dir, "baritoneUke_chords_backend.json"),
     }
 
-    file_path = file_map.get(instrument, file_map['ukulele'])  # Default to ukulele
+    file_path = file_map.get(instrument, file_map['ukulele'])
+    print(f"DEBUG: Loading chords for instrument '{instrument}' from {file_path}")
+
     try:
-        with open(file_path, 'r') as file:
-            return json.load(file)
+        with open(file_path, 'r', encoding='utf-8') as file:
+            chords = json.load(file)
+            print(f"DEBUG: Loaded {len(chords)} chords for {instrument}")
+            # Ensure instrument field exists
+            for chord in chords:
+                chord["instrument"] = instrument
+            return chords
     except FileNotFoundError:
-        #print(f"Error: Chord file not found for {instrument}")
+        print(f"ERROR: Chord file not found for {instrument} at {file_path}")
         return []
     except json.JSONDecodeError as e:
-        #print(f"Error: Invalid JSON format in {file_path}: {e}")
+        print(f"ERROR: Invalid JSON format in {file_path}: {e}")
         return []
     
 def extract_used_chords(lyrics_with_chords):
@@ -150,23 +161,22 @@ def extract_used_chords(lyrics_with_chords):
     # Return the chords as a sorted list
     return sorted(chords)
 
+
 def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing, 
                  is_lefty, instrument="ukulele", secondary_instrument=None,
                  is_printing_alternate_chord=False, acknowledgement='',
                  rows_needed=1, diagram_height=0):
     
+    print(f"DEBUG: draw_footer called with instrument='{instrument}', secondary_instrument='{secondary_instrument}'")
+    print(f"DEBUG: relevant_chords count = {len(relevant_chords)}")
+
     page_width, _ = doc.pagesize
     max_per_row = 12 if not secondary_instrument else 6
-    footer_height = 100
-    
 
-    # Instrument-specific adjustments
-    #min_chord_spacing = 10 if instrument == "ukulele" else 70
-
-    
     def prepare_chords(chords):
         diagrams = []
         for chord in chords:
+            print(f"DEBUG: Preparing chord '{chord.get('name')}' for instrument '{chord.get('instrument')}'")
             diagrams.append({
                 "name": chord["name"],
                 "variation": chord["variations"][0]
@@ -178,20 +188,26 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
                 })
         return diagrams
 
+    primary_diagrams = prepare_chords(
+        [chord for chord in relevant_chords if chord.get("instrument") == instrument]
+    )
+    print(f"DEBUG: primary_diagrams count = {len(primary_diagrams)}")
 
-    max_chords_per_row = 12 if not secondary_instrument else 6  # 6 per instrument if two
-
-    primary_diagrams = prepare_chords([chord for chord in relevant_chords if chord.get("instrument") == instrument])
-    secondary_diagrams = prepare_chords([chord for chord in relevant_chords if secondary_instrument and chord.get("instrument") == secondary_instrument])
+    secondary_diagrams = prepare_chords(
+        [chord for chord in relevant_chords if secondary_instrument and chord.get("instrument") == secondary_instrument]
+    )
+    print(f"DEBUG: secondary_diagrams count = {len(secondary_diagrams)}")
 
     if secondary_instrument:
-        primary_rows = (len(primary_diagrams) + max_chords_per_row - 1) // max_chords_per_row  # Per instrument
-        secondary_rows = (len(secondary_diagrams) + max_chords_per_row - 1) // max_chords_per_row  # Per instrument
-        rows_needed = max(primary_rows, secondary_rows)  # Take the max since they stack
+        primary_rows = (len(primary_diagrams) + max_per_row - 1) // max_per_row
+        secondary_rows = (len(secondary_diagrams) + max_per_row - 1) // max_per_row
+        rows_needed = max(primary_rows, secondary_rows)
     else:
-        rows_needed = (len(primary_diagrams) + max_chords_per_row - 1) // max_chords_per_row  # Full page
+        rows_needed = (len(primary_diagrams) + max_per_row - 1) // max_per_row
 
-    #print(f"DEBUG: Number of chords={len(primary_diagrams)}, max_chords_per_row={max_chords_per_row}, rows_needed={rows_needed}")
+    print(f"DEBUG: rows_needed = {rows_needed}")
+
+
 
 
 
@@ -244,3 +260,133 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
             doc.pagesize[0] / 2, 0.2 * inch,  #changer .5 a .25
             f"Ackowledgement: {acknowledgement}"
         )
+from reportlab.lib import colors
+from reportlab.pdfgen import canvas
+
+# --- Helper Functions ---
+def compute_base_fret(positions):
+    """Determine the base fret for the diagram."""
+    if any(f == 0 for f in positions):
+        return 1
+    fretted = [f for f in positions if isinstance(f, int) and f > 0]
+    if not fretted:
+        return 1
+    min_fret = min(fretted)
+    return min_fret if min_fret > 3 else 1
+
+def normalize_variation(variation):
+    """Return a modern variation object: {positions, baseFret, barre}."""
+    if isinstance(variation, dict):
+        # already modern
+        return variation
+    # old style → wrap
+    return {
+        "positions": variation,
+        "baseFret": compute_base_fret(variation),
+        "barre": detect_barre(variation)
+    }
+
+
+def detect_barre(positions):
+    """Detects a barre (two or more adjacent strings at the same fret)."""
+    i = 0
+    while i < len(positions):
+        fret = positions[i]
+        if fret > 0:
+            start = i
+            while i + 1 < len(positions) and positions[i + 1] == fret:
+                i += 1
+            if i > start:
+                return {
+                    "fromString": start + 1,
+                    "toString": i + 1,
+                    "fret": fret
+                }
+        i += 1
+    return None
+
+# --- Chord Drawing ---
+def draw_chord_diagram(c, x, y, variation, chord_name=""):
+    """
+    Draw a chord diagram on a reportlab canvas `c` at position (x,y).
+    variation can be:
+      - Old style: [0, 0, 1, 0]
+      - Modern style: { positions:[...], baseFret:..., barre:{...} }
+    """
+    # Normalize variation
+    if isinstance(variation, dict):
+        positions = variation.get("positions", [])
+        base_fret = variation.get("baseFret", compute_base_fret(positions))
+        barre = variation.get("barre")
+    else:
+        positions = variation
+        base_fret = compute_base_fret(positions)
+        barre = detect_barre(positions)
+
+    # Adjust positions if base_fret > 1 (offset)
+    adjusted_positions = [
+        (f - (base_fret - 1) if f > 0 else f)
+        for f in positions
+    ]
+
+    # Diagram settings
+    string_count = len(positions)
+    fret_count = 5
+    string_spacing = 15
+    fret_spacing = 15
+    radius = 4
+
+    # Draw chord name
+    if chord_name:
+        c.setFont("Helvetica-Bold", 18)
+        c.drawCentredString(x + (string_count - 1) * string_spacing / 2,
+                            y + fret_count * fret_spacing + 18,
+                            chord_name)
+
+    # Draw base fret label if needed
+    if base_fret > 1:
+        c.setFont("Helvetica", 14)
+        c.drawString(x - 20, y + fret_count * fret_spacing - 10, f"{base_fret}fr")
+
+    # Draw strings
+    for i in range(string_count):
+        c.setStrokeColor(colors.black)
+        c.setLineWidth(2)
+        c.line(x + i * string_spacing, y, x + i * string_spacing, y + fret_count * fret_spacing)
+
+    # Draw frets (top line is nut if base_fret == 1)
+    for j in range(fret_count + 1):
+        y_line = y + j * fret_spacing
+        c.setLineWidth(4 if (j == fret_count and base_fret == 1) else 2)
+        c.line(x, y_line, x + (string_count - 1) * string_spacing, y_line)
+
+    # --- Barre ---
+    if barre:
+        adj_fret = barre["fret"] - (base_fret - 1)
+        if 1 <= adj_fret <= fret_count:
+            start_string = barre["fromString"] - 1
+            end_string = barre["toString"] - 1
+            y_bar = y + (fret_count - adj_fret) * fret_spacing + fret_spacing / 2
+            x_start = x + start_string * string_spacing - radius
+            width = (end_string - start_string) * string_spacing + 2 * radius
+            c.setFillColor(colors.black)
+            c.roundRect(
+                x_start, y_bar - radius, width, 2 * radius, 2, stroke=0, fill=1
+            )
+
+    # Draw dots / markers
+    for i, fret in enumerate(adjusted_positions):
+        x_dot = x + i * string_spacing
+        if fret > 0:
+            #y_dot = y + (fret - 1) * fret_spacing + fret_spacing / 2   #This draw bottom up
+            y_dot = y + (fret_count - fret) * fret_spacing + fret_spacing / 2
+            
+            print (y_dot) 
+            c.setFillColor(colors.black)
+            c.circle(x_dot, y_dot, radius, stroke=0, fill=1)
+        elif fret == 0:
+            c.setFont("Helvetica", 12)
+            c.drawCentredString(x_dot, y + fret_count * fret_spacing + 5, "O")
+        elif fret == -1:
+            c.setFont("Helvetica", 11)
+            c.drawCentredString(x_dot, y + fret_count * fret_spacing + 4, "X")
