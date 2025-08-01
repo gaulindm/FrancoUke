@@ -1,0 +1,10 @@
+<h1>Roster for {{ gig.title }}</h1>
+<table>
+<tr><th>Player</th><th>Available?</th></tr>
+{% for a in availabilities %}
+<tr>
+    <td>{{ a.player.name }}</td>
+    <td>{% if a.available %}✅{% else %}❌{% endif %}</td>
+</tr>
+{% endfor %}
+</table>

@@ -13,6 +13,7 @@ This Django project serves two music-focused sites, **FrancoUke** and **StrumSph
   - `songbook`: Manages songs, tags, formatting, and metadata
   - `users`: Handles custom user model, registration, login, preferences
   - `tools`: Helper utilities (transposition, chord rendering, PDF generation)
+  - `gigs`: Manage gigs sessions and availability 
 - **Custom User Model**: Implemented (`users.CustomUser`)
 - **Authentication**: Includes registration, login, password reset
 - **Database**:
@@ -63,9 +64,44 @@ Implements a mix of CBVs and FBVs:
 
 
 
+### 2025-08-01: Phase 1 – Core Volunteer Management (Gigs Module)
+
+We have implemented the **Gigs module** for StrumSphere to manage volunteer performers and their event availability.
+
+#### ✅ Features Completed:
+- **Gigs App (`gigs`)**
+  - `Gig` model with title, description, location, start/end time
+  - `Availability` model: user → gig → status (Yes/Maybe/No)
+- **Player Workflow**
+  - "My Gig Availability" page for performers
+  - Dropdown to select Yes/Maybe/No for upcoming gigs
+  - Saves automatically and redirects
+- **Leader Workflow**
+  - Role-aware "Availability Matrix" page (performer rows × gig columns)
+  - Shows ✅ / ❌ / 🤔 for availability
+  - Only accessible to `Leaders` group
+- **Admin Management**
+  - Gigs managed in admin with inline availability
+  - Matrix provides a clean roster overview
+- **Navigation**
+  - Integrated into `_navbar.html` dropdown
+  - Role-aware (Performers & Leaders) and site-aware (StrumSphere only)
+
+#### ⚡ Notes:
+- Phase 1 core functionality is complete and stable
+- Responsive with Bootstrap; future mobile polish (PWA) is possible
+- Email/push reminders are **planned for Phase 2**
+
+Next Steps:
+- Add optional `dress_code` and `equipment` fields to `Gig`
+- Consider dashboard/email reminders for pending responses
+
+
+
+
 
 ### July 23 : Added permanent transpose button to admin panel
-- Admins can transpose by 1 semitone up or down from Chang Song admin form
+- Admins can transpose by 1 semitone up or down from Change Song admin form
 - Admins can also transpose by 1 semitone up or down in bulk in song list
 
 

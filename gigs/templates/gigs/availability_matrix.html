@@ -1,0 +1,40 @@
+{% extends "songbook/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>🎼 StrumSphere Performer Availability Matrix</h1>
+    <p>This roster shows which performers are available for each gig.</p>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Performer</th>
+                {% for gig in gigs %}
+                    <th>
+                        {{ gig.title }}<br>
+                        <small>{{ gig.start_time|date:"M d" }}</small>
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for player, row in matrix %}
+            <tr>
+                <td>
+                    {% if player.first_name or player.last_name %}
+                        {{ player.first_name }} {{ player.last_name }}
+                    {% else %}
+                        {{ player.username }}
+                    {% endif %}
+                </td>
+                {% for icon in row %}
+                    <td class="text-center">{{ icon }}</td>
+                {% endfor %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="{{ gigs|length|add:1 }}">No performers found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

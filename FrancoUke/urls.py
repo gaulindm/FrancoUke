@@ -8,6 +8,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
 
+    path("StrumSphere/gigs/", include("gigs.urls", namespace="gigs")),
+
     # 🏠 Default route redirects to FrancoUke homepage
     path("", lambda request: redirect("francouke:home")),
 

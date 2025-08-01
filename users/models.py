@@ -9,7 +9,11 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
 
     def __str__(self):
+        # Prefer full name if available, fallback to username
+        if self.first_name or self.last_name:
+            return f"{self.first_name} {self.last_name}".strip()
         return self.username
+        
 
 @receiver(post_save, sender=User)
 def create_user_preference(sender, instance, created, **kwargs):
