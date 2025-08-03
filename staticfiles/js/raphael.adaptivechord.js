@@ -161,12 +161,32 @@
         // Base fret label (e.g., "4fr") if offset > 0
         // --------------------------------
         if (offset > 0) {
-            element.text(5, yStart + fretSpacing / 2, `${baseFret}fr`).attr({
+            //let visibleFrets = positions.filter((f) => typeof f === 'number' && f > 0);
+            //let minFret = Math.min(...visibleFrets);
+
+            // fallback in weird edge cases
+            //if (!isFinite(minFret)) {
+            //    minFret = baseFret;
+            //}
+
+            //const adjusted = minFret - offset;
+            const labelX = xStart - 6;
+            //const labelY = yStart + (adjusted - 1 + 0.5) * fretSpacing;
+            const labelY = yStart + (0.5) * fretSpacing;
+
+            element.text(labelX, 28, `${baseFret}fr`).attr({
                 'font-size': 10,
+                'font-weight': 'bold',
+                'text-anchor': 'end',
                 'font-family': 'Arial, sans-serif',
-                'text-anchor': 'start'
+                fill: '#000'
             });
+
+            console.log("DEBUG: baseFret label", `${baseFret}fr`, "at", labelX, labelY);
         }
+      
+
+
 
         // --------------------------------
         // Barre rendering (if provided)
@@ -210,11 +230,16 @@
             const x = stringPositions[i];
 
             if (fret === -1) {
+                
                 // Muted
-                element.text(x, yStart - 10, 'X').attr({
-                    'font-size': 10,
+                //element.text(x, yStart - 10, 'X').attr({
+                element.text(x, 17.5 , 'X').attr({
+                    'font-size': 12,
                     'font-family': 'Arial',
-                    'text-anchor': 'middle'
+                    'text-anchor': 'middle',
+                    'dominant-baseline': 'middle'  // Vertically centers the text properly
+
+
                 });
             } else if (fret === 0) {
                 // Open
@@ -235,7 +260,7 @@
 
                         if (fingers && fingers[i]) {
                             element.text(x, y, fingers[i]).attr({
-                                'font-size': 8,
+                                'font-size': 12,
                                 'font-family': 'Arial',
                                 fill: '#fff'
                             });

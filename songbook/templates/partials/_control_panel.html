@@ -1,4 +1,5 @@
 {% load static %}
+{% load user_extras %}
 
 <div class="content-section">
     {% if user.is_authenticated %}
@@ -103,43 +104,33 @@
     {% endif %}
   </p>
   
+
+
   <div class="me-3">
     {% if user.is_authenticated %}
-      {% with site_namespace|add:':edit_formatting' as edit_url_name %}
-        {% if user.is_superuser %}
-          <a href="{% url edit_url_name score.id %}" class="btn btn-warning">
-            {% if site_name == "FrancoUke" %}
-              Modifier la mise en forme
+        {% with site_namespace|add:':edit_formatting' as edit_url_name %}
+            {% if user.is_superuser or user|has_group:"Power Users" %}
+                <a href="{% url edit_url_name score.id %}" class="btn btn-warning">
+                    {% if site_name == "FrancoUke" %}
+                        Modifier la mise en forme
+                    {% else %}
+                        Edit Song Formatting
+                    {% endif %}
+                </a>
             {% else %}
-              Edit Song Formatting
+                <p class="text-muted small">
+                    {% if site_name == "FrancoUke" %}
+                        Veuillez envoyer un message à gaulindm@gmail.com pour demander la permission Power User.
+                    {% else %}
+                        Please send an email to gaulindm@gmail.com to request Power User permission.
+                    {% endif %}
+                </p>
             {% endif %}
-          </a>
-        {% else %}
-          {% for group in user.groups.all %}
-            {% if group.name == "Power Users" %}
-              <a href="{% url edit_url_name score.id %}" class="btn btn-warning">
-                {% if site_name == "FrancoUke" %}
-                  Modifier la mise en forme
-                {% else %}
-                  Edit Song Formatting
-                {% endif %}
-              </a>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-  
-      {% if not user.is_superuser and not user.groups.all|dictsort:"name"|join:", "%}
-        <p>
-          {% if site_name == "FrancoUke" %}
-            Veuillez envoyer un message à gaulindm@gmail.com pour demander la permission Power User.
-          {% else %}
-            Please send an email to gaulindm@gmail.com to request Power User permission.
-          {% endif %}
-        </p>
-      {% endif %}
+        {% endwith %}
     {% endif %}
-  </div>
+</div>
+  
+  
   
 
 

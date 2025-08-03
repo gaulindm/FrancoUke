@@ -1,66 +1,7 @@
-{% extends "songbook/base.html" %}
+{% extends base_template %}
 
 {% block content %}
-<style>
-.letter-nav-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.letter-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    flex-grow: 1;
-}
-
-.letter-nav a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
-    padding: 5px 8px;
-}
-
-.letter-nav a.active {
-    color: #fff;
-    background-color: #007bff;
-    border-radius: 5px;
-}
-
-.artist-columns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-}
-
-.artist-column {
-    flex: 1;
-    min-width: 200px;
-    max-width: 300px;
-}
-
-.artist-column ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.artist-column li {
-    margin-bottom: 5px;
-}
-
-.all-artists-btn {
-    margin-left: auto;
-    white-space: nowrap;
-}
-</style>
-
-<!-- ✅ Dynamic Heading -->
-<h2>
+<h2 class="mb-4">
     {% if site_name == "FrancoUke" %}
         Parcourir par artiste
     {% else %}
@@ -69,52 +10,42 @@
 </h2>
 
 <!-- ✅ Letter Navigation -->
-<div class="letter-nav-container">
-    <div class="letter-nav">
+<div class="letter-nav-container mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="letter-nav d-flex flex-wrap gap-1">
         {% for letter in first_letters %}
-            <a href="{% url site_namespace|add:':artist_by_letter' letter=letter %}"
-               class="{% if letter == selected_letter %}active{% endif %}">
+            <a href="{% url site_namespace|add:':artist_by_letter' letter %}"
+               class="btn btn-sm {% if letter == selected_letter %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 {{ letter }}
             </a>
         {% endfor %}
     </div>
-    
 
     {% if selected_letter %}
-    <a href="{% url site_namespace|add:':artist_list' %}" class="btn btn-secondary all-artists-btn">
-        {% if site_name == "FrancoUke" %}
-            Afficher tous les artistes
-        {% else %}
-            Show All Artists
-        {% endif %}
-    </a>
-{% endif %}
+        <a href="{% url site_namespace|add:':artist_list' %}" class="btn btn-secondary all-artists-btn">
+            {% if site_name == "FrancoUke" %}
+                Afficher tous les artistes
+            {% else %}
+                Show All Artists
+            {% endif %}
+        </a>
+    {% endif %}
 </div>
 
 <!-- ✅ Artist List -->
-<div class="artist-columns">
+<div class="row row-cols-2 row-cols-md-4 g-3">
     {% for column in artist_columns %}
-        <div class="artist-column">
-            <ul>
+        <div class="col">
+            <ul class="list-unstyled">
                 {% for artist in column %}
-                <li>
-                    <a href="{% url site_namespace|add:':artist_songs' artist_name=artist %}">
-                        {{ artist }}
-                    </a>
-                </li>
-            {% endfor %}
-            
+                    <li>
+                        <a href="{% url site_namespace|add:':songs_by_artist' artist %}" 
+                           class="text-decoration-none d-block py-1">
+                            {{ artist }}
+                        </a>
+                    </li>
+                {% endfor %}
             </ul>
         </div>
     {% endfor %}
 </div>
 {% endblock %}
-
-{% if not user.is_authenticated %}
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var authModal = new bootstrap.Modal(document.getElementById('authModal'));
-        authModal.show();
-    });
-</script>
-{% endif %}

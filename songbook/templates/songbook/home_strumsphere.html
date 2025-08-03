@@ -1,0 +1,14 @@
+{% extends "base_strumsphere.html" %}
+{% load site_urls %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1>🎵 Welcome to StrumSphere!</h1>
+    <p>Explore English songs, create quality pdf chord chart  and jam with the community.</p>
+    
+    {% site_url 'song_list' as song_list_url %}
+    <a class="btn btn-primary btn-lg mt-3" href="{% url song_list_url %}">
+        Browse Songs
+    </a>
+</div>
+{% endblock %}

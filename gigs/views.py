@@ -15,6 +15,9 @@ def is_leader(user):
 def is_performer(user):
     return user.groups.filter(name='Performers').exists()
 
+def gig_home(request):
+    return render(request, "gigs/home.html")
+
 
 def gig_roster(request, pk):
     gig = get_object_or_404(Gig, pk=pk)

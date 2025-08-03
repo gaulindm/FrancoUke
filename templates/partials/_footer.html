@@ -1,0 +1,23 @@
+<footer class="text-center mt-4 py-3 bg-light border-top">
+    <p>
+        {% if site_name == "FrancoUke" %}
+            Vous cherchez des chansons en anglais? 🎸 
+            <a href="{% url 'strumsphere:song_list' %}" class="btn btn-outline-primary btn-sm">
+                Visitez StrumSphere
+            </a>
+        {% elif site_name == "StrumSphere" %}
+            Êtes-vous à la recherche de chansons françaises? 🎵  
+            <a href="{% url 'francouke:song_list' %}" class="btn btn-outline-success btn-sm">
+                Visitez FrancoUke
+            </a>
+        {% elif site_name == "Uke4ia" %}
+            🎶 Découvrez aussi nos songbooks :  
+            <a href="{% url 'francouke:song_list' %}" class="btn btn-outline-success btn-sm me-2">
+                FrancoUke
+            </a>
+            <a href="{% url 'strumsphere:song_list' %}" class="btn btn-outline-primary btn-sm">
+                StrumSphere
+            </a>
+        {% endif %}
+    </p>
+</footer>

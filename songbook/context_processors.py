@@ -1,18 +1,16 @@
-def site_namespace(request):
-    path = request.path
+def site_context(request):
+    """Inject site-related variables based on URL namespace."""
+    ns = getattr(request.resolver_match, "namespace", "") if request.resolver_match else ""
+    site_map = {
+        "francouke":  ("FrancoUke", "base_francouke.html"),
+        "strumsphere": ("StrumSphere", "base_strumsphere.html"),
+        "uke4ia":     ("Uke4ia", "base_uke4ia.html"),
+    }
 
-    if path.startswith("/FrancoUke/"):
-        return {
-            "site_name": "FrancoUke",
-            "site_namespace": "francouke",
-        }
-    elif path.startswith("/StrumSphere/"):
-        return {
-            "site_name": "StrumSphere",
-            "site_namespace": "strumsphere",
-        }
+    site_name, base_template = site_map.get(ns, ("FrancoUke", "base_francouke.html"))
 
     return {
-        "site_name": "FrancoUke",
-        "site_namespace": "francouke",
+        "site_name": site_name,
+        "site_namespace": ns,
+        "base_template": base_template,
     }

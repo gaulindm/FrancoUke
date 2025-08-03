@@ -18,7 +18,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from collections import defaultdict
 from django.core.exceptions import PermissionDenied
-
+from .mixins import SiteContextMixin
 # Import project-specific modules
 from .models import Song, SongFormatting
 from .forms import SongForm, TagFilterForm, SongFormattingForm
@@ -86,79 +86,37 @@ def edit_song_formatting(request, song_id, site_name=None):
     })
 
 
-
-class ArtistListView(LoginRequiredMixin, ListView):
+class ArtistListView(SiteContextMixin, ListView):
     template_name = "songbook/artist_list.html"
     context_object_name = "artists"
 
-    def dispatch(self, request, *args, **kwargs):
-        """Show login modal if user is not authenticated."""
-        if not request.user.is_authenticated:
-            return render(request, "users/auth_modal.html", {"next_url": request.path})
-        return super().dispatch(request, *args, **kwargs)
-
     def get_queryset(self):
-        """
-        Get unique artists for the current site and filter by first letter if provided.
-        """
-        # 🔹 Get the `site_name` from the URL kwargs
-        site_name = self.kwargs.get("site_name", "FrancoUke")  # Default to FrancoUke if not provided
+        site_name = self.get_site_name()
+        queryset = Song.objects.filter(site_name=site_name).values_list(
+            "metadata__artist", flat=True
+        ).distinct()
 
-        # 🔹 Filter only songs that belong to the current `site_name`
-        queryset = (
-            Song.objects.filter(site_name=site_name)  # ✅ Only fetch artists from the correct site
-            .exclude(metadata__artist__isnull=True)
-            .exclude(metadata__artist="")
-            .annotate(artist_name=Lower(Cast("metadata__artist", CharField())))
-            .values_list("metadata__artist", flat=True)
-            .distinct()
-            .order_by("artist_name")
-        )
+        # Filter by letter if provided
+        self.selected_letter = self.kwargs.get("letter")
+        if self.selected_letter:
+            queryset = [a for a in queryset if a and a.upper().startswith(self.selected_letter.upper())]
 
-        # 🔹 Filter by first letter (if selected)
-        letter = self.kwargs.get("letter")
-        if letter:
-            queryset = [artist for artist in queryset if artist and artist[0].upper() == letter.upper()]
-
-        return queryset
+        return sorted(queryset)
 
     def get_context_data(self, **kwargs):
-        """Ensure letter navigation is always visible and filter artists by site_name."""
         context = super().get_context_data(**kwargs)
 
-        # 🔹 Get the `site_name` from the URL
-        site_name = self.kwargs.get("site_name", "FrancoUke")  # Default to FrancoUke
+        all_artists = self.get_queryset()
+        first_letters = sorted({a[0].upper() for a in all_artists if a})
 
-        # 🔹 Ensure all artists are from the current `site_name`
-        all_artists = (
-            Song.objects.filter(site_name=site_name)  # ✅ Only fetch artists from the correct site
-            .exclude(metadata__artist__isnull=True)
-            .exclude(metadata__artist="")
-            .annotate(artist_name=Lower(Cast("metadata__artist", CharField())))
-            .values_list("metadata__artist", flat=True)
-            .distinct()
-        )
-
-        # 🔹 Extract all first letters
-        first_letters = sorted(set(artist[0].upper() for artist in all_artists if artist))
-
-        # 🔹 Filter artists if a letter is selected
-        letter = self.kwargs.get("letter")
-        if letter:
-            filtered_artists = sorted([artist for artist in all_artists if artist and artist[0].upper() == letter.upper()])
-        else:
-            filtered_artists = sorted(all_artists)  # ✅ Always sort alphabetically
-
-        # 🔹 Split artists into columns (max 20 per column)
-        artists_per_column = 20
-        artist_columns = [filtered_artists[i:i + artists_per_column] for i in range(0, len(filtered_artists), artists_per_column)]
-
-        # 🔹 Pass data to template
-        context["site_name"] = site_name  # ✅ Ensure `site_name` is available in the template
-        context["artist_columns"] = artist_columns  # ✅ Keep artists split into columns
-        context["first_letters"] = first_letters  # ✅ Ensure letter navigation works
-        context["selected_letter"] = letter  # ✅ Track the selected letter
-
+        # ✅ Extra artist context
+        context.update({
+            "first_letters": first_letters,
+            "selected_letter": self.selected_letter,
+            "artist_columns": [
+                all_artists[i::4] for i in range(4)  # 4 columns layout
+            ],
+        })
         return context
 
 from django.shortcuts import get_object_or_404
@@ -283,6 +241,16 @@ from taggit.models import Tag
 from songbook.models import Song, SongFormatting
 from songbook.utils.transposer import extract_chords
 
+from django.views.generic import TemplateView
+
+class LandingView(TemplateView):
+    template_name = "songbook/home_francouke.html"
+
+    def get_template_names(self):
+        ns = self.request.resolver_match.namespace
+        if ns == "strumsphere":
+            return ["songbook/home_strumsphere.html"]
+        return ["songbook/home_francouke.html"]
 
 
 
@@ -332,8 +300,9 @@ class ScoreView(LoginRequiredMixin, DetailView):
 
         return context  # ✅ Return context at the end
 
+from .mixins import SiteContextMixin  # Make sure this is imported
 
-class SongListView(ListView):
+class SongListView(SiteContextMixin, ListView):
     model = Song
     template_name = 'songbook/song_list.html'
     context_object_name = 'songs'
@@ -341,17 +310,15 @@ class SongListView(ListView):
     paginate_by = 25
 
     def dispatch(self, request, *args, **kwargs):
+        # Optional: show auth modal if not logged in
         if not request.user.is_authenticated:
             return render(request, "users/auth_modal.html", {"next_url": request.path})
         return super().dispatch(request, *args, **kwargs)
 
-    def get_site_name(self):
-        return "FrancoUke" if self.request.resolver_match.namespace == "francouke" else "StrumSphere"
-
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        site_name = self.get_site_name()
+        site_name = self.get_site_name()  # From the mixin
         queryset = queryset.filter(site_name=site_name)
 
         # Filters
@@ -380,8 +347,7 @@ class SongListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        site_name = self.get_site_name()
-        context['site_name'] = site_name
+        site_name = self.get_site_name()  # From mixin
         context['selected_artist'] = self.kwargs.get('artist_name')
         context['search_query'] = self.request.GET.get('q', '')
         context['selected_tag'] = self.request.GET.get('tag', '')

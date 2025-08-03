@@ -8,8 +8,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
 
-    path("StrumSphere/gigs/", include("gigs.urls", namespace="gigs")),
-
+    
     # 🏠 Default route redirects to FrancoUke homepage
     path("", lambda request: redirect("francouke:home")),
 
@@ -18,7 +17,13 @@ urlpatterns = [
 
     # 🎸 StrumSphere routes (namespace-aware)
     path("StrumSphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
+
+    # 🎸 Uke4ia routes (namespace-aware)
+    path("Uke4ia/", include("gigs.urls", namespace="uke4ia")),
+
 ]
+
+
 
 # 🛠 Static/media support in development
 if settings.DEBUG:

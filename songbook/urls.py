@@ -20,38 +20,37 @@ from songbook import views
 app_name = "songbook"
 
 urlpatterns = [
-    # 🔹 Home / Song List View
-    path('', SongListView.as_view(), name='song-list'),
-###Latest one
-    path('', SongListView.as_view(), name='home'),  # 👈 This is critical!
-    path('artists/', ArtistListView.as_view(), name='artist_list'),
-    path('chord-dictionary/', chord_dictionary, name='chord-dictionary'),
-    path('about/', views.about, name='songbook-about'),
-    #path('whats-new/', views.whats_new, name='whats_new'),
-    path('song/new/', SongCreateView.as_view(), name='song-create'),
+    # 🔹 Home
+    path("", views.LandingView.as_view(), name="home"),  # ✅ Landing page
 
 
-
+    # 🔹 Songs
+    path("songs/", views.SongListView.as_view(), name="song_list"),
+    path("songs/new/", views.SongCreateView.as_view(), name="song_create"),
+    path("songs/<int:pk>/", views.ScoreView.as_view(), name="score_view"),
+    path("songs/<int:pk>/edit/", views.SongUpdateView.as_view(), name="song_update"),
+    path("songs/<int:pk>/delete/", views.SongDeleteView.as_view(), name="song_delete"),
 
     # 🔹 Artists
-    path('artists/', ArtistListView.as_view(), name='artist_list'),
-    path('artists/letter/<str:letter>/', ArtistListView.as_view(), name='artist_by_letter'),
-    path('artists/<str:artist_name>/', SongListView.as_view(), name='artist_songs'),
+    path("artists/", views.ArtistListView.as_view(), name="artist_list"),
+    path("artists/<str:artist_name>/", views.SongListView.as_view(), name="songs_by_artist"),
+    path("artists/letter/<str:letter>/", views.ArtistListView.as_view(), name="artist_by_letter"),
 
-    # 🔹 Song Create / Update / Delete
-    path('song/new/', SongCreateView.as_view(), name='song-create'),
-    path('song/<int:pk>/', ScoreView.as_view(), name='score-view'),
-    path('song/<int:pk>/update/', SongUpdateView.as_view(), name='song_update'),
-    path('song/<int:pk>/delete/', SongDeleteView.as_view(), name='song_delete'),
+    # 🔹 Chords 
+    path("chords/", views.chord_dictionary, name="chord_dictionary"),
 
-    # 🔹 Songs contributed by specific user
-    path('user/<str:username>/', UserSongListView.as_view(), name='user-songs'),
+    # 🔹 Tags (Optional)
+    path("tags/<str:tag_name>/", views.SongListView.as_view(), name="songs_by_tag"),
 
-    # 🔹 Song Formatting
+    # 🔹 Legacy FBVs (to be refactored)
+    path("about/", views.about, name="about"),
+    path("whats-new/", views.whats_new, name="whats_new"),
+
+     # 🔹 Song Formatting
     path('songs/<int:song_id>/edit_formatting/', edit_song_formatting, name='edit_formatting'),
 
-    # 🔹 Chord Dictionary
-    path('chord-dictionary/', chord_dictionary, name='chord_dictionary'),
+
+
 
     # 🔹 PDF Generation
     path('preview_pdf/<int:song_id>/', preview_pdf, name='preview_pdf'),

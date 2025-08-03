@@ -1,20 +1,10 @@
-{% extends "songbook/base.html" %}
+{% extends base_template %}
+{% load static %}
+
 {% block content %}
 
-<style>
-    .table-condensed td,
-    .table-condensed th {
-        padding: 2px 5px;
-        line-height: 1;
-        font-size: 0.9em;
-    }
+<link rel="stylesheet" href="{% static 'songbook/css/song_list.css' %}">
 
-    .btn-compact {
-        padding: 2px 6px;
-        font-size: 0.75em;
-        line-height: 1;
-    }
-</style>
 
 <!-- 🔎 Search / Filter -->
 <form method="get" class="mb-4">
@@ -37,7 +27,9 @@
         <div class="col-md-3">
             <label>Filter:</label>
             <a href="?formatted=1" class="btn btn-outline-secondary btn-sm">Show Formatted Songs</a>
-            <a href="{% url site_namespace|add:':song-list' %}" class="btn btn-danger btn-sm">
+
+            
+            <a href="{% url site_namespace|add:':song_list' %}" class="btn btn-danger btn-sm">
                 {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
             </a>
         </div>
@@ -86,10 +78,13 @@
             {% for item in song_data %}
             <tr>
                 <td>
-                    <a href="{% url site_namespace|add:':score-view' item.song.id %}" class="song-link"
-                       title="{{ item.song.songTitle }}" aria-label="View score for {{ item.song.songTitle }}">
-                        {{ item.song.songTitle }}
-                    </a>
+                    
+                    <a href="{% url site_namespace|add:':score_view' item.song.id %}" 
+                    class="song-link"
+                    title="{{ item.song.songTitle }}"
+                    aria-label="View score for {{ item.song.songTitle }}">
+                     {{ item.song.songTitle }}
+                 </a>
                 </td>
                 <td>{% if item.is_formatted %}✅{% else %}❌{% endif %}</td>
                 <td>{{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
