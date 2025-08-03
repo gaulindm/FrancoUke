@@ -1,10 +1,13 @@
-# Project Context: StrumSphere /FrancoUke
+# Project Context – FrancoUke / StrumSphere / Uke4ia
 
-## 🌐 Overview
+## Overview
+This Django project powers three related ukulele web applications:
+1. **FrancoUke** – French songbook (main)
+2. **StrumSphere** – English songbook
+3. **Uke4ia** – Performance/volunteer portal
 
-This Django project serves two music-focused sites, **FrancoUke** and **StrumSphere**, with shared backend logic. Users can view, create, update, and manage ukulele chord charts, including metadata and chord formatting.
+All apps share a single Django project with namespaced URLs and site-specific templates.
 
-**StrumSphere** has been temporairly disabled and can easily be reanabled.
 
 ## ✅ Current Architecture
 
@@ -19,7 +22,9 @@ This Django project serves two music-focused sites, **FrancoUke** and **StrumSph
 - **Database**:
   - **Development**: SQLite (default, simple local dev)
   - **Production (planned)**: MySQL on PythonAnywhere
-  
+
+
+
 
 ## 🧩 Core App Structure
 
@@ -97,8 +102,18 @@ Next Steps:
 - Consider dashboard/email reminders for pending responses
 
 
+### Aug 3: 
 
 
+### ✅ Multi-Site Base Template System
+- `base_francouke.html`, `base_strumsphere.html`, `base_uke4ia.html`
+- Pages extend `{% extends base_template %}` dynamically from `SiteContextMixin`
+- Navbar, footer, and Bootstrap 5.3 are now consistent
+
+### ✅ URL & Namespace Refactor
+- All template links use:
+  ```django
+  {% url site_namespace|add:':view_name' arg %}
 
 ### July 23 : Added permanent transpose button to admin panel
 - Admins can transpose by 1 semitone up or down from Change Song admin form

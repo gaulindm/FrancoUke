@@ -5,7 +5,7 @@
     <p>Manage your availability and get ready for upcoming gigs.</p>
 
     {% if user.is_authenticated %}
-        <a class="btn btn-info btn-lg mt-3" href="{% url site_url 'my_availability' %}">
+        <a class="btn btn-info btn-lg mt-3" href="{% url my_availability_url' %}">
             Set My Availability
         </a>
     {% else %}

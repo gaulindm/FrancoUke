@@ -216,16 +216,16 @@ def get_chord_definition(request, chord_name):
 
 from django.shortcuts import render
 
-def chord_dictionary(request, site_name="FrancoUke"):
-    """Load chord data and adapt for FrancoUke or StrumSphere."""
-    instruments = ["ukulele", "guitar", "guitalele", "mandolin", "banjo", "baritone_ukulele"]
-    chord_data = {instrument: load_chords(instrument) for instrument in instruments}
 
-    return render(
-        request,
-        "songbook/allChordsTable.html",
-        {"chord_data": chord_data, "site_name": site_name}
-    )
+def chord_dictionary(request):
+    site_name = "FrancoUke" if request.resolver_match.namespace == "francouke" else "StrumSphere"
+    base_template = f"base_{site_name.lower()}.html"
+
+    return render(request, "songbook/chord_dictionary.html", {
+        "site_name": site_name,
+        "base_template": base_template,
+    })
+
 
 
 
@@ -410,7 +410,7 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         # ✅ Redirect using the song's real site_name, not the one from the URL
         site_name = self.object.site_name or 'FrancoUke'
-        return reverse(f"{site_name.lower()}:score-view", kwargs={'pk': self.object.pk})
+        return reverse(f"{site_name.lower()}:score_view", kwargs={'pk': self.object.pk})
 
 
     def form_valid(self, form):
