@@ -9,6 +9,9 @@ urlpatterns = [
 
     # Gigs listing
     path("gigs/", views.gig_list, name="gig_list"),
+    
+    path('calendar/<int:gig_id>/', views.add_to_calendar, name='add_to_calendar'),
+
 
     # Optional: Gig detail (future-proofing)
     # path("gigs/<int:gig_id>/", views.gig_detail, name="gig_detail"),

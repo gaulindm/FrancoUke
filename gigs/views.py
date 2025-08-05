@@ -8,6 +8,12 @@ from django.contrib.auth import get_user_model
 from .models import Gig, Availability
 from .models import Venue
 
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.utils.timezone import localtime
+from .models import Gig
+
+
 User = get_user_model()
 
 def is_leader(user):
@@ -24,7 +30,28 @@ def gig_list(request):
     venues = Venue.objects.prefetch_related('gigs').all()
     return render(request, 'gigs/gig_list.html', {'venues': venues})
 
+def add_to_calendar(request, gig_id):
+    gig = get_object_or_404(Gig, pk=gig_id)
+    gig_time = localtime(gig.date)  # Convert to local timezone
 
+    # Create ICS content
+    ics_content = f"""BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FrancoUke//Gigs//EN
+BEGIN:VEVENT
+UID:{gig.id}@francouke
+DTSTAMP:{gig_time.strftime('%Y%m%dT%H%M%SZ')}
+DTSTART:{gig_time.strftime('%Y%m%dT%H%M%SZ')}
+DTEND:{gig_time.strftime('%Y%m%dT%H%M%SZ')}
+SUMMARY:{gig.title}
+LOCATION:{gig.venue}
+END:VEVENT
+END:VCALENDAR
+"""
+
+    response = HttpResponse(ics_content, content_type='text/calendar')
+    response['Content-Disposition'] = f'attachment; filename="{gig.title}.ics"'
+    return response
 
 def gig_roster(request, pk):
     gig = get_object_or_404(Gig, pk=pk)

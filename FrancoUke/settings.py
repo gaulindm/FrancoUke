@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'taggit',
     'gigs',
+    'core',
     'django.contrib.sites'
     
 
@@ -53,7 +54,7 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 MIDDLEWARE = [
-    'FrancoUke.core.middleware.path_based_site.PathBasedSiteMiddleware',
+    'core.middleware.path_based_site.PathBasedSiteMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

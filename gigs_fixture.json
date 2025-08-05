@@ -1,0 +1,294 @@
+[
+{
+  "model": "gigs.venue",
+  "pk": 1,
+  "fields": {
+    "name": "Barclay House",
+    "location": "600 Chippewa St W, North Bay, ON P1B 9E7",
+    "image": "venues/barclay_house.png"
+  }
+},
+{
+  "model": "gigs.venue",
+  "pk": 2,
+  "fields": {
+    "name": "EastHolme Home for the Aged",
+    "location": "62 Big Bend Avenue, Powasson",
+    "image": "venues/EastHolme.jpeg"
+  }
+},
+{
+  "model": "gigs.venue",
+  "pk": 3,
+  "fields": {
+    "name": "Empire Living",
+    "location": "425 Fraser St, North Bay, ON P1B 3X1",
+    "image": "venues/empire.png"
+  }
+},
+{
+  "model": "gigs.venue",
+  "pk": 4,
+  "fields": {
+    "name": "Marina Point Village",
+    "location": "225 Oak St W, North Bay, ON P1B 0A9",
+    "image": "venues/marina_point_village.png"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 1,
+  "fields": {
+    "venue": 1,
+    "title": "Monthly performance",
+    "description": "January 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nFriday, January 3, 2025 at 9:17:18aAM\r\n===\r\nHi everyone.\r\nHappy New Year.\r\nI'm working on some scheduling for 2025 this afternoon.  Please note below the dates that I am confirming with Barclay House.  Our plan is still to go there on the last Monday of each month.  If there need to be any changes I will let you know.\r\nPierre, please add these dates to Trello for us.  Thank you.\r\nHJT\r\n \r\n---------- Forwarded message ---------\r\nFrom: Heather J Topps <hjtopps@gmail.com>\r\nDate: Thu, Jan 2, 2025 at 3:04 PM\r\nSubject: 2025 Schedule\r\nTo: Alexandra Parker <Alexandra.Parker@barclayhouse.ca>\r\n \r\n \r\nHi Alex.\r\nHappy New Year.  I hope you were able to get some time off over the holiday season to relax and have fun.\r\nI'm looking at our schedule for 2025 and would like to confirm our sessions at Barclay House.  The dates that fall on the last Monday of each month are as follows:\r\nJanuary 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nWe should also confirm that we are still doing our performances between 2:15 p.m. - 3:15 p.m.\r\nThanks, Alex.\r\nHJT",
+    "date": "2025-08-25",
+    "start_time": "14:15:00",
+    "end_time": "15:15:00",
+    "attire": "T-shirt",
+    "chairs": "Provided",
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 2,
+  "fields": {
+    "venue": 2,
+    "title": "Monthly performance",
+    "description": "Wednesday, May 21, 2025 at 9:34:24aPM\r\n===\r\nHi everyone.\r\nI told you recently that Eastholme Home For The Aged would like us every 2nd month.  They wanted us on July 4th but I am unavailable.  They have offered us the following dates:\r\nFriday, August 1st (1:30 p.m. - 2:30 p.m.)\r\nFriday, September 5th (1:30 - 2:30 p.m.)\r\nFriday, November 7th (1:30 p.m. - 2:30 p.m.)\r\nAddress:  62 Big Bend Avenue, Powassan\r\nEvent:  birthday celebration for the residents.\r\nArrival Time:  1/2 hour before performance start time.\r\nAttire:  either short or long-sleeved Uke4ia shirts with black bottoms.  Shorts are fine.\r\nChairs:  will be provided.\r\nPierre, would you please create a column in Trello for Eastholme (like you have for Marina Point, Empire Living Centre and Barclay House) so that everyone can see the schedule for this facility for the remainder of the year?\r\nThese dates are several months away so please be sure to submit your availability as we get closer to them.\r\nThank you.\r\nHJT",
+    "date": "2025-09-05",
+    "start_time": "13:30:00",
+    "end_time": "14:30:00",
+    "attire": "Uke4ia shirts, black bottom",
+    "chairs": "Will be provided",
+    "arrive_by": "13:00:00",
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 3,
+  "fields": {
+    "venue": 1,
+    "title": "Monthly performance",
+    "description": "January 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nFriday, January 3, 2025 at 9:17:18aAM\r\n===\r\nHi everyone.\r\nHappy New Year.\r\nI'm working on some scheduling for 2025 this afternoon.  Please note below the dates that I am confirming with Barclay House.  Our plan is still to go there on the last Monday of each month.  If there need to be any changes I will let you know.\r\nPierre, please add these dates to Trello for us.  Thank you.\r\nHJT\r\n \r\n---------- Forwarded message ---------\r\nFrom: Heather J Topps <hjtopps@gmail.com>\r\nDate: Thu, Jan 2, 2025 at 3:04 PM\r\nSubject: 2025 Schedule\r\nTo: Alexandra Parker <Alexandra.Parker@barclayhouse.ca>\r\n \r\n \r\nHi Alex.\r\nHappy New Year.  I hope you were able to get some time off over the holiday season to relax and have fun.\r\nI'm looking at our schedule for 2025 and would like to confirm our sessions at Barclay House.  The dates that fall on the last Monday of each month are as follows:\r\nJanuary 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nWe should also confirm that we are still doing our performances between 2:15 p.m. - 3:15 p.m.\r\nThanks, Alex.\r\nHJT",
+    "date": "2025-09-29",
+    "start_time": "14:15:00",
+    "end_time": "15:15:00",
+    "attire": "T-shirt",
+    "chairs": "Provided",
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 4,
+  "fields": {
+    "venue": 1,
+    "title": "Monthly performance",
+    "description": "January 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nFriday, January 3, 2025 at 9:17:18aAM\r\n===\r\nHi everyone.\r\nHappy New Year.\r\nI'm working on some scheduling for 2025 this afternoon.  Please note below the dates that I am confirming with Barclay House.  Our plan is still to go there on the last Monday of each month.  If there need to be any changes I will let you know.\r\nPierre, please add these dates to Trello for us.  Thank you.\r\nHJT\r\n \r\n---------- Forwarded message ---------\r\nFrom: Heather J Topps <hjtopps@gmail.com>\r\nDate: Thu, Jan 2, 2025 at 3:04 PM\r\nSubject: 2025 Schedule\r\nTo: Alexandra Parker <Alexandra.Parker@barclayhouse.ca>\r\n \r\n \r\nHi Alex.\r\nHappy New Year.  I hope you were able to get some time off over the holiday season to relax and have fun.\r\nI'm looking at our schedule for 2025 and would like to confirm our sessions at Barclay House.  The dates that fall on the last Monday of each month are as follows:\r\nJanuary 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nWe should also confirm that we are still doing our performances between 2:15 p.m. - 3:15 p.m.\r\nThanks, Alex.\r\nHJT",
+    "date": "2025-10-27",
+    "start_time": "14:15:00",
+    "end_time": "15:15:00",
+    "attire": "T-shirt",
+    "chairs": "Provided",
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 5,
+  "fields": {
+    "venue": 1,
+    "title": "Monthly performance",
+    "description": "January 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nFriday, January 3, 2025 at 9:17:18aAM\r\n===\r\nHi everyone.\r\nHappy New Year.\r\nI'm working on some scheduling for 2025 this afternoon.  Please note below the dates that I am confirming with Barclay House.  Our plan is still to go there on the last Monday of each month.  If there need to be any changes I will let you know.\r\nPierre, please add these dates to Trello for us.  Thank you.\r\nHJT\r\n \r\n---------- Forwarded message ---------\r\nFrom: Heather J Topps <hjtopps@gmail.com>\r\nDate: Thu, Jan 2, 2025 at 3:04 PM\r\nSubject: 2025 Schedule\r\nTo: Alexandra Parker <Alexandra.Parker@barclayhouse.ca>\r\n \r\n \r\nHi Alex.\r\nHappy New Year.  I hope you were able to get some time off over the holiday season to relax and have fun.\r\nI'm looking at our schedule for 2025 and would like to confirm our sessions at Barclay House.  The dates that fall on the last Monday of each month are as follows:\r\nJanuary 27\r\nFebruary 24\r\nMarch 31\r\nApril 28\r\nMay 26\r\nJune 30\r\nJuly 28\r\nAugust 25\r\nSeptember 29\r\nOctober 27\r\nNovember 24\r\nDecember - to be determined\r\nWe should also confirm that we are still doing our performances between 2:15 p.m. - 3:15 p.m.\r\nThanks, Alex.\r\nHJT",
+    "date": "2025-11-24",
+    "start_time": "14:15:00",
+    "end_time": "15:15:00",
+    "attire": "T-shirt",
+    "chairs": "Provided",
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 6,
+  "fields": {
+    "venue": 2,
+    "title": "Monthly performance",
+    "description": "Wednesday, May 21, 2025 at 9:34:24aPM\r\n===\r\nHi everyone.\r\nI told you recently that Eastholme Home For The Aged would like us every 2nd month.  They wanted us on July 4th but I am unavailable.  They have offered us the following dates:\r\nFriday, August 1st (1:30 p.m. - 2:30 p.m.)\r\nFriday, September 5th (1:30 - 2:30 p.m.)\r\nFriday, November 7th (1:30 p.m. - 2:30 p.m.)\r\nAddress:  62 Big Bend Avenue, Powassan\r\nEvent:  birthday celebration for the residents.\r\nArrival Time:  1/2 hour before performance start time.\r\nAttire:  either short or long-sleeved Uke4ia shirts with black bottoms.  Shorts are fine.\r\nChairs:  will be provided.\r\nPierre, would you please create a column in Trello for Eastholme (like you have for Marina Point, Empire Living Centre and Barclay House) so that everyone can see the schedule for this facility for the remainder of the year?\r\nThese dates are several months away so please be sure to submit your availability as we get closer to them.\r\nThank you.\r\nHJT",
+    "date": "2025-11-07",
+    "start_time": "13:30:00",
+    "end_time": "14:30:00",
+    "attire": "Uke4ia shirts, black bottom",
+    "chairs": "Will be provided",
+    "arrive_by": "13:00:00",
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 7,
+  "fields": {
+    "venue": 3,
+    "title": "ELC August Performance",
+    "description": "",
+    "date": "2025-08-13",
+    "start_time": "18:30:00",
+    "end_time": "19:30:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 8,
+  "fields": {
+    "venue": 3,
+    "title": "ELC September performance",
+    "description": "",
+    "date": "2025-09-10",
+    "start_time": "18:30:00",
+    "end_time": "19:30:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 9,
+  "fields": {
+    "venue": 3,
+    "title": "ELC October performance",
+    "description": "",
+    "date": "2025-10-08",
+    "start_time": "18:30:00",
+    "end_time": "19:30:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 10,
+  "fields": {
+    "venue": 3,
+    "title": "ELC November performance",
+    "description": "",
+    "date": "2025-11-12",
+    "start_time": "18:30:00",
+    "end_time": "19:30:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 11,
+  "fields": {
+    "venue": 3,
+    "title": "ELC December performance",
+    "description": "",
+    "date": "2025-12-10",
+    "start_time": "18:30:00",
+    "end_time": "19:30:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 12,
+  "fields": {
+    "venue": 4,
+    "title": "MPV November Performance",
+    "description": "January 21\r\n\r\nFebruary 18\r\n\r\nMarch 18\r\n\r\nApril 15\r\n\r\nMay 20\r\n\r\nJune 17\r\n\r\nJuly 15\r\n\r\nAugust 19\r\n\r\nSeptember 16\r\n\r\nOctober 21\r\n\r\nNovember 18\r\n\r\nDecember 16th\r\n\r\nFriday, January 3, 2025 at 9:06:12aPM\r\n\r\n===\r\n\r\n \r\n\r\nHi everyone.\r\n\r\nPlease note below the dates that I am confirming with Marina Point.  Our plan is still to go there on the 3rd Tuesday of each month from 2:00 p.m. - 3:00 p.m..  If there need to be any changes I will let you know.\r\n\r\nPierre, please add these dates to Trello for us.  Thank you.\r\n\r\nHJT",
+    "date": "2025-11-18",
+    "start_time": "14:00:00",
+    "end_time": "15:00:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 13,
+  "fields": {
+    "venue": 4,
+    "title": "MPV August Performance",
+    "description": "Wednesday, May 21, 2025 at 9:34:24aPM\r\n===\r\nHi everyone.\r\nI told you recently that Eastholme Home For The Aged would like us every 2nd month.  They wanted us on July 4th but I am unavailable.  They have offered us the following dates:\r\nFriday, August 1st (1:30 p.m. - 2:30 p.m.)\r\nFriday, September 5th (1:30 - 2:30 p.m.)\r\nFriday, November 7th (1:30 p.m. - 2:30 p.m.)\r\nAddress:  62 Big Bend Avenue, Powassan\r\nEvent:  birthday celebration for the residents.\r\nArrival Time:  1/2 hour before performance start time.\r\nAttire:  either short or long-sleeved Uke4ia shirts with black bottoms.  Shorts are fine.\r\nChairs:  will be provided.\r\nPierre, would you please create a column in Trello for Eastholme (like you have for Marina Point, Empire Living Centre and Barclay House) so that everyone can see the schedule for this facility for the remainder of the year?\r\nThese dates are several months away so please be sure to submit your availability as we get closer to them.\r\nThank you.\r\nHJT",
+    "date": "2025-08-12",
+    "start_time": "14:00:00",
+    "end_time": "15:00:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 14,
+  "fields": {
+    "venue": 4,
+    "title": "MPV September Performance",
+    "description": "January 21\r\n\r\nFebruary 18\r\n\r\nMarch 18\r\n\r\nApril 15\r\n\r\nMay 20\r\n\r\nJune 17\r\n\r\nJuly 15\r\n\r\nAugust 19\r\n\r\nSeptember 16\r\n\r\nOctober 21\r\n\r\nNovember 18\r\n\r\nDecember 16th\r\n\r\nFriday, January 3, 2025 at 9:06:12aPM\r\n\r\n===\r\n\r\n \r\n\r\nHi everyone.\r\n\r\nPlease note below the dates that I am confirming with Marina Point.  Our plan is still to go there on the 3rd Tuesday of each month from 2:00 p.m. - 3:00 p.m..  If there need to be any changes I will let you know.\r\n\r\nPierre, please add these dates to Trello for us.  Thank you.\r\n\r\nHJT",
+    "date": "2025-09-16",
+    "start_time": "14:00:00",
+    "end_time": "15:00:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 15,
+  "fields": {
+    "venue": 4,
+    "title": "MPV October Performance",
+    "description": "January 21\r\n\r\nFebruary 18\r\n\r\nMarch 18\r\n\r\nApril 15\r\n\r\nMay 20\r\n\r\nJune 17\r\n\r\nJuly 15\r\n\r\nAugust 19\r\n\r\nSeptember 16\r\n\r\nOctober 21\r\n\r\nNovember 18\r\n\r\nDecember 16th\r\n\r\nFriday, January 3, 2025 at 9:06:12aPM\r\n\r\n===\r\n\r\n \r\n\r\nHi everyone.\r\n\r\nPlease note below the dates that I am confirming with Marina Point.  Our plan is still to go there on the 3rd Tuesday of each month from 2:00 p.m. - 3:00 p.m..  If there need to be any changes I will let you know.\r\n\r\nPierre, please add these dates to Trello for us.  Thank you.\r\n\r\nHJT",
+    "date": "2025-10-21",
+    "start_time": "14:00:00",
+    "end_time": "15:00:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+},
+{
+  "model": "gigs.gig",
+  "pk": 16,
+  "fields": {
+    "venue": 4,
+    "title": "MPV December Performance",
+    "description": "January 21\r\n\r\nFebruary 18\r\n\r\nMarch 18\r\n\r\nApril 15\r\n\r\nMay 20\r\n\r\nJune 17\r\n\r\nJuly 15\r\n\r\nAugust 19\r\n\r\nSeptember 16\r\n\r\nOctober 21\r\n\r\nNovember 18\r\n\r\nDecember 16th\r\n\r\nFriday, January 3, 2025 at 9:06:12aPM\r\n\r\n===\r\n\r\n \r\n\r\nHi everyone.\r\n\r\nPlease note below the dates that I am confirming with Marina Point.  Our plan is still to go there on the 3rd Tuesday of each month from 2:00 p.m. - 3:00 p.m..  If there need to be any changes I will let you know.\r\n\r\nPierre, please add these dates to Trello for us.  Thank you.\r\n\r\nHJT",
+    "date": "2025-12-16",
+    "start_time": "14:00:00",
+    "end_time": "15:00:00",
+    "attire": null,
+    "chairs": null,
+    "arrive_by": null,
+    "site_name": "strumsphere"
+  }
+}
+]

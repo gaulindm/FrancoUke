@@ -3,13 +3,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
+from core.views import landing_page 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
 
     # Redirect root to FrancoUke
-    path("", lambda request: redirect("francouke:home")),
+    #path("", lambda request: redirect("francouke:home")),
+    path('', landing_page, name='landing'),
+
+
 
     # Songbooks
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
@@ -20,6 +24,8 @@ urlpatterns = [
 
     # Optional shortcut to gig list
     path("gigs/", lambda request: redirect("uke4ia:gig_list")),
+
+    
 ]
 
 

@@ -10,36 +10,33 @@
     <style>
         /* Horizontal scroll container */
         .venue-scroll-wrapper {
-            position: relative; /* For arrow positioning */
+            position: relative;
         }
-
         .venue-scroll {
             display: flex;
             overflow-x: auto;
             gap: 1rem;
             scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             padding-bottom: 1rem;
-            scroll-behavior: smooth; /* smooth scroll on arrow click */
         }
         .venue-scroll::-webkit-scrollbar {
-            display: none; /* hide scrollbar for cleaner UI */
+            display: none;
         }
 
-        /* Venue column card */
+        /* Venue card sizing */
         .venue-card {
-            flex: 0 0 auto;        /* no shrink, no grow */
-            min-width: 33.33%;     /* ~3 columns visible on desktop */
+            flex: 0 0 auto;
+            min-width: 33.33%;  /* ~3 cards per screen desktop */
             scroll-snap-align: start;
         }
-
-        @media (max-width: 768px) {
-            .venue-card {
-                min-width: 100%;   /* 1 column on mobile */
-            }
+        @media (max-width: 991px) {
+            .venue-card { min-width: 100%; }
+            .scroll-arrow { display: none; }
         }
 
-        /* Arrow buttons */
+        /* Scroll arrows */
         .scroll-arrow {
             position: absolute;
             top: 40%;
@@ -54,22 +51,9 @@
             border-radius: 50%;
             transition: background 0.2s;
         }
-        .scroll-arrow:hover {
-            background: rgba(0,0,0,0.6);
-        }
-        .scroll-left {
-            left: -0.75rem;
-        }
-        .scroll-right {
-            right: -0.75rem;
-        }
-
-        /* Hide arrows on mobile */
-        @media (max-width: 768px) {
-            .scroll-arrow {
-                display: none;
-            }
-        }
+        .scroll-arrow:hover { background: rgba(0,0,0,0.6); }
+        .scroll-left { left: -0.75rem; }
+        .scroll-right { right: -0.75rem; }
     </style>
 </head>
 <body class="bg-light">
@@ -78,23 +62,25 @@
     <h1 class="text-center mb-5">🎵 Upcoming Performances</h1>
 
     <div class="venue-scroll-wrapper">
-        <!-- Scroll arrows -->
         <button class="scroll-arrow scroll-left" type="button">&#8249;</button>
         <button class="scroll-arrow scroll-right" type="button">&#8250;</button>
 
-        <!-- Horizontal scroll wrapper -->
         <div class="venue-scroll">
             {% for venue in venues %}
             <div class="venue-card card shadow-sm h-100">
-                
+
                 {% if venue.image %}
-                <img src="{{ venue.image.url }}" alt="{{ venue.name }}" class="card-img-top" style="height: 180px; object-fit: cover;">
+                    <img src="{{ venue.image.url }}" alt="{{ venue.name }}"
+                         class="card-img-top" style="height: 180px; object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'images/placeholder.png' %}" alt="No image available"
+                         class="card-img-top" style="height: 180px; object-fit: cover;">
                 {% endif %}
-                
+
                 <div class="card-body text-center">
                     <h5 class="card-title mb-1">{{ venue.name }}</h5>
                     {% if venue.location %}
-                    <p class="text-muted small mb-3">📍 {{ venue.location }}</p>
+                        <p class="text-muted small mb-3">📍 {{ venue.location }}</p>
                     {% endif %}
 
                     {% for gig in venue.gigs.all|dictsort:"date" %}
@@ -105,26 +91,33 @@
                             {% if gig.start_time %} {{ gig.start_time|time:"g:i A" }}{% endif %}
                             {% if gig.end_time %} – {{ gig.end_time|time:"g:i A" }}{% endif %}
                         </p>
-                        {% if gig.arrive_by %}
-                        <p class="text-secondary small mb-0">
-                            Arrive by {{ gig.arrive_by|time:"g:i A" }}
+                        <p class="fw-bold">
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ gig.venue|urlencode }}" 
+                               target="_blank" class="text-decoration-none">
+                               {{ gig.venue }}
+                            </a>
                         </p>
-                        {% endif %}
+                        
+                        <!-- Calendar & Map buttons -->
+                        <a href="{% url 'gigs:add_to_calendar' gig.id %}" class="btn btn-outline-success btn-sm mb-2">
+                            📅 Add to Calendar
+                        </a>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ gig.venue|urlencode }}" 
+                           class="btn btn-outline-primary btn-sm" target="_blank">
+                            📍 Google Maps
+                        </a>
                     </div>
                     {% empty %}
-                    <p class="text-muted small">No performances yet</p>
+                        <p class="text-center">No performances scheduled yet 🎸</p>
                     {% endfor %}
-                </div>
-            </div>
-            {% empty %}
-            <p class="text-center">No performances scheduled yet 🎸</p>
+                </div> <!-- end card-body -->
+            </div> <!-- end venue-card -->
             {% endfor %}
-        </div>
-    </div>
-</div>
+        </div> <!-- end venue-scroll -->
+    </div> <!-- end venue-scroll-wrapper -->
+</div> <!-- end container -->
 
 <script>
-    // Simple JS for arrow scrolling
     const scrollContainer = document.querySelector('.venue-scroll');
     const scrollLeftBtn = document.querySelector('.scroll-left');
     const scrollRightBtn = document.querySelector('.scroll-right');
@@ -132,11 +125,8 @@
     function scrollByCard(direction) {
         const card = scrollContainer.querySelector('.venue-card');
         if (!card) return;
-        const cardWidth = card.offsetWidth + 16; // 16px ~ gap
-        scrollContainer.scrollBy({
-            left: direction * cardWidth,
-            behavior: 'smooth'
-        });
+        const cardWidth = card.offsetWidth + 16; // ~gap
+        scrollContainer.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
     }
 
     scrollLeftBtn.addEventListener('click', () => scrollByCard(-1));
