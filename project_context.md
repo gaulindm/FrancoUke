@@ -67,6 +67,61 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
+### 2025-08-04: Uke4ia dashboard
+
+# FrancoUke Project Context
+
+## Current Features
+
+1. **Gigs App (Uke4ia)**
+   - `Venue` model with:
+     - `name`, `location`
+     - `image` (optional)
+   - `Gig` model with:
+     - `title`, `description`
+     - `date`, `start_time`, `end_time` (optional)
+     - `arrive_by` (optional)
+     - `venue` (FK)
+     - `created_at` (auto timestamp)
+   - Admin:
+     - List view sorted by venue/date
+     - **Duplicate gig action** with:
+       - Bulk duplicate
+       - **Duplicate & edit** (redirect to new gig edit page)
+   - Template:
+     - **Horizontal scrolling grid of venues**
+     - Each venue is a **column** with:
+       - Venue image + name + location
+       - **Stacked performances (gigs)** sorted by date
+       - Optional **arrive_by** and time range
+     - **Responsive behavior:**
+       - Desktop: 3 venue columns at a time, **horizontal scroll**
+       - Mobile: 1 column per screen (swipeable)
+       - **Arrows** for desktop scroll, **auto-hidden on mobile**
+       - Smooth scroll & snap-to-card
+
+2. **Styling**
+   - Pure **Bootstrap 5** for base styling
+   - **Custom embedded CSS** in template for horizontal scroll
+   - Scroll arrows styled with semi-transparent backgrounds
+
+---
+
+## Next Steps / TODO
+
+- Auto-hide arrows if the scroll container doesn’t overflow
+- Optional:
+  - Filter out past gigs in the public view
+  - Add “Get Directions” link for venue location
+  - Consider a card hover effect to show more details
+
+---
+
+## Notes
+
+- We consistently use **Gig model in backend**, but **UI shows “Performance”**
+- Current layout works well for 4+ venues with horizontal scroll
+- Mobile experience is optimized for **1 card per screen** with swipe navigation
 
 
 ### 2025-08-01: Phase 1 – Core Volunteer Management (Gigs Module)

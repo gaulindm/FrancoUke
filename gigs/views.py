@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from .models import Gig, Availability
+from .models import Venue
 
 User = get_user_model()
 
@@ -17,6 +18,12 @@ def is_performer(user):
 
 def gig_home(request):
     return render(request, "gigs/home.html")
+
+
+def gig_list(request):
+    venues = Venue.objects.prefetch_related('gigs').all()
+    return render(request, 'gigs/gig_list.html', {'venues': venues})
+
 
 
 def gig_roster(request, pk):

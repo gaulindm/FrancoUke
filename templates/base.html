@@ -1,49 +1,67 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Songbook{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/site.css' %}">
-    {% block extra_head %}{% endblock %}
-</head>
-<body class="d-flex flex-column min-vh-100">
+    <title>{% block title %}Uke4ia Volunteers{% endblock %}</title>
 
-    <!-- 🔹 Navbar -->
-    <nav class="navbar navbar-expand-md navbar-dark {% block navbar_class %}bg-primary{% endblock %} fixed-top shadow-sm">
-        <div class="container-fluid">
-            {% block navbar_brand %}
-            <a class="navbar-brand fw-bold" href="/">🎵 Songbook</a>
-            {% endblock %}
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
-                aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarToggle">
-                {% include "partials/_navbar.html" %}
+    <!-- ✅ Bootstrap 5 CSS via CDN -->
+    <link 
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+        rel="stylesheet"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoAeA0UvGXXCkB3Q0IE5hO47Pjzv4l6R2z9jUkn8R3Dy0F+" 
+        crossorigin="anonymous"
+    >
+
+    <!-- Optional: Your own CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ✅ Optional Navbar Example -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">🎵 Uke4ia</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'gigs:my_availability' %}">My Availability</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'users:logout' %}">Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'users:login' %}">Login</a></li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
 
-    <!-- 🔹 Optional Top Banner -->
-    {% block top_banner %}{% endblock %}
+    <!-- ✅ Messages Framework as Bootstrap Alerts -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 
-    <!-- 🔹 Main Content -->
-    <main class="flex-grow-1 container mt-5 pt-3">
+    <!-- ✅ Page Content -->
+    <div class="container">
         {% block content %}{% endblock %}
-    </main>
+    </div>
 
-    <!-- 🔹 Footer -->
-    <footer class="{% block footer_class %}bg-dark text-white{% endblock %} text-center py-3 mt-auto">
-        {% block footer %}
-        <small>&copy; {{ now|date:"Y" }} Songbook</small>
-        {% endblock %}
-    </footer>
+    <!-- ✅ Bootstrap 5 JS Bundle via CDN (Popper included) -->
+    <script 
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-kQtao1iR9p7+V+nobV1ROn8FdnYWlYXAxPpoAg1fD2+J30PehkW7p5zD6Sbp6HYZ" 
+        crossorigin="anonymous"
+    ></script>
 
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

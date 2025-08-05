@@ -1,156 +1,236 @@
-{% extends base_template %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Chord Diagrams</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-{% block content %}
-<div class="container py-4">
-    <h1 class="mb-4 text-center">
-        🎵 {% if site_name == "FrancoUke" %}Dictionnaire d'accords{% else %}Chord Dictionary{% endif %}
-    </h1>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="{% static 'js/raphael.adaptivechord.js' %}"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+  
+            margin: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .diagram-container {
+            position: relative;
+            width: 80px; /* adjust as needed */
+            height: 125px;
+            display: inline-block;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        {% include "partials/_navbar.html" %}
+      </header>
+      <br><br>
 
-    <!-- 🎛 Instrument Selector Form -->
-    <form id="instrument-form" class="d-flex flex-wrap align-items-center justify-content-center mb-4">
-        <label for="instrument-select" class="me-2 fw-bold">Instrument:</label>
-        <select id="instrument-select" class="form-select w-auto me-3">
-            <option value="ukulele">Ukulele</option>
+      
+        {% if site_name == "FrancoUke" %}
+            <h2>Les diagrammes d'accords</h2>
+        {% else %}
+            <h2>All Chord diagrams</h2>
+        {% endif %}
+    
+
+    <form id="instrument-form">
+        <label for="instrument-select">Choose an instrument:</label>
+        <select id="instrument-select" name="instrument">
+            <option value="ukulele" selected>Ukulele</option>
+            <option value="guitalele">Guitalele</option>
             <option value="guitar">Guitar</option>
             <option value="banjo">Banjo</option>
             <option value="mandolin">Mandolin</option>
             <option value="baritoneUke">Baritone Ukulele</option>
         </select>
-
-        <div class="form-check me-3">
-            <input type="checkbox" class="form-check-input" id="is-lefty">
-            <label for="is-lefty" class="form-check-label">Left-Handed</label>
-        </div>
-
-        <button type="submit" class="btn btn-success">
-            {% if site_name == "FrancoUke" %}Afficher les accords{% else %}Show Chords{% endif %}
-        </button>
+        <label>
+            <input type="checkbox" id="is-lefty"> Left-Handed
+        </label>
+        <button type="submit">Update</button>
     </form>
 
-    <!-- 🎼 Chord Tables -->
-    <div id="chord-tables" class="table-responsive"></div>
-</div>
+    <div id="chord-tables"></div>
 
-<!-- ✅ Required JS Libraries -->
-<script src="{% static 'js/raphael.min.js' %}"></script>
-<script src="{% static 'js/raphael.chord.js' %}"></script>
 
-<!-- ✅ Chord Rendering Script -->
-<script>
-    const PREFERRED_CHORD_ORDER = [
-        "", "7", "m", "m7", "maj7", "dim", "aug", "sus2", "sus4", 
-        "5", "6", "m6", "m9", "maj9", "11", "maj13"
-    ];
-
-    const CHORD_DEFINITIONS = {
-        ukulele: "{% static 'js/ukulele_chords.json' %}",
-        guitar: "{% static 'js/guitar_chords.json' %}",
-        banjo: "{% static 'js/banjo_chords.json' %}",
-        mandolin: "{% static 'js/mandolin_chords.json' %}",
-        baritoneUke: "{% static 'js/baritone_uke_chords.json' %}"
-    };
-
-    // 🎵 Fetch and Render Chords
-    function fetchAndRenderChords(selectedInstrument, isLefty) {
-        const container = document.getElementById("chord-tables");
-        container.innerHTML = ""; // Clear previous content
-
-        fetch(CHORD_DEFINITIONS[selectedInstrument])
-            .then(response => response.json())
-            .then(data => {
-                const groupedChords = groupChordsByRootAndType(data);
-                renderChordsTable(container, selectedInstrument, groupedChords, isLefty);
-            })
-            .catch(error => console.error(`Error loading ${selectedInstrument} chord data:`, error));
-    }
-
-    // Group chords by root and type
-    function groupChordsByRootAndType(jsonData) {
-        const groupedChords = {};
-        jsonData.forEach(chord => {
-            if (!chord.name) return;
-            const match = chord.name.match(/([A-G]#?b?)(.*)/);
-            if (!match) return;
-
-            const [root, type = "maj"] = match.slice(1);
-            if (!groupedChords[root]) groupedChords[root] = {};
-            groupedChords[root][type] = chord.variations;
-        });
-        return groupedChords;
-    }
-
-    // Render chord table
-    function renderChordsTable(container, instrument, chordData, isLefty) {
-        const table = document.createElement("table");
-        table.className = "table table-bordered text-center align-middle";
-
-        const header = document.createElement("h3");
-        header.className = "my-3 text-primary";
-        header.textContent = `${instrument.charAt(0).toUpperCase() + instrument.slice(1)} Chords`;
-        container.appendChild(header);
-
-        // Table Header
-        const headerRow = document.createElement("tr");
-        headerRow.innerHTML = `<th>Chord Type</th>` + 
-                              Object.keys(chordData).map(root => `<th>${root}</th>`).join("");
-        table.appendChild(headerRow);
-
-        // Loop through preferred chord order
-        PREFERRED_CHORD_ORDER.forEach(type => {
-            const row1 = document.createElement("tr");
-            const row2 = document.createElement("tr");
-
-            row1.innerHTML = `<td rowspan="2">${type || "maj"}</td>`;
-            row2.innerHTML = "";
-
-            Object.keys(chordData).forEach(root => {
-                const variations = chordData[root][type] || [null, null];
-                variations.forEach((variation, index) => {
-                    const cell = document.createElement("td");
-                    const diagramContainer = document.createElement("div");
-                    diagramContainer.className = "diagram-container";
-
-                    if (variation) {
-                        const mirroredVariation = isLefty ? mirrorVariation(variation) : variation;
-                        new Raphael.chord.Chord(diagramContainer, mirroredVariation, `${root} ${type || "maj"}`);
-                    }
-
-                    cell.appendChild(diagramContainer);
-                    if (index === 0) row1.appendChild(cell);
-                    if (index === 1) row2.appendChild(cell);
-                });
+    <script>
+        const PREFERRED_CHORD_ORDER = [
+            "", "7", "m", "m7", "maj7", "dim", "aug", "sus2", "sus4",
+            "5", "6", "m6", "m9", "maj9", "11", "maj13"
+        ];
+    
+        const CHORD_DEFINITIONS = {
+            ukulele: "{% static 'js/ukulele_chords_frontend.json' %}",
+            guitalele: "{% static 'js/guitalele_chords_frontend.json' %}",
+            guitar: "{% static 'js/guitar_chords_frontend.json' %}",
+            banjo: "{% static 'js/banjo_chords_frontend.json' %}",
+            mandolin: "{% static 'js/mandolin_chords_frontend.json' %}",
+            baritoneUke: "{% static 'js/baritoneUke_chords_frontend.json' %}"
+        };
+    
+        async function loadChordData(path) {
+            const resp = await fetch(path);
+            const text = await resp.text();
+            try {
+                const parsed = JSON.parse(text);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return text.split(/\r?\n/)
+                    .map(l => l.trim())
+                    .filter(l => l.length > 0)
+                    .map(l => JSON.parse(l));
+            }
+        }
+    
+        function fetchAndRenderChords(selectedInstrument, isLefty) {
+            const container = document.getElementById("chord-tables");
+            container.innerHTML = "";
+            const dataPath = CHORD_DEFINITIONS[selectedInstrument];
+    
+            loadChordData(dataPath)
+                .then(data => {
+                    const groupedChords = groupChordsByRootAndType(data);
+                    renderChordsTable(container, selectedInstrument, groupedChords, isLefty);
+                })
+                .catch(error => console.error(`Error loading ${selectedInstrument} chord data:`, error));
+        }
+    
+        function groupChordsByRootAndType(jsonData) {
+            const groupedChords = {};
+            jsonData.forEach(chord => {
+                if (!chord.name) return;
+                const match = chord.name.match(/([A-G]#?b?)(.*)/);
+                if (!match) return;
+                const [root, type = "maj"] = match.slice(1);
+                if (!groupedChords[root]) groupedChords[root] = {};
+                groupedChords[root][type] = chord.variations;
             });
+            return groupedChords;
+        }
+    
+        function renderChordsTable(container, instrument, chordData, isLefty) {
+            const table = document.createElement("table");
+            const header = document.createElement("h3");
+            header.textContent = `${capitalize(instrument)} Chords`;
+            container.appendChild(header);
+    
+            const headerRow = document.createElement("tr");
+            headerRow.innerHTML = `<th>Chord Type</th>` +
+                Object.keys(chordData).map(root => `<th>${root}</th>`).join("");
+            table.appendChild(headerRow);
+    
+            PREFERRED_CHORD_ORDER.forEach(type => {
+                const row1 = document.createElement("tr");
+                const row2 = document.createElement("tr");
+                row1.innerHTML = `<td rowspan="2">${type}</td>`;
+    
+                Object.keys(chordData).forEach(root => {
+                    const variations = chordData[root][type] || [null, null];
+    
+                    variations.forEach((variation, index) => {
+                        const cell = document.createElement("td");
+                        const diagramContainer = document.createElement("div");
+                        diagramContainer.className = "diagram-container";
+    
+                        if (variation) {
+                            try {
+                                const modernVariation = prepareVariation(variation, isLefty);
+                                console.log("Rendering", root, type, modernVariation);
 
-            table.appendChild(row1);
-            table.appendChild(row2);
+                                new Raphael.chord.Chord(diagramContainer, modernVariation, `${root} ${type}`);
+                            } catch (error) {
+                                console.warn(`Error rendering ${root} ${type} variation ${index + 1}:`, error);
+                            }
+                        }
+    
+                        cell.appendChild(diagramContainer);
+                        if (index === 0) row1.appendChild(cell);
+                        if (index === 1) row2.appendChild(cell);
+                    });
+                });
+    
+                table.appendChild(row1);
+                table.appendChild(row2);
+            });
+    
+            container.appendChild(table);
+        }
+    
+        function prepareVariation(variation, isLefty) {
+            let varObj;
+            if (Array.isArray(variation)) {
+                // Convert old array to object
+                varObj = {
+                    positions: variation.slice(),
+                    baseFret: computeBaseFret(variation)
+                };
+            } else {
+                varObj = { ...variation };
+            }
+
+            // Mirror positions/fingers for lefty
+            if (isLefty) {
+                varObj.positions = mirrorVariation(varObj.positions);
+                if (varObj.fingers) varObj.fingers = mirrorVariation(varObj.fingers);
+                if (varObj.barre) {
+                    const temp = varObj.barre.fromString;
+                    varObj.barre.fromString = varObj.positions.length - varObj.barre.toString + 1;
+                    varObj.barre.toString = varObj.positions.length - temp + 1;
+                }
+            }
+
+            console.log("Prepared variation:", varObj);
+            return varObj;
+        }
+
+    
+        function computeBaseFret(positions) {
+            if (positions.some(f => f === 0)) return 1;
+            const fretted = positions.filter(f => typeof f === "number" && f > 0);
+            if (!fretted.length) return 1;
+            const minFret = Math.min(...fretted);
+            return minFret > 3 ? minFret : 1;
+        }
+    
+        function mirrorVariation(variation) {
+            return variation.slice().reverse();
+        }
+    
+        function capitalize(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+    
+        document.getElementById("instrument-form").addEventListener("submit", event => {
+            event.preventDefault();
+            const selectedInstrument = document.getElementById("instrument-select").value;
+            const isLefty = document.getElementById("is-lefty").checked;
+            fetchAndRenderChords(selectedInstrument, isLefty);
         });
-
-        container.appendChild(table);
-    }
-
-    // Flip chord for left-handed players
-    function mirrorVariation(variation) {
-        return Array.isArray(variation) ? variation.slice().reverse() : variation;
-    }
-
-    // Handle form submission
-    document.getElementById("instrument-form").addEventListener("submit", event => {
-        event.preventDefault();
-        const selectedInstrument = document.getElementById("instrument-select").value;
-        const isLefty = document.getElementById("is-lefty").checked;
-        fetchAndRenderChords(selectedInstrument, isLefty);
-    });
-
-    // Initial render (default: Ukulele, Right-Handed)
-    fetchAndRenderChords("ukulele", false);
-</script>
-
-<style>
-    .diagram-container {
-        width: 80px;
-        height: 100px;
-        margin: 0 auto;
-    }
-</style>
-{% endblock %}
+    
+        fetchAndRenderChords("ukulele", false);
+    </script>
+        
+    
+    
+    
+</body>
+</html>

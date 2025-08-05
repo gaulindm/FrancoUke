@@ -381,7 +381,6 @@ def draw_chord_diagram(c, x, y, variation, chord_name=""):
             #y_dot = y + (fret - 1) * fret_spacing + fret_spacing / 2   #This draw bottom up
             y_dot = y + (fret_count - fret) * fret_spacing + fret_spacing / 2
             
-            print (y_dot) 
             c.setFillColor(colors.black)
             c.circle(x_dot, y_dot, radius, stroke=0, fill=1)
         elif fret == 0:

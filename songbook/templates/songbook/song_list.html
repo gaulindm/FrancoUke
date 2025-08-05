@@ -3,55 +3,60 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'songbook/css/song_list.css' %}">
+<link rel="stylesheet" href="{% static 'songbook/song_list.css' %}">
 
 
 <!-- 🔎 Search / Filter -->
-<form method="get" class="mb-4">
-    <div class="row align-items-center">
-        <!-- 🔍 Search Input -->
-        <div class="col-md-3">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control"
-                       placeholder="{% if site_name == 'FrancoUke' %}Recherche par titre, compositeur et interprète{% else %}Search by title, composer, and performer{% endif %}"
-                       value="{{ search_query }}">
-                {% if site_name == 'FrancoUke' %}
-                    <button class="btn btn-success" type="submit">🔍 Recherche</button>
-                {% else %}
-                    <button class="btn btn-primary" type="submit">🔍 Search</button>
-                {% endif %}
+<div class="container-fluid">
+    <form method="get" class="song-search-form mb-4 w-100">
+        <!-- 🔍 Search + Filters Row -->
+        <div class="row align-items-center mb-2">
+            <!-- Search Bar (larger portion) -->
+            <div class="col-md-8">
+                <div class="input-group w-100">
+                    <input type="text" name="q" class="form-control"
+                           placeholder="{% if site_name == 'FrancoUke' %}Recherche par titre, compositeur et interprète{% else %}Search by title, composer, and performer{% endif %}"
+                           value="{{ search_query }}">
+                    {% if site_name == 'FrancoUke' %}
+                        <button class="btn btn-success" type="submit">🔍 Recherche</button>
+                    {% else %}
+                        <button class="btn btn-primary" type="submit">🔍 Search</button>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-
-        <!-- 🔘 Filter Buttons -->
-        <div class="col-md-3">
-            <label>Filter:</label>
-            <a href="?formatted=1" class="btn btn-outline-secondary btn-sm">Show Formatted Songs</a>
-
-            
-            <a href="{% url site_namespace|add:':song_list' %}" class="btn btn-danger btn-sm">
-                {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-            </a>
-        </div>
-
-        <!-- 🏷️ Tag Filters -->
-        <div class="col-md-9">
-            <strong>Tags: </strong>
-            {% for tag in all_tags %}
-                <a href="?tag={{ tag }}" class="btn btn-outline-secondary btn-sm {% if selected_tag == tag %}active{% endif %}">
-                    {{ tag }}
+    
+            <!-- Filter Buttons -->
+            <div class="col-md-4 text-end">
+                <label class="me-2">{% if site_name == 'FrancoUke' %}Filtre :{% else %}Filter:{% endif %}</label>
+                <a href="?formatted=1" class="btn btn-outline-secondary btn-sm me-1">
+                    {% if site_name == 'FrancoUke' %}Partitions formatées{% else %}Show Formatted Songs{% endif %}
                 </a>
-            {% endfor %}
-        
-            {% if selected_tag %}
                 <a href="{% url site_namespace|add:':song_list' %}" class="btn btn-danger btn-sm">
                     {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
                 </a>
-            {% endif %}
+            </div>
         </div>
-        
-    </div>
-</form>
+    
+        <!-- 🏷️ Tag Filters (on a new row) -->
+        <div class="row">
+            <div class="col">
+                <strong>Tags: </strong>
+                {% for tag in all_tags %}
+                    <a href="?tag={{ tag }}" class="btn btn-outline-secondary btn-sm {% if selected_tag == tag %}active{% endif %}">
+                        {{ tag }}
+                    </a>
+                {% endfor %}
+    
+                {% if selected_tag %}
+                    <a href="{% url site_namespace|add:':song_list' %}" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+    
+</div>
 
 <!-- 🎤 Artist Filtered Title -->
 {% if selected_artist %}
@@ -65,7 +70,7 @@
 
 <!-- 🎼 Songs Table -->
 <div class="table-responsive">
-    <table class="table table-striped table-hover table-condensed">
+    <table class="table table-striped table-hover compact-table">
         <thead>
             <tr>
                 {% if site_name == 'FrancoUke' %}

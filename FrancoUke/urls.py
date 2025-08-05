@@ -8,19 +8,18 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
 
-    
-    # 🏠 Default route redirects to FrancoUke homepage
+    # Redirect root to FrancoUke
     path("", lambda request: redirect("francouke:home")),
 
-    # 🎵 FrancoUke routes (namespace-aware)
-    path("FrancoUke/", include(("songbook.urls", "songbook"), namespace="francouke")),
+    # Songbooks
+    path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
+    path("strumsphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
 
-    # 🎸 StrumSphere routes (namespace-aware)
-    path("StrumSphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
+    # Gigs / Uke4ia
+    path("uke4ia/", include(("gigs.urls", "gigs"), namespace="uke4ia")),
 
-    # 🎸 Uke4ia routes (namespace-aware)
-    path("Uke4ia/", include("gigs.urls", namespace="uke4ia")),
-
+    # Optional shortcut to gig list
+    path("gigs/", lambda request: redirect("uke4ia:gig_list")),
 ]
 
 
