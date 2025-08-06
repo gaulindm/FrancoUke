@@ -1,0 +1,47 @@
+{% extends "base_uke4ia.html" %}
+{% load dict_extras %}
+{% block title %}Performer Gig Grid{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-center">🎵 Performer Gig Grid by Venue 🎵</h1>
+<p class="text-muted text-center">Scroll right/left to see all venues and your availability.</p>
+
+<div class="d-flex flex-row overflow-auto pb-3" style="gap: 1rem;">
+    {% for venue, gigs in gigs_by_venue.items %}
+    <div class="card shadow-sm flex-shrink-0" style="width: 18rem;">
+        {% if venue.image %}
+            <img src="{{ venue.image.url }}" class="card-img-top" alt="{{ venue.name }}">
+        {% endif %}
+        <div class="card-header bg-primary text-white text-center fw-bold">
+            {{ venue.name }}
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for gig in gigs %}
+            <li class="list-group-item p-2">
+                <a href="{% url 'gigs:performer_gig_grid_detail' gig.id %}" 
+                   class="d-flex justify-content-between align-items-center text-decoration-none">
+                    <div>
+                        <div class="fw-bold text-dark">{{ gig.title }}</div>
+                        <small class="text-muted">{{ gig.date }} {{ gig.start_time }}</small>
+                    </div>
+                    {% with status=my_availability|get_item:gig.id %}
+                        {% if status == "Y" %}
+                            <span class="badge bg-success">Y</span>
+                        {% elif status == "N" %}
+                            <span class="badge bg-danger">N</span>
+                        {% elif status == "M" %}
+                            <span class="badge bg-warning text-dark">M</span>
+                        {% else %}
+                            <span class="badge bg-secondary">–</span>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% empty %}
+        <p class="text-center text-muted w-100">No upcoming gigs.</p>
+    {% endfor %}
+</div>
+{% endblock %}

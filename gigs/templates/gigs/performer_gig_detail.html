@@ -1,0 +1,78 @@
+{% extends "base_uke4ia.html" %}
+
+{% block title %}{{ gig.title }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'gigs:performer_gig_list' %}" class="btn btn-outline-secondary mb-4">&larr; Back to Gigs</a>
+
+<div class="card shadow-sm mb-5">
+    <div class="card-body">
+        <h1 class="card-title mb-3">{{ gig.title }}</h1>
+        <p class="mb-1"><strong>🎤 Venue:</strong> {{ gig.venue.name }}</p>
+        <p class="mb-1"><strong>📅 Date:</strong> {{ gig.date }} {{ gig.start_time }}
+            {% if gig.end_time %}- {{ gig.end_time }}{% endif %}
+        </p>
+        {% if gig.attire %}
+        <p class="mb-1"><strong>👔 Attire:</strong> {{ gig.attire }}</p>
+        {% endif %}
+        {% if gig.chairs %}
+        <p class="mb-1"><strong>🪑 Chairs:</strong> {{ gig.chairs }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm mb-5">
+    <div class="card-header bg-primary text-white fw-bold">
+        Your Availability
+    </div>
+    <div class="card-body">
+        <form method="post" class="d-flex align-items-center gap-3">
+            {% csrf_token %}
+            <select name="status" class="form-select w-auto" onchange="this.form.submit()">
+                {% for code,label in availability.AVAILABILITY_CHOICES %}
+                <option value="{{ code }}" {% if availability.status == code %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+            <small class="text-muted">Change your status from the dropdown.</small>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold">
+        Performer Responses
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Performer</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for av in all_availabilities %}
+                    <tr>
+                        <td>{{ av.player.username }}</td>
+                        <td>
+                            {% if av.status == "Y" %}
+                                <span class="badge bg-success">Yes</span>
+                            {% elif av.status == "N" %}
+                                <span class="badge bg-danger">No</span>
+                            {% elif av.status == "M" %}
+                                <span class="badge bg-warning text-dark">Maybe</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-4">No responses yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

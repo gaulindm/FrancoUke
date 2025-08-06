@@ -6,3 +6,13 @@
 .bg-uke4ia-light {
     background-color: #1e90ff; /* Lighter, vibrant blue */
 }
+.list-group-item a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-group-item a:hover {
+    background-color: #f0f8ff;
+    border-radius: 0.25rem;
+}
