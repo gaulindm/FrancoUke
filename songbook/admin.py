@@ -1,19 +1,18 @@
-from django.contrib import admin
-from django.urls import path
+from django.contrib import admin, messages
+from django.urls import path, reverse
 from django.shortcuts import redirect, get_object_or_404
-from django.urls import reverse
-
 from django.utils.html import format_html
 from django.db.models import Value
 from django.db.models.functions import Concat
-from .models import Song, SongFormatting
 from django import forms
-from django.contrib import admin, messages
+
+from .models import Song, SongFormatting
 from .utils.admin_chordpro_transposer import transpose_chordpro_text
 from .utils.transposer import transpose_chordpro  # ✅ Using your transposer.py
 
 
-# Custom admin form to show JSON fields as editable text areas
+# ---------- SongFormatting Admin ----------
+
 class SongFormattingAdminForm(forms.ModelForm):
     class Meta:
         model = SongFormatting
@@ -27,48 +26,84 @@ class SongFormattingAdminForm(forms.ModelForm):
             'outro': forms.Textarea(attrs={'rows': 3, 'cols': 50}),
         }
 
-# Custom display function for JSON fields in admin list view
+
 @admin.register(SongFormatting)
 class SongFormattingAdmin(admin.ModelAdmin):
     form = SongFormattingAdminForm
     list_display = ('user', 'song', 'display_intro_font_size', 'display_verse_font_size', 'display_chorus_font_size')
 
     def display_intro_font_size(self, obj):
-        """ Show font size for Intro in admin list view """
         return obj.intro.get("font_size", "Default") if obj.intro else "Default"
     display_intro_font_size.short_description = "Intro Font Size"
 
     def display_verse_font_size(self, obj):
-        """ Show font size for Verse in admin list view """
         return obj.verse.get("font_size", "Default") if obj.verse else "Default"
     display_verse_font_size.short_description = "Verse Font Size"
 
     def display_chorus_font_size(self, obj):
-        """ Show font size for Chorus in admin list view """
         return obj.chorus.get("font_size", "Default") if obj.chorus else "Default"
     display_chorus_font_size.short_description = "Chorus Font Size"
 
 
+# ---------- Song Admin ----------
 
 @admin.action(description="Transpose songChordPro UP 1 semitone")
 def transpose_up_1(modeladmin, request, queryset):
     for song in queryset:
+        if not song.songChordPro:
+            continue
         song.songChordPro = transpose_chordpro_text(song.songChordPro, 1)
         song.save()
     messages.success(request, f"{queryset.count()} song(s) transposed UP 1 semitone.")
 
+
 @admin.action(description="Transpose songChordPro DOWN 1 semitone")
 def transpose_down_1(modeladmin, request, queryset):
     for song in queryset:
+        if not song.songChordPro:
+            continue
         song.songChordPro = transpose_chordpro_text(song.songChordPro, -1)
         song.save()
     messages.success(request, f"{queryset.count()} song(s) transposed DOWN 1 semitone.")
 
 
+# ✅ Custom filter to include Hidden (None)
+class SiteNameFilter(admin.SimpleListFilter):
+    title = 'Site Name'
+    parameter_name = 'site_name'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('FrancoUke', 'FrancoUke'),
+            ('StrumSphere', 'StrumSphere'),
+            ('hidden', 'Hidden (None)'),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == 'hidden':
+            return queryset.filter(site_name__isnull=True)
+        elif value:
+            return queryset.filter(site_name=value)
+        return queryset
+
+@admin.action(description="Hide selected songs (set site_name=None)")
+def mark_hidden(modeladmin, request, queryset):
+    updated = queryset.update(site_name=None)
+    messages.success(request, f"{updated} song(s) marked as hidden.")
 
 
+@admin.action(description="Restore hidden songs to FrancoUke")
+def restore_francouke(modeladmin, request, queryset):
+    updated = queryset.filter(site_name__isnull=True).update(site_name='FrancoUke')
+    messages.success(request, f"{updated} hidden song(s) restored to FrancoUke.")
 
-# ✅ Single Admin Panel with Filtering by Site Name
+
+@admin.action(description="Restore hidden songs to StrumSphere")
+def restore_strumsphere(modeladmin, request, queryset):
+    updated = queryset.filter(site_name__isnull=True).update(site_name='StrumSphere')
+    messages.success(request, f"{updated} hidden song(s) restored to StrumSphere.")
+
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
     change_form_template = "admin/song_change_form_with_transpose.html"
@@ -77,8 +112,17 @@ class SongAdmin(admin.ModelAdmin):
     list_editable = ['site_name']
     search_fields = ['songTitle', 'metadata__artist']
     ordering = ('metadata__artist',)
-    list_filter = ['site_name']  # ✅ Admin panel filter to separate FrancoUke & StrumSphere
-    actions = [transpose_up_1, transpose_down_1]
+    list_filter = [SiteNameFilter]  # ✅ Custom filter
+    actions = [
+        transpose_up_1,
+        transpose_down_1,
+        mark_hidden,             # ✅ Hide songs
+        restore_francouke,       # ✅ Restore to FrancoUke
+        restore_strumsphere,     # ✅ Restore to StrumSphere
+    ]
+
+
+
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return queryset.annotate(
@@ -104,19 +148,19 @@ class SongAdmin(admin.ModelAdmin):
 
     def get_tags(self, obj):
         return ", ".join(obj.tags.names())
-    get_tags.admin_order_field = 'tags_string'  # Enable sorting by annotated field
+    get_tags.admin_order_field = 'tags_string'
     get_tags.short_description = 'Tags'
 
     def get_urls(self):
-            urls = super().get_urls()
-            custom_urls = [
-                path(
-                    "<int:song_id>/transpose/<semitones>/",
-                    self.admin_site.admin_view(self.transpose_song),
-                    name="songbook_song_transpose",
-                ),
-            ]
-            return custom_urls + urls
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:song_id>/transpose/<semitones>/",
+                self.admin_site.admin_view(self.transpose_song),
+                name="songbook_song_transpose",
+            ),
+        ]
+        return custom_urls + urls
 
     def transpose_song(self, request, song_id, semitones):
         try:
@@ -136,15 +180,4 @@ class SongAdmin(admin.ModelAdmin):
         direction = "up" if semitones > 0 else "down"
         messages.success(request, f"Transposed {direction} {abs(semitones)} semitone(s).")
         return redirect(f"../../")
-
-
-
-@admin.action(description="Transpose songChordPro DOWN 1 semitone")
-def transpose_down_1(modeladmin, request, queryset):
-    for song in queryset:
-        if not song.songChordPro:
-            continue
-        original = song.songChordPro
-        song.songChordPro = transpose_chordpro_text(original, -1)
-        song.save()
 

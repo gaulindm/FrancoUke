@@ -27,7 +27,14 @@ class Song(models.Model):
     contributor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     acknowledgement = models.CharField(max_length=100, blank=True, null=True)
-    site_name = models.CharField(max_length=20, choices=SITE_CHOICES, default='FrancoUke')  # NEW FIELD
+    site_name = models.CharField(
+    max_length=20,
+    choices=SITE_CHOICES,
+    null=True,        # ✅ Allow database NULL
+    blank=True,       # ✅ Allow admin form to leave it empty
+    default=None,     # ✅ No default, so can be hidden
+    help_text="Leave empty to hide this song from all platforms"
+)
 
 
     def save(self, *args, **kwargs):

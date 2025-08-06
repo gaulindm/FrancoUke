@@ -123,38 +123,27 @@ Implements a mix of CBVs and FBVs:
 - Current layout works well for 4+ venues with horizontal scroll
 - Mobile experience is optimized for **1 card per screen** with swipe navigation
 
+### 2025-08-06: Uke4ia Navbar & Landing Page Enhancements
 
-### 2025-08-01: Phase 1 – Core Volunteer Management (Gigs Module)
+#### ✅ Navbar Improvements
+- Added **Gig List**, **Gig Grid**, and **Availability Matrix** links for performers
+- Restored **user dropdown** in the top-right corner:
+  - **My Profile** → points to `users:profile`
+  - **Change Password** → placeholder for now (will enable tomorrow)
+  - **Logout**
+- Mobile-friendly with Bootstrap 5 dropdowns
 
-We have implemented the **Gigs module** for StrumSphere to manage volunteer performers and their event availability.
+#### ✅ Landing Page Update
+- Added **Uke4ia Performers** card to the landing page
+- Shows **NEW!** badge to highlight the new portal
+- Directs to the **Performer Gig Grid** for quick access
 
-#### ✅ Features Completed:
-- **Gigs App (`gigs`)**
-  - `Gig` model with title, description, location, start/end time
-  - `Availability` model: user → gig → status (Yes/Maybe/No)
-- **Player Workflow**
-  - "My Gig Availability" page for performers
-  - Dropdown to select Yes/Maybe/No for upcoming gigs
-  - Saves automatically and redirects
-- **Leader Workflow**
-  - Role-aware "Availability Matrix" page (performer rows × gig columns)
-  - Shows ✅ / ❌ / 🤔 for availability
-  - Only accessible to `Leaders` group
-- **Admin Management**
-  - Gigs managed in admin with inline availability
-  - Matrix provides a clean roster overview
-- **Navigation**
-  - Integrated into `_navbar.html` dropdown
-  - Role-aware (Performers & Leaders) and site-aware (StrumSphere only)
+#### ✅ UX Polish
+- Gig Grid is **scrollable by venue**, with **clickable gigs**
+- My Profile accessible from **navbar dropdown** in all performer views
+- Prepared the **Change Password link** as a dummy until implemented
 
-#### ⚡ Notes:
-- Phase 1 core functionality is complete and stable
-- Responsive with Bootstrap; future mobile polish (PWA) is possible
-- Email/push reminders are **planned for Phase 2**
 
-Next Steps:
-- Add optional `dress_code` and `equipment` fields to `Gig`
-- Consider dashboard/email reminders for pending responses
 
 ### 2025-08-06: Uke4ia Performer Grid & Venue Dashboard
 
@@ -192,8 +181,6 @@ We introduced a **performer-focused gig experience** for the Uke4ia portal, enha
 - **Visual dashboard** for performers without affecting the public gigs page
 - Lays groundwork for **future AJAX auto-save** and **carpooling features**
 
-
-
 ### Aug 3: 
 
 
@@ -206,6 +193,42 @@ We introduced a **performer-focused gig experience** for the Uke4ia portal, enha
 - All template links use:
   ```django
   {% url site_namespace|add:':view_name' arg %}
+
+
+### 2025-08-01: Phase 1 – Core Volunteer Management (Gigs Module)
+
+We have implemented the **Gigs module** for StrumSphere to manage volunteer performers and their event availability.
+
+#### ✅ Features Completed:
+- **Gigs App (`gigs`)**
+  - `Gig` model with title, description, location, start/end time
+  - `Availability` model: user → gig → status (Yes/Maybe/No)
+- **Player Workflow**
+  - "My Gig Availability" page for performers
+  - Dropdown to select Yes/Maybe/No for upcoming gigs
+  - Saves automatically and redirects
+- **Leader Workflow**
+  - Role-aware "Availability Matrix" page (performer rows × gig columns)
+  - Shows ✅ / ❌ / 🤔 for availability
+  - Only accessible to `Leaders` group
+- **Admin Management**
+  - Gigs managed in admin with inline availability
+  - Matrix provides a clean roster overview
+- **Navigation**
+  - Integrated into `_navbar.html` dropdown
+  - Role-aware (Performers & Leaders) and site-aware (StrumSphere only)
+
+#### ⚡ Notes:
+- Phase 1 core functionality is complete and stable
+- Responsive with Bootstrap; future mobile polish (PWA) is possible
+- Email/push reminders are **planned for Phase 2**
+
+Next Steps:
+- Add optional `dress_code` and `equipment` fields to `Gig`
+- Consider dashboard/email reminders for pending responses
+
+
+
 
 ### July 23 : Added permanent transpose button to admin panel
 - Admins can transpose by 1 semitone up or down from Change Song admin form
