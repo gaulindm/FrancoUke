@@ -56,3 +56,32 @@ def user_preferences_view(request):
         form = UserPreferenceForm(instance=user_pref)
 
     return render(request, "partials/user_preferences_modal.html", {"form": form, "site_name": site_name})
+
+@login_required
+def profile(request):
+    # If user came from the performers portal, use Uke4ia styling
+    if request.META.get('HTTP_REFERER', '').startswith('/uke4ia'):
+        template = "users/profile_uke4ia.html"
+    else:
+        template = "users/profile.html"
+
+    if request.method == "POST":
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(
+            request.POST, 
+            request.FILES, 
+            instance=request.user.profile
+        )
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, "Your profile has been updated!")
+            return redirect("users:profile")
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.profile)
+
+    return render(request, template, {
+        "u_form": u_form,
+        "p_form": p_form
+    })

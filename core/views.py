@@ -2,12 +2,24 @@ from django.shortcuts import render
 
 
 def landing_page(request):
-    ukulele_brands = [
-        {"name": "FrancoUke", "desc": "Votre outil idéal pour générer des PDF de qualité de chansons pour tous les instruments à cordes pincées.", 
-         "icon": "bi-music-note-beamed", "url": "francouke:home"},
-        {"name": "StrumSphere", "desc": "Your perfect tool to render quality PDF of songs for all strumming instruments.", 
-         "icon": "bi-vinyl", "url": "strumsphere:home"},
-        {"name": "Uke4ia", "desc": "Your gateway to ukulele euphoria.", 
-         "icon": "bi-star-fill", "url": "uke4ia:home"},
+    brands = [
+        {
+            "name": "FrancoUke",
+            "desc": "Your local ukulele songbook",
+            "icon": "bi-music-note-beamed",
+            "url": "francouke:home",
+        },
+        {
+            "name": "StrumSphere",
+            "desc": "Connect and strum around the world",
+            "icon": "bi-globe",
+            "url": "strumsphere:home",
+        },
+        {
+            "name": "Uke4ia Performers",
+            "desc": "Manage your availability and plan carpools",
+            "icon": "bi-people-fill",
+            "url": "gigs:performer_gig_grid",  # 👈 Goes to new grid dashboard
+        },
     ]
-    return render(request, "core/landing.html", {"brands": ukulele_brands})
+    return render(request, "core/landing.html", {"brands": brands})

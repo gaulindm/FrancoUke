@@ -156,6 +156,43 @@ Next Steps:
 - Add optional `dress_code` and `equipment` fields to `Gig`
 - Consider dashboard/email reminders for pending responses
 
+### 2025-08-06: Uke4ia Performer Grid & Venue Dashboard
+
+We introduced a **performer-focused gig experience** for the Uke4ia portal, enhancing volunteer UX and carpool planning:
+
+#### ✅ New Performer Views
+1. **Performer Gig Grid**
+   - Horizontal **venue-based scrolling grid** using Bootstrap 5
+   - **Columns = Venues**, **Rows = Gigs** for that venue
+   - Each gig shows:
+     - Title, date/time
+     - **My availability badge** (Yes/No/Maybe/–)
+     - Clickable row → Gig detail page
+
+2. **Performer Gig Grid Detail**
+   - Full gig info (venue, date, time, attire, chairs)
+   - **My availability dropdown** with auto-save on submit
+   - **All performers availability** shown in table with color-coded badges
+   - **Sidebar with all gigs for this venue** to encourage contextual navigation
+
+3. **Availability Matrix**
+   - Now accessible to all logged-in performers (was leader-only)
+   - Shows performer rows × gig columns with emoji/status icons
+   - Great for **planning carpools** and group logistics
+
+#### ✅ UI/UX Highlights
+- **Bootstrap 5 CDN** for consistent styling
+- **Horizontal scrolling grid** (mobile swipe-friendly)
+- **Clickable gig rows** for immediate navigation to details
+- **Badges & emojis** for clear visual availability
+- **Venue sidebar in detail page** for quick cross-gig navigation
+
+#### ⚡ Impact
+- Dramatically improved **volunteer coordination**
+- **Visual dashboard** for performers without affecting the public gigs page
+- Lays groundwork for **future AJAX auto-save** and **carpooling features**
+
+
 
 ### Aug 3: 
 
