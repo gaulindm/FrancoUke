@@ -1,17 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Gig
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from .models import Gig, Availability
 from .models import Venue
-
+from collections import defaultdict
+from django.db.models import Prefetch
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
-from django.utils.timezone import localtime
-from .models import Gig
+from django.utils.timezone import localtime, now
+
 
 
 User = get_user_model()
@@ -64,10 +61,7 @@ def gig_roster(request, pk):
 
 
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Gig, Availability
+
 
 User = get_user_model()  # ✅ Use your CustomUser
 
@@ -138,11 +132,7 @@ def my_availability(request):
         'availability_dict': availability_dict
     })
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.utils.timezone import now
 
-from .models import Gig, Availability
 
 def performer_gig_list(request):
     gigs = Gig.objects.filter(date__gte=now().date()).order_by('date', 'start_time')
@@ -179,11 +169,7 @@ def performer_gig_detail(request, gig_id):
         'all_availabilities': all_availabilities
     })
 
-from collections import defaultdict
-from django.db.models import Prefetch
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Gig, Availability
+
 
 @login_required
 def performer_gig_grid(request):
@@ -209,9 +195,7 @@ def performer_gig_grid(request):
         'my_availability': my_availability,
     })
 
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
-from .models import Gig, Availability
+
 
 @login_required
 def performer_gig_grid_detail(request, gig_id):

@@ -2,6 +2,37 @@
 {% block title %}{{ gig.title }} at {{ venue.name }}{% endblock %}
 
 {% block content %}
+<style>
+    /* Inline gig card styling */
+    .gig-card {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 16px;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    
+    .gig-card h3 {
+        margin-top: 0;
+    }
+    
+    .gig-card .description {
+        margin-top: 8px;
+        color: #444;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .gig-card .description ul,
+    .gig-card .description ol {
+        margin: 0.4em 0 0.4em 1.2em;
+    }
+    
+    .gig-card .description li {
+        margin-bottom: 0.2em;
+    }
+    </style>
 <a href="{% url 'gigs:performer_gig_grid' %}" class="btn btn-outline-secondary mb-4">
     &larr; Back to Venue Grid
 </a>
@@ -21,6 +52,15 @@
                 </p>
                 {% if gig.attire %}<p><strong>👔 Attire:</strong> {{ gig.attire }}</p>{% endif %}
                 {% if gig.chairs %}<p><strong>🪑 Chairs:</strong> {{ gig.chairs }}</p>{% endif %}
+                {% if gig.arrive_by %}
+        <p><strong>Arrive By:</strong> {{ gig.arrive_by|time:"g:i A" }}</p>
+    {% endif %}
+
+    {% if gig.description %}
+        <div class="description">
+            {{ gig.description|safe }}
+        </div>
+    {% endif %}
             </div>
         </div>
 

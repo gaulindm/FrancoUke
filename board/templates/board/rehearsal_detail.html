@@ -1,0 +1,50 @@
+{% extends 'base_uke4ia.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <a href="{% url 'full_board' %}" class="btn btn-secondary mb-3">← Back to Board</a>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title">{{ rehearsal.title }}</h2>
+            <p class="text-muted">
+                📅 {{ rehearsal.event_date|date:"l, M d, Y" }} at {{ rehearsal.event_date|time:"H:i" }}<br>
+                📍 {{ rehearsal.location }}
+            </p>
+
+            <div class="mb-3">
+                {{ rehearsal.rich_description|safe }}
+            </div>
+
+            {% if rehearsal.youtube_embed_url %}
+                <div class="ratio ratio-16x9 mb-3">
+                    <iframe src="{{ rehearsal.youtube_embed_url }}" frameborder="0" allowfullscreen></iframe>
+                </div>
+            {% endif %}
+
+            {% if rehearsal.media_file %}
+                <audio controls>
+                    <source src="{{ rehearsal.media_file.url }}">
+                </audio>
+            {% endif %}
+
+            {% if request.user.is_authenticated %}
+                <hr>
+                <form method="post" action="{% url 'update_availability' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="rehearsal_id" value="{{ rehearsal.id }}">
+                    <div class="btn-group" role="group">
+                        <button name="status" value="yes" class="btn btn-success btn-sm">✅ Coming</button>
+                        <button name="status" value="maybe" class="btn btn-warning btn-sm">❓ Maybe</button>
+                        <button name="status" value="no" class="btn btn-danger btn-sm">❌ Can't</button>
+                    </div>
+                </form>
+
+                {% if user_availability %}
+                    <p class="mt-2 text-muted">You responded: <strong>{{ user_availability.get_status_display }}</strong></p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

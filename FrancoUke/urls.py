@@ -9,11 +9,11 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
 
-    # Redirect root to FrancoUke
-    #path("", lambda request: redirect("francouke:home")),
+    # Root landing page
     path('', landing_page, name='landing'),
 
-
+    # Board (Trello-style UI)
+    path('board/', include('board.urls')),
 
     # Songbooks
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
@@ -22,14 +22,10 @@ urlpatterns = [
     # Gigs / Uke4ia
     path("uke4ia/", include(("gigs.urls", "gigs"), namespace="uke4ia")),
 
-    # Optional shortcut to gig list
+    # Shortcut to gigs
     path("gigs/", lambda request: redirect("uke4ia:gig_list")),
-
-    
 ]
 
-
-
-# 🛠 Static/media support in development
+# Media & static support (for dev)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

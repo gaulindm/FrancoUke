@@ -144,7 +144,7 @@ class SongAdmin(admin.ModelAdmin):
     get_artist.short_description = 'Artist'
 
     def get_view_on_site_url(self, obj):
-        return reverse("songbook:score-view", kwargs={"pk": obj.pk})
+        return reverse("songbook:score_view", kwargs={"pk": obj.pk})
 
     def get_tags(self, obj):
         return ", ".join(obj.tags.names())

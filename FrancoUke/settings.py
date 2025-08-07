@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'taggit',
     'gigs',
     'core',
+    'ckeditor',
+    'board',
     'django.contrib.sites'
     
 
@@ -85,6 +87,21 @@ TEMPLATES = [
     },
 ]
 
+SILENCED_SYSTEM_CHECKS = [
+    'ckeditor.W001',
+]
+
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Basic',
+        'toolbar_Basic': [
+            ['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Undo', 'Redo']
+        ],
+        'height': 150,
+        'width': 'auto',
+    },
+}
 WSGI_APPLICATION = 'FrancoUke.wsgi.application'
 
 
@@ -171,3 +188,6 @@ LOGIN_REDIRECT_URL = '/'  # ✅ Ensure users go to home after login
 LOGOUT_REDIRECT_URL = '/'  # ✅ Ensure users go home after logout
 
 TAGGIT_CASE_INSENSITIVE = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

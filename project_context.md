@@ -123,6 +123,46 @@ Implements a mix of CBVs and FBVs:
 - Current layout works well for 4+ venues with horizontal scroll
 - Mobile experience is optimized for **1 card per screen** with swipe navigation
 
+### 🗓 August 7, 2025 – Unified Full Board View
+
+- Merged gig columns by venue and board columns (e.g. “Songs to Listen”, “Upcoming Rehearsals”) into a single horizontal scrollable flex container.
+- Venue columns now include:
+  - 📸 Venue image at the top.
+  - 🎤 List of upcoming gigs displayed as cards with title and date.
+- Board columns display draggable items (e.g., rehearsal events, YouTube links).
+- My availability is shown inline for rehearsal cards.
+- Cleaned up layout: removed section header to streamline appearance.
+- Ensured YouTube embeds, links, and event dates appear cleanly in board items.
+- Venue images now served properly from `/media/venues/`.
+
+Pending:
+- Improve responsiveness on mobile.
+- Add drag-and-drop restrictions (prevent dragging gig cards).
+- Optionally add sticky headers or availability icons on gig cards.
+
+
+
+
+## 2025-08-06 – Admin Enhancements
+
+- Songs can now be **hidden** by setting `site_name=None`.
+- Admin:
+  - Added **custom filter** `SiteNameFilter` to show:
+    - FrancoUke
+    - StrumSphere
+    - Hidden (None)
+  - Added **bulk actions**:
+    - Hide selected songs (sets `site_name=None`)
+    - Restore hidden songs to FrancoUke
+    - Restore hidden songs to StrumSphere
+- Model update:
+  - `site_name` now allows `null=True, blank=True, default=None`
+  - Admin filter recognizes `None` as Hidden
+- New manager method: `Song.objects.visible()` to auto‑exclude hidden songs
+
+
+
+
 ### 2025-08-06: Uke4ia Navbar & Landing Page Enhancements
 
 #### ✅ Navbar Improvements

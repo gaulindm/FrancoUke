@@ -1,0 +1,92 @@
+{% extends 'base_uke4ia.html' %}
+
+{% block content %}
+
+
+  
+<!-- 🎤 Performances by Venue -->
+<div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;">
+
+    {% for venue, gigs in gigs_by_venue.items %}
+        <div class="board-column" style="flex: 0 0 300px; background: #f8f8f8; border-radius: 6px; padding: 10px;">
+            
+
+            <!-- 🏛️ Venue Name -->
+            <h5 class="text-center">{{ venue.name }}</h5>
+
+            <!-- 🖼️ Venue Image -->
+            {% if venue.image %}
+                <img src="{{ venue.image.url }}" alt="{{ venue.name }}" style="width: 100%; border-radius: 6px; margin-bottom: 10px;">
+            {% endif %}
+
+
+            <!-- 🎵 Gigs as Cards -->
+            {% for gig in gigs %}
+                <div class="card mb-3 p-2" style="background: white; border-radius: 4px;">
+                    <strong>
+                        <a href="{% url 'gigs:performer_gig_detail' gig.id %}">
+                            {{ gig.title }}
+                        </a>
+                    </strong><br>
+                    <small class="text-muted">📅 {{ gig.date|date:"M d, Y" }}</small><br>
+                    {% if gig.call_time %}
+                        <small class="text-muted">🎤 Call Time: {{ gig.call_time|time:"H:i" }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+        </div>
+    {% endfor %}
+    {% for column in columns %}
+        {% if column.column_type != 'venue' %}
+            <div class="board-column" style="flex: 0 0 300px; background: #f8f8f8; border-radius: 6px; padding: 10px;">
+                <h4>{{ column.name }}</h4>
+                <div class="sortable-list" data-column-id="{{ column.id }}">
+                    {% for item in column.items.all|dictsort:"position" %}
+                        <div class="card" data-item-id="{{ item.id }}"
+                             style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:grab;">
+
+                            {% if item.is_rehearsal %}
+                                <a href="{% url 'rehearsal_detail' item.id %}">
+                                    <strong>{{ item.title }}</strong>
+                                </a><br>
+                                <p><strong>Your response:</strong>
+                                    <p><strong>Your response:</strong>
+                                        {% if item.my_availability == 'yes' %}
+                                            ✅ Coming
+                                        {% elif item.my_availability == 'maybe' %}
+                                            ❓ Maybe
+                                        {% elif item.my_availability == 'no' %}
+                                            ❌ Can't
+                                        {% else %}
+                                            🚫 No response yet
+                                        {% endif %}
+                                    </p>
+
+                                
+                                </p>
+                                <small class="text-muted">📅 {{ item.event_date|date:"M d, Y H:i" }}</small>
+                            {% else %}
+                                <strong>{{ item.title }}</strong><br>
+                                {{ item.description|linebreaks }}
+                                {% if item.youtube_embed_url %}
+                                    <div class="ratio ratio-16x9 mt-2 mb-2">
+                                        <iframe src="{{ item.youtube_embed_url }}" frameborder="0" allowfullscreen></iframe>
+                                    </div>
+                                {% endif %}
+                                {% if item.link %}
+                                    <p><a href="{{ item.link }}" target="_blank">🔗 Open Link</a></p>
+                                {% endif %}
+                                {% if item.event_date %}
+                                    <small class="text-muted">📅 {{ item.event_date|date:"M d, Y H:i" }}</small>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}

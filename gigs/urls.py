@@ -14,7 +14,7 @@ urlpatterns = [
 
 
     # Optional: Gig detail (future-proofing)
-    # path("gigs/<int:gig_id>/", views.gig_detail, name="gig_detail"),
+    path('<int:gig_id>/', views.performer_gig_detail, name='performer_gig_detail'),
 
     # Availability pages
     path("my-availability/", views.my_availability, name="my_availability"),

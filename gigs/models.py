@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings  # CustomUser
 from django.utils.timezone import now
+from ckeditor.fields import RichTextField
+import bleach
 
 
 class Venue(models.Model):
@@ -14,7 +16,7 @@ class Venue(models.Model):
 class Gig(models.Model):
     venue = models.ForeignKey(Venue, related_name='gigs', on_delete=models.CASCADE,null=True)
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = RichTextField(blank=True, null=True)
     date = models.DateField()                      # The day of the performance
     start_time = models.TimeField()                # e.g., 19:30
     end_time = models.TimeField(null=True, blank=True)  # optional end time
@@ -28,8 +30,24 @@ class Gig(models.Model):
     # Hardcode site since it's only for StrumSphere
     site_name = models.CharField(max_length=20, default='strumsphere', editable=False)
 
+
+    ALLOWED_TAGS = [
+        'b', 'strong', 'i', 'em', 'ul', 'ol', 'li', 'p', 'br'
+    ]
+    ALLOWED_ATTRIBUTES = {}
+
+    def save(self, *args, **kwargs):
+        if self.description:
+            self.description = bleach.clean(
+                self.description,
+                tags=self.ALLOWED_TAGS,
+                attributes=self.ALLOWED_ATTRIBUTES,
+                strip=True
+            )
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.title} at {self.venue.name}"
+        return f"{self.title} @ {self.venue}"
 
 
 
