@@ -4,9 +4,24 @@ from ckeditor.fields import RichTextField
 
 
 class BoardColumn(models.Model):
-    name = models.CharField(max_length=100)  # Column title
-    position = models.PositiveIntegerField(default=0)  # Column order in the board
-    is_public = models.BooleanField(default=False)  # Whether unauthenticated users can see it
+    COLUMN_TYPES = [
+        ('general', 'General'),
+        ('photos', 'Photo Gallery'),
+        ('venue', 'Venue'),
+        ('songs to listen', 'Songs To Listen'),
+        ('rehearsal','Rehearsal'),
+        ('rehearsal notes','Rehearsal Notes'),
+        # Add more if needed
+    ]
+
+    name = models.CharField(max_length=100)
+    position = models.PositiveIntegerField(default=0)
+    is_public = models.BooleanField(default=False)
+    column_type = models.CharField(
+        max_length=20,
+        choices=COLUMN_TYPES,
+        default='general'
+    )
 
     def __str__(self):
         return self.name
@@ -59,6 +74,18 @@ class BoardItem(models.Model):
 
         return None
     
+class BoardItemPhoto(models.Model):
+    board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name='photos')
+    image = models.ImageField(upload_to='board_photos/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Photo for {self.board_item.title}"
+
+
+
+
+
     # board/models.py
 from django.db import models
 from django.conf import settings  # needed for referencing the user model

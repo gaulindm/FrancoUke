@@ -96,3 +96,24 @@ def rehearsal_detail_view(request, pk):
         'rehearsal': rehearsal,
         'user_availability': user_availability,
     })
+
+# board/views.py
+from django.shortcuts import get_object_or_404, render
+from .models import BoardItem
+
+def board_item_gallery_view(request, item_id):
+    board_item = get_object_or_404(BoardItem, id=item_id)
+    return render(request, 'board/item_gallery.html', {'board_item': board_item})
+
+from django.http import JsonResponse
+from .models import BoardItem
+
+def item_photo_list(request, item_id):
+    item = BoardItem.objects.get(id=item_id)
+    photos = item.photos.all()
+    data = [{
+        'url': photo.image.url,
+        'caption': f"Photo {i+1}"
+    } for i, photo in enumerate(photos)]
+    return JsonResponse(data, safe=False)
+
