@@ -67,6 +67,21 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
+### 2025-08-08 — Full Board Horizontal Scroll + Gig Availability Badges
+
+**Changes:**
+- Updated `full_board.html` so that all venue cards and board columns display in a **single horizontal scrolling row** (`.board-scroll-row`) using flexbox.
+- Removed Bootstrap grid classes to prevent wrapping — now each column has fixed width (`flex: 0 0 300px`).
+- Replaced old gig listings with the **performance_gig_grid.html style** list items for consistent look.
+- Gig cards now display:
+  - Gig date
+  - Start time (and end time if available)
+  - User's availability badge (Y, N, M, or –)
+- Integrated Bootstrap and Lightbox scripts/CSS directly into `full_board.html`.
+- Preserved rehearsal and other board column items with correct availability badges.
+- This layout now works well for mobile — horizontal scroll can be swiped.
+
+
 ### 2025-08-04: Uke4ia dashboard
 
 # FrancoUke Project Context
@@ -122,6 +137,8 @@ Implements a mix of CBVs and FBVs:
 - We consistently use **Gig model in backend**, but **UI shows “Performance”**
 - Current layout works well for 4+ venues with horizontal scroll
 - Mobile experience is optimized for **1 card per screen** with swipe navigation
+
+
 
 ### 🗓 August 7, 2025 – Unified Full Board View
 

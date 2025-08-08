@@ -1,167 +1,246 @@
 {% extends 'base_uke4ia.html' %}
-
+{% load static %}
 {% block content %}
-<!-- Lightbox2 -->
+
 <link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox-plus-jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Bootstrap 5 Modal (if not already included) -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+  /* Make a horizontal scrolling "board row" */
+  .board-scroll-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
 
-<!-- 🎤 Performances by Venue -->
-<div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;">
+  .board-scroll-row::-webkit-scrollbar {
+    height: 8px;
+  }
+  .board-scroll-row::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 4px;
+  }
 
+  .board-column {
+    flex: 0 0 300px; /* fixed width for each column */
+  }
+  .board-card {
+    border: 1px solid #e6e6e6;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fff;
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="board-scroll-row">
+
+    <!-- 🎤 Gigs by Venue -->
     {% for venue, gigs in gigs_by_venue.items %}
-        <div class="board-column" style="flex: 0 0 300px; background: #f8f8f8; border-radius: 6px; padding: 10px;">
+      <div class="board-column">
+        <div class="card h-100 shadow-sm">
+          {% if venue.image %}
+            <img src="{{ venue.image.url }}" class="card-img-top" alt="{{ venue.name }}" style="object-fit: cover; max-height: 160px;">
+          {% endif %}
+          <div class="card-body p-2">
+            <h6 class="card-title text-center mb-2">{{ venue.name }}</h6>
 
-            <!-- 🏛️ Venue Name -->
-            <h5 class="text-center">{{ venue.name }}</h5>
-
-            <!-- 🖼️ Venue Image -->
-            {% if venue.image %}
-                <img src="{{ venue.image.url }}" alt="{{ venue.name }}" style="width: 100%; border-radius: 6px; margin-bottom: 10px;">
-            {% endif %}
-
-            <!-- 🎵 Gigs as Cards -->
             {% for gig in gigs %}
-                <div class="card mb-3 p-2" style="background: white; border-radius: 4px;">
-                    <strong>
-                        <a href="{% url 'gigs:performer_gig_detail' gig.id %}">
-                            {{ gig.title }}
-                        </a>
-                    </strong><br>
-                    <small class="text-muted">📅 {{ gig.date|date:"M d, Y" }}</small><br>
-                    {% if gig.call_time %}
-                        <small class="text-muted">🎤 Call Time: {{ gig.call_time|time:"H:i" }}</small>
-                    {% endif %}
-                </div>
+              <div class="card-list-item board-card mb-2">
+                <a href="{% url 'gigs:performer_gig_detail' gig.id %}"
+                   class="d-flex justify-content-between align-items-center text-decoration-none">
+                  <div>
+                    <div class="fw-bold text-dark">{{ gig.title }}</div>
+                    <small class="text-muted">
+                      {{ gig.date|date:"M d, Y" }}
+                      {% if gig.start_time %}
+                        &nbsp;·&nbsp; {{ gig.start_time|time:"H:i" }}
+                        {% if gig.end_time %} – {{ gig.end_time|time:"H:i" }}{% endif %}
+                      {% endif %}
+                    </small>
+                  </div>
+                  {% if gig.my_availability == "Y" %}
+                    <span class="badge bg-success">Y</span>
+                  {% elif gig.my_availability == "N" %}
+                    <span class="badge bg-danger">N</span>
+                  {% elif gig.my_availability == "M" %}
+                    <span class="badge bg-warning text-dark">M</span>
+                  {% else %}
+                    <span class="badge bg-secondary">–</span>
+                  {% endif %}
+                </a>
+              </div>
             {% endfor %}
-
+          </div>
         </div>
+      </div>
     {% endfor %}
 
-    <!-- 🧱 Other Columns -->
+    <!-- 🎵 Other Board Columns -->
     {% for column in columns %}
-        {% if column.column_type != 'venue' %}
-            <div class="board-column" style="flex: 0 0 300px; background: #f8f8f8; border-radius: 6px; padding: 10px;">
-                <h4>{{ column.name }}</h4>
-                <div class="sortable-list" data-column-id="{{ column.id }}">
-
-                    {% for item in column.items.all|dictsort:"position" %}
-                        <div class="card" data-item-id="{{ item.id }}"
-                             style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:grab;">
-
-                            {% if item.is_rehearsal %}
-                                <a href="{% url 'rehearsal_detail' item.id %}">
-                                    <strong>{{ item.title }}</strong>
-                                </a><br>
-
-                                <p><strong>Your response:</strong>
-                                    {% if item.my_availability == 'yes' %}
-                                        ✅ Coming
-                                    {% elif item.my_availability == 'maybe' %}
-                                        ❓ Maybe
-                                    {% elif item.my_availability == 'no' %}
-                                        ❌ Can't
-                                    {% else %}
-                                        🚫 No response yet
-                                    {% endif %}
-                                </p>
-
-                                <small class="text-muted">📅 {{ item.event_date|date:"M d, Y H:i" }}</small>
-
-                                {% else %}
-                                <strong>{{ item.title }}</strong><br>
-                                {{ item.description|linebreaks }}
-                            
-                                {% if item.column.column_type == "photos" and item.photos.exists %}
-                                <p>
-                                  <a href="#" class="btn btn-sm btn-outline-primary"
-                                     data-bs-toggle="modal"
-                                     data-bs-target="#photoGalleryModal"
-                                     data-item-id="{{ item.id }}"
-                                     data-item-title="{{ item.title }}">
-                                    📷 View Photo Gallery
-                                  </a>
-                                </p>
-                              {% endif %}
-                            
-                                {% if item.youtube_embed_url %}
-                                    <div class="ratio ratio-16x9 mt-2 mb-2">
-                                        <iframe src="{{ item.youtube_embed_url }}" frameborder="0" allowfullscreen></iframe>
-                                    </div>
-                                {% endif %}
-                            
-                                {% if item.link %}
-                                    <p><a href="{{ item.link }}" target="_blank">🔗 Open Link</a></p>
-                                {% endif %}
-                            
-                                {% if item.event_date %}
-                                    <small class="text-muted">📅 {{ item.event_date|date:"M d, Y H:i" }}</small>
-                                {% endif %}
-                            {% endif %}
-                            
+      {% if column.column_type != 'venue' %}
+        <div class="board-column">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header">{{ column.name }}</div>
+            <div class="card-body p-2">
+              <div class="sortable-list" data-column-id="{{ column.id }}">
+                {% for item in column.items.all|dictsort:"position" %}
+                  <div class="card-list-item board-card mb-2" data-item-id="{{ item.id }}">
+                    {% if item.is_rehearsal %}
+                      <a href="{% url 'rehearsal_detail' item.id %}"
+                         class="d-flex justify-content-between align-items-center text-decoration-none">
+                        <div>
+                          <div class="fw-bold text-dark">{{ item.title }}</div>
+                          {% if item.event_date %}
+                            <small class="text-muted">📅 {{ item.event_date|date:"M d, Y" }}</small>
+                          {% endif %}
                         </div>
-                    {% endfor %}
-
-                </div>
+                        {% if item.my_availability == "yes" %}
+                          <span class="badge bg-success">Y</span>
+                        {% elif item.my_availability == "no" %}
+                          <span class="badge bg-danger">N</span>
+                        {% elif item.my_availability == "maybe" %}
+                          <span class="badge bg-warning text-dark">M</span>
+                        {% else %}
+                          <span class="badge bg-secondary">–</span>
+                        {% endif %}
+                      </a>
+                    {% else %}
+                      <div>
+                        <div class="fw-bold">{{ item.title }}</div>
+                        {% if item.cover_photo %}
+                          <img src="{{ item.cover_photo.image.url }}"
+                               alt="Cover for {{ item.title }}"
+                               style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 4px; margin-top:8px; margin-bottom:8px;">
+                        {% endif %}
+                        {{ item.description|linebreaks }}
+                        {% if item.column.column_type == "photos" and item.photos.exists %}
+                          <p class="mt-2">
+                            <a href="#" class="btn btn-sm btn-outline-primary"
+                               data-bs-toggle="modal"
+                               data-bs-target="#photoGalleryModal"
+                               data-item-id="{{ item.id }}"
+                               data-item-title="{{ item.title }}">
+                              📷 View Photo Gallery
+                            </a>
+                          </p>
+                        {% endif %}
+                        {% if item.youtube_embed_url %}
+                          <div class="ratio ratio-16x9 mt-2 mb-2">
+                            <iframe src="{{ item.youtube_embed_url }}" frameborder="0" allowfullscreen></iframe>
+                          </div>
+                        {% endif %}
+                        {% if item.link %}
+                          <p><a href="{{ item.link }}" target="_blank">🔗 Open Link</a></p>
+                        {% endif %}
+                        {% if item.event_date %}
+                          <small class="text-muted">📅 {{ item.event_date|date:"M d, Y H:i" }}</small>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+                {% empty %}
+                  <p class="text-muted small">No items</p>
+                {% endfor %}
+              </div>
             </div>
-        {% endif %}
+          </div>
+        </div>
+      {% endif %}
     {% endfor %}
 
-</div>
+  </div> {# board-scroll-row #}
+</div> {# container-fluid #}
+
+<!-- Keep your modal + JS code here from the last version -->
+
+{% endblock %}
+
+<!-- 🖼️ Lightbox / Photo Modal (AJAX) -->
 <div class="modal fade" id="photoGalleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="galleryModalLabel">Photo Gallery</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="photoGalleryContent">
-          <p>Loading photos...</p>
-        </div>
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="galleryModalLabel">Photo Gallery</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="photoGalleryContent">
+        <p>Loading photos...</p>
       </div>
     </div>
   </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const modal = document.getElementById('photoGalleryModal');
-      modal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const itemId = button.getAttribute('data-item-id');
-        const itemTitle = button.getAttribute('data-item-title');
-        const modalTitle = modal.querySelector('.modal-title');
-        const modalBody = document.getElementById('photoGalleryContent');
-  
-        modalTitle.textContent = `📷 ${itemTitle}`;
-  
-        // Clear previous content
-        modalBody.innerHTML = '<p>Loading photos...</p>';
-  
-        // Fetch photos via AJAX
-        fetch(`/board/api/items/${itemId}/photos/`)
-        .then(response => response.json())
-          .then(data => {
-            if (data.length === 0) {
-              modalBody.innerHTML = '<p>No photos found.</p>';
-              return;
-            }
-  
-            const galleryHTML = data.map(photo => `
-              <a href="${photo.url}" data-lightbox="item-${itemId}" data-title="${photo.caption || ''}">
-                <img src="${photo.url}" class="img-fluid mb-3" style="max-height: 200px; margin-right: 10px;" />
-              </a>
-            `).join('');
-  
-            modalBody.innerHTML = `<div class="d-flex flex-wrap">${galleryHTML}</div>`;
-          })
-          .catch(err => {
-            modalBody.innerHTML = '<p class="text-danger">Failed to load photos.</p>';
-          });
-      });
-    });
-  </script>
-   
+</div>
 
-{% endblock %}
+<!-- SortableJS for board columns (draggable items) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Sortable on each column's .sortable-list (only board columns)
+  document.querySelectorAll('.sortable-list').forEach(function(el) {
+    new Sortable(el, {
+      group: 'shared',
+      animation: 150,
+      onEnd: function(evt) {
+        const itemId = evt.item.dataset.itemId || evt.item.getAttribute('data-item-id');
+        const newColumnId = evt.to.dataset.columnId;
+        const newPosition = evt.newIndex;
+
+        fetch("{% url 'update_card_position' %}", {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            item_id: itemId,
+            new_column_id: newColumnId,
+            new_position: newPosition
+          })
+        }).catch(err => {
+          console.error('Failed to save card position', err);
+        });
+      }
+    });
+  });
+
+  // Photo gallery modal loader
+  const modal = document.getElementById('photoGalleryModal');
+  modal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const itemId = button.getAttribute('data-item-id');
+    const itemTitle = button.getAttribute('data-item-title');
+    const modalTitle = modal.querySelector('.modal-title');
+    const modalBody = document.getElementById('photoGalleryContent');
+
+    modalTitle.textContent = `📷 ${itemTitle}`;
+    modalBody.innerHTML = '<p>Loading photos...</p>';
+
+    fetch(`/board/api/items/${itemId}/photos/`)
+      .then(response => response.json())
+      .then(data => {
+        if (!data || data.length === 0) {
+          modalBody.innerHTML = '<p>No photos found.</p>';
+          return;
+        }
+
+        const galleryHTML = data.map(photo => `
+          <a href="${photo.url}" data-lightbox="item-${itemId}" data-title="${photo.caption || ''}">
+            <img src="${photo.url}" class="img-fluid mb-3" style="max-height: 200px; margin-right: 10px;" />
+          </a>
+        `).join('');
+
+        modalBody.innerHTML = `<div class="d-flex flex-wrap">${galleryHTML}</div>`;
+      })
+      .catch(err => {
+        modalBody.innerHTML = '<p class="text-danger">Failed to load photos.</p>';
+      });
+  });
+});
+</script>
+

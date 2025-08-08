@@ -2,11 +2,14 @@ from django.contrib import admin
 from .models import BoardColumn, BoardItem, BoardItemPhoto, RehearsalAvailability
 
 # Inline: Photos
+# board/admin.py
+
 class BoardItemPhotoInline(admin.TabularInline):
     model = BoardItemPhoto
     extra = 1
-    fields = ['image', 'uploaded_at']
+    fields = ['image', 'is_cover', 'uploaded_at']
     readonly_fields = ['uploaded_at']
+
 
 # Optional: Show thumbnail in admin
     def image_preview(self, obj):

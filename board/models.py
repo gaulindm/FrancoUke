@@ -71,16 +71,26 @@ class BoardItem(models.Model):
                     start_time = parsed.query.split("t=")[-1]
                     embed_url += f"?start={start_time.replace('s', '')}"
             return embed_url
-
         return None
-    
+
+
+
+   
+    @property
+    def cover_photo(self):
+        return self.photos.filter(is_cover=True).first() or self.photos.first()
+
+
+
 class BoardItemPhoto(models.Model):
-    board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name='photos')
+    board_item = models.ForeignKey('BoardItem', on_delete=models.CASCADE, related_name='photos')
     image = models.ImageField(upload_to='board_photos/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_cover = models.BooleanField(default=False)  # ✅ New field
 
     def __str__(self):
         return f"Photo for {self.board_item.title}"
+
 
 
 

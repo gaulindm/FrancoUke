@@ -3,38 +3,42 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
 import json
-
 from .models import BoardColumn, BoardItem, RehearsalAvailability
-from gigs.models import Gig, Venue
-
+from gigs.models import Gig, Venue, Availability  # <-- add Availability
 
 def full_board_view(request):
     columns = BoardColumn.objects.prefetch_related('items').all()
     rehearsals = BoardItem.objects.filter(is_rehearsal=True).select_related('column')
     gigs_by_venue = {}
 
-    # 🎤 Get all upcoming gigs grouped by venue
     venues = Venue.objects.all()
     for venue in venues:
         gigs = Gig.objects.filter(venue=venue, date__gte=timezone.now()).order_by('date')
         if gigs.exists():
             gigs_by_venue[venue] = gigs
 
-    # 🧍 Add `my_availability` directly to each rehearsal item
     if request.user.is_authenticated:
         user = request.user
+
+        # 🎵 Rehearsals
         for column in columns:
             for item in column.items.all():
                 if item.is_rehearsal:
                     availability = RehearsalAvailability.objects.filter(user=user, rehearsal=item).first()
                     item.my_availability = availability.status if availability else None
 
+        # 🎤 Gigs
+        for venue, gigs in gigs_by_venue.items():
+            for gig in gigs:
+                availability = Availability.objects.filter(player=user, gig=gig).first()
+                gig.my_availability = availability.status if availability else None
+
     return render(request, 'board/full_board.html', {
         'columns': columns,
         'gigs_by_venue': gigs_by_venue,
     })
+
 
 
 @csrf_exempt
