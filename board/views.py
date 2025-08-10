@@ -18,40 +18,52 @@ import json
 from .models import BoardColumn, BoardItem, RehearsalAvailability
 from gigs.models import Gig, Venue, Availability
 
-
 def full_board_view(request):
-    columns = BoardColumn.objects.prefetch_related('items').all()
+    columns = BoardColumn.objects.prefetch_related('items__photos').all()
     gigs_by_venue = {}
+    my_availability = {}
 
-    # Get venues and gigs
+    # 🎤 Get all upcoming gigs grouped by venue
     venues = Venue.objects.all()
     for venue in venues:
         gigs = Gig.objects.filter(venue=venue, date__gte=timezone.now()).order_by('date')
         if gigs.exists():
-            gigs_by_venue[venue] = list(gigs)  # convert to list so we can attach attributes
+            gigs_by_venue[venue] = gigs
 
-    # Get availability if logged in
+    # 🧍 Get my gig availability
     if request.user.is_authenticated:
         user = request.user
-        availabilities = Availability.objects.filter(player=user)
-        avail_dict = {a.gig_id: a.status for a in availabilities}
+        my_availability = {a.gig_id: a.status for a in Availability.objects.filter(player=user)}
 
-        # Annotate each gig with my_status
-        for venue, gigs in gigs_by_venue.items():
-            for gig in gigs:
-                gig.my_status = avail_dict.get(gig.id, None)
-
-        # Attach rehearsal availability to board items
+        # Attach rehearsal availability + cover photo to each BoardItem
         for column in columns:
             for item in column.items.all():
+                # rehearsal availability
                 if item.is_rehearsal:
                     availability = RehearsalAvailability.objects.filter(user=user, rehearsal=item).first()
                     item.my_availability = availability.status if availability else None
+
+                # cover photo logic
+                cover = item.photos.filter(is_cover=True).first()
+                if not cover:
+                    cover = item.photos.first()
+                #item.cover_photo = cover
+
     else:
-        # Not logged in → my_status is None
-        for venue, gigs in gigs_by_venue.items():
-            for gig in gigs:
-                gig.my_status = None
+        # Still attach cover photo for unauthenticated users
+        for column in columns:
+            for item in column.items.all():
+                cover = item.photos.filter(is_cover=True).first()
+                if not cover:
+                    cover = item.photos.first()
+                item.cover_photo = cover
+
+    return render(request, 'board/full_board.html', {
+        'columns': columns,
+        'gigs_by_venue': gigs_by_venue,
+        'my_availability': my_availability,
+    })
+
 
     return render(request, 'board/full_board.html', {
         'columns': columns,
