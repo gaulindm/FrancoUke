@@ -7,38 +7,56 @@ import json
 from .models import BoardColumn, BoardItem, RehearsalAvailability
 from gigs.models import Gig, Venue, Availability  # <-- add Availability
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+import json
+
+from .models import BoardColumn, BoardItem, RehearsalAvailability
+from gigs.models import Gig, Venue, Availability
+
+
 def full_board_view(request):
     columns = BoardColumn.objects.prefetch_related('items').all()
-    rehearsals = BoardItem.objects.filter(is_rehearsal=True).select_related('column')
     gigs_by_venue = {}
 
+    # Get venues and gigs
     venues = Venue.objects.all()
     for venue in venues:
         gigs = Gig.objects.filter(venue=venue, date__gte=timezone.now()).order_by('date')
         if gigs.exists():
-            gigs_by_venue[venue] = gigs
+            gigs_by_venue[venue] = list(gigs)  # convert to list so we can attach attributes
 
+    # Get availability if logged in
     if request.user.is_authenticated:
         user = request.user
+        availabilities = Availability.objects.filter(player=user)
+        avail_dict = {a.gig_id: a.status for a in availabilities}
 
-        # 🎵 Rehearsals
+        # Annotate each gig with my_status
+        for venue, gigs in gigs_by_venue.items():
+            for gig in gigs:
+                gig.my_status = avail_dict.get(gig.id, None)
+
+        # Attach rehearsal availability to board items
         for column in columns:
             for item in column.items.all():
                 if item.is_rehearsal:
                     availability = RehearsalAvailability.objects.filter(user=user, rehearsal=item).first()
                     item.my_availability = availability.status if availability else None
-
-        # 🎤 Gigs
+    else:
+        # Not logged in → my_status is None
         for venue, gigs in gigs_by_venue.items():
             for gig in gigs:
-                availability = Availability.objects.filter(player=user, gig=gig).first()
-                gig.my_availability = availability.status if availability else None
+                gig.my_status = None
 
     return render(request, 'board/full_board.html', {
         'columns': columns,
         'gigs_by_venue': gigs_by_venue,
     })
-
 
 
 @csrf_exempt
@@ -110,14 +128,23 @@ def board_item_gallery_view(request, item_id):
     return render(request, 'board/item_gallery.html', {'board_item': board_item})
 
 from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 from .models import BoardItem
 
+@require_GET
 def item_photo_list(request, item_id):
-    item = BoardItem.objects.get(id=item_id)
+    try:
+        item = BoardItem.objects.get(id=item_id)
+    except BoardItem.DoesNotExist:
+        return JsonResponse({'error': 'Item not found'}, status=404)
+
     photos = item.photos.all()
     data = [{
         'url': photo.image.url,
-        'caption': f"Photo {i+1}"
+        'caption': getattr(photo, 'caption', f"Photo {i+1}")
     } for i, photo in enumerate(photos)]
-    return JsonResponse(data, safe=False)
 
+    # ✅ Debug output in server log
+    print(f"DEBUG: Photos for item {item_id}: {data}")
+
+    return JsonResponse(data, safe=False)
