@@ -12,78 +12,106 @@
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
 
-    <!-- 🔹 Uke4ia Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-info shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-dark" href="{% url 'gigs:performer_gig_grid' %}">
-                🎵 Uke4ia Volunteers
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
-                    aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-    
-            <div class="collapse navbar-collapse" id="navbarToggle">
-                <!-- Left: Navigation links -->
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_list' %}active{% endif %}"
-                           href="{% url 'gigs:performer_gig_list' %}">
-                            Gig List
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_grid' %}active{% endif %}"
-                           href="{% url 'gigs:performer_gig_grid' %}">
-                            Gig Grid
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'availability_matrix' %}active{% endif %}"
-                           href="{% url 'gigs:availability_matrix' %}">
-                            Availability Matrix
-                        </a>
-                    </li>
-                </ul>
-    
-                <!-- Right: User info & dropdown -->
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle fw-bold text-dark" href="#" id="userDropdown" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                Hi, {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'users:profile' %}">
-                                        <i class="bi bi-person-circle me-2"></i> My Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item disabled" href="#" title="Coming Soon!">
-                                        <i class="bi bi-key me-2"></i> Change Password (soon)
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="btn btn-primary btn-sm" href="{% url 'users:login' %}">Login</a>
-                        </li>
-                    {% endif %}
-                </ul>
-                
+ 
+<!-- 🔹 Uke4ia Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-info shadow-sm">
+    <div class="container-fluid">
 
-            </div>
+        <!-- ✅ Brand now links to Full Board -->
+        <a class="navbar-brand fw-bold text-dark" href="{% url 'full_board' %}">
+            🎵 Uke4ia Volunteers
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
+                aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarToggle">
+            <!-- Left: Navigation links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <!-- ✅ First link: Full Board -->
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'full_board' %}active{% endif %}"
+                       href="{% url 'full_board' %}">
+                        Full Board
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_list' %}active{% endif %}"
+                       href="{% url 'gigs:performer_gig_list' %}">
+                        Gig List
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_grid' %}active{% endif %}"
+                       href="{% url 'gigs:performer_gig_grid' %}">
+                        Gig Grid
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'availability_matrix' %}active{% endif %}"
+                       href="{% url 'gigs:availability_matrix' %}">
+                        Availability Matrix
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right: User info with dropdown logout -->
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle fw-bold text-dark" href="#" id="userDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Hi, {{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
+                        {% comment %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'users:profile' %}">
+                                <i class="bi bi-person-circle me-2"></i> My Profile
+                            </a>
+                        </li>
+                        {% endcomment%}
+                        <!-- ✅ Link to landing page -->
+                        <li>
+                            <a class="dropdown-item" href="{% url 'landing' %}">
+                                <i class="bi bi-house-door me-2"></i> Landing Page
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item disabled" href="#" title="Coming Soon!">
+                                <i class="bi bi-key me-2"></i> Change Password (soon)
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                
+                        <!-- ✅ Logout via POST -->
+                        <li>
+                            <form action="{% url 'users:logout' %}" method="post" style="margin:0; padding:0;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger fw-bold" style="width:100%; text-align:left;">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+                    
+
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-primary btn-sm" href="{% url 'users:login' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
+
+
     
 
     <!-- 🔹 Top Banner -->

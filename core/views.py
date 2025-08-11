@@ -5,7 +5,7 @@ def landing_page(request):
     brands = [
         {
             "name": "FrancoUke",
-            "desc": "Your local ukulele songbook",
+            "desc": "Ton chansonnier francophone",
             "icon": "bi-music-note-beamed",
             "url": "francouke:home",
         },
@@ -17,9 +17,9 @@ def landing_page(request):
         },
         {
             "name": "Uke4ia Performers",
-            "desc": "Manage your availability and plan carpools",
+            "desc": "Manage your availability and be informed",
             "icon": "bi-people-fill",
-            "url": "gigs:performer_gig_grid",  # 👈 Goes to new grid dashboard
+            "url": "full_board",  # 👈 Goes to new grid dashboard
         },
     ]
     return render(request, "core/landing.html", {"brands": brands})
