@@ -1,0 +1,48 @@
+<div class="board-column" style="flex: 0 0 300px; background: #f8f8f8; border-radius: 6px; padding: 10px;">
+    <h4>{{ column.name }}</h4>
+    <div class="sortable-list" data-column-id="{{ column.id }}">
+      {% for item in column.items.all|dictsort:"position" %}
+        <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
+          <strong>{{ item.title }}</strong><br>
+          <p><strong>Your response:</strong>
+            {% if item.my_availability == 'yes' %}
+              ✅ Coming
+            {% elif item.my_availability == 'maybe' %}
+              ❓ Maybe
+            {% elif item.my_availability == 'no' %}
+              ❌ Can't
+            {% else %}
+              🚫 No response yet
+            {% endif %}
+          </p>
+          <small class="text-muted">📅 {{ item.event_date|date:"M d, Y H:i" }}</small><br>
+          
+          <button class="btn btn-sm btn-outline-info mt-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#rehearsalDetailModal{{ item.id }}">
+            📄 Click for Details
+          </button>
+  
+          <div class="modal fade" id="rehearsalDetailModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">{{ item.title }} - Details</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <p><strong>Date:</strong> {{ item.event_date|date:"M d, Y H:i" }}</p>
+                  <p><strong>Location:</strong> {{ item.location }}</p>
+                  <div>{{ item.rich_description|safe }}</div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  

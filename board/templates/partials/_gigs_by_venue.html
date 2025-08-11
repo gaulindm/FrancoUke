@@ -1,0 +1,42 @@
+{% for venue, gigs in gigs_by_venue.items %}
+  <div class="board-column" style="flex: 0 0 300px; background: #f8f8f8; border-radius: 6px; padding: 10px;">
+    <h5 class="text-center">{{ venue.name }}</h5>
+
+    {% if venue.image %}
+      <img src="{{ venue.image.url }}" alt="{{ venue.name }}" style="width: 100%; border-radius: 6px; margin-bottom: 10px;">
+    {% endif %}
+
+    <ul class="list-group">
+      {% for gig in gigs %}
+        <li class="list-group-item p-2">
+          <a href="{% url 'gigs:performer_gig_grid_detail' gig.id %}" 
+             class="d-flex justify-content-between align-items-center text-decoration-none">
+            <div>
+              <div class="fw-bold text-dark">{{ gig.title }}</div>
+              <small class="text-muted">
+                {{ gig.date|date:"M d, Y" }}
+                {% if gig.start_time %}
+                  {{ gig.start_time|time:"H:i" }}
+                  {% if gig.end_time %}
+                    - {{ gig.end_time|time:"H:i" }}
+                  {% endif %}
+                {% endif %}
+              </small>
+            </div>
+            
+            {% if gig.my_status == "Y" %}
+                <span class="badge bg-success">Y</span>
+            {% elif gig.my_status == "N" %}
+                <span class="badge bg-danger">N</span>
+            {% elif gig.my_status == "M" %}
+                <span class="badge bg-warning text-dark">M</span>
+            {% else %}
+                <span class="badge bg-secondary">–</span>
+            {% endif %}
+            
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endfor %}

@@ -1,0 +1,27 @@
+<div class="board-column" style="flex: 0 0 300px; background: #eef9ff; border-radius: 6px; padding: 10px;">
+    <h4>{{ column.name }}</h4>
+    <div class="sortable-list" data-column-id="{{ column.id }}">
+      {% for item in column.items.all|dictsort:"position" %}
+        <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
+          <strong>{{ item.title }}</strong><br>
+          {% if item.photos.exists %}
+            <img src="{{ item.photos.first.image.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
+          {% endif %}
+          <br>
+          {% if item.column.column_type == "photos" and item.photos.exists %}
+          <p>
+            <a href="#" class="btn btn-sm btn-outline-primary"
+               data-bs-toggle="modal"
+               data-bs-target="#photoGalleryModal"
+               data-item-id="{{ item.id }}"
+               data-item-title="{{ item.title }}">
+              📷 View Photo Gallery
+            </a>
+          </p>
+          {% endif %}
+          {{ item.description|linebreaks }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  

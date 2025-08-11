@@ -1,0 +1,26 @@
+<div class="board-column" style="flex: 0 0 300px; background: #fff3e0; border-radius: 6px; padding: 10px;">
+    <h4>🎭 Past Performances</h4>
+    <div class="sortable-list" data-column-id="{{ column.id }}">
+      {% for item in column.items.all|dictsort:"position" %}
+        <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
+          {% if item.cover_photo %}
+            <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
+          {% else %}
+            <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+              ❌ No image available
+            </div>
+          {% endif %}
+  
+          <strong>{{ item.title }}</strong><br>
+          {{ item.description|linebreaks }}
+  
+          {% if item.youtube_embed_url %}
+            <div class="ratio ratio-16x9 my-2">
+              <iframe src="{{ item.youtube_embed_url }}" title="YouTube video" allowfullscreen></iframe>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  

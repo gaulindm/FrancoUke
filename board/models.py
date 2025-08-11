@@ -11,6 +11,8 @@ class BoardColumn(models.Model):
         ('songs to listen', 'Songs To Listen'),
         ('rehearsal','Rehearsal'),
         ('rehearsal notes','Rehearsal Notes'),
+        ('past_performances', 'Past Performances'),  # ✅ New type
+
         # Add more if needed
     ]
 

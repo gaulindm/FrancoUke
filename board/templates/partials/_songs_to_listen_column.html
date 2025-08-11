@@ -1,0 +1,17 @@
+<div class="board-column" style="flex: 0 0 300px; background: #f0fff0; border-radius: 6px; padding: 10px;">
+    <h4>{{ column.name }}</h4>
+    <div class="sortable-list" data-column-id="{{ column.id }}">
+      {% for item in column.items.all|dictsort:"position" %}
+        <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
+          <strong>{{ item.title }}</strong><br>
+          {% if item.youtube_embed_url %}
+            <div class="ratio ratio-16x9 my-2">
+              <iframe src="{{ item.youtube_embed_url }}" title="YouTube video" allowfullscreen></iframe>
+            </div>
+          {% endif %}
+          {{ item.description|linebreaks }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  
