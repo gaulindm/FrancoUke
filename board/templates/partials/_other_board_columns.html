@@ -1,15 +1,18 @@
 {% for column in columns %}
   {% if column.column_type == "rehearsal" %}
     {% include "partials/_rehearsal_column.html" %}
-  
+
   {% elif column.column_type == "past_performances" %}
     {% include "partials/_past_performances_column.html" %}
-  
+{% elif column.column_type == "songs to listen" %}
+    {% include "partials/_songs_to_listen_column.html" %}
+
+
   {% elif column.column_type == "photos" %}
     {% include "partials/_photos_column.html" %}
-  {% comment %}
+
   {% else %}
     {% include "partials/_general_column.html" %}
-    {% endcomment %}
+
   {% endif %}
 {% endfor %}

@@ -56,7 +56,7 @@ def full_board_view(request):
                 cover = item.photos.filter(is_cover=True).first()
                 if not cover:
                     cover = item.photos.first()
-                item.cover_photo = cover
+                #item.cover_photo = cover
 
     return render(request, 'board/full_board.html', {
         'columns': columns,

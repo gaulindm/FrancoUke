@@ -27,7 +27,7 @@ class RehearsalAvailabilityInline(admin.TabularInline):
 # BoardItem Admin: Merged version
 @admin.register(BoardItem)
 class BoardItemAdmin(admin.ModelAdmin):
-    list_display = ['title', 'column', 'is_rehearsal', 'event_date', 'position']
+    list_display = ['title', 'column', 'is_rehearsal', 'event_date', 'start_time', 'end_time', 'position']
     list_filter = ['is_rehearsal', 'column']
     search_fields = ['title', 'description', 'rich_description', 'location']
     ordering = ['column__position', 'position']
@@ -41,7 +41,7 @@ class BoardItemAdmin(admin.ModelAdmin):
         }),
         ('Schedule & Location', {
             'fields': (
-                'event_date', 'location'
+                'event_date', 'start_time', 'end_time', 'location'
             ),
             'classes': ('collapse',)
         }),

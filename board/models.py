@@ -36,7 +36,11 @@ class BoardItem(models.Model):
     youtube_url = models.URLField(blank=True, null=True)  # Optional: Embed a video
     media_file = models.FileField(upload_to='board_media/', blank=True, null=True)  # Optional audio/video
     link = models.URLField(blank=True, null=True)  # Optional external link
-    event_date = models.DateTimeField(blank=True, null=True)  # For gigs or rehearsals
+    
+    event_date = models.DateField(blank=True, null=True)       # 📅 Date only
+    start_time = models.TimeField(blank=True, null=True)       # 🕑 Start
+    end_time = models.TimeField(blank=True, null=True)         # 🕒 End
+
     created_at = models.DateTimeField(auto_now_add=True)
     position = models.PositiveIntegerField(default=0)  # Position in column
     location = models.CharField(max_length=255, blank=True)  # ✅ Address
