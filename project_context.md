@@ -84,6 +84,22 @@ Implements a mix of CBVs and FBVs:
 
 ### 2025-08-17
 
+## Gig Detail View Enhancements
+
+### Collapsible Description
+- Gig `description` field is now displayed in a collapsible container.
+- By default, only the first ~100px of text is visible with a subtle fade-out effect.
+- A **"See more"** button allows users to expand the full description.
+- Once expanded, the button toggles to **"See less"** to collapse the text again.
+- The toggle button is automatically hidden if the description is shorter than the collapsed height.
+
+### User Experience
+- Prevents long descriptions from overwhelming the page layout.
+- Improves readability on both desktop and mobile views.
+- Maintains clean UI consistent with the card-based design.
+
+
+
 ### Past Event Description Handling
 - **Problem:** Long formatted text from `rich_description` (CKEditor field) could overwhelm the card layout.
 - **Solution:** Implemented preview + expand/collapse functionality.
