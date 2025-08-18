@@ -9,6 +9,7 @@ urlpatterns = [
     path('rehearsal/<int:pk>/', views.rehearsal_detail_view, name='rehearsal_detail'),  # 👈 new detail route
     path('item/<int:item_id>/gallery/', board_item_gallery_view, name='item_gallery'),
     path('api/items/<int:item_id>/photos/', item_photo_list, name='item_photo_list'),
+    path('public/', views.public_board, name='public_board'),  # accessible to everyone
 
 
 

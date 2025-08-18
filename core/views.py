@@ -19,7 +19,7 @@ def landing_page(request):
             "name": "Uke4ia Performers",
             "desc": "Manage your availability and be informed",
             "icon": "bi-people-fill",
-            "url": "full_board",  # 👈 Goes to new grid dashboard
+            "url": "public_board",  # 👈 Goes to new grid dashboard
         },
     ]
     return render(request, "core/landing.html", {"brands": brands})

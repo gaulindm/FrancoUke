@@ -82,6 +82,21 @@ Implements a mix of CBVs and FBVs:
 - This layout now works well for mobile — horizontal scroll can be swiped.
 
 
+### 2025-08-17
+
+### Past Event Description Handling
+- **Problem:** Long formatted text from `rich_description` (CKEditor field) could overwhelm the card layout.
+- **Solution:** Implemented preview + expand/collapse functionality.
+  - By default, only a few lines of the description are shown.
+  - Users can click "See more" to expand inline or rely on the modal for the full details.
+- **Implementation Details:**
+  - Template uses two blocks: `.short-text` (clamped height) and `.full-text` (hidden).
+  - A small JavaScript toggle switches between them and updates link text.
+  - In the modal view, the full `rich_description` is rendered with full formatting.
+- **Impact:** Cleaner grid display, improved readability, and still full access to rich event details.
+
+
+
 ### 2025-08-04: Uke4ia dashboard
 
 # FrancoUke Project Context

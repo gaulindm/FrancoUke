@@ -1,0 +1,101 @@
+{% extends 'base_uke4ia.html' %}
+{% load board_extras %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox-plus-jquery.min.js"></script>
+
+<div class="board-container" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;">
+
+  {# --- Venue columns --- #}
+  {% if gigs_by_venue %}
+    {% for venue, gigs in gigs_by_venue.items %}
+      <div class="board-column" style="flex: 0 0 300px; background: #e6f3ff; border-radius: 6px; padding: 10px;">
+        <h5 class="text-center">{{ venue.name }}</h5>
+
+        {% if venue.image %}
+          <img src="{{ venue.image.url }}" alt="{{ venue.name }}" style="width:100%; border-radius:6px; margin-bottom:12px;">
+        {% endif %}
+
+        {% for gig in gigs %}
+          <div class="gig-card" style="background-color:#fff; border-radius:8px; padding:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+            <div class="fw-bold text-dark">{{ gig.title }}</div>
+            <small class="text-muted">
+              {{ gig.date|date:"M d, Y" }}
+              {% if gig.start_time %}
+                {{ gig.start_time|time:"H:i" }}
+                {% if gig.end_time %}
+                  – {{ gig.end_time|time:"H:i" }}
+                {% endif %}
+              {% endif %}
+            </small>
+          </div>
+        {% endfor %}
+
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {# --- Other columns --- #}
+  {% for column in columns %}
+    {% if column.column_type != "venue" %}
+      <div class="board-column" style="flex: 0 0 300px; background: #f8f9fa; border-radius: 6px; padding: 10px;">
+        {% if column.column_type == "rehearsal" %}
+          {% include "partials/_rehearsal_column.html" with column=column items=column.items.all %}
+        {% elif column.column_type == "past_performances" %}
+          {% include "partials/_past_performances_column.html" with column=column items=column.items.all %}
+        {% elif column.column_type == "songs to listen" %}
+          {% include "partials/_songs_to_listen_column.html" with column=column items=column.items.all %}
+        {% elif column.column_type == "photos" %}
+          {% include "partials/_photos_column.html" with column=column items=column.items.all %}
+        {% else %}
+          {% include "partials/_general_column.html" with column=column items=column.items.all %}
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+</div>
+
+{% include 'partials/_photo_gallery_modal.html' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modal = document.getElementById('photoGalleryModal');
+  modal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const itemId = button.getAttribute('data-item-id');
+    const itemTitle = button.getAttribute('data-item-title');
+    const modalTitle = modal.querySelector('.modal-title');
+    const modalBody = document.getElementById('photoGalleryContent');
+
+    modalTitle.textContent = `📷 ${itemTitle}`;
+    modalBody.innerHTML = '<p>Loading photos...</p>';
+
+    fetch(`/board/api/items/${itemId}/photos/`)
+      .then(response => response.json())
+      .then(data => {
+        const photos = Array.isArray(data) ? data : (data.photos || []);
+        if (photos.length === 0) {
+          modalBody.innerHTML = '<p>No photos found.</p>';
+          return;
+        }
+
+        const galleryHTML = photos.map(photo => `
+          <a href="${photo.url}" data-lightbox="item-${itemId}" data-title="${photo.caption || ''}">
+            <img src="${photo.url}" class="img-fluid mb-3" style="max-height: 200px; margin-right: 10px;" />
+          </a>
+        `).join('');
+
+        modalBody.innerHTML = `<div class="d-flex flex-wrap">${galleryHTML}</div>`;
+      })
+      .catch(err => {
+        modalBody.innerHTML = '<p class="text-danger">Failed to load photos.</p>';
+        console.error("Photo gallery error:", err);
+      });
+
+  });
+});
+</script>
+
+{% endblock %}

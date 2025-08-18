@@ -25,8 +25,13 @@ class BoardColumn(models.Model):
         default='general'
     )
 
+    class Meta:
+        ordering = ['position']
+
     def __str__(self):
         return self.name
+
+
 
 
 class BoardItem(models.Model):

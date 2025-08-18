@@ -18,6 +18,7 @@ import json
 from .models import BoardColumn, BoardItem, RehearsalAvailability
 from gigs.models import Gig, Venue, Availability
 
+@login_required
 def full_board_view(request):
     columns = BoardColumn.objects.prefetch_related('items__photos').all()
     gigs_by_venue = {}
@@ -68,6 +69,31 @@ def full_board_view(request):
     return render(request, 'board/full_board.html', {
         'columns': columns,
         'gigs_by_venue': gigs_by_venue,
+    })
+
+
+from django.shortcuts import render
+from .models import BoardColumn
+from gigs.models import Gig  # correct import
+
+
+
+def public_board(request):
+    # 1️⃣ Get all public board columns
+    columns = BoardColumn.objects.filter(is_public=True).prefetch_related('items')
+
+    # 2️⃣ Build a dictionary of gigs grouped by venue
+    gigs = Gig.objects.select_related('venue')  # no is_public filter since field doesn't exist
+    gigs_by_venue = {}
+    for gig in gigs:
+        if gig.venue not in gigs_by_venue:
+            gigs_by_venue[gig.venue] = []
+        gigs_by_venue[gig.venue].append(gig)
+
+    # 3️⃣ Pass columns and gigs_by_venue to the template
+    return render(request, 'board/public_board.html', {
+        "columns": columns,
+        "gigs_by_venue": gigs_by_venue,
     })
 
 

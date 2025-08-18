@@ -16,3 +16,51 @@
     background-color: #f0f8ff;
     border-radius: 0.25rem;
 }
+/* Column container */
+.board-container {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+/* Each column */
+.board-column {
+    flex: 0 0 300px;
+    border-radius: 8px;
+    padding: 12px;
+    background-color: #e0f2ff; /* lighter blue for the column background */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Column title */
+.board-column h5 {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+/* Cards inside column */
+.gig-card {
+    background-color: #ffffff; /* pure white cards stand out more */
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* slightly stronger shadow */
+    transition: transform 0.1s ease;
+}
+
+.gig-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Optional: scrollbar styling */
+.board-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.board-container::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}

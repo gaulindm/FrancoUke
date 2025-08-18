@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Uke4ia Volunteer Portal{% endblock %}</title>
+    <title>{% block title %}Uke4ia{% endblock %}</title>
 
     <!-- ✅ Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,7 @@
 
         <!-- ✅ Brand now links to Full Board -->
         <a class="navbar-brand fw-bold text-dark" href="{% url 'full_board' %}">
-            🎵 Uke4ia Volunteers
+            🎵 Uke4ia Performance group
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
@@ -28,36 +28,45 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarToggle">
-            <!-- Left: Navigation links -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                <!-- ✅ First link: Full Board -->
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'full_board' %}active{% endif %}"
-                       href="{% url 'full_board' %}">
-                        Full Board
-                    </a>
-                </li>
+        <!-- Left: Navigation links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <!-- Full Board always visible -->
+            {% if user.is_authenticated %} 
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'full_board' %}active{% endif %}"
+                href="{% url 'full_board' %}">
+                    Full Board
+                </a>
+            </li>
 
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_list' %}active{% endif %}"
-                       href="{% url 'gigs:performer_gig_list' %}">
-                        Gig List
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_grid' %}active{% endif %}"
-                       href="{% url 'gigs:performer_gig_grid' %}">
-                        Gig Grid
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'availability_matrix' %}active{% endif %}"
-                       href="{% url 'gigs:availability_matrix' %}">
-                        Availability Matrix
-                    </a>
-                </li>
-            </ul>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_list' %}active{% endif %}"
+                href="{% url 'gigs:performer_gig_list' %}">
+                    Gig List
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_grid' %}active{% endif %}"
+                href="{% url 'gigs:performer_gig_grid' %}">
+                    Gig Grid
+                </a>
+            </li>
+
+            <!-- Availability Matrix visible only for authenticated users -->
+           
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'availability_matrix' %}active{% endif %}"
+                href="{% url 'gigs:availability_matrix' %}">
+                    Availability Matrix
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+
+
+
 
             <!-- Right: User info with dropdown logout -->
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -114,11 +123,19 @@
 
     
 
-    <!-- 🔹 Top Banner -->
+   <!-- 🔹 Top Banner -->
+    {% if user.is_authenticated %}
     <div class="pt-5 pb-3 bg-primary text-white text-center shadow-sm">
         <h2 class="mb-0">Welcome to the Uke4ia Volunteer Portal</h2>
         <small>Manage your availability for upcoming performances</small>
     </div>
+    {% else %}
+    <div class="pt-5 pb-3 bg-primary text-white text-center shadow-sm">
+        <h2 class="mb-0">Welcome to Uke4ia!</h2>
+        <small>Check out our volunteer activities and public boards</small>
+    </div>
+    {% endif %}
+
 
     <!-- 🔹 Main Content -->
     <main class="flex-grow-1 container my-4">

@@ -23,7 +23,23 @@
         font-size: 0.95rem;
         line-height: 1.4;
     }
-    
+    /* Collapsed state */
+.desc-collapsed {
+  max-height: 100px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Faded effect when collapsed */
+.desc-collapsed::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, transparent, white);
+}
     .gig-card .description ul,
     .gig-card .description ol {
         margin: 0.4em 0 0.4em 1.2em;
@@ -32,9 +48,25 @@
     .gig-card .description li {
         margin-bottom: 0.2em;
     }
+    
+    .desc-collapsed {
+        max-height: 100px; /* limit preview height */
+        overflow: hidden;
+        position: relative;
+    }
+    .desc-collapsed::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2.5em;
+        background: linear-gradient(to bottom, transparent, white);
+    }
+
     </style>
-<a href="{% url 'gigs:performer_gig_grid' %}" class="btn btn-outline-secondary mb-4">
-    &larr; Back to Venue Grid
+<a href="{% url 'full_board' %}" class="btn btn-outline-secondary mb-4">
+    &larr; Back to Uke4ia Board
 </a>
 
 <div class="row g-4">
@@ -57,10 +89,14 @@
     {% endif %}
 
     {% if gig.description %}
-        <div class="description">
+    <div class="description-container">
+        <div id="desc-preview" class="description desc-collapsed">
             {{ gig.description|safe }}
         </div>
+        <button id="toggle-desc" class="btn btn-link p-0 mt-2">See more</button>
+    </div>
     {% endif %}
+    
             </div>
         </div>
 
@@ -131,4 +167,25 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const desc = document.getElementById("desc-preview");
+        const toggleBtn = document.getElementById("toggle-desc");
+    
+        if (desc && toggleBtn) {
+            // Only show toggle if description is taller than collapsed max-height
+            if (desc.scrollHeight <= 100) {
+                toggleBtn.style.display = "none";
+            }
+    
+            toggleBtn.addEventListener("click", function () {
+                desc.classList.toggle("desc-collapsed");
+                toggleBtn.textContent = desc.classList.contains("desc-collapsed") 
+                    ? "See more" 
+                    : "See less";
+            });
+        }
+    });
+    </script>
+    
 {% endblock %}
