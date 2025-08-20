@@ -18,6 +18,37 @@ import json
 from .models import BoardColumn, BoardItem, RehearsalAvailability
 from gigs.models import Gig, Venue, Availability
 
+
+# views.py
+from rest_framework import viewsets
+from .models import BoardItem
+from .serializers import BoardItemSerializer
+
+
+class BoardItemViewSet(viewsets.ModelViewSet):
+    queryset = BoardItem.objects.all().order_by("-created_at")
+    serializer_class = BoardItemSerializer
+
+
+from rest_framework import viewsets
+from .models import Performance, Event
+from .serializers import PerformanceSerializer, EventSerializer
+
+class PerformanceViewSet(viewsets.ModelViewSet):
+    queryset = Performance.objects.all().order_by("-created_at")
+    serializer_class = PerformanceSerializer
+
+
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = (
+        Event.objects
+        .select_related("board_item")
+        .prefetch_related("photos")
+        .order_by("event_date", "start_time", "title")
+    )
+    serializer_class = EventSerializer
+
+
 @login_required
 def full_board_view(request):
     columns = BoardColumn.objects.prefetch_related('items__photos').all()
@@ -40,9 +71,10 @@ def full_board_view(request):
         for column in columns:
             for item in column.items.all():
                 # rehearsal availability
-                if item.is_rehearsal:
-                    availability = RehearsalAvailability.objects.filter(user=user, rehearsal=item).first()
-                    item.my_availability = availability.status if availability else None
+                if item.events.filter(event_type="rehearsal").exists():
+                    # Do rehearsal-related logic
+                    rehearsal = item.events.filter(event_type="rehearsal").first()
+                    # You can now use rehearsal.event_date, rehearsal.start_time, etc.
 
                 # cover photo logic
                 cover = item.photos.filter(is_cover=True).first()
@@ -124,23 +156,27 @@ def update_card_position(request):
 
     return JsonResponse({'status': 'invalid method'}, status=405)
 
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Performance, RehearsalAvailability
 
 @login_required
 def update_availability(request):
     if request.method == 'POST':
-        rehearsal_id = request.POST.get('rehearsal_id')
+        performance_id = request.POST.get('performance_id')
         status = request.POST.get('status')
 
-        try:
-            rehearsal = BoardItem.objects.get(id=rehearsal_id, is_rehearsal=True)
-        except BoardItem.DoesNotExist:
-            return redirect('full_board')
+        performance = get_object_or_404(Performance, id=performance_id, is_rehearsal=True)
 
         RehearsalAvailability.objects.update_or_create(
             user=request.user,
-            rehearsal=rehearsal,
+            performance=performance,
             defaults={'status': status}
         )
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"success": True, "status": status, "user": request.user.username})
 
     return redirect('full_board')
 
@@ -186,3 +222,4 @@ def item_photo_list(request, item_id):
     print(f"DEBUG: Photos for item {item_id}: {data}")
 
     return JsonResponse(data, safe=False)
+

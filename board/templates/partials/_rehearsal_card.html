@@ -1,0 +1,51 @@
+<div class="card"
+     style="background:#f0f9ff; padding:10px; margin-bottom:10px; border-radius:4px; cursor:pointer;"
+     data-bs-toggle="modal" data-bs-target="#rehearsalModal{{ item.id }}">
+
+  <strong>{{ item.title }}</strong><br>
+  <small class="text-muted">
+    {% if item.performance.event_date %}
+      <p><strong>Date:</strong> {{ item.performance.event_date|date:"M d, Y" }}</p>
+    {% endif %}
+    {% if item.performance.start_time %}
+      <p><strong>Time:</strong> {{ item.performance.start_time|time:"g:i A" }}
+        {% if item.performance.end_time %} - {{ item.performance.end_time|time:"g:i A" }}{% endif %}
+      </p>
+    {% endif %}
+  </small>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="rehearsalModal{{ item.id }}" tabindex="-1"
+     aria-labelledby="rehearsalModalLabel{{ item.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">🎶 Rehearsal – {{ item.title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        {% if item.performance.event_date %}
+          <p><strong>Date:</strong> {{ item.performance.event_date|date:"M d, Y" }}</p>
+        {% endif %}
+        {% if item.performance.start_time %}
+          <p><strong>Time:</strong> {{ item.performance.start_time|time:"g:i A" }}
+            {% if item.performance.end_time %} - {{ item.performance.end_time|time:"g:i A" }}{% endif %}
+          </p>
+        {% endif %}
+
+        <div>{{ item.rich_description|safe }}</div>
+
+        <hr>
+        <h6>Availability</h6>
+        <ul>
+          {% for availability in item.availabilities.all %}
+            <li>{{ availability.user.username }} → {{ availability.get_status_display }}</li>
+          {% empty %}
+            <li>No responses yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

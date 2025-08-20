@@ -49,7 +49,9 @@ INSTALLED_APPS = [
     'core',
     'ckeditor',
     'board',
-    'django.contrib.sites'
+    'django.contrib.sites',
+    "rest_framework",
+
     
 
 ]

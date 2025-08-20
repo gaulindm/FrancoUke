@@ -1,18 +1,31 @@
 {% for column in columns %}
-  {% if column.column_type == "rehearsal" %}
-    {% include "partials/_rehearsal_column.html" %}
-
-  {% elif column.column_type == "past_performances" %}
-    {% include "partials/_past_performances_column.html" %}
-{% elif column.column_type == "songs to listen" %}
-    {% include "partials/_songs_to_listen_column.html" %}
-
-
-  {% elif column.column_type == "photos" %}
+  {% if column.column_type == "photos" %}
     {% include "partials/_photos_column.html" %}
+    
+  {% elif column.column_type == "songs_to_listen" %}
+    {% include "partials/_songs_to_listen_column.html" %}
+{% comment %}
+  {% elif column.column_type == "venue" %}
+    {% include "partials/_venue_column.html" %}
+    {% endcomment %}
+  {% elif column.column_type == "general" %}
+    <div class="board-column" style="flex: 0 0 300px; background:#f9f9f9; border-radius:6px; padding:10px;">
+      <h4>{{ column.name }}</h4>
+      <div class="sortable-list" data-column-id="{{ column.id }}">
+        {% for item in column.items.all|dictsort:"position" %}
+          {% if item.performance.is_rehearsal %}
+            {% include "partials/_rehearsal_card.html" with item=item %}
+          {% else %}
+            {% include "partials/_performance_card.html" with item=item %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
 
   {% else %}
-    {% include "partials/_general_column.html" %}
-
+    <div class="board-column">
+      <h4>{{ column.name }}</h4>
+      <p>⚠️ Column type not recognized</p>
+    </div>
   {% endif %}
 {% endfor %}

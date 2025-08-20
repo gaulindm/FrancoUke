@@ -4,9 +4,8 @@
       {% for item in column.items.all|dictsort:"position" %}
         <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
           <strong>{{ item.title }}</strong><br>
-          {% if item.cover_photo %}
-            <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
-          {% endif %}
+
+
           {{ item.description|linebreaks }}
         </div>
       {% endfor %}

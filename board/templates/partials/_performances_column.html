@@ -1,0 +1,27 @@
+<div class="board-column" style="flex: 0 0 300px; background: #fff3e0; border-radius: 6px; padding: 10px;">
+    <h4>
+      {% if column.column_type == "rehearsal" %}
+        🎵 Rehearsals
+      {% elif column.column_type == "past_performances" %}
+        🎭 Past Performances
+      {% else %}
+        🎶 Performances
+      {% endif %}
+    </h4>
+  
+    <div class="sortable-list" data-column-id="{{ column.id }}">
+      {% for item in column.items.all|dictsort:"position" %}
+        
+        {# Show only relevant events depending on column type #}
+        {% if column.column_type == "rehearsal" and item.performance_type == "rehearsal" %}
+          {% include "partials/_performance_card.html" %}
+        {% elif column.column_type == "past_performances" and item.performance_type == "past" %}
+          {% include "partials/_performance_card.html" %}
+        {% elif column.column_type not in "rehearsal past_performances" %}
+          {% include "partials/_performance_card.html" %}
+        {% endif %}
+  
+      {% endfor %}
+    </div>
+  </div>
+  
