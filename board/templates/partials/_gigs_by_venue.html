@@ -18,17 +18,15 @@
                 <div class="fw-bold text-dark">{{ gig.title }}</div>
               </td>
               <td rowspan="2" style="width: 15%; text-align: right; vertical-align: middle;">
-                {% with status=my_availability|get_item:gig.id %}
-                  {% if status == "Y" %}
-                      <span class="badge bg-success">Y</span>
-                  {% elif status == "N" %}
-                      <span class="badge bg-danger">N</span>
-                  {% elif status == "M" %}
-                      <span class="badge bg-warning text-dark">M</span>
-                  {% else %}
-                      <span class="badge bg-secondary">–</span>
-                  {% endif %}
-                {% endwith %}
+                {% if status == "Y" %}
+                    <span class="badge bg-success">Y</span>
+                {% elif status == "N" %}
+                    <span class="badge bg-danger">N</span>
+                {% elif status == "M" %}
+                    <span class="badge bg-warning text-dark">M</span>
+                {% else %}
+                    <span class="badge bg-secondary">–</span>
+                {% endif %}
               </td>
             </tr>
             <tr>

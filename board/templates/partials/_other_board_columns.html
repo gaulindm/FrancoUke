@@ -4,10 +4,10 @@
     
   {% elif column.column_type == "songs_to_listen" %}
     {% include "partials/_songs_to_listen_column.html" %}
-{% comment %}
+
   {% elif column.column_type == "venue" %}
     {% include "partials/_venue_column.html" %}
-    {% endcomment %}
+    
   {% elif column.column_type == "general" %}
     <div class="board-column" style="flex: 0 0 300px; background:#f9f9f9; border-radius:6px; padding:10px;">
       <h4>{{ column.name }}</h4>

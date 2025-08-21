@@ -2,17 +2,32 @@
      style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:pointer;"
      data-bs-toggle="modal" data-bs-target="#performanceModal{{ item.id }}">
 
-     {% if item.cover_photo %}
-     <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
-   {% elif item.media_file %}
-     <img src="{{ item.media_file.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
-   {% else %}
-     <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
-       ❌ No image available
-     </div>
-   {% endif %}
+  <!-- Cover / Media -->
+  {% if item.cover_photo %}
+    <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
+  {% elif item.media_file %}
+    <img src="{{ item.media_file.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
+  {% else %}
+    <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+      ❌ No image available
+    </div>
+  {% endif %}
 
-  <strong>{{ item.title }}</strong><br>
+  <!-- Title + Availability -->
+  <div class="d-flex justify-content-between align-items-center mt-2">
+    <strong>{{ item.title }}</strong>
+    {% if item.performance.my_availability == "yes" %}
+      <span class="badge bg-success">Y</span>
+    {% elif item.performance.my_availability == "no" %}
+      <span class="badge bg-danger">N</span>
+    {% elif item.performance.my_availability == "maybe" %}
+      <span class="badge bg-warning text-dark">M</span>
+    {% else %}
+      <span class="badge bg-secondary">–</span>
+    {% endif %}
+  </div>
+
+  <!-- Date + Time + Location -->
   <small class="text-muted">
     {% if item.performance.event_date %}
       <p><strong>Date:</strong> {{ item.performance.event_date|date:"M d, Y" }}</p>
@@ -22,13 +37,11 @@
         {% if item.performance.end_time %} - {{ item.performance.end_time|time:"g:i A" }}{% endif %}
       </p>
     {% endif %}
-    
     {% if item.performance.location %}
       <p><strong>Location:</strong> {{ item.performance.location }}</p>
     {% endif %}
   </small>
 </div>
-
 <!-- Modal -->
 <div class="modal fade" id="performanceModal{{ item.id }}" tabindex="-1"
      aria-labelledby="performanceModalLabel{{ item.id }}" aria-hidden="true">

@@ -48,12 +48,16 @@ class EventViewSet(viewsets.ModelViewSet):
     )
     serializer_class = EventSerializer
 
-
+# views.py
 @login_required
 def full_board_view(request):
-    columns = BoardColumn.objects.prefetch_related('items__photos').all()
+    # Prefetch related performance + availabilities + photos
+    columns = BoardColumn.objects.prefetch_related(
+        'items__photos',
+        'items__performance__availabilities'
+    ).all()
+
     gigs_by_venue = {}
-    my_availability = {}
 
     # 🎤 Get all upcoming gigs grouped by venue
     venues = Venue.objects.all()
@@ -62,41 +66,22 @@ def full_board_view(request):
         if gigs.exists():
             gigs_by_venue[venue] = gigs
 
-    # 🧍 Get my gig availability
-    if request.user.is_authenticated:
-        user = request.user
-        my_availability = {a.gig_id: a.status for a in Availability.objects.filter(player=user)}
+    # 🧍 Attach availability + cover photo to each board item
+    user = request.user
+    for column in columns:
+        for item in column.items.all():
 
-        # Attach rehearsal availability + cover photo to each BoardItem
-        for column in columns:
-            for item in column.items.all():
-                # rehearsal availability
-                if item.events.filter(event_type="rehearsal").exists():
-                    # Do rehearsal-related logic
-                    rehearsal = item.events.filter(event_type="rehearsal").first()
-                    # You can now use rehearsal.event_date, rehearsal.start_time, etc.
-
-                # cover photo logic
-                cover = item.photos.filter(is_cover=True).first()
-                if not cover:
-                    cover = item.photos.first()
-                #item.cover_photo = cover
-
-    else:
-        # Still attach cover photo for unauthenticated users
-        for column in columns:
-            for item in column.items.all():
-                cover = item.photos.filter(is_cover=True).first()
-                if not cover:
-                    cover = item.photos.first()
-                #item.cover_photo = cover
-
-    return render(request, 'board/full_board.html', {
-        'columns': columns,
-        'gigs_by_venue': gigs_by_venue,
-        'my_availability': my_availability,
-    })
-
+            # 👉 Performance availability
+            if hasattr(item, "performance"):
+                if user.is_authenticated:
+                    availability = item.performance.availabilities.filter(user=user).first()
+                    item.performance.my_availability = availability.status if availability else None
+                else:
+                    item.performance.my_availability = None
+                        
+            # 👉 Cover photo
+            cover = item.photos.filter(is_cover=True).first() or item.photos.first()
+            item.cover_photo = item.photos.filter(is_cover=True).first() or item.photos.first()
 
     return render(request, 'board/full_board.html', {
         'columns': columns,
