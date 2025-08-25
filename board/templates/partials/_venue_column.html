@@ -1,25 +1,21 @@
-{% for venue, gigs in gigs_by_venue.items %}
-  <div class="board-column" style="flex: 0 0 300px; background: #e6f3ff; border-radius: 6px; padding: 10px;">
+{% for venue, performances in venues.items %}
+  <div class="board-column"
+       style="flex: 0 0 300px; background: #e6f3ff; border-radius: 6px; padding: 10px;">
+    
+    <!-- Venue title -->
     <h5 class="text-center">{{ venue.name }}</h5>
 
+    <!-- Venue image -->
     {% if venue.image %}
       <img src="{{ venue.image.url }}" alt="{{ venue.name }}"
            style="width: 100%; border-radius: 6px; margin-bottom: 12px;">
     {% endif %}
 
-    {% for gig in gigs %}
-      <div class="gig-card" style="background-color: #ffffff; border-radius: 8px; padding: 10px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <div class="fw-bold text-dark">{{ gig.title }}</div>
-        <small class="text-muted">
-          {{ gig.date|date:"M d, Y" }}
-          {% if gig.start_time %}
-            {{ gig.start_time|time:"H:i" }}
-            {% if gig.end_time %}
-              – {{ gig.end_time|time:"H:i" }}
-            {% endif %}
-          {% endif %}
-        </small>
-      </div>
+    <!-- Performances for this venue -->
+    {% for perf in performances %}
+      {% include "partials/_performance_card.html" with item=perf.boarditem_set.first %}
+    {% empty %}
+      <p class="text-muted">No performances scheduled yet.</p>
     {% endfor %}
   </div>
 {% endfor %}

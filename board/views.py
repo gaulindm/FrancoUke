@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import BoardColumn, BoardItem, RehearsalAvailability
+from .models import BoardColumn, BoardItem, PerformanceAvailability
 from gigs.models import Gig, Venue, Availability  # <-- add Availability
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import json
 
-from .models import BoardColumn, BoardItem, RehearsalAvailability
+from .models import BoardColumn, BoardItem, PerformanceAvailability
 from gigs.models import Gig, Venue, Availability
 
 
@@ -48,45 +48,61 @@ class EventViewSet(viewsets.ModelViewSet):
     )
     serializer_class = EventSerializer
 
-# views.py
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import BoardColumn, Performance, PerformanceAvailability
+
+
+from .models import BoardColumn, Venue, Performance
+
 @login_required
 def full_board_view(request):
-    # Prefetch related performance + availabilities + photos
     columns = BoardColumn.objects.prefetch_related(
         'items__photos',
         'items__performance__availabilities'
     ).all()
 
-    gigs_by_venue = {}
+    venues = Venue.objects.prefetch_related(
+        'performances__board_item__photos',
+        'performances__availabilities'
+    ).all()
 
-    # 🎤 Get all upcoming gigs grouped by venue
-    venues = Venue.objects.all()
-    for venue in venues:
-        gigs = Gig.objects.filter(venue=venue, date__gte=timezone.now()).order_by('date')
-        if gigs.exists():
-            gigs_by_venue[venue] = gigs
-
-    # 🧍 Attach availability + cover photo to each board item
     user = request.user
+
+    # Attach availability and cover photos like before
     for column in columns:
         for item in column.items.all():
-
-            # 👉 Performance availability
             if hasattr(item, "performance"):
-                if user.is_authenticated:
-                    availability = item.performance.availabilities.filter(user=user).first()
-                    item.performance.my_availability = availability.status if availability else None
-                else:
-                    item.performance.my_availability = None
-                        
-            # 👉 Cover photo
+                availability = item.performance.availabilities.filter(user=user).first()
+                item.performance.my_availability = availability.status if availability else None
+                avails = item.performance.availabilities.all()
+                item.performance.avail_summary = {
+                    "yes": avails.filter(status="yes").count(),
+                    "no": avails.filter(status="no").count(),
+                    "maybe": avails.filter(status="maybe").count(),
+                }
             cover = item.photos.filter(is_cover=True).first() or item.photos.first()
-            item.cover_photo = item.photos.filter(is_cover=True).first() or item.photos.first()
+            item.cover_photo = cover
+
+    # Same prep for venue performances
+    for venue in venues:
+        for perf in venue.performances.all():
+            availability = perf.availabilities.filter(user=user).first()
+            perf.my_availability = availability.status if availability else None
+            avails = perf.availabilities.all()
+            perf.avail_summary = {
+                "yes": avails.filter(status="yes").count(),
+                "no": avails.filter(status="no").count(),
+                "maybe": avails.filter(status="maybe").count(),
+            }
+            cover = perf.board_item.photos.filter(is_cover=True).first() or perf.board_item.photos.first()
+            perf.board_item.cover_photo = cover
 
     return render(request, 'board/full_board.html', {
         'columns': columns,
-        'gigs_by_venue': gigs_by_venue,
+        'venues': venues,
     })
+
 
 
 from django.shortcuts import render
@@ -144,24 +160,54 @@ def update_card_position(request):
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Performance, RehearsalAvailability
+from .models import Performance, PerformanceAvailability
+
+
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect
+from .models import Performance, PerformanceAvailability
 
 @login_required
-def update_availability(request):
+@require_POST
+def set_availability(request, performance_id):
+    performance = get_object_or_404(Performance, id=performance_id)
+    status = request.POST.get("status")
+
+    availability, created = PerformanceAvailability.objects.get_or_create(
+        performance=performance,
+        user=request.user,
+        defaults={"status": status}
+    )
+
+    if not created:
+        availability.status = status
+        availability.save()
+
+    return redirect("full_board")  # or back to modal if using AJAX
+
+
+
+@login_required
+def update_availability(request, performance_id=None):
     if request.method == 'POST':
-        performance_id = request.POST.get('performance_id')
+        # Allow performance_id from URL OR POST data
+        performance_id = performance_id or request.POST.get('performance_id')
         status = request.POST.get('status')
 
-        performance = get_object_or_404(Performance, id=performance_id, is_rehearsal=True)
+        performance = get_object_or_404(Performance, id=performance_id)
 
-        RehearsalAvailability.objects.update_or_create(
+        PerformanceAvailability.objects.update_or_create(
             user=request.user,
             performance=performance,
             defaults={'status': status}
         )
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return JsonResponse({"success": True, "status": status, "user": request.user.username})
+            return JsonResponse({
+                "success": True,
+                "status": status,
+                "user": request.user.username
+            })
 
     return redirect('full_board')
 

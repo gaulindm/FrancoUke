@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BoardColumn, BoardItem, BoardItemPhoto, RehearsalAvailability
+from .models import BoardColumn, BoardItem, BoardItemPhoto #, RehearsalAvailability
 from .models import Performance, BoardItemPhoto, Event, PerformanceDetails, EventPhoto
 
 
@@ -113,22 +113,15 @@ class BoardItemPhotoAdmin(admin.ModelAdmin):
     list_filter = ("is_cover",)
 '''
 
-@admin.register(RehearsalAvailability)
-class RehearsalAvailabilityAdmin(admin.ModelAdmin):
-    list_display = ("user", "performance", "status", "updated_at")
-    list_filter = ("status", "performance__is_rehearsal")
-    search_fields = ("user__username", "performance__board_item__title")
+from .models import Venue
+
+@admin.register(Venue)
+class VenueAdmin(admin.ModelAdmin):
+    list_display = ("name", "address","position")
+    list_editable = ("position",)
+    ordering = ("position",)
 
 
 
-
-
-
-# Inline: Rehearsal availability
-class RehearsalAvailabilityInline(admin.TabularInline):
-    model = RehearsalAvailability
-    extra = 0
-    readonly_fields = ['user', 'updated_at']
-    can_delete = False
 
 

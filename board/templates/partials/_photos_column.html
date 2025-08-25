@@ -5,8 +5,9 @@
         <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
           <strong>{{ item.title }}</strong><br>
           {% if item.photos.exists %}
-            <img src="{{ item.photos.first.image.url }}" alt="{{ item.title }}" style="width:100%; border-radius:4px;">
-          {% endif %}
+          <img src="{{ photo.image.url }}" alt="{{ photo.title }}"
+          style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+               {% endif %}
           <br>
           {% if item.column.column_type == "photos" and item.photos.exists %}
           <p>

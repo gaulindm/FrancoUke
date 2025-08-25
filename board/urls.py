@@ -5,7 +5,7 @@ from .views import (
     BoardItemViewSet,
     EventViewSet,
     board_item_gallery_view,
-    item_photo_list,
+    item_photo_list, update_availability
 )
 
 # DRF Router
@@ -18,6 +18,7 @@ router.register(r"events", EventViewSet)  # 👈 NEW
 urlpatterns = [
     # Your regular Django views
     path("", views.full_board_view, name="full_board"),
+    path('availability/<int:performance_id>/', update_availability, name='set_availability'),
     path("update-card/", views.update_card_position, name="update_card_position"),
     path("availability/", views.update_availability, name="update_availability"),
     path("rehearsal/<int:pk>/", views.rehearsal_detail_view, name="rehearsal_detail"),

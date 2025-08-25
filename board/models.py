@@ -1,65 +1,100 @@
 from django.db import models
+from django.conf import settings
 from ckeditor.fields import RichTextField
 from urllib.parse import urlparse, parse_qs
 
+
+# -------------------------
+# Board + Items
+# -------------------------
 class BoardColumn(models.Model):
     COLUMN_TYPES = [
-        ('general', 'General'),
-        ('photos', 'Photo Gallery'),
-        ('venue', 'Venue'),
-        ('songs_to_listen', 'Songs To Listen'),
-        # 🚀 removed rehearsals/past performances — handled by Performance
+        ("general", "General"),
+        ("photos", "Photo Gallery"),
+        ("venue", "Venue"),
+        ("songs_to_listen", "Songs To Listen"),
+        # 🚀 rehearsals/past performances now handled by Performance
     ]
 
     name = models.CharField(max_length=100)
     position = models.PositiveIntegerField(default=0)
     is_public = models.BooleanField(default=False)
-    column_type = models.CharField(max_length=20, choices=COLUMN_TYPES, default='general')
+    column_type = models.CharField(max_length=20, choices=COLUMN_TYPES, default="general")
 
     class Meta:
-        ordering = ['position']
+        ordering = ["position"]
+
+    def __str__(self):
+        return self.name
+
+class Venue(models.Model):
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=500, blank=True, null=True)
+    image = models.ImageField(upload_to="venues/", blank=True, null=True)
+    website = models.URLField(blank=True, null=True)
+
+    # ✅ ordering like BoardColumn
+    position = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["position", "name"]
 
     def __str__(self):
         return self.name
 
 
+
 class BoardItem(models.Model):
-    column = models.ForeignKey(BoardColumn, on_delete=models.CASCADE, related_name='items')
+    column = models.ForeignKey(BoardColumn, on_delete=models.CASCADE, related_name="items")
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     youtube_url = models.URLField(blank=True, null=True)
-    media_file = models.FileField(upload_to='board_media/', blank=True, null=True)
+    media_file = models.FileField(upload_to="board_media/", blank=True, null=True)
     link = models.URLField(blank=True, null=True)
 
     rich_description = RichTextField(blank=True, null=True)
     position = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["position"]
+
     def __str__(self):
         return self.title
 
     @property
     def youtube_embed_url(self):
+        """Return proper YouTube embed link if possible."""
         if not self.youtube_url:
             return None
+
         parsed = urlparse(self.youtube_url)
         query = parse_qs(parsed.query)
         video_id = query.get("v", [None])[0]
         start_time = query.get("t", [None])[0]
+
+        # Standard YouTube link
         if video_id:
             embed_url = f"https://www.youtube.com/embed/{video_id}"
             if start_time:
                 embed_url += f"?start={start_time.replace('s', '')}"
             return embed_url
-        if 'youtu.be' in parsed.netloc:
+
+        # Shortened youtu.be link
+        if "youtu.be" in parsed.netloc:
             video_id = parsed.path.strip("/")
             embed_url = f"https://www.youtube.com/embed/{video_id}"
             if parsed.query and "t=" in parsed.query:
                 start_time = parsed.query.split("t=")[-1]
                 embed_url += f"?start={start_time.replace('s', '')}"
             return embed_url
+
         return None
 
+
+# -------------------------
+# Performances + Availability
+# -------------------------
 class Performance(models.Model):
     PERFORMANCE_CHOICES = [
         ("upcoming", "Upcoming"),
@@ -73,7 +108,13 @@ class Performance(models.Model):
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
     arrive_by = models.TimeField(blank=True, null=True)
-
+    venue = models.ForeignKey(
+            "Venue",
+            on_delete=models.SET_NULL,
+            related_name="performances",
+            null=True,
+            blank=True
+        )
     location = models.CharField(max_length=255, blank=True)
     attire = models.CharField(max_length=255, null=True, blank=True)
     chairs = models.CharField(max_length=255, null=True, blank=True)
@@ -83,13 +124,49 @@ class Performance(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def get_my_availability_display(self):
+        if hasattr(self, "my_availability") and self.my_availability:
+            mapping = {"yes": "Yes", "no": "No", "maybe": "Maybe"}
+            return mapping.get(self.my_availability, self.my_availability)
+        return "Not set"
+
     def __str__(self):
         return f"{self.board_item.title} ({self.get_performance_type_display()})"
 
 
+class PerformanceAvailability(models.Model):
+    YES = "yes"
+    NO = "no"
+    MAYBE = "maybe"
+
+    STATUS_CHOICES = [
+        (YES, "Yes"),
+        (NO, "No"),
+        (MAYBE, "Maybe"),
+    ]
+
+    performance = models.ForeignKey(
+        Performance,
+        on_delete=models.CASCADE,
+        related_name="availabilities"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="performance_availabilities"
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=MAYBE)
+
+    class Meta:
+        unique_together = ("performance", "user")
+
+    def __str__(self):
+        return f"{self.user} – {self.performance.board_item.title} – {self.get_status_display()}"
+
+
 class BoardItemPhoto(models.Model):
-    board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name='photos')
-    image = models.ImageField(upload_to='board_photos/')
+    board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField(upload_to="board_photos/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     is_cover = models.BooleanField(default=False)
 
@@ -97,39 +174,9 @@ class BoardItemPhoto(models.Model):
         return f"Photo for {self.board_item.title}"
 
 
-
-
-
-    # board/models.py
-from django.db import models
-from django.conf import settings  # needed for referencing the user model
-
-
-class RehearsalAvailability(models.Model):
-    ATTENDANCE_CHOICES = [
-        ('yes', "✅ I'm coming"),
-        ('maybe', "❓ Not sure"),
-        ('no', "❌ Can't make it"),
-    ]
-
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    performance = models.ForeignKey(
-        "Performance",
-        on_delete=models.CASCADE,
-        related_name="availabilities",
-        null=True,
-        blank=True
-    )
-    status = models.CharField(max_length=10, choices=ATTENDANCE_CHOICES)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ('user', 'performance')
-
-    def __str__(self):
-        return f"{self.user} → {self.get_status_display()} for {self.performance.board_item.title}"
-
-
+# -------------------------
+# Events
+# -------------------------
 class Event(models.Model):
     EVENT_TYPES = [
         ("rehearsal", "Rehearsal"),
@@ -143,17 +190,13 @@ class Event(models.Model):
         ("past", "Past"),
     ]
 
-    # Optional link to a board item (to show an event within a card/column)
-    # Safe and nullable so it won't break existing data.
     board_item = models.ForeignKey(
-        'BoardItem',
+        "BoardItem",
         on_delete=models.SET_NULL,
-        related_name='events',
+        related_name="events",
         null=True,
         blank=True
     )
-
-
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -169,19 +212,15 @@ class Event(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-            ordering = ["event_date", "start_time", "title"]
-
+        ordering = ["event_date", "start_time", "title"]
 
     def __str__(self):
         return f"{self.title} ({self.get_event_type_display()} - {self.get_status_display()})"
 
+
 class PerformanceDetails(models.Model):
     """Extra fields only for performances (gigs)."""
-    event = models.OneToOneField(
-        Event,
-        on_delete=models.CASCADE,
-        related_name="performance_details"
-    )
+    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="performance_details")
     attire = models.CharField(max_length=255, null=True, blank=True)
     chairs = models.CharField(max_length=255, null=True, blank=True)
     arrive_by = models.TimeField(null=True, blank=True)
@@ -194,6 +233,7 @@ class RehearsalDetails(models.Model):
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="rehearsal_details")
     notes = models.TextField(blank=True, null=True)
 
+
 class EventPhoto(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="photos")
     image = models.ImageField(upload_to="event_photos/")
@@ -202,4 +242,3 @@ class EventPhoto(models.Model):
 
     def __str__(self):
         return f"Photo for {self.event.title}"
-
