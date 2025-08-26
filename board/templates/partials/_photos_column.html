@@ -1,28 +1,36 @@
 <div class="board-column" style="flex: 0 0 300px; background: #eef9ff; border-radius: 6px; padding: 10px;">
-    <h4>{{ column.name }}</h4>
-    <div class="sortable-list" data-column-id="{{ column.id }}">
-      {% for item in column.items.all|dictsort:"position" %}
-        <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
-          <strong>{{ item.title }}</strong><br>
-          {% if item.photos.exists %}
-          <img src="{{ photo.image.url }}" alt="{{ photo.title }}"
-          style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-               {% endif %}
-          <br>
-          {% if item.column.column_type == "photos" and item.photos.exists %}
-          <p>
-            <a href="#" class="btn btn-sm btn-outline-primary"
-               data-bs-toggle="modal"
-               data-bs-target="#photoGalleryModal"
-               data-item-id="{{ item.id }}"
-               data-item-title="{{ item.title }}">
-              📷 View Photo Gallery
-            </a>
-          </p>
-          {% endif %}
-          {{ item.description|linebreaks }}
-        </div>
-      {% endfor %}
-    </div>
+  <h4>{{ column.name }}</h4>
+  <div class="sortable-list" data-column-id="{{ column.id }}">
+    {% for item in column.items.all|dictsort:"position" %}
+      <div class="card" style="background:white; padding:10px; margin-bottom:10px; border-radius:4px;">
+        <strong>{{ item.title }}</strong><br>
+
+        {% if item.photos.exists %}
+          {# ✅ Cover image (clickable for Lightbox) #}
+          {% with cover=item.cover_photo|default:item.photos.first %}
+            {% if cover %}
+              <a href="{{ cover.image.url }}"
+                 data-lightbox="gallery-{{ item.id }}"
+                 data-title="{{ item.title }}">
+                <img src="{{ cover.image.url }}" alt="{{ item.title }}"
+                     style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+              </a>
+            {% endif %}
+          {% endwith %}
+
+          {# ✅ Hidden anchors for other photos #}
+          {% for photo in item.photos.all %}
+            {% if not photo.is_cover and photo != cover %}
+              <a href="{{ photo.image.url }}"
+                 data-lightbox="gallery-{{ item.id }}"
+                 data-title="{{ item.title }}"></a>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        <br>
+        {{ item.description|linebreaks }}
+      </div>
+    {% endfor %}
   </div>
-  
+</div>

@@ -29,47 +29,34 @@
   padding: 10px;
   border: 2px solid blue;         /* 🔍 temp debug: make each column visible */
 }
+.card img {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+.card img:hover {
+  transform: scale(1.03);
+}
+.event-gallery, .gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.event-gallery img.thumbnail,
+.gallery img.thumbnail {
+  max-width: 200px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  object-fit: cover;
+}
+
+.event-gallery img.thumbnail:hover,
+.gallery img.thumbnail:hover {
+  transform: scale(1.05);
+}
+
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('photoGalleryModal');
-    modal.addEventListener('show.bs.modal', function (event) {
-      const button = event.relatedTarget;
-      const itemId = button.getAttribute('data-item-id');
-      const itemTitle = button.getAttribute('data-item-title');
-      const modalTitle = modal.querySelector('.modal-title');
-      const modalBody = document.getElementById('photoGalleryContent');
-  
-      modalTitle.textContent = `📷 ${itemTitle}`;
-      modalBody.innerHTML = '<p>Loading photos...</p>';
-  
-      fetch(`/board/api/items/${itemId}/photos/`)
-        .then(response => response.json())
-        .then(data => {
-          // ✅ Handle both array and object response formats
-          const photos = Array.isArray(data) ? data : (data.photos || []);
-  
-          if (photos.length === 0) {
-            modalBody.innerHTML = '<p>No photos found.</p>';
-            return;
-          }
-  
-          const galleryHTML = photos.map(photo => `
-            <a href="${photo.url}" data-lightbox="item-${itemId}" data-title="${photo.caption || ''}">
-              <img src="${photo.url}" class="img-fluid mb-3" style="max-height: 200px; margin-right: 10px;" />
-            </a>
-          `).join('');
-  
-          modalBody.innerHTML = `<div class="d-flex flex-wrap">${galleryHTML}</div>`;
-        })
-        .catch(err => {
-          modalBody.innerHTML = '<p class="text-danger">Failed to load photos.</p>';
-          console.error("Photo gallery error:", err);
-        });
-  
-    });
-  });
-  </script>
   
 {% endblock %}

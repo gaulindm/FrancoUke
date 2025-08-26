@@ -63,6 +63,12 @@ class BoardItem(models.Model):
         return self.title
 
     @property
+    def cover_photo(self):
+        return self.photos.filter(is_cover=True).first() or self.photos.first()
+
+
+
+    @property
     def youtube_embed_url(self):
         """Return proper YouTube embed link if possible."""
         if not self.youtube_url:
@@ -216,6 +222,12 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.get_event_type_display()} - {self.get_status_display()})"
+
+
+    @property
+    def cover_photo(self):
+        return self.photos.filter(is_cover=True).first() or self.photos.first()
+
 
 
 class PerformanceDetails(models.Model):

@@ -82,7 +82,7 @@ def full_board_view(request):
                     "maybe": avails.filter(status="maybe").count(),
                 }
             cover = item.photos.filter(is_cover=True).first() or item.photos.first()
-            item.cover_photo = cover
+            #item.cover_photo = cover
 
     # Same prep for venue performances
     for venue in venues:
@@ -96,7 +96,7 @@ def full_board_view(request):
                 "maybe": avails.filter(status="maybe").count(),
             }
             cover = perf.board_item.photos.filter(is_cover=True).first() or perf.board_item.photos.first()
-            perf.board_item.cover_photo = cover
+            #perf.board_item.cover_photo = cover
 
     return render(request, 'board/full_board.html', {
         'columns': columns,

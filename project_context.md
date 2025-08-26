@@ -67,6 +67,18 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
+### 20250-08-25 
+
+### Board Layout Fixes (Aug 2025)
+
+- Issue: Some board columns (e.g., "Past Performances") were appearing nested
+  inside other columns ("To be confirmed"). This was traced to **unbalanced `<div>` tags**
+  inside partial templates (`_performance_card.html`, etc.).
+- Resolution: Carefully audited includes for stray closing `</div>` tags and
+  ensured that each `.board-row` and `.board-column` has balanced wrappers.
+- Validation: Confirmed in Chrome DevTools that the structure renders as:
+
+
 ### 2025-08-08 — Full Board Horizontal Scroll + Gig Availability Badges
 
 **Changes:**
