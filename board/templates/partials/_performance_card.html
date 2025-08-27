@@ -32,12 +32,12 @@
   <!-- Date + Time + Location -->
   <small class="text-muted">
     {% if item.performance.event_date %}
-      <p><strong>Date:</strong> {{ item.performance.event_date|date:"M d, Y" }}</p>
+      {{ item.performance.event_date|date:"M d, Y" }}
     {% endif %}
     {% if item.performance.start_time %}
-      <p><strong>Time:</strong> {{ item.performance.start_time|time:"g:i A" }}
-        {% if item.performance.end_time %} - {{ item.performance.end_time|time:"g:i A" }}{% endif %}
-      </p>
+      ({{ item.performance.start_time|time:"g:i A" }}
+        {% if item.performance.end_time %} - {{ item.performance.end_time|time:"g:i A" }}{% endif %})
+      
     {% endif %}
     {% if item.performance.location %}
       <p><strong>Location:</strong> {{ item.performance.location }}</p>

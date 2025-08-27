@@ -17,9 +17,9 @@ class Command(BaseCommand):
         User = get_user_model()
 
         # Ensure the performers group exists
-        performers_group, created = Group.objects.get_or_create(name="performers")
+        performers_group, created = Group.objects.get_or_create(name="Performers")
         if created:
-            self.stdout.write(self.style.SUCCESS("Created 'performers' group."))
+            self.stdout.write(self.style.SUCCESS("Created 'Performers' group."))
 
         with open(csv_file, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
