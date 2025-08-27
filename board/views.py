@@ -254,3 +254,54 @@ def item_photo_list(request, item_id):
 
     return JsonResponse(data, safe=False)
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Performance, PerformanceAvailability
+
+User = get_user_model()
+
+
+@login_required
+def availability_matrix(request):
+    # 1️⃣ All performers
+    players = (
+        User.objects
+        .filter(groups__name="Performers", is_active=True)
+        .order_by("first_name", "last_name", "username")
+    )
+
+    # 2️⃣ All performances that require availability
+    performances = (
+        Performance.objects
+        .select_related("venue", "board_item")
+        .order_by("event_date", "start_time", "board_item__title")
+    )
+
+    # 3️⃣ Build lookup {(user_id, performance_id): status}
+    availability_dict = {
+        (a.user_id, a.performance_id): a.status
+        for a in PerformanceAvailability.objects.filter(performance__in=performances)
+    }
+
+    # 4️⃣ Icons mapping
+    STATUS_ICONS = {
+        "yes": "✅",
+        "no": "❌",
+        "maybe": "🤔",
+    }
+
+    # 5️⃣ Build matrix rows
+    matrix = []
+    for player in players:
+        row = []
+        for perf in performances:
+            status = availability_dict.get((player.id, perf.id))
+            row.append(STATUS_ICONS.get(status, "—"))
+        matrix.append((player, row))
+
+    return render(request, "board/availability_matrix.html", {
+        "players": players,
+        "performances": performances,
+        "matrix": matrix,
+    })

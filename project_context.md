@@ -67,6 +67,21 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
+### 2025-08-25
+
+## Photo Gallery (Lightbox Integration)
+
+- The board now supports a Lightbox gallery for items in photo/media columns.
+- Implementation details:
+  - `full_board.html` already includes Lightbox2 CSS/JS via CDN.
+  - `_photos_column.html` renders each item’s **cover photo** as a clickable Lightbox trigger.
+  - All photos for an item are grouped into a gallery (`data-lightbox="gallery-<item.id>"`).
+  - Non-cover photos are hidden anchors but included in the Lightbox set, allowing cycling through them inside the modal.
+  - If no photos are present, a placeholder block is displayed.
+- Future improvement: show miniature thumbnails beneath items or switch to Fancybox/lightGallery for thumbnail navigation inside the modal.
+
+
+
 ### 20250-08-25 
 
 ### Board Layout Fixes (Aug 2025)

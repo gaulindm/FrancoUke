@@ -25,6 +25,7 @@ urlpatterns = [
     path("item/<int:item_id>/gallery/", board_item_gallery_view, name="item_gallery"),
     path("api/items/<int:item_id>/photos/", item_photo_list, name="item_photo_list"),
     path("public/", views.public_board, name="public_board"),
+    path("availability-matrix/", views.availability_matrix, name="availability_matrix"),
 
     # Your DRF API endpoints
     path("api/", include(router.urls)),

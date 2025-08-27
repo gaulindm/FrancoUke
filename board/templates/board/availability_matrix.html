@@ -1,0 +1,44 @@
+{% extends "base_uke4ia.html" %}
+{% block title %}Availability Matrix{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-center">📊 Availability Matrix</h1>
+<p class="text-muted text-center">See everyone’s availability for each performance.</p>
+
+<div class="table-responsive shadow-sm border rounded">
+    <table class="table table-bordered table-hover align-middle text-center">
+        <thead class="table-dark sticky-top">
+            <tr>
+                <th>Performer</th>
+                {% for perf in performances %}
+                <th>
+                    <div class="fw-bold">{{ perf.board_item.title }}</div>
+                    <small class="text-light">
+                        {{ perf.event_date }} {{ perf.start_time|default:"" }}
+                    </small>
+                </th>
+                
+                {% empty %}
+                    <th>No performances scheduled</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for player, row in matrix %}
+            <tr>
+                <td class="text-start fw-bold">{{ player.get_full_name|default:player.username }}</td>
+                {% for status_icon in row %}
+                    <td>{{ status_icon }}</td>
+                {% endfor %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{{ performances|length|add:'1' }}" class="text-center text-muted py-4">
+                    No performers found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
