@@ -261,37 +261,38 @@ from .models import Performance, PerformanceAvailability
 
 User = get_user_model()
 
-
 @login_required
 def availability_matrix(request):
-    # 1️⃣ All performers
+    User = get_user_model()
     players = (
         User.objects
         .filter(groups__name="Performers", is_active=True)
         .order_by("first_name", "last_name", "username")
     )
 
-    # 2️⃣ All performances that require availability
+    # Exclude performances that live in unwanted board columns
+    excluded_columns = ["Songs to listen", "Media", "Past Performances"]
+
     performances = (
         Performance.objects
-        .select_related("venue", "board_item")
+        .select_related("venue", "board_item__column")
+        .exclude(board_item__column__name__in=excluded_columns)
         .order_by("event_date", "start_time", "board_item__title")
     )
 
-    # 3️⃣ Build lookup {(user_id, performance_id): status}
+    # Build lookup: {(user_id, perf_id): status}
     availability_dict = {
         (a.user_id, a.performance_id): a.status
         for a in PerformanceAvailability.objects.filter(performance__in=performances)
     }
 
-    # 4️⃣ Icons mapping
     STATUS_ICONS = {
         "yes": "✅",
         "no": "❌",
         "maybe": "🤔",
     }
 
-    # 5️⃣ Build matrix rows
+    # Build rows
     matrix = []
     for player in players:
         row = []
@@ -304,4 +305,31 @@ def availability_matrix(request):
         "players": players,
         "performances": performances,
         "matrix": matrix,
+    })
+
+from django.utils.timezone import now
+from django.db.models import Prefetch
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Performance, PerformanceAvailability
+
+@login_required
+def performer_performance_list(request):
+    performances = (
+        Performance.objects.filter(event_date__gte=now().date())
+        .select_related("venue", "board_item")
+        .order_by("event_date", "start_time")
+    )
+
+    # preload user's availability
+    user_availability = {}
+    if request.user.is_authenticated:
+        availabilities = PerformanceAvailability.objects.filter(
+            user=request.user, performance__in=performances
+        )
+        user_availability = {av.performance_id: av.status for av in availabilities}
+
+    return render(request, "board/performer_performance_list.html", {
+        "performances": performances,
+        "user_availability": user_availability,
     })

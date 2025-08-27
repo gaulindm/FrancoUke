@@ -1,0 +1,80 @@
+{% extends "base_uke4ia.html" %}
+{% load dict_extras %}
+
+{% block title %}Upcoming Performances{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-center">🎵 Upcoming Performances 🎵</h1>
+
+<div class="table-responsive shadow-sm rounded">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Venue</th>
+                <th>Your Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for perf in performances %}
+            <tr>
+                <td>
+                    {{ perf.event_date|date:"M j, Y" }}
+                    {% if perf.start_time %}
+                        <small class="text-muted">{{ perf.start_time|time:"g:i A" }}</small>
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {{ perf.board_item}}
+
+                
+                    {% comment %}
+                    {% if perf.is_rehearsal %}
+                        🎤 <span class="fw-bold">Rehearsal</span>
+                    {% elif perf.board_item %}
+                        <a href="{% url 'item_detail' perf.board_item.id %}"
+                           class="text-decoration-none fw-bold">
+                           {{ perf.board_item.title }}
+                        </a>
+                    {% else %}
+                        <span class="fw-bold">Untitled Performance</span>
+                    {% endif %}
+                    {% endcomment%}
+                </td>
+                
+                <td>
+                    {% if perf.venue %}
+                        {{ perf.venue.name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_authenticated %}
+                        {% with status=user_availability|get_item:perf.id %}
+                            {% if status == "Y" %}
+                                <span class="badge bg-success">Yes</span>
+                            {% elif status == "N" %}
+                                <span class="badge bg-danger">No</span>
+                            {% elif status == "M" %}
+                                <span class="badge bg-warning text-dark">Maybe</span>
+                            {% else %}
+                                <span class="badge bg-secondary">–</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <span class="text-muted fst-italic">Login to respond</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">No upcoming performances.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
