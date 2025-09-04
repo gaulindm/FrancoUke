@@ -20,6 +20,10 @@ class BoardColumn(models.Model):
     position = models.PositiveIntegerField(default=0)
     is_public = models.BooleanField(default=False)
     column_type = models.CharField(max_length=20, choices=COLUMN_TYPES, default="general")
+    # 🔑 Optional link to Venue if this is a venue-column
+    venue = models.ForeignKey("Venue", on_delete=models.CASCADE, null=True, blank=True, related_name="board_column")
+
+
 
     class Meta:
         ordering = ["position"]

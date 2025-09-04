@@ -52,6 +52,24 @@ class BoardItemPhotoAdmin(admin.ModelAdmin):
     list_display = ("board_item", "is_cover", "uploaded_at")
     list_filter = ("is_cover",)
 
+# board/admin.py
+from django.contrib import admin
+from django.utils import timezone
+from .models import Event, EventAvailability, EventPhoto
+
+
+class EventAvailabilityInline(admin.TabularInline):
+    model = EventAvailability
+    extra = 1
+
+
+class EventPhotoInline(admin.TabularInline):
+    model = EventPhoto
+    extra = 1
+    fields = ("image", "is_cover", "uploaded_at")
+    readonly_fields = ("uploaded_at",)
+
+
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = (
@@ -61,11 +79,11 @@ class EventAdmin(admin.ModelAdmin):
         "event_date",
         "start_time",
         "end_time",
-        "arrive_by",
-        "attire",
-        "chairs", 
         "venue",
-        "column",   # ✅ show the new column field
+        "arrive_by",
+        "chairs",
+        "attire",
+        "column",   # ✅ new column field for board placement
     )
     list_filter = ("event_type", "status", "venue", "column")
     search_fields = ("title", "rich_description", "location")
@@ -76,11 +94,11 @@ class EventAdmin(admin.ModelAdmin):
             "fields": ("title", "rich_description", "event_type", "status")
         }),
         ("Scheduling", {
-            "fields": ("event_date", "start_time", "end_time", "arrive_by", "attire", "chairs", "location")
+            "fields": ("event_date", "start_time", "end_time", "arrive_by", "chairs", "attire", "location")
         }),
         ("Associations", {
             "fields": ("venue", "column"),
-            "description": "Link this event either to a Venue (for recurring events) or to a Board Column (e.g., Upcoming, To Be Confirmed, Past)."
+            "description": "Link this event either to a Venue (recurring events) or to a Board Column (e.g., Upcoming, To Be Confirmed, Past)."
         }),
         ("Metadata", {
             "fields": ("created_at", "updated_at"),
@@ -90,17 +108,19 @@ class EventAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
     inlines = [EventAvailabilityInline, EventPhotoInline]
 
-     # ✅ Custom action to duplicate selected events
+    # ✅ Custom action to duplicate selected events
     actions = ["duplicate_events"]
 
     def duplicate_events(self, request, queryset):
+        count = 0
         for event in queryset:
             event.pk = None  # remove primary key so Django creates a new row
             event.title = f"{event.title} (Copy)"  # optional tweak
             event.created_at = timezone.now()
             event.updated_at = timezone.now()
             event.save()
-        self.message_user(request, f"✅ Successfully duplicated {queryset.count()} event(s).")
+            count += 1
+        self.message_user(request, f"✅ Successfully duplicated {count} event(s).")
 
     duplicate_events.short_description = "Duplicate selected events"
 

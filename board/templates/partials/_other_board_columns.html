@@ -4,58 +4,26 @@
 <div class="board-row" style="display:flex; gap:20px; flex-wrap:nowrap; align-items:flex-start;">
 
 
-  {% for venue in venues %}
-    <div class="board-column" style="flex:0 0 300px; background:#e6f3ff; border-radius:6px; padding:10px;">
-      <h5 class="text-center">{{ venue.name }}</h5>
-
-      {% for event in venue.events.all %}
-        {% include "partials/_event_card.html" with event=event %}
-      {% empty %}
-        <p class="text-muted">No events scheduled.</p>
-      {% endfor %}
-    </div>
-  {% endfor %}
-
-
   {% for column in columns %}
-    {% if column.column_type == "photos" %}
-      {% include "partials/_photos_column.html" %}
-
-    {% elif column.column_type == "songs_to_listen" %}
-      {% include "partials/_songs_to_listen_column.html" %}
-
-    {% else %}
-      <div class="board-column" style="flex:0 0 300px; background:#f9f9f9; border-radius:6px; padding:10px;">
-        <h4>{{ column.name }}</h4>
-
-        {# Events linked directly to this column #}
-        {% for event in column.events.all %}
-          {% include "partials/_event_card.html" with event=event %}
-        {% empty %}
-          <p class="text-muted">No events scheduled.</p>
-        {% endfor %}
-
-        {# Non-event board items (like YouTube, photos, notes) #}
-        <div class="sortable-list" data-column-id="{{ column.id }}">
-          {% for item in column.items.all|dictsort:"position" %}
-            <div class="card my-2 p-2 border">
-              <strong>{{ item.title }}</strong><br>
-              {% if item.event_date %}
-                <small class="text-muted">
-                  {{ item.event_date|date:"M d, Y" }}
-                  {% if item.start_time %}
-                    {{ item.start_time|time:"g:i A" }}
-                    {% if item.end_time %} - {{ item.end_time|time:"g:i A" }}{% endif %}
-                  {% endif %}
-                </small>
-              {% endif %}
-            </div>
+  {% if column.column_type == "venue" %}
+      <div class="board-column">
+          <h5 class="text-center">{{ column.venue.name }}</h5>
+          {% for event in column.venue.events.all %}
+              {% include "partials/_event_card.html" with event=event %}
           {% empty %}
-            <p class="text-muted">No cards added yet.</p>
+              <p class="text-muted">No events scheduled.</p>
           {% endfor %}
-        </div>
       </div>
-    {% endif %}
-  {% endfor %}
+  {% else %}
+      <div class="board-column">
+          <h5>{{ column.name }}</h5>
+          {% for event in column.events.all %}
+              {% include "partials/_event_card.html" with event=event %}
+          {% empty %}
+              <p class="text-muted">No events scheduled.</p>
+          {% endfor %}
+      </div>
+  {% endif %}
+{% endfor %}
 
 </div>

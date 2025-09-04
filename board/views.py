@@ -50,54 +50,70 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
 
 
-# board/views.py
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .models import BoardColumn, Venue, Event
+from .models import BoardColumn
 
 @login_required
 def full_board_view(request):
     user = request.user
 
-    # Prefetch related data for efficiency
-    columns = BoardColumn.objects.prefetch_related("items__photos", "events__photos").all()
-    venues = Venue.objects.prefetch_related("events__photos").all()
+    # ✅ Single unified set of columns (general + venue)
+    columns = (
+        BoardColumn.objects
+        .select_related("venue")
+        .prefetch_related(
+            "items__photos",
+            "events__photos",          # events linked directly to column
+            "events__availabilities",
+            "venue__events__photos",   # events linked via venue
+            "venue__events__availabilities"
+        )
+        .order_by("position")
+    )
 
     # Attach availability + cover photo info
-    for venue in venues:
-        for event in venue.events.all():
-            availability = event.availabilities.filter(user=user).first()
-            event.my_availability = availability.status if availability else None
-
-            avails = event.availabilities.all()
-            event.avail_summary = {
-                "yes": avails.filter(status="yes").count(),
-                "no": avails.filter(status="no").count(),
-                "maybe": avails.filter(status="maybe").count(),
-            }
-
-            # Attach cover photo from event photos
-            event._cover_photo = event.photos.filter(is_cover=True).first() or event.photos.first()
-
     for column in columns:
-        for event in column.events.all():
-            availability = event.availabilities.filter(user=user).first()
-            event.my_availability = availability.status if availability else None
+        if column.venue:
+            # 🔹 Venue-based events
+            for event in column.venue.events.all():
+                availability = event.availabilities.filter(user=user).first()
+                event.my_availability = availability.status if availability else None
 
-            avails = event.availabilities.all()
-            event.avail_summary = {
-                "yes": avails.filter(status="yes").count(),
-                "no": avails.filter(status="no").count(),
-                "maybe": avails.filter(status="maybe").count(),
-            }
+                avails = event.availabilities.all()
+                event.avail_summary = {
+                    "yes": avails.filter(status="yes").count(),
+                    "no": avails.filter(status="no").count(),
+                    "maybe": avails.filter(status="maybe").count(),
+                }
 
-            # Attach cover photo from event photos
-            event._cover_photo = event.photos.filter(is_cover=True).first() or event.photos.first()
+                # Cover photo
+                event._cover_photo = (
+                    event.photos.filter(is_cover=True).first() or event.photos.first()
+                )
+        else:
+            # 🔹 Non-venue column events
+            for event in column.events.all():
+                availability = event.availabilities.filter(user=user).first()
+                event.my_availability = availability.status if availability else None
+
+                avails = event.availabilities.all()
+                event.avail_summary = {
+                    "yes": avails.filter(status="yes").count(),
+                    "no": avails.filter(status="no").count(),
+                    "maybe": avails.filter(status="maybe").count(),
+                }
+
+                # Cover photo
+                event._cover_photo = (
+                    event.photos.filter(is_cover=True).first() or event.photos.first()
+                )
 
     return render(request, "board/full_board.html", {
-        "columns": columns,
-        "venues": venues,
+        "columns": columns,  # ✅ single unified context
     })
+
+
 
 @require_POST
 @login_required
