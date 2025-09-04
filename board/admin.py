@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils import timezone
+from .models import Event
 from .models import (
     BoardColumn, BoardItem, BoardItemPhoto,
     Event, EventPhoto, EventAvailability, Venue
@@ -59,6 +61,9 @@ class EventAdmin(admin.ModelAdmin):
         "event_date",
         "start_time",
         "end_time",
+        "arrive_by",
+        "attire",
+        "chairs", 
         "venue",
         "column",   # ✅ show the new column field
     )
@@ -71,7 +76,7 @@ class EventAdmin(admin.ModelAdmin):
             "fields": ("title", "rich_description", "event_type", "status")
         }),
         ("Scheduling", {
-            "fields": ("event_date", "start_time", "end_time", "location")
+            "fields": ("event_date", "start_time", "end_time", "arrive_by", "attire", "chairs", "location")
         }),
         ("Associations", {
             "fields": ("venue", "column"),
@@ -84,6 +89,20 @@ class EventAdmin(admin.ModelAdmin):
 
     readonly_fields = ("created_at", "updated_at")
     inlines = [EventAvailabilityInline, EventPhotoInline]
+
+     # ✅ Custom action to duplicate selected events
+    actions = ["duplicate_events"]
+
+    def duplicate_events(self, request, queryset):
+        for event in queryset:
+            event.pk = None  # remove primary key so Django creates a new row
+            event.title = f"{event.title} (Copy)"  # optional tweak
+            event.created_at = timezone.now()
+            event.updated_at = timezone.now()
+            event.save()
+        self.message_user(request, f"✅ Successfully duplicated {queryset.count()} event(s).")
+
+    duplicate_events.short_description = "Duplicate selected events"
 
 @admin.register(Venue)
 class VenueAdmin(admin.ModelAdmin):

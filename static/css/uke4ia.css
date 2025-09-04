@@ -64,3 +64,7 @@
     background-color: rgba(0,0,0,0.2);
     border-radius: 4px;
 }
+.description-preview .short-text,
+.description-preview .full-text {
+  transition: all 0.3s ease;
+}

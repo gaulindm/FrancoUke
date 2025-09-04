@@ -231,10 +231,17 @@ class Event(models.Model):
     event_date = models.DateField(blank=True, null=True)
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
+    
+    
     location = models.CharField(max_length=255, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    #last added fields
+    arrive_by = models.TimeField(null=True, blank=True) # optional early arrival
+    attire = models.CharField(max_length=255,null=True, blank=True)
+    chairs = models.CharField(max_length=255,null=True, blank=True)
+ 
 
     class Meta:
         ordering = ["event_date", "start_time", "title"]

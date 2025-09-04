@@ -1,17 +1,19 @@
+{% load static %}
 {# partials/_event_card.html #}
 <div class="card"
      style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:pointer;"
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
-  <!-- Cover / Media -->
-  {% if event.cover_photo %}
-    <img src="{{ event.cover_photo.image.url }}" alt="{{ event.title }}"
-         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-  {% else %}
-    <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
-      ❌ No image available
-    </div>
-  {% endif %}
+ <!-- Card Cover (use Venue image) -->
+{% if event.venue and event.venue.image %}
+<img src="{{ event.venue.image.url }}" 
+     alt="{{ event.venue.name }}"
+     style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% else %}
+<div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+  ❌ No venue image available
+</div>
+{% endif %}
 
   <!-- Title + Availability -->
   <div class="d-flex justify-content-between align-items-center mt-2">
@@ -40,6 +42,8 @@
   </small>
 </div>
 
+
+
 <!-- Modal -->
 <div class="modal fade" id="eventModal{{ event.id }}" tabindex="-1"
      aria-labelledby="eventModalLabel{{ event.id }}" aria-hidden="true">
@@ -50,9 +54,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        {% if event.cover_photo %}
-          <img src="{{ event.cover_photo.image.url }}" alt="{{ event.title }}" class="img-fluid mb-3 rounded">
-        {% endif %}
+        {% if event.cover_photo_url %}
+        <img src="{{ event.cover_photo_url }}" alt="{{ event.title }}">
+      {% else %}
+        <img src="{% static 'images/fallback.jpg' %}" alt="No cover available">
+      {% endif %}
 
         <p><strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}</p>
         {% if event.start_time %}
@@ -61,7 +67,44 @@
           </p>
         {% endif %}
 
-        <div>{{ event.rich_description|safe }}</div>
+          <!-- Arrive by -->
+          {% if event.arrive_by %}
+            <p><strong>Arrive by:</strong> {{ event.arrive_by|time:"g:i A" }}</p>
+          {% endif %}
+        </small>
+
+
+        <!-- Attire -->
+          {% if event.attire %}
+            <p><strong>Attire:</strong> {{ event.attire }}</p>
+          {% endif %}
+        </small>
+
+          <!-- Chairs -->
+            {% if event.chairs %}
+              <p><strong>Chairs:</strong> {{ event.chairs }}</p>
+            {% endif %}
+          </small>
+
+
+          <div class="description-preview">
+            <!-- Short text (collapsed) -->
+            <div class="short-text" style="max-height: 4.5em; overflow: hidden;">
+              {{ event.rich_description|safe }}
+            </div>
+          
+            <!-- Full text (expanded) -->
+            <div class="full-text d-none">
+              {{ event.rich_description|safe }}
+            </div>
+          
+            <a href="#" class="toggle-description">See more</a>
+          </div>
+
+
+
+
+
 
         <!-- Availability Form -->
         <form method="post" action="{% url 'set_event_availability' event.id %}">
