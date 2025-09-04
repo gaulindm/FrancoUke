@@ -1,38 +1,61 @@
+{# templates/partials/_other_board_column.html #}
+{% load board_extras %}
+
 <div class="board-row" style="display:flex; gap:20px; flex-wrap:nowrap; align-items:flex-start;">
-  
-  {# Venues first #}
+
+
   {% for venue in venues %}
     <div class="board-column" style="flex:0 0 300px; background:#e6f3ff; border-radius:6px; padding:10px;">
       <h5 class="text-center">{{ venue.name }}</h5>
-      {% if venue.image %}
-        <img src="{{ venue.image.url }}" class="img-fluid rounded mb-2">
-      {% endif %}
-      {% for perf in venue.performances.all %}
-        {% include "partials/_performance_card.html" with item=perf.board_item %}
+
+      {% for event in venue.events.all %}
+        {% include "partials/_event_card.html" with event=event %}
+      {% empty %}
+        <p class="text-muted">No events scheduled.</p>
       {% endfor %}
     </div>
   {% endfor %}
 
-  {# Regular board columns (general, photos, songs...) #}
+
   {% for column in columns %}
     {% if column.column_type == "photos" %}
       {% include "partials/_photos_column.html" %}
+
     {% elif column.column_type == "songs_to_listen" %}
       {% include "partials/_songs_to_listen_column.html" %}
-    {% elif column.column_type == "general" %}
+
+    {% else %}
       <div class="board-column" style="flex:0 0 300px; background:#f9f9f9; border-radius:6px; padding:10px;">
         <h4>{{ column.name }}</h4>
+
+        {# Events linked directly to this column #}
+        {% for event in column.events.all %}
+          {% include "partials/_event_card.html" with event=event %}
+        {% empty %}
+          <p class="text-muted">No events scheduled.</p>
+        {% endfor %}
+
+        {# Non-event board items (like YouTube, photos, notes) #}
         <div class="sortable-list" data-column-id="{{ column.id }}">
           {% for item in column.items.all|dictsort:"position" %}
-            {% if item.performance.is_rehearsal %}
-              {% include "partials/_rehearsal_card.html" with item=item %}
-            {% else %}
-              {% include "partials/_performance_card.html" with item=item %}
-            {% endif %}
+            <div class="card my-2 p-2 border">
+              <strong>{{ item.title }}</strong><br>
+              {% if item.event_date %}
+                <small class="text-muted">
+                  {{ item.event_date|date:"M d, Y" }}
+                  {% if item.start_time %}
+                    {{ item.start_time|time:"g:i A" }}
+                    {% if item.end_time %} - {{ item.end_time|time:"g:i A" }}{% endif %}
+                  {% endif %}
+                </small>
+              {% endif %}
+            </div>
+          {% empty %}
+            <p class="text-muted">No cards added yet.</p>
           {% endfor %}
         </div>
       </div>
     {% endif %}
   {% endfor %}
-</div>
 
+</div>

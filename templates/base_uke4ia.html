@@ -42,17 +42,12 @@
 
             <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_list' %}active{% endif %}"
-                href="{% url 'performer_performance_list' %}">
+                href="{% url 'performer_event_list' %}">
                     Performances
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_grid' %}active{% endif %}"
-                href="{% url 'gigs:performer_gig_grid' %}">
-                    Gig Grid
-                </a>
-            </li>
+         
 
             <!-- Availability Matrix visible only for authenticated users -->
            

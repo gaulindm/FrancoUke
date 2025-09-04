@@ -19,11 +19,8 @@ urlpatterns = [
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
     path("strumsphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
 
-    # Gigs / Uke4ia
-    path("uke4ia/", include(("gigs.urls", "gigs"), namespace="uke4ia")),
+   
 
-    # Shortcut to gigs
-    path("gigs/", lambda request: redirect("uke4ia:gig_list")),
 ]
 
 # Media & static support (for dev)

@@ -1,0 +1,29 @@
+{# partials/_event_detail.html #}
+<div class="container">
+  <h3>{{ event.title }}</h3>
+
+  {% if event.venue and event.venue.image %}
+    <img src="{{ event.venue.image.url }}" class="img-fluid rounded mb-3">
+  {% endif %}
+
+  <p><strong>Date:</strong> {{ event.event_date|date:"l, F j, Y" }}</p>
+  {% if event.start_time %}
+    <p><strong>Time:</strong> {{ event.start_time|time:"g:i A" }}</p>
+  {% endif %}
+
+  <p>{{ event.description|safe }}</p>
+
+  {% if user.is_authenticated %}
+    <form method="post"
+          action="{% url 'set_event_availability' event.id %}"
+          class="availability-form d-flex gap-2">
+      {% csrf_token %}
+      <input type="hidden" name="event_id" value="{{ event.id }}">
+      <button type="submit" name="status" value="Y" class="btn btn-sm btn-success">Yes</button>
+      <button type="submit" name="status" value="M" class="btn btn-sm btn-warning">Maybe</button>
+      <button type="submit" name="status" value="N" class="btn btn-sm btn-danger">No</button>
+    </form>
+  {% else %}
+    <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a> to set your availability.</p>
+  {% endif %}
+</div>

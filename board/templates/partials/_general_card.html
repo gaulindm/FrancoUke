@@ -1,0 +1,65 @@
+{# partials/_general_card.html #}
+<div class="card"
+     style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:pointer;"
+     data-bs-toggle="modal" data-bs-target="#generalModal{{ item.id }}">
+
+  <!-- Cover / Media -->
+  {% if item.cover_photo %}
+    <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}"
+         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+  {% elif item.youtube_embed_url %}
+    <div class="ratio ratio-16x9 mb-2">
+      <iframe src="{{ item.youtube_embed_url }}" frameborder="0" allowfullscreen></iframe>
+    </div>
+  {% elif item.media_file %}
+    <a href="{{ item.media_file.url }}" target="_blank" class="d-block text-center">
+      📎 Download file
+    </a>
+  {% else %}
+    <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+      ℹ️ No media
+    </div>
+  {% endif %}
+
+  <!-- Title -->
+  <div class="mt-2">
+    <strong>{{ item.title }}</strong>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="generalModal{{ item.id }}" tabindex="-1"
+     aria-labelledby="generalModalLabel{{ item.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ item.title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        
+        {% if item.cover_photo %}
+          <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}" class="img-fluid mb-3 rounded">
+        {% elif item.youtube_embed_url %}
+          <div class="ratio ratio-16x9 mb-3">
+            <iframe src="{{ item.youtube_embed_url }}" frameborder="0" allowfullscreen></iframe>
+          </div>
+        {% elif item.media_file %}
+          <p><a href="{{ item.media_file.url }}" target="_blank" class="btn btn-outline-primary">📎 Download file</a></p>
+        {% endif %}
+
+        {% if item.rich_description %}
+          <div>{{ item.rich_description|safe }}</div>
+        {% elif item.description %}
+          <p>{{ item.description }}</p>
+        {% endif %}
+
+        {% if item.link %}
+          <p><a href="{{ item.link }}" target="_blank" class="btn btn-link">🔗 Visit link</a></p>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>

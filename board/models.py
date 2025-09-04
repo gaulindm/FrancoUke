@@ -43,16 +43,17 @@ class Venue(models.Model):
         return self.name
 
 
-
 class BoardItem(models.Model):
-    column = models.ForeignKey(BoardColumn, on_delete=models.CASCADE, related_name="items")
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    column = models.ForeignKey("BoardColumn", on_delete=models.CASCADE, null=True, blank=True, related_name="items")
+    event = models.ForeignKey("Event", on_delete=models.CASCADE, null=True, blank=True, related_name="board_items")
+
+    # Fields for non-event cards
+    title = models.CharField(max_length=255, blank=True)
+    rich_description = RichTextField(blank=True, null=True)
     youtube_url = models.URLField(blank=True, null=True)
     media_file = models.FileField(upload_to="board_media/", blank=True, null=True)
     link = models.URLField(blank=True, null=True)
 
-    rich_description = RichTextField(blank=True, null=True)
     position = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -60,13 +61,9 @@ class BoardItem(models.Model):
         ordering = ["position"]
 
     def __str__(self):
-        return self.title
-
-    @property
-    def cover_photo(self):
-        return self.photos.filter(is_cover=True).first() or self.photos.first()
-
-
+        if self.event:
+            return f"Event: {self.event.title}"
+        return self.title or "Board Item"
 
     @property
     def youtube_embed_url(self):
@@ -79,15 +76,13 @@ class BoardItem(models.Model):
         video_id = query.get("v", [None])[0]
         start_time = query.get("t", [None])[0]
 
-        # Standard YouTube link
-        if video_id:
+        if video_id:  # standard YouTube link
             embed_url = f"https://www.youtube.com/embed/{video_id}"
             if start_time:
                 embed_url += f"?start={start_time.replace('s', '')}"
             return embed_url
 
-        # Shortened youtu.be link
-        if "youtu.be" in parsed.netloc:
+        if "youtu.be" in parsed.netloc:  # shortened link
             video_id = parsed.path.strip("/")
             embed_url = f"https://www.youtube.com/embed/{video_id}"
             if parsed.query and "t=" in parsed.query:
@@ -96,6 +91,7 @@ class BoardItem(models.Model):
             return embed_url
 
         return None
+
 
 
 # -------------------------
@@ -183,6 +179,9 @@ class BoardItemPhoto(models.Model):
 # -------------------------
 # Events
 # -------------------------
+from django.db import models
+from ckeditor.fields import RichTextField
+
 class Event(models.Model):
     EVENT_TYPES = [
         ("rehearsal", "Rehearsal"),
@@ -196,8 +195,18 @@ class Event(models.Model):
         ("past", "Past"),
     ]
 
-    board_item = models.ForeignKey(
-        "BoardItem",
+    # 🔑 Optional Venue link (for recurring venue-based events)
+    venue = models.ForeignKey(
+        "Venue",
+        on_delete=models.SET_NULL,
+        related_name="events",
+        null=True,
+        blank=True
+    )
+
+    # 🔑 Optional BoardColumn link (for "Upcoming", "Past", "To Be Confirmed")
+    column = models.ForeignKey(
+        "BoardColumn",
         on_delete=models.SET_NULL,
         related_name="events",
         null=True,
@@ -205,9 +214,19 @@ class Event(models.Model):
     )
 
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    event_type = models.CharField(max_length=20, choices=EVENT_TYPES, default="performance")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="upcoming")
+    rich_description = RichTextField(blank=True)  
+    rich_notes = RichTextField(blank=True)       
+
+    event_type = models.CharField(
+        max_length=20,
+        choices=EVENT_TYPES,
+        default="performance"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="upcoming"
+    )
 
     event_date = models.DateField(blank=True, null=True)
     start_time = models.TimeField(blank=True, null=True)
@@ -223,7 +242,6 @@ class Event(models.Model):
     def __str__(self):
         return f"{self.title} ({self.get_event_type_display()} - {self.get_status_display()})"
 
-
     @property
     def cover_photo(self):
         return self.photos.filter(is_cover=True).first() or self.photos.first()
@@ -231,7 +249,7 @@ class Event(models.Model):
 
 
 class PerformanceDetails(models.Model):
-    """Extra fields only for performances (gigs)."""
+    """Extra fields only for performances."""
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="performance_details")
     attire = models.CharField(max_length=255, null=True, blank=True)
     chairs = models.CharField(max_length=255, null=True, blank=True)
@@ -254,3 +272,21 @@ class EventPhoto(models.Model):
 
     def __str__(self):
         return f"Photo for {self.event.title}"
+
+# -------------------------
+# Event Availabilty
+# -------------------------
+
+from django.conf import settings
+
+class EventAvailability(models.Model):
+    event = models.ForeignKey("Event", on_delete=models.CASCADE, related_name="availabilities")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("available", "Available"),
+            ("unavailable", "Unavailable"),
+            ("maybe", "Maybe"),
+        ],
+    )

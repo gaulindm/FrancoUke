@@ -1,49 +1,52 @@
+{# board/templates/board/_performance_card.html #}
+
 <div class="card"
      style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:pointer;"
      data-bs-toggle="modal" data-bs-target="#performanceModal{{ item.id }}">
 
   <!-- Cover / Media -->
   {% if item.cover_photo %}
-    <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}"
-         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-  {% elif item.media_file %}
-    <img src="{{ item.media_file.url }}" alt="{{ item.title }}"
-         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-  {% else %}
-    <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
-      ❌ No image available
-    </div>
-  {% endif %}
+  <img src="{{ item.cover_photo.image.url }}" alt="{{ item.title }}"
+       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% elif item.media_file %}
+  <img src="{{ item.media_file.url }}" alt="{{ item.title }}"
+       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% elif event and event.venue and event.venue.image %}
+  <img src="{{ event.venue.image.url }}" alt="{{ event.venue.name }}"
+       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% else %}
+  <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+    ❌ No image available
+  </div>
+{% endif %}
 
-  <!-- Title + Availability -->
+
+  <!-- Title + Date/Time (from Event) -->
   <div class="d-flex justify-content-between align-items-center mt-2">
     <strong>{{ item.title }}</strong>
-    {% if item.performance.my_availability == "yes" %}
-      <span class="badge bg-success">Y</span>
-    {% elif item.performance.my_availability == "no" %}
-      <span class="badge bg-danger">N</span>
-    {% elif item.performance.my_availability == "maybe" %}
-      <span class="badge bg-warning text-dark">M</span>
-    {% else %}
-      <span class="badge bg-secondary">–</span>
-    {% endif %}
   </div>
 
-  <!-- Date + Time + Location -->
   <small class="text-muted">
-    {% if item.performance.event_date %}
-      {{ item.performance.event_date|date:"M d, Y" }}
-    {% endif %}
-    {% if item.performance.start_time %}
-      ({{ item.performance.start_time|time:"g:i A" }}
-        {% if item.performance.end_time %} - {{ item.performance.end_time|time:"g:i A" }}{% endif %})
-      
-    {% endif %}
-    {% if item.performance.location %}
-      <p><strong>Location:</strong> {{ item.performance.location }}</p>
-    {% endif %}
+    {% with event=item.events.first %}
+      {% if event %}
+        {% if event.event_date %}
+          {{ event.event_date|date:"M d, Y" }}
+        {% endif %}
+        {% if event.start_time %}
+          ({{ event.start_time|time:"g:i A" }}
+            {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %})
+        {% endif %}
+        {% if event.venue %}
+          <p><strong>Venue:</strong> {{ event.venue.name }}</p>
+        {% elif event.location %}
+          <p><strong>Location:</strong> {{ event.location }}</p>
+        {% endif %}
+      {% else %}
+        <span class="text-muted">No event linked</span>
+      {% endif %}
+    {% endwith %}
   </small>
-</div>  {# ✅ closes only the card! #}
+</div>  {# ✅ closes only the card #}
 
 <!-- Modal -->
 <div class="modal fade" id="performanceModal{{ item.id }}" tabindex="-1"
@@ -61,23 +64,27 @@
           <img src="{{ item.media_file.url }}" alt="{{ item.title }}" class="img-fluid mb-3 rounded">
         {% endif %}
 
-        {% if item.performance.event_date %}
-          <p><strong>Date:</strong> {{ item.performance.event_date|date:"M d, Y" }}</p>
-        {% endif %}
-        {% if item.performance.start_time %}
-          <p><strong>Time:</strong> {{ item.performance.start_time|time:"g:i A" }}
-            {% if item.performance.end_time %} - {{ item.performance.end_time|time:"g:i A" }}{% endif %}
-          </p>
-        {% endif %}
-        {% if item.performance.arrive_by %}
-          <p><strong>Arrive By:</strong> {{ item.performance.arrive_by|time:"g:i A" }}</p>
-        {% endif %}
-        {% if item.performance.attire %}
-          <p><strong>Attire:</strong> {{ item.performance.attire }}</p>
-        {% endif %}
-        {% if item.performance.chairs %}
-          <p><strong>Chairs:</strong> {{ item.performance.chairs }}</p>
-        {% endif %}
+        {% with event=item.events.first %}
+          {% if event %}
+            {% if event.event_date %}
+              <p><strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}</p>
+            {% endif %}
+            {% if event.start_time %}
+              <p><strong>Time:</strong> {{ event.start_time|time:"g:i A" }}
+                {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
+              </p>
+            {% endif %}
+            {% if event.arrive_by %}
+              <p><strong>Arrive By:</strong> {{ event.arrive_by|time:"g:i A" }}</p>
+            {% endif %}
+            {% if event.attire %}
+              <p><strong>Attire:</strong> {{ event.attire }}</p>
+            {% endif %}
+            {% if event.chairs %}
+              <p><strong>Chairs:</strong> {{ event.chairs }}</p>
+            {% endif %}
+          {% endif %}
+        {% endwith %}
 
         <div>{{ item.rich_description|safe }}</div>
 
@@ -89,51 +96,34 @@
 
         <hr>
 
-        {# ✅ Event Photos Gallery (Lightbox) #}
-        {% for event in item.events.all %}
-          {% if event.cover_photo %}
-            <div class="event-gallery mb-3">
-              <a href="{{ event.cover_photo.image.url }}"
-                 data-lightbox="event-{{ event.id }}"
-                 data-title="{{ event.title }}">
-                <img src="{{ event.cover_photo.image.url }}" alt="{{ event.title }}" class="thumbnail">
-              </a>
+        {# ✅ Availability Form (safe check if event exists) #}
+        {% with event=item.events.first %}
+          {% if event %}
+          <form method="post" action="{% url 'set_event_availability' event.id %}">
+            {% csrf_token %}
+              <div class="mb-3">
+                <label for="availability{{ item.id }}" class="form-label"><strong>Your Availability:</strong></label>
+                <select id="availability{{ item.id }}" name="status" class="form-select">
+                  <option value="">-- Select --</option>
+                  <option value="yes" {% if event.my_availability == "yes" %}selected{% endif %}>✅ Yes</option>
+                  <option value="maybe" {% if event.my_availability == "maybe" %}selected{% endif %}>🤔 Maybe</option>
+                  <option value="no" {% if event.my_availability == "no" %}selected{% endif %}>❌ No</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </form>
 
-              {% for photo in event.photos.all %}
-                {% if photo.id != event.cover_photo.id %}
-                  <a href="{{ photo.image.url }}"
-                     data-lightbox="event-{{ event.id }}"
-                     data-title="{{ event.title }}"></a>
-                {% endif %}
-              {% endfor %}
-            </div>
+            <!-- Group Availability Summary -->
+            {% if event.avail_summary %}
+              <div class="mt-3">
+                <strong>Group Availability:</strong><br>
+                ✅ Yes: {{ event.avail_summary.yes }} |
+                ❌ No: {{ event.avail_summary.no }} |
+                🤔 Maybe: {{ event.avail_summary.maybe }}
+              </div>
+            {% endif %}
           {% endif %}
-        {% endfor %}
-
-        <!-- User Availability Form -->
-        <form method="post" action="{% url 'set_availability' item.performance.id %}">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="availability{{ item.id }}" class="form-label"><strong>Your Availability:</strong></label>
-            <select id="availability{{ item.id }}" name="status" class="form-select">
-              <option value="">-- Select --</option>
-              <option value="yes" {% if item.performance.my_availability == "yes" %}selected{% endif %}>✅ Yes</option>
-              <option value="maybe" {% if item.performance.my_availability == "maybe" %}selected{% endif %}>🤔 Maybe</option>
-              <option value="no" {% if item.performance.my_availability == "no" %}selected{% endif %}>❌ No</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-
-        <!-- Group Availability Summary -->
-        {% if item.performance.avail_summary %}
-          <div class="mt-3">
-            <strong>Group Availability:</strong><br>
-            ✅ Yes: {{ item.performance.avail_summary.yes }} |
-            ❌ No: {{ item.performance.avail_summary.no }} |
-            🤔 Maybe: {{ item.performance.avail_summary.maybe }}
-          </div>
-        {% endif %}
+        {% endwith %}
       </div>
     </div>
   </div>

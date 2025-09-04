@@ -67,6 +67,32 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
+### 2025-08-28
+## 🎶 Board Evolution – From Performances → Events
+
+The Kanban-style board is now fully functional and much cleaner:
+
+Event Model Updates
+- Removed legacy Performance model and migrated everything into Event.
+- Each Event can now belong either to a Venue (recurring performances) or to a BoardColumn (e.g., Upcoming, Past Performances, To Be Confirmed).
+- Added cover_photo property (pulls from EventPhoto).
+- Preserved WYSIWYG fields (rich_description, rich_notes).
+
+Board Columns
+- Venue-based events show directly under their Venue.
+- Column-based events appear in user-created columns (Upcoming, Past, TBC).
+- Non-event cards (from BoardItem) such as YouTube videos, photo/media galleries, or notes still appear seamlessly in the same columns.
+Templates Refactored
+- _other_board_column.html simplified:
+  - Handles Venue columns → show Venue events.
+  - Handles BoardColumns → show events first, then board items.
+- _event_card.html unified for all events (venue or column).
+- Added _general_card.html for pure board items (no event).
+Admin Improvements
+- EventAdmin now exposes both venue and column.
+- Old PerformanceInline and related admin clutter removed.
+
+
 ### 2025-08-25
 
 ## Photo Gallery (Lightbox Integration)

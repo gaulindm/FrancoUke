@@ -4,9 +4,26 @@
 {% block content %}
 <link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox-plus-jquery.min.js"></script>
+
 <div class="board-row">
   {% include 'partials/_other_board_columns.html' %}
 </div>
+
+<!-- Event Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="eventModalContent">
+        <p class="text-muted">Loading...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <style>
 .board-row {
@@ -55,8 +72,31 @@
 .gallery img.thumbnail:hover {
   transform: scale(1.05);
 }
-
 </style>
-
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Attach AJAX to availability forms inside modal
+    document.addEventListener("submit", function (e) {
+      if (e.target.matches(".availability-form")) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+  
+        fetch(form.action, {
+          method: "POST",
+          headers: { "X-CSRFToken": getCookie("csrftoken") },
+          body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("Availability updated: " + data.status);
+          }
+        });
+      }
+    });
+  });
+  </script>
+    
   
 {% endblock %}

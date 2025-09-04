@@ -5,34 +5,35 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import BoardColumn, BoardItem, PerformanceAvailability
-from gigs.models import Gig, Venue, Availability  # <-- add Availability
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-
-import json
-
-from .models import BoardColumn, BoardItem, PerformanceAvailability
-from gigs.models import Gig, Venue, Availability
-
-
+from django.views.decorators.http import require_GET
 # views.py
 from rest_framework import viewsets
-from .models import BoardItem
-from .serializers import BoardItemSerializer
+from .models import BoardItem, Performance, Event
+from .serializers import BoardItemSerializer, PerformanceSerializer, EventSerializer
+from django.shortcuts import render
+from .models import BoardColumn, Performance, PerformanceAvailability, Venue, Performance
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect
+
+from django.utils.timezone import now
+from django.db.models import Prefetch
+
+
+from django.contrib.auth import get_user_model
+
+def public_board(request):
+    """
+    Temporary public board view.
+    Right now it just redirects to full_board.
+    Later you can strip it down for non-logged-in users if needed.
+    """
+    return redirect("full_board")
 
 
 class BoardItemViewSet(viewsets.ModelViewSet):
     queryset = BoardItem.objects.all().order_by("-created_at")
     serializer_class = BoardItemSerializer
 
-
-from rest_framework import viewsets
-from .models import Performance, Event
-from .serializers import PerformanceSerializer, EventSerializer
 
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all().order_by("-created_at")
@@ -48,168 +49,74 @@ class EventViewSet(viewsets.ModelViewSet):
     )
     serializer_class = EventSerializer
 
-from django.shortcuts import render
+
+# board/views.py
 from django.contrib.auth.decorators import login_required
-from .models import BoardColumn, Performance, PerformanceAvailability
-
-
-from .models import BoardColumn, Venue, Performance
+from django.shortcuts import render
+from .models import BoardColumn, Venue, Event
 
 @login_required
 def full_board_view(request):
-    columns = BoardColumn.objects.prefetch_related(
-        'items__photos',
-        'items__performance__availabilities'
-    ).all()
-
-    venues = Venue.objects.prefetch_related(
-        'performances__board_item__photos',
-        'performances__availabilities'
-    ).all()
-
     user = request.user
 
-    # Attach availability and cover photos like before
-    for column in columns:
-        for item in column.items.all():
-            if hasattr(item, "performance"):
-                availability = item.performance.availabilities.filter(user=user).first()
-                item.performance.my_availability = availability.status if availability else None
-                avails = item.performance.availabilities.all()
-                item.performance.avail_summary = {
-                    "yes": avails.filter(status="yes").count(),
-                    "no": avails.filter(status="no").count(),
-                    "maybe": avails.filter(status="maybe").count(),
-                }
-            cover = item.photos.filter(is_cover=True).first() or item.photos.first()
-            #item.cover_photo = cover
+    # Prefetch related data for efficiency
+    columns = BoardColumn.objects.prefetch_related("items__photos", "events__photos").all()
+    venues = Venue.objects.prefetch_related("events__photos").all()
 
-    # Same prep for venue performances
+    # Attach availability + cover photo info
     for venue in venues:
-        for perf in venue.performances.all():
-            availability = perf.availabilities.filter(user=user).first()
-            perf.my_availability = availability.status if availability else None
-            avails = perf.availabilities.all()
-            perf.avail_summary = {
+        for event in venue.events.all():
+            availability = event.availabilities.filter(user=user).first()
+            event.my_availability = availability.status if availability else None
+
+            avails = event.availabilities.all()
+            event.avail_summary = {
                 "yes": avails.filter(status="yes").count(),
                 "no": avails.filter(status="no").count(),
                 "maybe": avails.filter(status="maybe").count(),
             }
-            cover = perf.board_item.photos.filter(is_cover=True).first() or perf.board_item.photos.first()
-            #perf.board_item.cover_photo = cover
 
-    return render(request, 'board/full_board.html', {
-        'columns': columns,
-        'venues': venues,
-    })
+            # Attach cover photo from event photos
+            event._cover_photo = event.photos.filter(is_cover=True).first() or event.photos.first()
 
+    for column in columns:
+        for event in column.events.all():
+            availability = event.availabilities.filter(user=user).first()
+            event.my_availability = availability.status if availability else None
 
+            avails = event.availabilities.all()
+            event.avail_summary = {
+                "yes": avails.filter(status="yes").count(),
+                "no": avails.filter(status="no").count(),
+                "maybe": avails.filter(status="maybe").count(),
+            }
 
-from django.shortcuts import render
-from .models import BoardColumn
-from gigs.models import Gig  # correct import
+            # Attach cover photo from event photos
+            event._cover_photo = event.photos.filter(is_cover=True).first() or event.photos.first()
 
-
-
-def public_board(request):
-    # 1️⃣ Get all public board columns
-    columns = BoardColumn.objects.filter(is_public=True).prefetch_related('items')
-
-    # 2️⃣ Build a dictionary of gigs grouped by venue
-    gigs = Gig.objects.select_related('venue')  # no is_public filter since field doesn't exist
-    gigs_by_venue = {}
-    for gig in gigs:
-        if gig.venue not in gigs_by_venue:
-            gigs_by_venue[gig.venue] = []
-        gigs_by_venue[gig.venue].append(gig)
-
-    # 3️⃣ Pass columns and gigs_by_venue to the template
-    return render(request, 'board/public_board.html', {
+    return render(request, "board/full_board.html", {
         "columns": columns,
-        "gigs_by_venue": gigs_by_venue,
+        "venues": venues,
     })
 
-
-@csrf_exempt
-def update_card_position(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            item_id = data['item_id']
-            new_column_id = data['new_column_id']
-            new_position = data['new_position']
-
-            item = BoardItem.objects.get(id=item_id)
-            item.column_id = new_column_id
-            item.position = new_position
-            item.save()
-
-            # Optional: reassign other cards' positions in the column
-            siblings = BoardItem.objects.filter(column_id=new_column_id).exclude(id=item_id).order_by('position')
-            for idx, sibling in enumerate(siblings):
-                if idx >= new_position:
-                    sibling.position = idx + 1
-                    sibling.save()
-
-            return JsonResponse({'status': 'ok'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-
-    return JsonResponse({'status': 'invalid method'}, status=405)
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from .models import Performance, PerformanceAvailability
-
-
-from django.views.decorators.http import require_POST
-from django.shortcuts import redirect
-from .models import Performance, PerformanceAvailability
-
-@login_required
 @require_POST
-def set_availability(request, performance_id):
-    performance = get_object_or_404(Performance, id=performance_id)
-    status = request.POST.get("status")
-
-    availability, created = PerformanceAvailability.objects.get_or_create(
-        performance=performance,
-        user=request.user,
-        defaults={"status": status}
-    )
-
-    if not created:
-        availability.status = status
-        availability.save()
-
-    return redirect("full_board")  # or back to modal if using AJAX
-
-
-
 @login_required
-def update_availability(request, performance_id=None):
-    if request.method == 'POST':
-        # Allow performance_id from URL OR POST data
-        performance_id = performance_id or request.POST.get('performance_id')
-        status = request.POST.get('status')
+def set_availability(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
 
-        performance = get_object_or_404(Performance, id=performance_id)
-
-        PerformanceAvailability.objects.update_or_create(
+    if request.method == "POST":
+        status = request.POST.get("status")
+        availability, created = EventAvailability.objects.update_or_create(
             user=request.user,
-            performance=performance,
-            defaults={'status': status}
+            event=event,
+            defaults={"status": status},
         )
+    return redirect(request.META.get("HTTP_REFERER", "performer_event_list"))
 
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return JsonResponse({
-                "success": True,
-                "status": status,
-                "user": request.user.username
-            })
 
-    return redirect('full_board')
+
+
+
 
 
 def rehearsal_detail_view(request, pk):
@@ -224,17 +131,13 @@ def rehearsal_detail_view(request, pk):
         'user_availability': user_availability,
     })
 
-# board/views.py
-from django.shortcuts import get_object_or_404, render
-from .models import BoardItem
+
 
 def board_item_gallery_view(request, item_id):
     board_item = get_object_or_404(BoardItem, id=item_id)
     return render(request, 'board/item_gallery.html', {'board_item': board_item})
 
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-from .models import BoardItem
+
 
 @require_GET
 def item_photo_list(request, item_id):
@@ -254,82 +157,145 @@ def item_photo_list(request, item_id):
 
     return JsonResponse(data, safe=False)
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Performance, PerformanceAvailability
+
 
 User = get_user_model()
 
+# views.py
 @login_required
 def availability_matrix(request):
-    User = get_user_model()
-    players = (
-        User.objects
-        .filter(groups__name="Performers", is_active=True)
-        .order_by("first_name", "last_name", "username")
-    )
+    events = Event.objects.select_related("board_item").order_by("event_date", "start_time")
 
-    # Exclude performances that live in unwanted board columns
-    excluded_columns = ["Songs to listen", "Media", "Past Performances"]
-
-    performances = (
-        Performance.objects
-        .select_related("venue", "board_item__column")
-        .exclude(board_item__column__name__in=excluded_columns)
-        .order_by("event_date", "start_time", "board_item__title")
-    )
-
-    # Build lookup: {(user_id, perf_id): status}
-    availability_dict = {
-        (a.user_id, a.performance_id): a.status
-        for a in PerformanceAvailability.objects.filter(performance__in=performances)
-    }
-
-    STATUS_ICONS = {
-        "yes": "✅",
-        "no": "❌",
-        "maybe": "🤔",
-    }
-
-    # Build rows
+    players = User.objects.all().order_by("username")
     matrix = []
+
     for player in players:
         row = []
-        for perf in performances:
-            status = availability_dict.get((player.id, perf.id))
-            row.append(STATUS_ICONS.get(status, "—"))
+        for event in events:
+            availability = EventAvailability.objects.filter(
+                event=event, user=player
+            ).first()
+            if availability:
+                if availability.status == "yes":
+                    row.append("✅")
+                elif availability.status == "maybe":
+                    row.append("🤔")
+                elif availability.status == "no":
+                    row.append("❌")
+                else:
+                    row.append("–")
+            else:
+                row.append("–")
         matrix.append((player, row))
 
+    # ✅ build summary row
+    summary = []
+    for event in events:
+        yes_count = EventAvailability.objects.filter(event=event, status="yes").count()
+        maybe_count = EventAvailability.objects.filter(event=event, status="maybe").count()
+        no_count = EventAvailability.objects.filter(event=event, status="no").count()
+        summary.append(f"✅ {yes_count} / 🤔 {maybe_count} / ❌ {no_count}")
+
     return render(request, "board/availability_matrix.html", {
-        "players": players,
-        "performances": performances,
+        "events": events,
         "matrix": matrix,
+        "summary": summary,
+
+
     })
 
-from django.utils.timezone import now
-from django.db.models import Prefetch
+
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .models import Performance, PerformanceAvailability
+from django.utils.timezone import now
+
+from .models import Event, EventAvailability
+
 
 @login_required
-def performer_performance_list(request):
-    performances = (
-        Performance.objects.filter(event_date__gte=now().date())
-        .select_related("venue", "board_item")
+def performer_event_list(request):
+    events = (
+        Event.objects.filter(event_date__gte=now().date())
+        .select_related("board_item")  # keep if you need board columns
         .order_by("event_date", "start_time")
     )
 
     # preload user's availability
     user_availability = {}
     if request.user.is_authenticated:
-        availabilities = PerformanceAvailability.objects.filter(
-            user=request.user, performance__in=performances
+        availabilities = EventAvailability.objects.filter(
+            user=request.user, event__in=events
         )
-        user_availability = {av.performance_id: av.status for av in availabilities}
+        user_availability = {av.event_id: av.status for av in availabilities}
 
-    return render(request, "board/performer_performance_list.html", {
-        "performances": performances,
+    return render(request, "board/performer_event_list.html", {
+        "events": events,
         "user_availability": user_availability,
     })
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from .models import Event
+
+def event_detail_partial(request, event_id):
+    """
+    Returns the modal content for an Event (used in AJAX).
+    """
+    event = get_object_or_404(Event, id=event_id)
+    return render(request, "partials/_event_card.html", {"event": event})
+
+# board/views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Event, EventAvailability   # adjust if different
+
+# --- New: Event Detail ---
+def event_detail(request, event_id):
+    """
+    Renders the modal body for an event.
+    """
+    event = get_object_or_404(Event, id=event_id)
+
+    # Look up this user's availability if logged in
+    user_status = None
+    if request.user.is_authenticated:
+        user_status = (
+            EventAvailability.objects
+            .filter(user=request.user, event=event)
+            .values_list("status", flat=True)
+            .first()
+        )
+
+    return render(request, "partials/_event_detail.html", {
+        "event": event,
+        "user_status": user_status,
+    })
+
+
+# --- New: Update Event Availability ---
+@login_required
+def update_event_availability(request, event_id):
+    """
+    Updates the current user's availability for a given event.
+    """
+    if request.method == "POST":
+        status = request.POST.get("status")
+        event = get_object_or_404(Event, id=event_id)
+
+        EventAvailability.objects.update_or_create(
+            user=request.user,
+            event=event,
+            defaults={"status": status}
+        )
+
+        # If AJAX → respond with JSON
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": True,
+                "status": status,
+                "user": request.user.username
+            })
+
+    return redirect("full_board")
