@@ -26,8 +26,25 @@ def public_board(request):
     Temporary public board view.
     Right now it just redirects to full_board.
     Later you can strip it down for non-logged-in users if needed.
-    """
+    
     return redirect("full_board")
+
+    columns = BoardColumn.objects.filter(is_public=True).prefetch_related("boarditem_set")"""
+
+
+    columns = (
+        BoardColumn.objects
+        .select_related("venue")
+        .prefetch_related(
+            "items__photos",
+            "events__photos",          # events linked directly to column
+            "events__availabilities",
+            #"venue__events__photos",   # events linked via venue
+            "venue__events__availabilities"
+        )
+        .order_by("position")
+    )
+    return render(request, "board/public_board.html", {"columns": columns})
 
 
 class BoardItemViewSet(viewsets.ModelViewSet):

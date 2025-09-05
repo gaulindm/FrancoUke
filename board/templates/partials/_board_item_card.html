@@ -3,7 +3,7 @@
 <div class="card mb-3 board-item-card">
   <div class="card-body">
 
-    {# Title #}
+    {# Title always shown #}
     {% if item.title %}
       <h6 class="card-title">{{ item.title }}</h6>
     {% endif %}
@@ -26,42 +26,42 @@
         </iframe>
       </div>
     {% endif %}
-{% comment %}
+
     {# Photos: cover + lightbox gallery #}
     {% if item.photos.exists %}
-      {% with cover=item.photos.filter(is_cover=True).first|default:item.photos.first %}
-        {% if cover %}
-          <a href="{{ cover.image.url }}"
-             data-lightbox="boarditem-{{ item.id }}"
-             data-title="{{ item.title }}">
-            <img src="{{ cover.image.url }}"
-                 class="img-fluid rounded mb-2 shadow-sm"
-                 alt="{{ item.title }}">
-          </a>
-        {% endif %}
-      {% endwith %}
-
-      {# Hidden anchors for other photos (Lightbox grouping) #}
-      {% for photo in item.photos.all %}
-        {% if not photo.is_cover and photo != cover %}
-          <a href="{{ photo.image.url }}"
-             data-lightbox="boarditem-{{ item.id }}"
-             data-title="{{ item.title }}"
-             style="display:none;">
-            <img src="{{ photo.image.url }}" alt="{{ item.title }}">
-          </a>
-        {% endif %}
-      {% endfor %}
+    {% if item.cover_photo %}
+      <a href="{{ item.cover_photo.image.url }}"
+         data-lightbox="boarditem-{{ item.id }}"
+         data-title="{{ item.title }}">
+        <img src="{{ item.cover_photo.image.url }}"
+             class="img-fluid rounded mb-2 shadow-sm"
+             alt="{{ item.title }}">
+      </a>
     {% endif %}
+  
+    {# Hidden anchors for the rest of the photos #}
+    {% for photo in item.photos.all %}
+      {% if photo != item.cover_photo %}
+        <a href="{{ photo.image.url }}"
+           data-lightbox="boarditem-{{ item.id }}"
+           data-title="{{ item.title }}"
+           style="display:none;">
+          <img src="{{ photo.image.url }}" alt="{{ item.title }}">
+        </a>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  
 
-    {# Optional link field #}
+
+    {# Link (songs, resources, external pages) #}
     {% if item.link %}
       <p class="mt-2">
-        <a href="{{ item.link }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-          More info
+        <a href="{{ item.link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+          Listen / Open
         </a>
       </p>
     {% endif %}
-{% endcomment%}
+
   </div>
 </div>

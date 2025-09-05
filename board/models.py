@@ -106,6 +106,10 @@ class BoardItem(models.Model):
             embed_url += f"?start={start_time}"
         return embed_url
 
+    @property
+    def cover_photo(self):
+        """Return the cover photo if one is marked, otherwise the first photo."""
+        return self.photos.filter(is_cover=True).first() or self.photos.first()
 
 
 # -------------------------

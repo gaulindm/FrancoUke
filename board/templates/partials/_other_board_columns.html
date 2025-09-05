@@ -1,70 +1,47 @@
-{# templates/partials/_other_board_column.html #}
-{% load board_extras %}
-
-<div class="board-row" style="display:flex; gap:20px; flex-wrap:nowrap; align-items:flex-start;">
-
-
+{# templates/partials/_other_board_columns.html #}
+<div class="board-row">
   {% for column in columns %}
-  {% if column.column_type == "venue" %}
+
+    {% if column.column_type == "venue" %}
       <div class="board-column">
-          <h5 class="text-center">{{ column.venue.name }}</h5>
-          {% for event in column.venue.events.all %}
-              {% include "partials/_event_card.html" with event=event %}
-          {% empty %}
-              <p class="text-muted">No events scheduled.</p>
-          {% endfor %}
+        <h5 class="text-center">{{ column.venue.name }}</h5>
+        {% for event in column.venue.events.all %}
+          {% include "partials/_event_card.html" with event=event %}
+        {% empty %}
+          <p class="text-muted">No events scheduled.</p>
+        {% endfor %}
       </div>
- 
-      {% else %}
+
+    {% elif column.column_type == "songs" %}
       <div class="board-column">
-          <h5>{{ column.name }}</h5>
-          
-          {# Loop over board items for this column #}
-          {% for item in column.items.all %}
-              <div class="board-item mb-3">
-                  {% if item.title %}
-                      <h6>{{ item.title }}</h6>
-                  {% endif %}
-  
-                  {% if item.youtube_embed_url %}
-                      <div class="ratio ratio-16x9 mb-2">
-                          <iframe
-                              src="{{ item.youtube_embed_url }}"
-                              frameborder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowfullscreen>
-                          </iframe>
-                      </div>
-                  {% endif %}
-  
-                  {% if item.rich_description %}
-                      <div class="text-muted small">
-                          {{ item.rich_description|safe }}
-                      </div>
-                  {% endif %}
-  
-                  {% if item.link %}
-                      <a href="{{ item.link }}" target="_blank">More info</a>
-                  {% endif %}
-              </div>
-          {% empty %}
-              <p class="text-muted">No items here yet.</p>
-          {% endfor %}
-
-  
-
-
+        <h5 class="text-center">🎵 Songs to Listen</h5>
+        {% for item in column.items.all %}
+          {% include "partials/_board_item_card.html" with item=item %}
+        {% empty %}
+          <p class="text-muted">No songs added yet.</p>
+        {% endfor %}
       </div>
-  {% endif %}
-{% comment %}  
-{% for item in column.items.all %}
-  {% include "partials/_board_item_card.html" with item=item %}
-{% empty %}
-  <p class="text-muted">No items here yet.</p>
-{% endfor %}
-{% endcomment %}
 
+    {% elif column.column_type == "photos" %}
+      <div class="board-column">
+        <h5 class="text-center">📸 Photo Gallery</h5>
+        {% for item in column.items.all %}
+          {% include "partials/_board_item_card.html" with item=item %}
+        {% empty %}
+          <p class="text-muted">No photos yet.</p>
+        {% endfor %}
+      </div>
 
-{% endfor %}
+    {% else %}
+      <div class="board-column">
+        <h5 class="text-center">{{ column.name }}</h5>
+        {% for item in column.items.all %}
+          {% include "partials/_board_item_card.html" with item=item %}
+        {% empty %}
+          <p class="text-muted">No items yet.</p>
+        {% endfor %}
+      </div>
+    {% endif %}
 
+  {% endfor %}
 </div>
