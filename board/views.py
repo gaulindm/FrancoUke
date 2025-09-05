@@ -180,7 +180,7 @@ User = get_user_model()
 # views.py
 @login_required
 def availability_matrix(request):
-    events = Event.objects.select_related("board_item").order_by("event_date", "start_time")
+    events = Event.objects.select_related("venue").order_by("event_date", "start_time")
 
     players = User.objects.all().order_by("username")
     matrix = []
@@ -233,7 +233,7 @@ from .models import Event, EventAvailability
 def performer_event_list(request):
     events = (
         Event.objects.filter(event_date__gte=now().date())
-        .select_related("board_item")  # keep if you need board columns
+        .select_related("venue")  # keep if you need board columns
         .order_by("event_date", "start_time")
     )
 

@@ -77,24 +77,34 @@ class BoardItem(models.Model):
 
         parsed = urlparse(self.youtube_url)
         query = parse_qs(parsed.query)
-        video_id = query.get("v", [None])[0]
-        start_time = query.get("t", [None])[0]
+        video_id = None
+        start_time = None
 
-        if video_id:  # standard YouTube link
-            embed_url = f"https://www.youtube.com/embed/{video_id}"
-            if start_time:
-                embed_url += f"?start={start_time.replace('s', '')}"
-            return embed_url
+        # Handle normal YouTube links: https://www.youtube.com/watch?v=abc123
+        if "youtube.com" in parsed.netloc:
+            if "v" in query:
+                video_id = query["v"][0]
+            elif parsed.path.startswith("/embed/"):
+                video_id = parsed.path.split("/")[-1]
+            elif parsed.path.startswith("/shorts/"):
+                video_id = parsed.path.split("/")[-1]
 
-        if "youtu.be" in parsed.netloc:  # shortened link
+            if "t" in query:
+                start_time = query["t"][0].replace("s", "")
+
+        # Handle shortened links: https://youtu.be/abc123?t=90
+        elif "youtu.be" in parsed.netloc:
             video_id = parsed.path.strip("/")
-            embed_url = f"https://www.youtube.com/embed/{video_id}"
-            if parsed.query and "t=" in parsed.query:
-                start_time = parsed.query.split("t=")[-1]
-                embed_url += f"?start={start_time.replace('s', '')}"
-            return embed_url
+            if "t" in query:
+                start_time = query["t"][0].replace("s", "")
 
-        return None
+        if not video_id:
+            return None
+
+        embed_url = f"https://www.youtube.com/embed/{video_id}"
+        if start_time:
+            embed_url += f"?start={start_time}"
+        return embed_url
 
 
 

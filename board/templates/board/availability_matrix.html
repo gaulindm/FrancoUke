@@ -42,21 +42,8 @@
                 </td>
             </tr>
             {% endfor %}
-            <tbody>
-                {% for player, row in matrix %}
-                <tr>
-                    <td class="text-start fw-bold">{{ player.get_full_name|default:player.username }}</td>
-                    {% for status_icon in row %}
-                        <td>{{ status_icon }}</td>
-                    {% endfor %}
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="{{ events|length|add:'1' }}" class="text-center text-muted py-4">
-                        No performers found.
-                    </td>
-                </tr>
-                {% endfor %}
+            
+  
             
                 <!-- ✅ Summary Row -->
                 <tr class="table-secondary fw-bold">

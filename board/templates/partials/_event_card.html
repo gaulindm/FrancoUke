@@ -5,15 +5,23 @@
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
  <!-- Card Cover (use Venue image) -->
-{% if event.venue and event.venue.image %}
-<img src="{{ event.venue.image.url }}" 
-     alt="{{ event.venue.name }}"
-     style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+ {% if event.venue and event.venue.image %}
+ <!-- Venue image -->
+ <img src="{{ event.venue.image.url }}" 
+      alt="{{ event.venue.name }}"
+      style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% elif event.cover_photo %}
+ <!-- Event cover photo fallback -->
+ <img src="{{ event.cover_photo.image.url }}" 
+      alt="{{ event.title }}"
+      style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
 {% else %}
-<div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
-  ❌ No venue image available
-</div>
+ <!-- Placeholder -->
+ <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+   ❌ No image available
+ </div>
 {% endif %}
+
 
   <!-- Title + Availability -->
   <div class="d-flex justify-content-between align-items-center mt-2">

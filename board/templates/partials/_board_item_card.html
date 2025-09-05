@@ -1,0 +1,67 @@
+{# partials/_board_item_card.html #}
+
+<div class="card mb-3 board-item-card">
+  <div class="card-body">
+
+    {# Title #}
+    {% if item.title %}
+      <h6 class="card-title">{{ item.title }}</h6>
+    {% endif %}
+
+    {# Rich description (safe HTML) #}
+    {% if item.rich_description %}
+      <div class="card-text small text-muted mb-2">
+        {{ item.rich_description|safe }}
+      </div>
+    {% endif %}
+
+    {# YouTube embed #}
+    {% if item.youtube_embed_url %}
+      <div class="ratio ratio-16x9 mb-2">
+        <iframe
+          src="{{ item.youtube_embed_url }}"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+    {% endif %}
+{% comment %}
+    {# Photos: cover + lightbox gallery #}
+    {% if item.photos.exists %}
+      {% with cover=item.photos.filter(is_cover=True).first|default:item.photos.first %}
+        {% if cover %}
+          <a href="{{ cover.image.url }}"
+             data-lightbox="boarditem-{{ item.id }}"
+             data-title="{{ item.title }}">
+            <img src="{{ cover.image.url }}"
+                 class="img-fluid rounded mb-2 shadow-sm"
+                 alt="{{ item.title }}">
+          </a>
+        {% endif %}
+      {% endwith %}
+
+      {# Hidden anchors for other photos (Lightbox grouping) #}
+      {% for photo in item.photos.all %}
+        {% if not photo.is_cover and photo != cover %}
+          <a href="{{ photo.image.url }}"
+             data-lightbox="boarditem-{{ item.id }}"
+             data-title="{{ item.title }}"
+             style="display:none;">
+            <img src="{{ photo.image.url }}" alt="{{ item.title }}">
+          </a>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {# Optional link field #}
+    {% if item.link %}
+      <p class="mt-2">
+        <a href="{{ item.link }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+          More info
+        </a>
+      </p>
+    {% endif %}
+{% endcomment%}
+  </div>
+</div>
