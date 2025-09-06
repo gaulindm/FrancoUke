@@ -61,6 +61,9 @@ class BoardItem(models.Model):
     position = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+     # 👇 NEW
+    is_public = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["position"]
 
@@ -260,6 +263,8 @@ class Event(models.Model):
     attire = models.CharField(max_length=255,null=True, blank=True)
     chairs = models.CharField(max_length=255,null=True, blank=True)
  
+    # 👇 NEW
+    is_public = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["event_date", "start_time", "title"]

@@ -1,4 +1,4 @@
-{% extends 'base_uke4ia.html' %}
+{% extends 'base_public_uke4ia.html' %}
 {% load board_extras %}
 
 {% block content %}
@@ -8,17 +8,55 @@
 <div class="board-container" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;">
 
   {% for column in columns %}
-  <div class="board-column">
-    {% if column.column_type == "rehearsal" %}
-      {% include "partials/_rehearsal_column.html" with column=column items=column.public_items %}
-    {% elif column.column_type == "past_performances" %}
-      {% include "partials/_past_performances_column.html" with column=column items=column.public_items %}
-    {% elif column.column_type == "songs to listen" %}
-      {% include "partials/_songs_to_listen_column.html" with column=column items=column.public_items %}
+  {% if column.column_type == "venue" %}
+      <div class="board-column">
+        <h5 class="text-center">{{ column.venue.name }}</h5>
+        {% for event in column.venue.events.all %}
+          {% include "partials/_public_event_card.html" with event=event %}
+        {% empty %}
+          <p class="text-muted">No events scheduled.</p>
+        {% endfor %}
+      </div>
+
+    {% elif column.column_type == "songs_to_listen" %}
+      <div class="board-column">
+        <h5 class="text-center">🎵 Songs to Listen</h5>
+        {% for item in column.items.all %}
+          {% include "partials/_board_item_card.html" with item=item %}
+        {% empty %}
+          <p class="text-muted">No songs added yet.</p>
+        {% endfor %}
+      </div>
+
+    {% elif column.column_type == "photos" %}
+      <div class="board-column">
+        <h5 class="text-center">📸 Photo Gallery</h5>
+        {% for item in column.items.all %}
+          {% include "partials/_board_item_card.html" with item=item %}
+        {% empty %}
+          <p class="text-muted">No photos yet.</p>
+        {% endfor %}
+      </div>
+
     {% else %}
-      {% include "partials/_general_column.html" with column=column items=column.public_items %}
+      <div class="board-column">
+        <h5 class="text-center">{{ column.name }}</h5>
+
+        {# ✅ Show events linked to this column #}
+        {% for event in column.events.all %}
+          {% include "partials/_event_card.html" with event=event %}
+        {% empty %}
+          {# If no events, maybe items exist #}
+        {% endfor %}
+
+        {# ✅ Show any board items linked to this column #}
+        {% for item in column.items.all %}
+          {% include "partials/_board_item_card.html" with item=item %}
+        {% empty %}
+          <p class="text-muted">No items yet.</p>
+        {% endfor %}
+      </div>
     {% endif %}
-  </div>
 {% endfor %}
 
 </div>
