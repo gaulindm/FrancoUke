@@ -6,58 +6,20 @@
 <script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox-plus-jquery.min.js"></script>
 
 <div class="board-container" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;">
-{% comment %}
-{# --- Venue columns --- #}  
-{# --- NO LONGER USING GIGS --- #}
-  {% if gigs_by_venue %}
-    {% for venue, gigs in gigs_by_venue.items %}
-      <div class="board-column" style="flex: 0 0 300px; background: #e6f3ff; border-radius: 6px; padding: 10px;">
-        <h5 class="text-center">{{ venue.name }}</h5>
 
-        {% if venue.image %}
-          <img src="{{ venue.image.url }}" alt="{{ venue.name }}" style="width:100%; border-radius:6px; margin-bottom:12px;">
-        {% endif %}
-
-        {% for gig in gigs %}
-          <div class="gig-card" style="background-color:#fff; border-radius:8px; padding:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-            <div class="fw-bold text-dark">{{ gig.title }}</div>
-            <small class="text-muted">
-              {{ gig.date|date:"M d, Y" }}
-              {% if gig.start_time %}
-                {{ gig.start_time|time:"H:i" }}
-                {% if gig.end_time %}
-                  – {{ gig.end_time|time:"H:i" }}
-                {% endif %}
-              {% endif %}
-            </small>
-          </div>
-        {% endfor %}
-
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endcomment %}
-
-  {# --- Other columns --- #}
   {% for column in columns %}
-    {% if column.column_type != "venue" %}
-      <div class="board-column" style="flex: 0 0 300px; background: #f8f9fa; border-radius: 6px; padding: 10px;">
-        {% if column.column_type == "rehearsal" %}
-          {% include "partials/_rehearsal_column.html" with column=column items=column.items.all %}
-        {% elif column.column_type == "past_performances" %}
-          {% include "partials/_past_performances_column.html" with column=column items=column.items.all %}
-        {% elif column.column_type == "songs to listen" %}
-          {% include "partials/_songs_to_listen_column.html" with column=column items=column.items.all %}
-        {% comment %}
-          {% elif column.column_type == "photos" %}
-          {% include "partials/_photos_column.html" with column=column items=column.items.all %}
-        {% endcomment %}
-        {% else %}
-          {% include "partials/_general_column.html" with column=column items=column.items.all %}
-        {% endif %}
-      </div>
+  <div class="board-column">
+    {% if column.column_type == "rehearsal" %}
+      {% include "partials/_rehearsal_column.html" with column=column items=column.public_items %}
+    {% elif column.column_type == "past_performances" %}
+      {% include "partials/_past_performances_column.html" with column=column items=column.public_items %}
+    {% elif column.column_type == "songs to listen" %}
+      {% include "partials/_songs_to_listen_column.html" with column=column items=column.public_items %}
+    {% else %}
+      {% include "partials/_general_column.html" with column=column items=column.public_items %}
     {% endif %}
-  {% endfor %}
+  </div>
+{% endfor %}
 
 </div>
 

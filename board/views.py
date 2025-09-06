@@ -4,72 +4,75 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import BoardColumn, BoardItem, PerformanceAvailability
-from django.views.decorators.http import require_GET
+from .models import BoardColumn, BoardItem, Venue, EventAvailability
+from django.views.decorators.http import require_GET, require_POST
 # views.py
 from rest_framework import viewsets
-from .models import BoardItem, Performance, Event
-from .serializers import BoardItemSerializer, PerformanceSerializer, EventSerializer
-from django.shortcuts import render
-from .models import BoardColumn, Performance, PerformanceAvailability, Venue, Performance
-from django.views.decorators.http import require_POST
+from .models import BoardItem, Event
+from .serializers import BoardItemSerializer, EventSerializer
+#from .serializers import PerformanceSerializer
+
 from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 
 from django.utils.timezone import now
+
 from django.db.models import Prefetch
 
-
+from .models import BoardColumn
+from django.http import HttpResponse
 from django.contrib.auth import get_user_model
+
+from django.shortcuts import render
+from .models import BoardColumn
 
 def public_board(request):
     """
-    Temporary public board view.
-    Right now it just redirects to full_board.
-    Later you can strip it down for non-logged-in users if needed.
-    
-    return redirect("full_board")
+    Public board view
+    - Accessible without login
+    - Only shows columns/events/items/photos marked as public
+    """
 
-    columns = BoardColumn.objects.filter(is_public=True).prefetch_related("boarditem_set")"""
-
-
+    # ✅ Only fetch public columns
     columns = (
         BoardColumn.objects
+        .filter(is_public=True)  # only public columns
         .select_related("venue")
         .prefetch_related(
             "items__photos",
-            "events__photos",          # events linked directly to column
-            "events__availabilities",
-            #"venue__events__photos",   # events linked via venue
-            "venue__events__availabilities"
+            "events__photos",
+            # Don't prefetch availabilities — not relevant for public
         )
         .order_by("position")
     )
-    return render(request, "board/public_board.html", {"columns": columns})
+
+    # ✅ Attach only public items/events/photos
+    for column in columns:
+        # public items
+        column.public_items = column.items.filter(is_public=True)
+
+        # venue events
+        if column.venue:
+            column.public_events = column.venue.events.filter(is_public=True)
+            for event in column.public_events:
+                event._cover_photo = (
+                    event.photos.filter(is_public=True, is_cover=True).first()
+                    or event.photos.filter(is_public=True).first()
+                )
+        else:
+            # non-venue column events
+            column.public_events = column.events.filter(is_public=True)
+            for event in column.public_events:
+                event._cover_photo = (
+                    event.photos.filter(is_public=True, is_cover=True).first()
+                    or event.photos.filter(is_public=True).first()
+                )
+
+    return render(request, "board/public_board.html", {
+        "columns": columns,
+    })
 
 
-class BoardItemViewSet(viewsets.ModelViewSet):
-    queryset = BoardItem.objects.all().order_by("-created_at")
-    serializer_class = BoardItemSerializer
-
-
-class PerformanceViewSet(viewsets.ModelViewSet):
-    queryset = Performance.objects.all().order_by("-created_at")
-    serializer_class = PerformanceSerializer
-
-
-class EventViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Event.objects
-        .select_related("board_item")
-        .prefetch_related("photos")
-        .order_by("event_date", "start_time", "title")
-    )
-    serializer_class = EventSerializer
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import BoardColumn
 
 @login_required
 def full_board_view(request):
@@ -239,11 +242,7 @@ def availability_matrix(request):
 
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.utils.timezone import now
 
-from .models import Event, EventAvailability
 
 
 @login_required
@@ -267,9 +266,7 @@ def performer_event_list(request):
         "user_availability": user_availability,
     })
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from .models import Event
+
 
 def event_detail_partial(request, event_id):
     """
@@ -279,10 +276,7 @@ def event_detail_partial(request, event_id):
     return render(request, "partials/_event_card.html", {"event": event})
 
 # board/views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from .models import Event, EventAvailability   # adjust if different
+
 
 # --- New: Event Detail ---
 def event_detail(request, event_id):
@@ -332,3 +326,26 @@ def update_event_availability(request, event_id):
             })
 
     return redirect("full_board")
+
+
+
+
+class BoardItemViewSet(viewsets.ModelViewSet):
+    queryset = BoardItem.objects.all().order_by("-created_at")
+    serializer_class = BoardItemSerializer
+
+"""
+class PerformanceViewSet(viewsets.ModelViewSet):
+    queryset = Performance.objects.all().order_by("-created_at")
+    serializer_class = PerformanceSerializer
+"""
+
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = (
+        Event.objects
+        .select_related("board_item")
+        .prefetch_related("photos")
+        .order_by("event_date", "start_time", "title")
+    )
+    serializer_class = EventSerializer
+

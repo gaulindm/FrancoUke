@@ -1,6 +1,7 @@
 # serializers.py
 from rest_framework import serializers
-from .models import BoardItem, Performance, BoardItemPhoto, Event, PerformanceDetails, EventPhoto
+from .models import BoardItem, BoardItemPhoto, Event, EventPhoto
+#from .models import PerformanceDetails
 
 
 class EventPhotoSerializer(serializers.ModelSerializer):
@@ -8,13 +9,15 @@ class EventPhotoSerializer(serializers.ModelSerializer):
         model = EventPhoto
         fields = ["id", "image", "is_cover", "uploaded_at"]
 
+'''
 class PerformanceDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PerformanceDetails
         fields = ["id", "attire", "chairs", "arrive_by"]
+'''
+        
 
 class EventSerializer(serializers.ModelSerializer):
-    performance_details = PerformanceDetailsSerializer(read_only=True)
     photos = EventPhotoSerializer(many=True, read_only=True)
 
     class Meta:
@@ -32,15 +35,16 @@ class EventSerializer(serializers.ModelSerializer):
             "location",
             "created_at",
             "updated_at",
-            "performance_details",
             "photos",
         ]
 
 
+"""
 class PerformanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Performance
         fields = "__all__"
+        """
 
 
 class BoardItemPhotoSerializer(serializers.ModelSerializer):

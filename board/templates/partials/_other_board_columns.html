@@ -12,7 +12,7 @@
         {% endfor %}
       </div>
 
-    {% elif column.column_type == "songs" %}
+    {% elif column.column_type == "songs_to_listen" %}
       <div class="board-column">
         <h5 class="text-center">🎵 Songs to Listen</h5>
         {% for item in column.items.all %}
@@ -35,6 +35,15 @@
     {% else %}
       <div class="board-column">
         <h5 class="text-center">{{ column.name }}</h5>
+
+        {# ✅ Show events linked to this column #}
+        {% for event in column.events.all %}
+          {% include "partials/_event_card.html" with event=event %}
+        {% empty %}
+          {# If no events, maybe items exist #}
+        {% endfor %}
+
+        {# ✅ Show any board items linked to this column #}
         {% for item in column.items.all %}
           {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}

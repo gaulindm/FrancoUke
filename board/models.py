@@ -111,7 +111,7 @@ class BoardItem(models.Model):
         """Return the cover photo if one is marked, otherwise the first photo."""
         return self.photos.filter(is_cover=True).first() or self.photos.first()
 
-
+'''
 # -------------------------
 # Performances + Availability
 # -------------------------
@@ -182,7 +182,7 @@ class PerformanceAvailability(models.Model):
 
     def __str__(self):
         return f"{self.user} – {self.performance.board_item.title} – {self.get_status_display()}"
-
+'''
 
 class BoardItemPhoto(models.Model):
     board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name="photos")
@@ -272,7 +272,7 @@ class Event(models.Model):
         return self.photos.filter(is_cover=True).first() or self.photos.first()
 
 
-
+'''
 class PerformanceDetails(models.Model):
     """Extra fields only for performances."""
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="performance_details")
@@ -282,7 +282,7 @@ class PerformanceDetails(models.Model):
 
     def __str__(self):
         return f"Performance Details for {self.event.title}"
-
+'''
 
 class RehearsalDetails(models.Model):
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="rehearsal_details")
