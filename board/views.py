@@ -72,67 +72,54 @@ def public_board(request):
         "columns": columns,
     })
 
-
+from django.utils import timezone
 
 @login_required
 def full_board_view(request):
     user = request.user
+    today = timezone.localdate()  # gives you just the date
 
-    # ✅ Single unified set of columns (general + venue)
     columns = (
         BoardColumn.objects
         .select_related("venue")
         .prefetch_related(
             "items__photos",
-            "events__photos",          # events linked directly to column
+            "events__photos",
             "events__availabilities",
-            "venue__events__photos",   # events linked via venue
-            "venue__events__availabilities"
+            "venue__events__photos",
+            "venue__events__availabilities",
         )
         .order_by("position")
     )
 
-    # Attach availability + cover photo info
     for column in columns:
         if column.venue:
-            # 🔹 Venue-based events
-            for event in column.venue.events.all():
-                availability = event.availabilities.filter(user=user).first()
-                event.my_availability = availability.status if availability else None
-
-                avails = event.availabilities.all()
-                event.avail_summary = {
-                    "yes": avails.filter(status="yes").count(),
-                    "no": avails.filter(status="no").count(),
-                    "maybe": avails.filter(status="maybe").count(),
-                }
-
-                # Cover photo
-                event._cover_photo = (
-                    event.photos.filter(is_cover=True).first() or event.photos.first()
-                )
+            events = column.venue.events.all()
         else:
-            # 🔹 Non-venue column events
-            for event in column.events.all():
-                availability = event.availabilities.filter(user=user).first()
-                event.my_availability = availability.status if availability else None
+            events = column.events.all()
 
-                avails = event.availabilities.all()
-                event.avail_summary = {
-                    "yes": avails.filter(status="yes").count(),
-                    "no": avails.filter(status="no").count(),
-                    "maybe": avails.filter(status="maybe").count(),
-                }
+        # 🔹 Split by event_date instead of 'start'
+        upcoming = events.filter(event_date__gte=today).order_by("event_date", "start_time")
+        past = events.filter(event_date__lt=today).order_by("-event_date", "-start_time")
 
-                # Cover photo
-                event._cover_photo = (
-                    event.photos.filter(is_cover=True).first() or event.photos.first()
-                )
+        column.sorted_events = list(upcoming) + list(past)
 
-    return render(request, "board/full_board.html", {
-        "columns": columns,  # ✅ single unified context
-    })
+        for event in column.sorted_events:
+            availability = event.availabilities.filter(user=user).first()
+            event.my_availability = availability.status if availability else None
 
+            avails = event.availabilities.all()
+            event.avail_summary = {
+                "yes": avails.filter(status="yes").count(),
+                "no": avails.filter(status="no").count(),
+                "maybe": avails.filter(status="maybe").count(),
+            }
+
+            event._cover_photo = (
+                event.photos.filter(is_cover=True).first() or event.photos.first()
+            )
+
+    return render(request, "board/full_board.html", {"columns": columns})
 
 
 @require_POST

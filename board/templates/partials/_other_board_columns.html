@@ -1,11 +1,10 @@
-{# templates/partials/_other_board_columns.html #}
 <div class="board-row">
   {% for column in columns %}
 
     {% if column.column_type == "venue" %}
       <div class="board-column">
         <h5 class="text-center">{{ column.venue.name }}</h5>
-        {% for event in column.venue.events.all %}
+        {% for event in column.sorted_events %}
           {% include "partials/_event_card.html" with event=event %}
         {% empty %}
           <p class="text-muted">No events scheduled.</p>
@@ -36,8 +35,8 @@
       <div class="board-column">
         <h5 class="text-center">{{ column.name }}</h5>
 
-        {# ✅ Show events linked to this column #}
-        {% for event in column.events.all %}
+        {# ✅ Show events (sorted: upcoming asc, past desc) #}
+        {% for event in column.sorted_events %}
           {% include "partials/_event_card.html" with event=event %}
         {% empty %}
           {# If no events, maybe items exist #}
