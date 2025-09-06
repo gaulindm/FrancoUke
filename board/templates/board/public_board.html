@@ -11,7 +11,7 @@
   {% if column.column_type == "venue" %}
       <div class="board-column">
         <h5 class="text-center">{{ column.venue.name }}</h5>
-        {% for event in column.venue.events.all %}
+        {% for event in column.sorted_events %}
           {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
           <p class="text-muted">No events scheduled.</p>

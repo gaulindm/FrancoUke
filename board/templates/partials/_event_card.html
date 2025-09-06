@@ -23,31 +23,45 @@
 {% endif %}
 
 
-  <!-- Title + Availability -->
-  <div class="d-flex justify-content-between align-items-center mt-2">
-    <strong>{{ event.title }}</strong>
-    {% if event.my_availability == "yes" %}
-      <span class="badge bg-success">Y</span>
-    {% elif event.my_availability == "no" %}
-      <span class="badge bg-danger">N</span>
-    {% elif event.my_availability == "maybe" %}
-      <span class="badge bg-warning text-dark">M</span>
-    {% else %}
-      <span class="badge bg-secondary">–</span>
-    {% endif %}
-  </div>
+<!-- Title -->
+<div class="d-flex justify-content-between align-items-center mt-2">
+  <h6 class="mb-0">{{ event.title }}</h6>
+</div>
 
-  <!-- Date + Time -->
-  <small class="text-muted">
-    {% if event.event_date %}
-      <p><strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}</p>
-    {% endif %}
-    {% if event.start_time %}
-      <p><strong>Time:</strong> {{ event.start_time|time:"g:i A" }}
-        {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
-      </p>
-    {% endif %}
-  </small>
+<!-- Date and Time + Availability -->
+<table class="table table-sm table-borderless align-middle mb-2">
+  <tr>
+    <td class="text-muted small">
+      {% if event.event_date %}
+        <strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}
+      {% endif %}
+    </td>
+    <td rowspan="2" class="text-end">
+      {% if event.my_availability == "yes" %}
+        <span class="badge bg-success" title="Available">Y</span>
+      {% elif event.my_availability == "no" %}
+        <span class="badge bg-danger" title="Not Available">N</span>
+      {% elif event.my_availability == "maybe" %}
+        <span class="badge bg-warning text-dark" title="Maybe">M</span>
+      {% else %}
+        <span class="badge bg-secondary" title="Unknown">–</span>
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td class="text-muted small">
+      {% if event.start_time %}
+        <strong>Time:</strong>
+        {{ event.start_time|time:"g:i A" }}
+        {% if event.end_time %}
+          – {{ event.end_time|time:"g:i A" }}
+        {% endif %}
+      {% endif %}
+    </td>
+  </tr>
+</table>
+
+    
 </div>
 
 
