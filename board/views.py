@@ -177,15 +177,27 @@ def item_photo_list(request, item_id):
 
 
 User = get_user_model()
+from django.utils import timezone
 
-# views.py
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+
+User = get_user_model()   # <-- this will point to users.CustomUser
+
 @login_required
 def availability_matrix(request):
-    events = Event.objects.select_related("venue").order_by("event_date", "start_time")
+    today = timezone.localdate()
 
-    players = User.objects.all().order_by("username")
+    # only upcoming events
+    events = Event.objects.select_related("venue").filter(
+        event_date__gte=today
+    ).order_by("event_date", "start_time")
+
+    # ✅ only performers
+    players = User.objects.filter(groups__name="Performers").order_by("username")
+
     matrix = []
-
     for player in players:
         row = []
         for event in events:
@@ -205,7 +217,7 @@ def availability_matrix(request):
                 row.append("–")
         matrix.append((player, row))
 
-    # ✅ build summary row
+    # summary row
     summary = []
     for event in events:
         yes_count = EventAvailability.objects.filter(event=event, status="yes").count()
@@ -217,12 +229,7 @@ def availability_matrix(request):
         "events": events,
         "matrix": matrix,
         "summary": summary,
-
-
     })
-
-
-
 
 
 
