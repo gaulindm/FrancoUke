@@ -8,11 +8,11 @@
 <div class="board-container" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px;">
 
   {% for column in columns %}
-  {% if column.column_type == "venue" %}
+    {% if column.column_type == "venue" %}
       <div class="board-column">
         <h5 class="text-center">{{ column.venue.name }}</h5>
         {% for event in column.sorted_events %}
-        {% include "partials/_public_event_card.html" with event=event %}
+          {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
           <p class="text-muted">No events scheduled.</p>
         {% endfor %}
@@ -22,7 +22,7 @@
       <div class="board-column">
         <h5 class="text-center">🎵 Songs to Listen</h5>
         {% for item in column.items.all %}
-        {% include "partials/_public_event_card.html" with event=event %}
+          {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}
           <p class="text-muted">No songs added yet.</p>
         {% endfor %}
@@ -32,7 +32,7 @@
       <div class="board-column">
         <h5 class="text-center">📸 Photo Gallery</h5>
         {% for item in column.items.all %}
-        {% include "partials/_public_event_card.html" with event=event %}
+          {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}
           <p class="text-muted">No photos yet.</p>
         {% endfor %}
@@ -42,14 +42,13 @@
       <div class="board-column">
         <h5 class="text-center">{{ column.name }}</h5>
 
-        {# ✅ Show events linked to this column #}
-        {% for event in column.events.all %}
+        {# Events #}
+        {% for event in column.sorted_events %}
           {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
-          {# If no events, maybe items exist #}
         {% endfor %}
 
-        {# ✅ Show any board items linked to this column #}
+        {# Items #}
         {% for item in column.items.all %}
           {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}
@@ -57,13 +56,12 @@
         {% endfor %}
       </div>
     {% endif %}
-{% endfor %}
+  {% endfor %}
 
 </div>
 
 {% include 'partials/_photo_gallery_modal.html' %}
 
-  
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const modal = document.getElementById('photoGalleryModal');
@@ -102,6 +100,4 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
-
-
 {% endblock %}

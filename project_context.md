@@ -67,6 +67,36 @@ Implements a mix of CBVs and FBVs:
 - **User-Contributed Content**: Integrated with Django’s `User` model.
 - **Tagging**: Via `TaggableManager` for song classification.
 
+### 2025-09-07 ###
+## Public App Introduction (Sept 2025)
+
+We introduced a new `public` app to cleanly separate visitor-facing pages from performer tools.
+
+### Why?
+- The `board` app was starting to mix public and performer-only logic.
+- We expect the public site to grow (about, contact, events, gallery, etc.).
+- Separation of concerns keeps the codebase maintainable.
+
+### Changes
+- New `public` app with views:
+  - `landing_page` → `/`
+  - `about` → `/about/`
+  - `public_board` → `/public-board/`
+  - `contact` → `/contact/`
+- Public templates live under `templates/public/`
+- Created `partials/_public_event_card.html` for safe public display of events
+  - No performer-specific actions (availability, editing, etc.)
+- Performer portal remains under `/board/` using `base_uke4ia.html`
+- Public site uses `base_public_uke4ia.html`
+
+### Next Steps
+- Potentially add filtering so only "public" columns/events show in `/public-board/`.
+- Expand the `public` app with more static pages or features (gallery, news, donations).
+
+
+
+
+
 ### 2025-08-28
 ## 🎶 Board Evolution – From Performances → Events
 
