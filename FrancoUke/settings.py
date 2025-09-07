@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'board',
     'django.contrib.sites',
     "rest_framework",
+    'public',
 
     
 

@@ -1,0 +1,22 @@
+{% extends "base_public_uke4ia.html" %}
+{% block title %}Contact Uke4ia{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Contact Uke4ia</h2>
+        <p>We’d love to hear from you! You can reach us at:</p>
+
+        <ul class="list-group mb-4">
+            <li class="list-group-item"><i class="bi bi-envelope me-2"></i> uke4ia@example.com</li>
+            <li class="list-group-item"><i class="bi bi-telephone me-2"></i> (555) 123-4567</li>
+            <li class="list-group-item"><i class="bi bi-facebook me-2"></i> <a href="#">Facebook Page</a></li>
+        </ul>
+
+        <p>
+            Interested in volunteering or performing? 
+            <a href="{% url 'users:login' %}?next=/board/">Login as a performer</a>.
+        </p>
+    </div>
+</div>
+{% endblock %}

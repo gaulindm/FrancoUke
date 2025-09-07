@@ -12,7 +12,7 @@
       <div class="board-column">
         <h5 class="text-center">{{ column.venue.name }}</h5>
         {% for event in column.sorted_events %}
-          {% include "partials/_public_event_card.html" with event=event %}
+        {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
           <p class="text-muted">No events scheduled.</p>
         {% endfor %}
@@ -22,7 +22,7 @@
       <div class="board-column">
         <h5 class="text-center">🎵 Songs to Listen</h5>
         {% for item in column.items.all %}
-          {% include "partials/_board_item_card.html" with item=item %}
+        {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
           <p class="text-muted">No songs added yet.</p>
         {% endfor %}
@@ -32,7 +32,7 @@
       <div class="board-column">
         <h5 class="text-center">📸 Photo Gallery</h5>
         {% for item in column.items.all %}
-          {% include "partials/_board_item_card.html" with item=item %}
+        {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
           <p class="text-muted">No photos yet.</p>
         {% endfor %}
@@ -44,7 +44,7 @@
 
         {# ✅ Show events linked to this column #}
         {% for event in column.events.all %}
-          {% include "partials/_event_card.html" with event=event %}
+          {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
           {# If no events, maybe items exist #}
         {% endfor %}

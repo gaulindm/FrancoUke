@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
 from core.views import landing_page 
+from public import views as public_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -18,6 +19,11 @@ urlpatterns = [
     # Songbooks
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
     path("strumsphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
+
+    # Public site pages
+    path("about/", public_views.about, name="about"),
+    path("public-board/", public_views.public_board, name="public_board"),
+    path("contact/", public_views.contact, name="contact"),
 
    
 
