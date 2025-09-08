@@ -21,7 +21,7 @@
     {% elif column.column_type == "songs_to_listen" %}
       <div class="board-column">
         <h5 class="text-center">🎵 Songs to Listen</h5>
-        {% for item in column.items.all %}
+        {% for item in column.public_items %}
           {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}
           <p class="text-muted">No songs added yet.</p>
@@ -31,7 +31,7 @@
     {% elif column.column_type == "photos" %}
       <div class="board-column">
         <h5 class="text-center">📸 Photo Gallery</h5>
-        {% for item in column.items.all %}
+        {% for item in column.public_items %}
           {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}
           <p class="text-muted">No photos yet.</p>
@@ -49,7 +49,7 @@
         {% endfor %}
 
         {# Items #}
-        {% for item in column.items.all %}
+        {% for item in column.public_items %}
           {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}
           <p class="text-muted">No items yet.</p>
