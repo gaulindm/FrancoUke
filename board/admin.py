@@ -1,6 +1,11 @@
+from django import forms
+from .forms import EventForm
+
 from django.contrib import admin
 from django.utils import timezone
+
 from .models import Event
+from assets.widgets import AssetChooserWidget
 from .models import (
     BoardColumn, BoardItem, BoardItemPhoto,
     Event, EventPhoto, EventAvailability, Venue
@@ -14,6 +19,15 @@ class BoardItemPhotoInline(admin.TabularInline):
     extra = 1
     fields = ("image", "is_cover", "uploaded_at")
     readonly_fields = ("uploaded_at",)
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = "__all__"
+        widgets = {
+            "cover_asset": AssetChooserWidget(),  # 👈 your chooser widget
+        }
+
 
 
 class EventPhotoInline(admin.TabularInline):
@@ -72,6 +86,7 @@ class EventPhotoInline(admin.TabularInline):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
+    form = EventForm
     list_display = (
         "title",
         "event_type",
@@ -91,7 +106,7 @@ class EventAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            "fields": ("title", "rich_description", "event_type", "status")
+            "fields": ("title", "rich_description", "event_type", "status","cover_asset")
         }),
         ("Scheduling", {
             "fields": ("event_date", "start_time", "end_time", "arrive_by", "chairs", "attire", "location")
@@ -129,3 +144,17 @@ class VenueAdmin(admin.ModelAdmin):
     list_display = ("name", "address", "position")
     list_editable = ("position",)
     ordering = ("position",)
+
+
+# board/admin.py
+from django import forms
+from assets.widgets import AssetChooserWidget
+from .models import Event
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = "__all__"
+        widgets = {
+            "cover_asset": AssetChooserWidget(),
+        }

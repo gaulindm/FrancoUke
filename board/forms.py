@@ -1,10 +1,12 @@
+# board/forms.py
 from django import forms
-from .models import PerformanceAvailability
+from assets.widgets import AssetChooserWidget
+from .models import Event
 
-class PerformanceAvailabilityForm(forms.ModelForm):
+class EventForm(forms.ModelForm):
     class Meta:
-        model = PerformanceAvailability
-        fields = ["status"]
+        model = Event
+        fields = "__all__"
         widgets = {
-            "status": forms.RadioSelect
+            "cover_asset": AssetChooserWidget(),
         }

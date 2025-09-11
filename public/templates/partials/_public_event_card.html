@@ -5,24 +5,34 @@
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
   <!-- 🔹 Card Cover -->
-  {% if event.venue and event.venue.image %}
-    <img src="{{ event.venue.image.url }}" 
-         alt="{{ event.venue.name }}"
-         class="img-fluid rounded">
-  {% elif event.cover_photo %}
-    <img src="{{ event.cover_photo.image.url }}" 
+  <div class="position-relative">
+    <img src="{{ event.cover_photo_url }}" 
          alt="{{ event.title }}"
          class="img-fluid rounded">
-  {% else %}
-    <div class="bg-light p-4 text-center rounded text-muted">
-      ❌ No image available
-    </div>
-  {% endif %}
 
-  <!-- 🔹 Photo Icon if event has more than one photo -->
+    {% if event.cover_photo_source == "guessed" %}
+      <span class="badge bg-info position-absolute top-0 start-0 m-2">
+        📸 Venue Photo
+      </span>
+    {% elif event.cover_photo_source == "explicit" %}
+      <span class="badge bg-success position-absolute top-0 start-0 m-2">
+        ✅ Cover Photo
+      </span>
+    {% elif event.cover_photo_source == "first-photo" %}
+      <span class="badge bg-primary position-absolute top-0 start-0 m-2">
+        🖼 First Photo
+      </span>
+    {% elif event.cover_photo_source == "fallback" %}
+      <span class="badge bg-secondary position-absolute top-0 start-0 m-2">
+        ❌ Placeholder
+      </span>
+    {% endif %}
+  </div>
+
+  <!-- 🔹 Photo Count Badge (exclude cover) -->
   {% if event.photos.count > 1 %}
     <span class="position-absolute top-0 end-0 m-2 text-white bg-dark bg-opacity-75 px-2 py-1 rounded">
-      📸 {{ event.photos.count|add:"-1"}}
+      📸 {{ event.photos.count|add:"-1" }}
     </span>
   {% endif %}
 
@@ -56,10 +66,8 @@
 
       <div class="modal-body">
 
-        <!-- Cover photo -->
-        {% if event.cover_photo %}
-          <img src="{{ event.cover_photo.image.url }}" alt="{{ event.title }}" class="img-fluid mb-3">
-        {% endif %}
+        <!-- Cover photo (same property) -->
+        <img src="{{ event.cover_photo_url }}" alt="{{ event.title }}" class="img-fluid mb-3">
 
         <!-- Date / Time -->
         {% if event.event_date %}

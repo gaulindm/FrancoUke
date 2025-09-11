@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     "rest_framework",
     'public',
+    'assets',
+    'teleprompter',
 
     
 

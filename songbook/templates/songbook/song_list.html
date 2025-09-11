@@ -78,7 +78,9 @@
                     <th class="text-center">Accords jouées</th><th class="text-center">Actions</th>
                 {% else %}
                     <th>Songs</th><th>Status</th><th>Artists</th><th>Year</th><th>Tags</th>
-                    <th class="text-center">Chords played</th><th class="text-center">Actions</th>
+                    <th class="text-center">Chords played</th>
+                    <th class="text-center">Teleprompter</th>
+                    <th class="text-center">Actions</th>
                 {% endif %}
             </tr>
         </thead>
@@ -109,6 +111,15 @@
                         {{ item.chords }}
                     {% endif %}
                 </td>
+                <td>  {% if item.song.pk %}
+                    <a href="{% url 'teleprompter:show' item.song.pk %}" 
+                       class="btn btn-sm btn-outline-primary"
+                       target="_blank" rel="noopener">
+                       Teleprompter
+                    </a>
+                  {% else %}
+                    <span class="text-muted">N/A</span>
+                  {% endif %}</td>
                 <td class="text-center">
                     {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
                     <a href="{% url pdf_url item.song.id %}?site_name={{ site_name }}">

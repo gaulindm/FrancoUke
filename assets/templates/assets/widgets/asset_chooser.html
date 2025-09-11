@@ -1,0 +1,18 @@
+<div class="asset-chooser-widget">
+    <input type="text"
+           name="{{ widget.name }}"
+           value="{{ widget.value|stringformat:'s' }}"
+           id="{{ widget.attrs.id }}"
+           {% include "django/forms/widgets/attrs.html" %}>
+    {% if widget.asset_url %}
+      <div class="asset-preview">
+        <img src="{{ widget.asset_url }}" style="max-width:150px; max-height:100px;">
+      </div>
+    {% endif %}
+    <button type="button"
+            class="asset-chooser-btn"
+            data-input-id="{{ widget.attrs.id }}">
+        Choose asset
+    </button>
+  </div>
+  

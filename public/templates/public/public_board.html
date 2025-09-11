@@ -47,14 +47,14 @@
           {% include "partials/_public_event_card.html" with event=event %}
         {% empty %}
         {% endfor %}
-{% comment %}
+
         {# Items #}
         {% for item in column.public_items %}
           {% include "partials/_board_item_card.html" with item=item %}
         {% empty %}
           <p class="text-muted">No items yet.</p>
         {% endfor %}
-{% endcomment %}
+
       </div>
     {% endif %}
   {% endfor %}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+      .asset-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+      .asset-item { cursor: pointer; border: 2px solid transparent; padding: 4px; }
+      .asset-item img { width: 120px; height: 80px; object-fit: cover; }
+      .asset-item:hover { border-color: #007bff; }
+      .asset-title { font-size: 12px; text-align: center; margin-top: 4px; }
+    </style>
+</head>
+<body>
+  <input type="text" id="asset-search" placeholder="Search...">
+  <div id="asset-results" class="asset-grid"></div>
+  <div id="asset-pagination"></div>
+
+  <script>
+    let page = 1;
+
+    function loadAssets() {
+      const q = document.getElementById("asset-search").value;
+      fetch(`/admin/assets/chooser/?q=${encodeURIComponent(q)}&page=${page}`)
+        .then(resp => resp.json())
+        .then(data => {
+          const container = document.getElementById("asset-results");
+          container.innerHTML = "";
+          data.results.forEach(asset => {
+            const div = document.createElement("div");
+            div.classList.add("asset-item");
+            div.innerHTML = `
+              <img src="${asset.thumb}" alt="">
+              <div class="asset-title">${asset.title}</div>
+            `;
+            // ✅ Make each item clickable
+            div.onclick = () => {
+              if (window.selectedCallback) {
+                // callback defined on this popup by asset_chooser.js
+                window.selectedCallback(asset);
+                window.close();
+              } else if (window.opener && window.opener.selectedCallback) {
+                // fallback (if callback was attached to opener)
+                window.opener.selectedCallback(asset);
+                window.close();
+              } else {
+                alert("⚠️ No callback found");
+              }
+            };
+            container.appendChild(div);
+          });
+        });
+    }
+
+    document.getElementById("asset-search").addEventListener("input", () => {
+      page = 1;
+      loadAssets();
+    });
+
+    loadAssets();
+  </script>
+</body>
+</html>

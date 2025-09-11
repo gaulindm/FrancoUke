@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from ckeditor.fields import RichTextField
 from urllib.parse import urlparse, parse_qs
+from assets.models import Asset  # central repository
 
 
 # -------------------------
@@ -114,7 +115,7 @@ class BoardItem(models.Model):
         """Return the cover photo if one is marked, otherwise the first photo."""
         return self.photos.filter(is_cover=True).first() or self.photos.first()
 
-'''
+
 # -------------------------
 # Performances + Availability
 # -------------------------
@@ -156,36 +157,6 @@ class Performance(models.Model):
     def __str__(self):
         return f"{self.board_item.title} ({self.get_performance_type_display()})"
 
-
-class PerformanceAvailability(models.Model):
-    YES = "yes"
-    NO = "no"
-    MAYBE = "maybe"
-
-    STATUS_CHOICES = [
-        (YES, "Yes"),
-        (NO, "No"),
-        (MAYBE, "Maybe"),
-    ]
-
-    performance = models.ForeignKey(
-        Performance,
-        on_delete=models.CASCADE,
-        related_name="availabilities"
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="performance_availabilities"
-    )
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=MAYBE)
-
-    class Meta:
-        unique_together = ("performance", "user")
-
-    def __str__(self):
-        return f"{self.user} – {self.performance.board_item.title} – {self.get_status_display()}"
-'''
 
 class BoardItemPhoto(models.Model):
     board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name="photos")
@@ -265,6 +236,15 @@ class Event(models.Model):
  
     # 👇 NEW
     is_public = models.BooleanField(default=False)
+
+    cover_asset = models.ForeignKey(
+        Asset,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="cover_for_events",
+        help_text="Optional: choose a shared cover image from the repository"
+    )
 
     class Meta:
         ordering = ["event_date", "start_time", "title"]

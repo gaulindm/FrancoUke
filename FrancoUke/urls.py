@@ -7,7 +7,9 @@ from core.views import landing_page
 from public import views as public_views
 
 urlpatterns = [
+    path("admin/assets/", include("assets.urls")),  # ✅ mount assets under /admin/assets/
     path("admin/", admin.site.urls),
+
     path("users/", include("users.urls")),
 
     # Root landing page
@@ -15,6 +17,9 @@ urlpatterns = [
 
     # Board (Trello-style UI)
     path('board/', include('board.urls')),
+
+    path('teleprompter/', include('teleprompter.urls', namespace='teleprompter')),
+
 
     # Songbooks
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
