@@ -5,29 +5,23 @@
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
   <!-- 🔹 Card Cover -->
-  <div class="position-relative">
-    <img src="{{ event.cover_photo_url }}" 
+  {% if event.cover_asset %}
+    <img src="{{ event.cover_asset.file.url }}"
+         alt="{{ event.cover_asset.title|default:event.title }}"
+         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+  {% elif event.venue and event.venue.image %}
+    <img src="{{ event.venue.image.url }}" 
+         alt="{{ event.venue.name }}"
+         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+  {% elif event.cover_photo %}
+    <img src="{{ event.cover_photo.image.url }}" 
          alt="{{ event.title }}"
-         class="img-fluid rounded">
-
-    {% if event.cover_photo_source == "guessed" %}
-      <span class="badge bg-info position-absolute top-0 start-0 m-2">
-        📸 Venue Photo
-      </span>
-    {% elif event.cover_photo_source == "explicit" %}
-      <span class="badge bg-success position-absolute top-0 start-0 m-2">
-        ✅ Cover Photo
-      </span>
-    {% elif event.cover_photo_source == "first-photo" %}
-      <span class="badge bg-primary position-absolute top-0 start-0 m-2">
-        🖼 First Photo
-      </span>
-    {% elif event.cover_photo_source == "fallback" %}
-      <span class="badge bg-secondary position-absolute top-0 start-0 m-2">
-        ❌ Placeholder
-      </span>
-    {% endif %}
-  </div>
+         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+  {% else %}
+    <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+      ❌ No image available
+    </div>
+  {% endif %}
 
   <!-- 🔹 Photo Count Badge (exclude cover) -->
   {% if event.photos.count > 1 %}
@@ -66,8 +60,20 @@
 
       <div class="modal-body">
 
-        <!-- Cover photo (same property) -->
-        <img src="{{ event.cover_photo_url }}" alt="{{ event.title }}" class="img-fluid mb-3">
+        <!-- Cover -->
+        {% if event.cover_asset %}
+          <img src="{{ event.cover_asset.file.url }}" 
+               alt="{{ event.cover_asset.title|default:event.title }}" 
+               class="img-fluid mb-3 rounded">
+        {% elif event.cover_photo %}
+          <img src="{{ event.cover_photo.image.url }}" 
+               alt="{{ event.title }}" 
+               class="img-fluid mb-3 rounded">
+        {% else %}
+          <img src="{% static 'images/fallback.jpg' %}" 
+               alt="No cover available" 
+               class="img-fluid mb-3 rounded">
+        {% endif %}
 
         <!-- Date / Time -->
         {% if event.event_date %}

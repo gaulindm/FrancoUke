@@ -51,8 +51,7 @@
         {# Items #}
         {% for item in column.public_items %}
           {% include "partials/_board_item_card.html" with item=item %}
-        {% empty %}
-          <p class="text-muted">No items yet.</p>
+
         {% endfor %}
 
       </div>

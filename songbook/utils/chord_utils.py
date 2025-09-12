@@ -1,4 +1,4 @@
-
+#chord_utils.py
 import os
 import json
 from django.conf import settings
@@ -30,72 +30,6 @@ class ChordDiagram(Flowable):
 
 
 
-
-'''
-        # Detect if the chord needs an offset (all non-open frets above the 3rd fret)
-        non_open_frets = [fret for fret in self.variation if fret > 0]
-        min_fret = min(non_open_frets, default=0)  # Use default=0 if no valid frets
-        needs_offset = min_fret > 3
-
-        # Calculate offset
-        fret_offset = min_fret - 1 if needs_offset else 0
-
-        # Flip x-coordinates if lefty
-        def flip_x(x):
-            return (num_strings - 1) * string_spacing - x if self.is_lefty else x
-
-        # Draw nut or offset label
-        if needs_offset:
-            self.canv.setFont("Helvetica-Bold", 10)  # Slightly larger font
-            self.canv.setFillColor(colors.red)  # Use a distinct color
-            self.canv.drawString(-15, fret_spacing * (num_frets - 1) + 5, f"{fret_offset}")
-            self.canv.setFillColor(colors.black)  # Reset color for other elements
-        else:
-            self.canv.setLineWidth(2)
-            self.canv.line(0, fret_spacing * num_frets, string_spacing * (num_strings - 1), fret_spacing * num_frets)
-            self.canv.setLineWidth(1)
-
-        # Draw strings
-        for i in range(num_strings):
-            x = flip_x(i * string_spacing)
-            self.canv.line(x, 0, x, fret_spacing * num_frets)
-
-        # Draw frets
-        for i in range(num_frets + 1):
-            y = i * fret_spacing
-            self.canv.line(0, y, string_spacing * (num_strings - 1), y)
-
-        # Draw chord name
-        self.canv.setFont("Helvetica-Bold", 12)
-        self.canv.drawCentredString(
-            (num_strings - 1) * string_spacing / 2,
-            fret_spacing * (num_frets + 1)+2,
-            self.chord_name
-        )
-
-        # Calculate max height for y-axis flipping
-        max_height = num_frets * fret_spacing
-
-        # Draw finger positions (dots)
-        self.canv.setFillColor(colors.black)
-        for string_idx, fret in enumerate(self.variation):
-            if fret > 0:  # Ignore open strings
-                adjusted_fret = fret - fret_offset
-                if adjusted_fret > 0:  # Only draw if the fret is within the diagram
-                    x = flip_x(string_idx * string_spacing)
-                    y = max_height - ((adjusted_fret - 0.5) * fret_spacing)
-                    self.canv.circle(x, y, 4 * self.scale, fill=1)
-
-        # Draw open strings
-        self.canv.setFillColor(colors.white)
-        self.canv.setStrokeColor(colors.black)
-        for string_idx, fret in enumerate(self.variation):
-            if fret == 0:  # Open string
-                x = flip_x(string_idx * string_spacing)
-                y = max_height + 5  # Position above the first fret
-                self.canv.circle(x, y, 4 * self.scale, fill=1)
-
-'''
 
 def load_chords(instrument):
     """
