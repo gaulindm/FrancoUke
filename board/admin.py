@@ -1,11 +1,12 @@
 from django import forms
-from .forms import EventForm
+#from .forms import EventForm
 
 from django.contrib import admin
+from assets.models import Asset
 from django.utils import timezone
 
 from .models import Event
-from assets.widgets import AssetChooserWidget
+from assets.widgets import AssetChooserWidget, AssetGalleryChooserWidget
 from .models import (
     BoardColumn, BoardItem, BoardItemPhoto,
     Event, EventPhoto, EventAvailability, Venue
@@ -87,6 +88,8 @@ class EventPhotoInline(admin.TabularInline):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     form = EventForm
+    #filter_horizontal = ("gallery_assets",)
+
     list_display = (
         "title",
         "event_type",
@@ -106,7 +109,7 @@ class EventAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            "fields": ("title", "rich_description", "event_type", "status","cover_asset")
+            "fields": ("title", "rich_description", "event_type", "status","cover_asset","gallery_assets")
         }),
         ("Scheduling", {
             "fields": ("event_date", "start_time", "end_time", "arrive_by", "chairs", "attire", "location")
@@ -145,16 +148,22 @@ class VenueAdmin(admin.ModelAdmin):
     list_editable = ("position",)
     ordering = ("position",)
 
-
-# board/admin.py
 from django import forms
-from assets.widgets import AssetChooserWidget
+from django.contrib import admin
 from .models import Event
+from assets.widgets import AssetChooserWidget  # ✅ custom widget we made earlier
 
-class EventForm(forms.ModelForm):
+class EventAdminForm(forms.ModelForm):
+    gallery_assets = forms.ModelMultipleChoiceField(
+        queryset=Asset.objects.all(),
+        required=False,
+        widget=AssetGalleryChooserWidget()
+    )
+
     class Meta:
         model = Event
         fields = "__all__"
         widgets = {
             "cover_asset": AssetChooserWidget(),
+            # gallery_assets uses the explicit field above
         }

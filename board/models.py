@@ -245,6 +245,10 @@ class Event(models.Model):
         related_name="cover_for_events",
         help_text="Optional: choose a shared cover image from the repository"
     )
+    gallery_assets = models.ManyToManyField(
+        Asset, blank=True, related_name="gallery_for_events"
+    )
+
 
     class Meta:
         ordering = ["event_date", "start_time", "title"]

@@ -12,23 +12,25 @@
 
   
   <!-- Card Cover -->
-  {% if event.cover_asset %}
-    <img src="{{ event.cover_asset.file.url }}"
-         alt="{{ event.cover_asset.title|default:event.title }}"
-         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-  {% elif event.venue and event.venue.image %}
-    <img src="{{ event.venue.image.url }}" 
-         alt="{{ event.venue.name }}"
-         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-  {% elif event.cover_photo %}
-    <img src="{{ event.cover_photo.image.url }}" 
-         alt="{{ event.title }}"
-         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-  {% else %}
-    <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
-      ❌ No image available
-    </div>
-  {% endif %}
+<!-- Card Cover -->
+{% if event.cover_asset and event.cover_asset.file %}
+  <img src="{{ event.cover_asset.file.url }}"
+       alt="{{ event.cover_asset.title|default:event.title }}"
+       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% elif event.venue and event.venue.image %}
+  <img src="{{ event.venue.image.url }}" 
+       alt="{{ event.venue.name }}"
+       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% elif event.cover_photo and event.cover_photo.image %}
+  <img src="{{ event.cover_photo.image.url }}" 
+       alt="{{ event.title }}"
+       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+{% else %}
+  <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+    ❌ No image available
+  </div>
+{% endif %}
+
 
 
   <!-- Title -->
@@ -95,6 +97,20 @@
                alt="No cover available" 
                class="img-fluid mb-3 rounded">
         {% endif %}
+
+<!-- 📸 Thumbnail strip (from repository) -->
+{% for asset in event.gallery_assets.all %}
+  {% if asset.thumbnail %}
+    <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
+      <img src="{{ asset.thumbnail.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
+    </a>
+  {% else %}
+    <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
+      <img src="{{ asset.file.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
+    </a>
+  {% endif %}
+{% endfor %}
+
 
 
         <!-- 📸 Thumbnail strip (exclude cover) -->

@@ -1,21 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <style>
+      body { font-family: sans-serif; padding: 10px; }
       .asset-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-      .asset-item { cursor: pointer; border: 2px solid transparent; padding: 4px; }
-      .asset-item img { width: 120px; height: 80px; object-fit: cover; }
+      .asset-item { cursor: pointer; border: 2px solid transparent; padding: 4px; width: 140px; }
+      .asset-item img { width: 120px; height: 80px; object-fit: cover; display:block; margin:0 auto; }
       .asset-item:hover { border-color: #007bff; }
       .asset-title { font-size: 12px; text-align: center; margin-top: 4px; }
+      .selected { border-color: #007bff; background: rgba(0,123,255,0.05); }
+      .toolbar { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
     </style>
 </head>
 <body>
-  <input type="text" id="asset-search" placeholder="Search...">
+  <div class="toolbar">
+    <input type="text" id="asset-search" placeholder="Search..." style="flex:1; padding:6px;">
+    <label style="margin-left:8px">
+      <input type="checkbox" id="multi-checkbox"> Multi
+    </label>
+    <button id="confirm-selection" class="btn btn-primary" style="display:none">Confirm</button>
+  </div>
+
   <div id="asset-results" class="asset-grid"></div>
   <div id="asset-pagination"></div>
 
   <script>
+    const multiMode = new URLSearchParams(window.location.search).get("multi") === "1";
+    // allow user override checkbox for convenience
+    document.addEventListener("DOMContentLoaded", () => {
+      const multiCheckbox = document.getElementById("multi-checkbox");
+      multiCheckbox.checked = multiMode;
+      updateConfirmVisibility();
+    });
+
     let page = 1;
+    let selectedAssets = new Map(); // id -> asset object
+
+    function updateConfirmVisibility() {
+      const show = document.getElementById("multi-checkbox").checked;
+      document.getElementById("confirm-selection").style.display = show ? "inline-block" : "none";
+    }
 
     function loadAssets() {
       const q = document.getElementById("asset-search").value;
@@ -27,24 +52,32 @@
           data.results.forEach(asset => {
             const div = document.createElement("div");
             div.classList.add("asset-item");
+            div.dataset.assetId = asset.id;
             div.innerHTML = `
               <img src="${asset.thumb}" alt="">
               <div class="asset-title">${asset.title}</div>
             `;
-            // ✅ Make each item clickable
-            div.onclick = () => {
-              if (window.selectedCallback) {
-                // callback defined on this popup by asset_chooser.js
-                window.selectedCallback(asset);
-                window.close();
-              } else if (window.opener && window.opener.selectedCallback) {
-                // fallback (if callback was attached to opener)
-                window.opener.selectedCallback(asset);
-                window.close();
+            // click toggles selection in multi mode, or returns immediately in single mode
+            div.addEventListener("click", () => {
+              const isMulti = document.getElementById("multi-checkbox").checked;
+              if (isMulti) {
+                if (selectedAssets.has(asset.id)) {
+                  selectedAssets.delete(asset.id);
+                  div.classList.remove("selected");
+                } else {
+                  selectedAssets.set(asset.id, asset);
+                  div.classList.add("selected");
+                }
               } else {
-                alert("⚠️ No callback found");
+                // single selection - send back and close
+                if (window.selectedCallback) {
+                  window.selectedCallback(asset);
+                } else if (window.opener && window.opener.selectedCallback) {
+                  window.opener.selectedCallback(asset);
+                }
+                window.close();
               }
-            };
+            });
             container.appendChild(div);
           });
         });
@@ -53,6 +86,18 @@
     document.getElementById("asset-search").addEventListener("input", () => {
       page = 1;
       loadAssets();
+    });
+
+    document.getElementById("multi-checkbox").addEventListener("change", updateConfirmVisibility);
+
+    document.getElementById("confirm-selection").addEventListener("click", () => {
+      const arr = Array.from(selectedAssets.values());
+      if (window.selectedCallback) {
+        window.selectedCallback(arr);
+      } else if (window.opener && window.opener.selectedCallback) {
+        window.opener.selectedCallback(arr);
+      }
+      window.close();
     });
 
     loadAssets();

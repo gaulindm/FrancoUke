@@ -1,0 +1,17 @@
+{# assets/templates/assets/widgets/asset_gallery_chooser.html #}
+<div class="asset-gallery-widget" data-widget-name="{{ name }}">
+  {# Hidden inputs for existing selections (multiple inputs with same name) #}
+  {% for pk in value_list %}
+    <input type="hidden" name="{{ name }}" value="{{ pk }}" class="asset-gallery-hidden">
+  {% endfor %}
+
+  <div class="gallery-preview" style="margin-bottom:8px;">
+    {% for p in preview_urls %}
+      <img src="{{ p.thumb }}" style="max-width:100px;max-height:80px;margin:2px;border-radius:4px;">
+    {% endfor %}
+  </div>
+
+  <button type="button" class="asset-gallery-chooser-btn btn btn-secondary" data-input-name="{{ name }}">
+    Choose assets
+  </button>
+</div>
