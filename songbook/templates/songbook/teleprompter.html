@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ song.songTitle }}</title>
+    <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+    <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+</head>
+<body>
+
+    <button id="toggle-chords" class="toggle-btn">Show/Hide Chords</button>
+
+    <div class="lyrics">
+        {{ lyrics_with_chords|safe }}
+    </div>
+
+    <div id="chord-section" style="display: none;">
+        <h2>Chord Diagrams</h2>
+        <div id="chord-diagrams"></div>
+    </div>
+
+    <script>
+        const chords = {{ relevant_chords|safe }};
+        const chordContainer = document.getElementById("chord-diagrams");
+
+        chords.forEach(chord => {
+            const wrapper = document.createElement("div");
+            wrapper.style.display = "inline-block";
+            wrapper.style.margin = "10px";
+            chordContainer.appendChild(wrapper);
+            drawChordDiagram(wrapper, chord);
+        });
+
+        document.getElementById("toggle-chords").addEventListener("click", () => {
+            const section = document.getElementById("chord-section");
+            section.style.display = section.style.display === "none" ? "block" : "none";
+        });
+    </script>
+
+</body>
+</html>

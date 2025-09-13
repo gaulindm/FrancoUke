@@ -113,6 +113,43 @@
     min-width:90px;
   }
   
+  body {
+    background: black;
+    color: white;
+    font-size: 2em;
+    text-align: center;
+}
+
+.lyrics {
+    margin: 40px auto;
+    max-width: 800px;
+    line-height: 1.6em;
+}
+
+.chord {
+    font-weight: bold;
+    color: #00ffcc;
+}
+
+/* Section layout */
+.section-block {
+    margin: 30px 0;
+}
+
+.section-label {
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #ffcc00;
+}
+
+.section-lyrics {
+    text-align: center;
+}
+
+
+
   /* small screens */
   @media (max-width:800px){
     .controls{height:auto; padding:10px; gap:6px; flex-wrap:wrap}

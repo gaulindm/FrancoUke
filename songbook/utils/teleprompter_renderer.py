@@ -1,0 +1,64 @@
+def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
+    """
+    Takes parsed lyrics_with_chords (list of groups) and turns it into HTML.
+    """
+
+    directive_map = {
+        "FrancoUke": {
+            "{soi}": "Intro",
+            "{soc}": "Refrain",
+            "{sov}": "Couplet",
+            "{sob}": "Pont",
+            "{soo}": "Outro",
+            "{sod}": "Interlude",
+            "{eoi}": None, "{eoc}": None, "{eov}": None, "{eob}": None, "{eoo}": None, "{eod}": None
+        },
+        "StrumSphere": {
+            "{soi}": "Intro",
+            "{soc}": "Chorus",
+            "{sov}": "Verse",
+            "{sob}": "Bridge",
+            "{soo}": "Outro",
+            "{sod}": "Interlude",
+            "{eoi}": None, "{eoc}": None, "{eov}": None, "{eob}": None, "{eoo}": None, "{eod}": None
+        }
+    }
+    selected_map = directive_map.get(site_name, directive_map["StrumSphere"])
+
+    html = []
+    current_buffer = []
+    section_type = None
+
+    def flush_buffer():
+        nonlocal current_buffer, section_type
+        if current_buffer:
+            text = "".join(current_buffer)
+            if section_type and section_type.lower() != "verse":
+                html.append(f'<div class="section"><div class="section-name">{section_type}</div><div class="section-body">{text}</div></div>')
+            else:
+                html.append(f'<div class="verse">{text}</div>')
+            current_buffer = []
+
+    for group in lyrics_with_chords:
+        for item in group:
+            if "directive" in item:
+                directive = item["directive"].lower()
+                if directive in selected_map:
+                    flush_buffer()
+                    section_type = selected_map[directive]
+            elif "lyric" in item:
+                chord = item.get("chord", "")
+                lyric = item["lyric"]
+                if chord:
+                    current_buffer.append(f"<b>[{chord}]</b>{lyric}")
+                else:
+                    current_buffer.append(lyric)
+            elif "format" in item:
+                if item["format"] == "LINEBREAK":
+                    current_buffer.append("<br/>")
+                elif item["format"] == "PARAGRAPHBREAK":
+                    flush_buffer()
+                    html.append('<div class="para-break"></div>')
+
+    flush_buffer()
+    return "".join(html)
