@@ -28,6 +28,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
     html = []
     current_buffer = []
     section_type = None
+    metadata = {}
 
     def flush_buffer():
         nonlocal current_buffer, section_type
@@ -42,10 +43,29 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
     for group in lyrics_with_chords:
         for item in group:
             if "directive" in item:
-                directive = item["directive"].lower()
-                if directive in selected_map:
+                directive = item["directive"]
+                key_val = directive.strip("{}").split(":", 1)
+                key = key_val[0].strip().lower()
+                val = key_val[1].strip() if len(key_val) > 1 else ""
+                    
+                # Collect metadata
+                if key in ["t", "title"]:
+                    metadata["title"] = val
+                elif key == "artist":
+                    metadata["artist"] = val
+                elif key == "album":
+                    metadata["album"] = val
+                elif key == "year":
+                    metadata["year"] = val
+                elif key == "songwriter":
+                    metadata["songwriter"] = val
+                elif key == "recording":
+                    metadata["recording"] = val
+                elif key in selected_map:
                     flush_buffer()
-                    section_type = selected_map[directive]
+                    section_type = selected_map[key]
+
+
             elif "lyric" in item:
                 chord = item.get("chord", "")
                 lyric = item["lyric"]
@@ -61,4 +81,4 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
                     html.append('<div class="para-break"></div>')
 
     flush_buffer()
-    return "".join(html)
+    return "".join(html),metadata

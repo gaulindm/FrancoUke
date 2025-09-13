@@ -14,7 +14,7 @@ def teleprompter_view(request, song_id):
     site_name = "FrancoUke" if "franco" in request.get_host().lower() else "StrumSphere"
 
     # Prepare lyrics HTML for teleprompter
-    lyrics_html = render_lyrics_with_chords_html(song.lyrics_with_chords, site_name)
+    lyrics_html, metadata = render_lyrics_with_chords_html(song.lyrics_with_chords, site_name)
 
     # Load user preferences for chords
     user_prefs = get_user_preferences(request.user)
@@ -23,6 +23,7 @@ def teleprompter_view(request, song_id):
     return render(request, "songbook/teleprompter.html", {
         "song": song,
         "lyrics_with_chords": lyrics_html,  # ✅ ready-to-use HTML
+        "metadata": metadata,
         "relevant_chords": relevant_chords,
-        "site_name": site_name,
+        #"site_name": site_name,
     })

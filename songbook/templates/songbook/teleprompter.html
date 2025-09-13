@@ -11,6 +11,20 @@
 
     <button id="toggle-chords" class="toggle-btn">Show/Hide Chords</button>
 
+    <div class="metadata">
+        <h1>{{ metadata.title }}</h1>
+        {% if metadata.artist %}<div><b>Artist:</b> {{ metadata.artist }}</div>{% endif %}
+        {% if metadata.album %}<div><b>Album:</b> {{ metadata.album }}</div>{% endif %}
+        {% if metadata.year %}<div><b>Year:</b> {{ metadata.year }}</div>{% endif %}
+        {% if metadata.songwriter %}<div><b>Songwriter:</b> {{ metadata.songwriter }}</div>{% endif %}
+        {% if metadata.recording %}<div><b>Recording:</b> {{ metadata.recording }}</div>{% endif %}
+    </div>
+
+
+
+
+
+
     <div class="lyrics">
         {{ lyrics_with_chords|safe }}
     </div>

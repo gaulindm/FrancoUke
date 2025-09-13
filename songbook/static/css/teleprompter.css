@@ -148,6 +148,20 @@
     text-align: center;
 }
 
+.metadata {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.metadata h1 {
+  font-size: 3em;   /* make it stage-friendly */
+  margin: 0 0 15px;
+  font-weight: bold;
+}
+.metadata div {
+  font-size: 1.2em;
+  color: #ccc;
+  margin: 5px 0;
+}
 
 
   /* small screens */
