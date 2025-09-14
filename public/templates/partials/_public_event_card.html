@@ -1,66 +1,37 @@
-{% load static %}
 <div class="card position-relative"
      style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:pointer;"
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
-  <!-- 📸 Photo count badge (exclude cover) -->
-  {% with repo_count=event.gallery_assets.count legacy_count=event.photos.count %}
-    {% if repo_count > 0 %}
-      <span class="position-absolute top-0 end-0 m-2 text-white bg-dark bg-opacity-75 px-2 py-1 rounded">
-        📸 {{ repo_count }}
-      </span>
-    {% elif legacy_count > 1 %}
-      <span class="position-absolute top-0 end-0 m-2 text-white bg-dark bg-opacity-75 px-2 py-1 rounded">
-        📸 {{ legacy_count|add:"-1" }}
-      </span>
-    {% endif %}
-  {% endwith %}
-
- <!-- Cover Image -->
-{% if event.cover_asset and event.cover_asset.file %}
-<img src="{{ event.cover_asset.file.url }}"
-     alt="{{ event.cover_asset.title|default:event.title }}"
-     class="img-fluid rounded mb-2">
-{% elif event.venue and event.venue.image %}
-{% if event.venue.image %}
-  <img src="{{ event.venue.image.url }}"
-       alt="{{ event.venue.name }}"
-       class="img-fluid rounded mb-2">
-{% endif %}
-{% elif event.cover_photo and event.cover_photo.image %}
-{% if event.cover_photo.image %}
-  <img src="{{ event.cover_photo.image.url }}"
-       alt="{{ event.title }}"
-       class="img-fluid rounded mb-2">
-{% endif %}
-{% else %}
-<div class="text-muted small" style="background:#eee; padding:20px; text-align:center; border-radius:4px;">
-  ❌ No image available
-</div>
-{% endif %}
+  <!-- Card Cover -->
+  {% if event.cover_asset and event.cover_asset.file %}
+    <img src="{{ event.cover_asset.file.url }}"
+         alt="{{ event.cover_asset.title|default:event.title }}"
+         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+  {% elif event.venue and event.venue.image %}
+    <img src="{{ event.venue.image.url }}" 
+         alt="{{ event.venue.name }}"
+         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+  {% elif event.cover_photo and event.cover_photo.image %}
+    <img src="{{ event.cover_photo.image.url }}" 
+         alt="{{ event.title }}"
+         style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
+  {% else %}
+    <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
+      ❌ No image available
+    </div>
+  {% endif %}
 
   <!-- Title -->
   <div class="d-flex justify-content-between align-items-center mt-2">
     <h6 class="mb-0">{{ event.title }}</h6>
   </div>
 
-  <!-- Date and Time + Availability -->
+  <!-- Date and Time -->
   <table class="table table-sm table-borderless align-middle mb-2">
     <tr>
       <td class="text-muted small">
         {% if event.event_date %}
           <strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}
-        {% endif %}
-      </td>
-      <td rowspan="2" class="text-end">
-        {% if event.my_availability == "yes" %}
-          <span class="badge bg-success" title="Available">Y</span>
-        {% elif event.my_availability == "no" %}
-          <span class="badge bg-danger" title="Not Available">N</span>
-        {% elif event.my_availability == "maybe" %}
-          <span class="badge bg-warning text-dark" title="Maybe">M</span>
-        {% else %}
-          <span class="badge bg-secondary" title="Unknown">–</span>
         {% endif %}
       </td>
     </tr>
@@ -76,118 +47,4 @@
       </td>
     </tr>
   </table>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="eventModal{{ event.id }}" tabindex="-1"
-     aria-labelledby="eventModalLabel{{ event.id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">{{ event.title }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-
-        <!-- Cover -->
-        {% if event.cover_asset %}
-          <img src="{{ event.cover_asset.file.url }}" alt="{{ event.title }}" class="img-fluid mb-3 rounded">
-        {% elif event.cover_photo %}
-          <img src="{{ event.cover_photo.image.url }}" alt="{{ event.title }}" class="img-fluid mb-3 rounded">
-        {% else %}
-          <img src="{% static 'images/fallback.jpg' %}" alt="No cover available" class="img-fluid mb-3 rounded">
-        {% endif %}
-
-        <!-- 📸 Gallery (repo first, fallback to legacy) -->
-        {% if event.gallery_assets.exists %}
-          <hr>
-          <h6>📸 Event Gallery</h6>
-          <div class="d-flex flex-wrap gap-2">
-
-            {% for asset in event.gallery_assets.all %}
-            {% if asset.thumbnail %}
-              <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
-                <img src="{{ asset.thumbnail.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
-              </a>
-            {% else %}
-              <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
-                <img src="{{ asset.file.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
-              </a>
-            {% endif %}
-          {% endfor %}
-          
-           
-
-
-
-          </div>
-        {% elif event.photos.count > 1 %}
-          <hr>
-          <h6>📸 Event Photos</h6>
-          <div class="d-flex flex-wrap gap-2">
-            {% for photo in event.photos.all %}
-              {% if not photo.is_cover %}
-                <a href="{{ photo.image.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ event.title }}">
-                  <img src="{{ photo.image.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
-                </a>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        <!-- Event details -->
-        <p><strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}</p>
-        {% if event.start_time %}
-          <p><strong>Time:</strong> {{ event.start_time|time:"g:i A" }}
-            {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
-          </p>
-        {% endif %}
-        {% if event.arrive_by %}
-          <p><strong>Arrive by:</strong> {{ event.arrive_by|time:"g:i A" }}</p>
-        {% endif %}
-        {% if event.attire %}
-          <p><strong>Attire:</strong> {{ event.attire }}</p>
-        {% endif %}
-        {% if event.chairs %}
-          <p><strong>Chairs:</strong> {{ event.chairs }}</p>
-        {% endif %}
-
-        <!-- Description -->
-        <div class="description-preview">
-          <div class="short-text" style="max-height: 4.5em; overflow: hidden;">
-            {{ event.rich_description|safe }}
-          </div>
-          <div class="full-text d-none">
-            {{ event.rich_description|safe }}
-          </div>
-          <a href="#" class="toggle-description">See more</a>
-        </div>
-
-        <!-- Availability Form -->
-        <form method="post" action="{% url 'set_event_availability' event.id %}">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="availability{{ event.id }}" class="form-label"><strong>Your Availability:</strong></label>
-            <select id="availability{{ event.id }}" name="status" class="form-select">
-              <option value="">-- Select --</option>
-              <option value="yes" {% if event.my_availability == "yes" %}selected{% endif %}>✅ Yes</option>
-              <option value="maybe" {% if event.my_availability == "maybe" %}selected{% endif %}>🤔 Maybe</option>
-              <option value="no" {% if event.my_availability == "no" %}selected{% endif %}>❌ No</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-
-        <!-- Group Availability -->
-        {% if event.avail_summary %}
-          <div class="mt-3">
-            <strong>Group Availability:</strong><br>
-            ✅ Yes: {{ event.avail_summary.yes }} |
-            ❌ No: {{ event.avail_summary.no }} |
-            🤔 Maybe: {{ event.avail_summary.maybe }}
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
 </div>

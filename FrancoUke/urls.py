@@ -20,6 +20,9 @@ urlpatterns = [
 
     path('teleprompter/', include('teleprompter.urls', namespace='teleprompter')),
 
+    path("assets/", include("assets.urls", namespace="asset_repo")),  # ✅ add this line
+
+
 
     # Songbooks
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),

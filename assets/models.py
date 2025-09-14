@@ -59,6 +59,8 @@ class Asset(models.Model):
     external_url = models.URLField(null=True, blank=True)
 
     title = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # 👈 add this
+
     caption = models.TextField(blank=True)
     alt_text = models.CharField(max_length=255, blank=True)
 

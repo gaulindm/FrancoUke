@@ -92,3 +92,8 @@ class AssetGalleryChooserWidget(forms.Widget):
             return [v for v in val.split(",") if v]
         return [val]
 
+
+from django import forms
+
+class MultiFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
