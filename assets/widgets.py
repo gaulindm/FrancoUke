@@ -3,6 +3,8 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
 from .models import Asset
+from django.forms.widgets import ClearableFileInput
+
 
 class AssetChooserWidget(forms.TextInput):
     template_name = "assets/widgets/asset_chooser.html"
@@ -91,9 +93,3 @@ class AssetGalleryChooserWidget(forms.Widget):
         if isinstance(val, str) and "," in val:
             return [v for v in val.split(",") if v]
         return [val]
-
-
-from django import forms
-
-class MultiFileInput(forms.ClearableFileInput):
-    allow_multiple_selected = True

@@ -52,29 +52,3 @@ def chooser_modal(request):
     """
     return render(request, "assets/chooser.html")
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
-
-from .forms import AssetBulkUploadForm
-from .models import Asset
-
-
-@login_required
-@permission_required("assets.add_asset", raise_exception=True)
-def bulk_upload_assets(request):
-    """Handle bulk image uploads for the Asset model."""
-    if request.method == "POST":
-        form = AssetBulkUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            files = request.FILES.getlist("files")
-            created = 0
-            for f in files:
-                Asset.objects.create(file=f, title=f.name)
-                created += 1
-            messages.success(request, f"✅ Successfully uploaded {created} assets.")
-            return redirect("admin:assets_asset_changelist")  # back to Asset admin
-    else:
-        form = AssetBulkUploadForm()
-
-    return render(request, "assets/bulk_upload.html", {"form": form})
