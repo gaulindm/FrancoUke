@@ -4,50 +4,76 @@
     {% if column.column_type == "venue" %}
       <div class="board-column">
         <h5 class="text-center">{{ column.venue.name }}</h5>
-        {% for event in column.sorted_events %}
-          {% include "partials/_event_card.html" with event=event %}
-        {% empty %}
+
+        {% if column.sorted_events %}
+          {% for event in column.sorted_events %}
+            {% include "partials/_event_card.html" with event=event %}
+          {% endfor %}
+        {% else %}
           <p class="text-muted">No events scheduled.</p>
-        {% endfor %}
+        {% endif %}
       </div>
 
     {% elif column.column_type == "songs_to_listen" %}
       <div class="board-column">
         <h5 class="text-center">🎵 Songs to Listen</h5>
-        {% for item in column.items.all %}
-          {% include "partials/_board_item_card.html" with item=item %}
-        {% empty %}
+
+        {% if column.items.all %}
+          {% for item in column.items.all %}
+            {% include "partials/_board_item_card.html" with item=item %}
+          {% endfor %}
+        {% else %}
           <p class="text-muted">No songs added yet.</p>
-        {% endfor %}
+        {% endif %}
       </div>
 
     {% elif column.column_type == "photos" %}
       <div class="board-column">
         <h5 class="text-center">📸 Photo Gallery</h5>
-        {% for item in column.items.all %}
-          {% include "partials/_board_item_card.html" with item=item %}
-        {% empty %}
+
+        {% if column.items.all %}
+          {% for item in column.items.all %}
+            {% include "partials/_board_item_card.html" with item=item %}
+          {% endfor %}
+        {% else %}
           <p class="text-muted">No photos yet.</p>
-        {% endfor %}
+        {% endif %}
+      </div>
+
+    {% elif column.column_type == "general" %}
+      <div class="board-column">
+        <h5 class="text-center">{{ column.name }}</h5>
+
+        {% if column.sorted_events or column.messages.all %}
+          {# ✅ Events first #}
+          {% for event in column.sorted_events %}
+            {% include "partials/_event_card.html" with event=event %}
+          {% endfor %}
+
+          {# ✅ Messages next #}
+          {% for message in column.messages.all %}
+            {% include "partials/_board_message_card.html" with message=message %}
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No updates yet.</p>
+        {% endif %}
       </div>
 
     {% else %}
       <div class="board-column">
         <h5 class="text-center">{{ column.name }}</h5>
 
-        {# ✅ Show events (sorted: upcoming asc, past desc) #}
-        {% for event in column.sorted_events %}
-          {% include "partials/_event_card.html" with event=event %}
-        {% empty %}
-          {# If no events, maybe items exist #}
-        {% endfor %}
+        {% if column.sorted_events or column.items.all %}
+          {% for event in column.sorted_events %}
+            {% include "partials/_event_card.html" with event=event %}
+          {% endfor %}
 
-        {# ✅ Show any board items linked to this column #}
-        {% for item in column.items.all %}
-          {% include "partials/_board_item_card.html" with item=item %}
-        {% empty %}
+          {% for item in column.items.all %}
+            {% include "partials/_board_item_card.html" with item=item %}
+          {% endfor %}
+        {% else %}
           <p class="text-muted">No items yet.</p>
-        {% endfor %}
+        {% endif %}
       </div>
     {% endif %}
 

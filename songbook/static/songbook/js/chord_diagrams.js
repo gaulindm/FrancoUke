@@ -1,3 +1,5 @@
+/* chord_diagrams.js
+*/
 function drawChordDiagram(container, chord) {
     const { name, variation } = chord;
     const positions = variation.positions || [];

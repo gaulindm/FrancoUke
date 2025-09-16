@@ -1,0 +1,38 @@
+<div class="card mb-2 board-message-card message-card"
+     role="button"
+     data-bs-toggle="modal"
+     data-bs-target="#messageModal-{{ message.id }}">
+  <div class="card-body">
+    {% if message.title %}
+      <h6 class="card-title mb-1">
+        📢 {{ message.title }}
+      </h6>
+    {% endif %}
+
+    <p class="text-muted small mb-0">
+      Posted by {{ message.author }} on {{ message.created_at|date:"M d, Y" }}
+    </p>
+  </div>
+</div>
+
+{# 🔹 Modal for full content #}
+<div class="modal fade" id="messageModal-{{ message.id }}" tabindex="-1" aria-labelledby="messageModalLabel-{{ message.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="messageModalLabel-{{ message.id }}">
+          📢 {{ message.title }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {{ message.content|safe }}
+      </div>
+      <div class="modal-footer">
+        <small class="text-muted">
+          Posted by {{ message.author }} on {{ message.created_at|date:"M d, Y H:i" }}
+        </small>
+      </div>
+    </div>
+  </div>
+</div>

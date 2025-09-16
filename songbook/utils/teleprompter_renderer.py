@@ -1,34 +1,25 @@
 def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
     """
-    Takes parsed lyrics_with_chords (list of groups) and turns it into HTML
-    and extracts metadata directives (title, artist, year, songwriter, etc.).
+    Render parsed lyrics_with_chords (list of groups) into HTML,
+    while extracting metadata directives (title, artist, year, etc.).
     """
 
     directive_map = {
         "FrancoUke": {
-            "{soi}": "Intro",
-            "{soc}": "Refrain",
-            "{sov}": "Couplet",
-            "{sob}": "Pont",
-            "{soo}": "Outro",
-            "{sod}": "Interlude",
+            "{soi}": "Intro", "{soc}": "Refrain", "{sov}": "Couplet",
+            "{sob}": "Pont", "{soo}": "Outro", "{sod}": "Interlude",
             "{eoi}": None, "{eoc}": None, "{eov}": None,
             "{eob}": None, "{eoo}": None, "{eod}": None
         },
         "StrumSphere": {
-            "{soi}": "Intro",
-            "{soc}": "Chorus",
-            "{sov}": "Verse",
-            "{sob}": "Bridge",
-            "{soo}": "Outro",
-            "{sod}": "Interlude",
+            "{soi}": "Intro", "{soc}": "Chorus", "{sov}": "Verse",
+            "{sob}": "Bridge", "{soo}": "Outro", "{sod}": "Interlude",
             "{eoi}": None, "{eoc}": None, "{eov}": None,
             "{eob}": None, "{eoo}": None, "{eod}": None
         }
     }
     selected_map = directive_map.get(site_name, directive_map["StrumSphere"])
 
-    # 🎵 Metadata container
     metadata = {
         "title": None,
         "artist": None,
@@ -64,8 +55,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
                 key_val = directive.strip("{}").split(":", 1)
                 key = key_val[0].strip().lower()
                 val = key_val[1].strip() if len(key_val) > 1 else ""
-                    
-                # Collect metadata
+
+                # Metadata
                 if key in ["t", "title"]:
                     metadata["title"] = val
                 elif key == "artist":
@@ -78,11 +69,11 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
                     metadata["songwriter"] = val
                 elif key == "recording":
                     metadata["recording"] = val
-                elif key in selected_map:
+
+                # Section markers
+                elif directive in selected_map:
                     flush_buffer()
                     section_type = selected_map[directive]
-                    section_type = selected_map[key]
-                
 
             elif "lyric" in item:
                 chord = item.get("chord", "")

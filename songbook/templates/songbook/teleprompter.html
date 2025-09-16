@@ -1,35 +1,42 @@
 {% load static %}
+{% load json_script %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ song.songTitle }}</title>
+    <title>{{ song.title }}</title>
     <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+    <!-- Diagram renderer -->
     <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+    <!-- Teleprompter engine -->
+    <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 </head>
 <body>
+    <!-- Controls -->
     <div class="controls">
         <div class="left">
-          <span class="song-title">{{ song.title }}</span>
+            <span class="song-title">{{ song.title }}</span>
         </div>
         <div class="center">
-          <button id="scroll-toggle">▶️ Start</button>
-          <div class="control-inline">
-            Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
-          </div>
+            <button id="scroll-toggle">▶️ Start</button>
+            <div class="control-inline">
+                Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
+            </div>
         </div>
         <div class="right">
-          <button id="scroll-reset">⏹ Reset</button>
+            <button id="scroll-reset">⏹ Reset</button>
         </div>
-      </div>
+    </div>
       
+    <!-- Toggle Chords Button -->
     <button id="toggle-chords" class="toggle-btn">Show/Hide Chords</button>
 
+    <!-- Lyrics -->
     <div class="tp-main">
         <div class="lyrics-container">
             <div class="lyrics">
                 <div class="metadata">
-                    <h1>{{ song.songTitle }}</h1>
+                    <h1>{{ song.title }}</h1>
                     {% if metadata.songwriter %}
                         <div class="songwriter">{{ metadata.songwriter }}</div>
                     {% endif %}
@@ -39,84 +46,33 @@
                         </div>
                     {% endif %}
                 </div>
-    
+
                 {{ lyrics_with_chords|safe }}
             </div>
         </div>
     </div>
     
-
+    <!-- Chord Diagrams -->
     <div id="chord-section" style="display: none;">
         <h2>Chord Diagrams</h2>
         <div id="chord-diagrams"></div>
     </div>
 
+    <!-- Pass chords safely from backend -->
+    {% json_script relevant_chords_json "chords-data" %}
+
+    <!-- Bootstrap Teleprompter -->
     <script>
-        const chords = {{ relevant_chords|safe }};
-        const chordContainer = document.getElementById("chord-diagrams");
+    document.addEventListener("DOMContentLoaded", () => {
+        window.SONG = {
+            id: "{{ song.id }}",
+            title: "{{ song.title|escapejs }}",
+            initialTranspose: 0,
+            chords: JSON.parse(document.getElementById("chords-data").textContent)
+        };
 
-        chords.forEach(chord => {
-            const wrapper = document.createElement("div");
-            wrapper.style.display = "inline-block";
-            wrapper.style.margin = "10px";
-            chordContainer.appendChild(wrapper);
-            drawChordDiagram(wrapper, chord);
-        });
-
-        document.getElementById("toggle-chords").addEventListener("click", () => {
-            const section = document.getElementById("chord-section");
-            section.style.display = section.style.display === "none" ? "block" : "none";
-        });
+        console.log("Loaded SONG chords:", window.SONG.chords);
+    });
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-          const container = document.querySelector(".lyrics-container");
-          const toggleBtn = document.getElementById("scroll-toggle");
-          const resetBtn = document.getElementById("scroll-reset");
-          const speedInput = document.getElementById("scroll-speed");
-        
-          let intervalId = null;
-          let speed = parseInt(speedInput.value, 10);
-        
-          function startScroll() {
-            if (intervalId) return; // already running
-            intervalId = setInterval(() => {
-              container.scrollBy(0, 1); // scroll down 1px
-              if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
-                stopScroll(); // stop at the bottom
-              }
-            }, 30 - speed); // higher speed -> shorter interval
-            toggleBtn.textContent = "⏸ Pause";
-          }
-        
-          function stopScroll() {
-            clearInterval(intervalId);
-            intervalId = null;
-            toggleBtn.textContent = "▶️ Start";
-          }
-        
-          function resetScroll() {
-            stopScroll();
-            container.scrollTo({ top: 0, behavior: "smooth" });
-          }
-        
-          toggleBtn.addEventListener("click", () => {
-            if (intervalId) stopScroll();
-            else startScroll();
-          });
-        
-          resetBtn.addEventListener("click", resetScroll);
-        
-          speedInput.addEventListener("input", (e) => {
-            speed = parseInt(e.target.value, 10);
-            if (intervalId) {
-              stopScroll();
-              startScroll(); // restart with new speed
-            }
-          });
-        });
-        </script>
-        
-
 </body>
 </html>

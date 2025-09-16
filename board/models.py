@@ -4,6 +4,12 @@ from ckeditor.fields import RichTextField
 from urllib.parse import urlparse, parse_qs
 from assets.models import Asset  # central repository
 
+from django.db import models
+from django.conf import settings
+from ckeditor.fields import RichTextField
+
+
+
 
 # -------------------------
 # Board + Items
@@ -46,6 +52,24 @@ class Venue(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BoardMessage(models.Model):
+    column = models.ForeignKey("BoardColumn", related_name="messages", on_delete=models.CASCADE)
+    title = models.CharField(max_length=255, blank=True)
+    content = RichTextField()
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+ 
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title or f"Message by {self.author}"
+
+
 
 
 class BoardItem(models.Model):

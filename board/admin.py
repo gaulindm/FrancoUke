@@ -30,6 +30,22 @@ class EventForm(forms.ModelForm):
         }
 
 
+from django.contrib import admin
+from .models import BoardMessage
+
+@admin.register(BoardMessage)
+class BoardMessageAdmin(admin.ModelAdmin):
+    list_display = ("title", "author", "column", "created_at")
+    search_fields = ("title", "content", "author__username")
+    list_filter = ("column",)
+    autocomplete_fields = ("author",)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "column":
+            # ✅ Only allow attaching messages to general columns
+            kwargs["queryset"] = BoardColumn.objects.filter(column_type="general")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class EventPhotoInline(admin.TabularInline):
     model = EventPhoto
@@ -60,6 +76,7 @@ class BoardColumnAdmin(admin.ModelAdmin):
     list_display = ("name", "column_type", "position", "is_public")
     list_editable = ("position", "is_public")
     ordering = ("position",)
+    search_fields = ("name",)   # 🔹 this is the missing piece
 
 
 @admin.register(BoardItemPhoto)

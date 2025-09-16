@@ -24,40 +24,60 @@ from django.utils import timezone
 from django.shortcuts import render
 from .models import BoardColumn
 
-
-
+# board/views.py
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import BoardColumn, Event, EventAvailability
+
 
 @login_required
 def full_board_view(request):
     user = request.user
-    today = timezone.localdate()  # gives you just the date
+    today = timezone.localdate()
 
     columns = (
         BoardColumn.objects
         .select_related("venue")
         .prefetch_related(
-            "items__photos",
-            "events__photos",
-            "events__availabilities",
+            "items__photos",                # songs, photos
+            "events__photos",               # event photos
+            "events__availabilities",       # availability
             "venue__events__photos",
             "venue__events__availabilities",
+            "messages",                     # general column messages
         )
         .order_by("position")
     )
 
     for column in columns:
+        print(f"\n🟦 Column: {column.name} (type={column.column_type})")
+
+        # 1️⃣ Select events depending on venue binding
         if column.venue:
             events = column.venue.events.all()
         else:
             events = column.events.all()
 
-        # 🔹 Split by event_date instead of 'start'
         upcoming = events.filter(event_date__gte=today).order_by("event_date", "start_time")
         past = events.filter(event_date__lt=today).order_by("-event_date", "-start_time")
 
-        column.sorted_events = list(upcoming) + list(past)
+        # 2️⃣ Assign events per column type or name
+        if column.name.lower().startswith("upcoming"):
+            column.sorted_events = list(upcoming)
+        elif column.name.lower().startswith("past"):
+            column.sorted_events = list(past)
+        elif column.name.lower().startswith("to be confirmed"):
+            column.sorted_events = list(events.order_by("event_date", "start_time"))        
+        else:
+            column.sorted_events = list(upcoming) + list(past)
 
+        # Debug: show what events are attached
+        for e in column.sorted_events:
+            print(f"   🎭 Event → {e.title} [{e.event_date}]")
+
+        # 3️⃣ Enrich events with availability + cover photo
         for event in column.sorted_events:
             availability = event.availabilities.filter(user=user).first()
             event.my_availability = availability.status if availability else None
@@ -73,7 +93,20 @@ def full_board_view(request):
                 event.photos.filter(is_cover=True).first() or event.photos.first()
             )
 
+        # 4️⃣ Messages for general columns
+        if column.column_type == "general":
+            column.sorted_messages = column.messages.order_by("-created_at")
+            for m in column.sorted_messages:
+                print(f"   💬 Message → {m.title or '(no title)'} by {m.author}")
+
+        # 5️⃣ Songs for songs_to_listen columns
+        if column.column_type == "songs_to_listen":
+            for item in column.items.all():
+                print(f"   🎵 Song → {item.title}")
+
     return render(request, "board/full_board.html", {"columns": columns})
+
+
 
 
 @require_POST

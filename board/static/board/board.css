@@ -1,0 +1,6 @@
+/* Light blue tint for board messages */
+.message-card {
+    background-color: #e7f1fb;  /* very light blue */
+    border: 1px solid #b6d4fe; /* soft blue border */
+  }
+  
