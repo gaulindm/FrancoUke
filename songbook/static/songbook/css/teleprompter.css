@@ -122,6 +122,11 @@ body {
   white-space: pre-wrap;
 }
 
+
+#chord-section {
+  display: none;
+}
+
 /* =============================
    INLINE MODE (chords inside lyrics)
    ============================= */

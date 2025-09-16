@@ -22,9 +22,11 @@
     <div class="container-fluid">
 
         <!-- ✅ Brand links to Home/About -->
-        <a class="navbar-brand fw-bold text-dark" href="{% url 'about' %}">
-            🎵 Uke4ia Public Site
+        <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'about' %}">
+            <img src="{% static 'board/img/logo-100.png' %}" alt="Uke4ia Logo" class="me-2" style="height:40px;">
+            Uke4ia Public Site
         </a>
+        
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
                 aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">

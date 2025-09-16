@@ -18,9 +18,12 @@
     <div class="container-fluid">
 
         <!-- ✅ Brand now links to Full Board -->
-        <a class="navbar-brand fw-bold text-dark" href="{% url 'full_board' %}">
-            🎵 Uke4ia Performance group
+        <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'full_board' %}">
+            <img src="{% static 'board/img/logo-100.png' %}" alt="Uke4ia Logo" class="me-2" style="height:40px;">
+            
         </a>
+        
+        
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
                 aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">

@@ -39,30 +39,44 @@
     $(".lyrics-container").scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // --- Chord Diagrams ---
-  function renderChordDiagrams(chords) {
-    const container = $("#chord-diagrams");
-    container.innerHTML = "";
+// --- Chord Diagrams ---
+function renderChordDiagrams(chords) {
+  const container = $("#chord-diagrams");
+  if (!container) {
+    console.error("❌ #chord-diagrams not found in DOM");
+    return;
+  }
+  container.innerHTML = "";
 
-    if (!chords || chords.length === 0) {
-      container.innerHTML = "<p>No chords found for this song.</p>";
+  chords.forEach((chord) => {
+    if (!chord.variations || chord.variations.length === 0) {
+      console.warn("⚠️ No variations for chord", chord.name);
       return;
     }
 
-    chords.forEach((chord) => {
+    chord.variations.forEach((variation, idx) => {
       const wrapper = document.createElement("div");
       wrapper.className = "chord-wrapper";
       wrapper.style.display = "inline-block";
       wrapper.style.margin = "10px";
+
+      const label = document.createElement("div");
+      label.textContent =
+        chord.name + (chord.variations.length > 1 ? ` (v${idx + 1})` : "");
+      label.style.textAlign = "center";
+      label.style.marginBottom = "4px";
+      wrapper.appendChild(label);
+
       container.appendChild(wrapper);
 
-      if (typeof drawChordDiagram === "function") {
-        drawChordDiagram(wrapper, chord);
-      } else {
-        console.error("❌ drawChordDiagram is not defined!");
-      }
+      drawChordDiagram(wrapper, {
+        name: chord.name,
+        ...variation,
+      });
     });
-  }
+  });
+}
+
 
   function toggleChordSection() {
     const section = $("#chord-section");

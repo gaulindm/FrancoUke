@@ -1,11 +1,19 @@
 /* chord_diagrams.js
 */
 function drawChordDiagram(container, chord) {
-    const { name, variation } = chord;
-    const positions = variation.positions || [];
-    const baseFret = variation.baseFret || computeBaseFret(positions);
-    const barre = variation.barre || detectBarre(positions);
-  
+  if (!container) {
+    console.error("❌ No container provided to drawChordDiagram");
+    return;
+  }
+
+  const positions = chord.positions || [];
+  const baseFret = chord.baseFret || computeBaseFret(positions);
+  const barre = chord.barre || detectBarre(positions);
+  const name = chord.name || "Chord";
+
+  // ... rest of your SVG drawing code ...
+
+
     const stringCount = positions.length;
     const fretCount = 5;
     const stringSpacing = 20;
