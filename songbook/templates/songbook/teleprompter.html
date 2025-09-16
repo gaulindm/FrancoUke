@@ -1,5 +1,5 @@
 {% load static %}
-{% load json_script %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,7 +59,9 @@
     </div>
 
     <!-- Pass chords safely from backend -->
-    {% json_script relevant_chords_json "chords-data" %}
+    <script id="chords-data" type="application/json">
+        {{ relevant_chords_json|safe }}
+    </script>
 
     <!-- Bootstrap Teleprompter -->
     <script>

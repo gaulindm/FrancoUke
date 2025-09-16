@@ -61,6 +61,6 @@ def teleprompter_view(request, song_id):
             "song": song,
             "lyrics_with_chords": lyrics_html,
             "metadata": metadata,
-            "relevant_chords_json": relevant_chords,  # ⬅️ pass raw list, not json.dumps
+            "relevant_chords_json": json.dumps(relevant_chords),  # ⬅️ pass raw list, not json.dumps
         },
     )

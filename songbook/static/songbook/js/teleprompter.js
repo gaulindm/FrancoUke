@@ -74,33 +74,46 @@
       renderChordDiagrams(window.SONG.chords);
     }
   }
+// --- Init ---
+document.addEventListener("DOMContentLoaded", () => {
+  // Scroll controls
+  $("#scroll-toggle").addEventListener("click", () => {
+    if (scrollInterval) stopScroll();
+    else startScroll();
+  });
 
-  // --- Init ---
-  document.addEventListener("DOMContentLoaded", () => {
-    // Scroll controls
-    $("#scroll-toggle").addEventListener("click", () => {
-      if (scrollInterval) stopScroll();
-      else startScroll();
-    });
+  $("#scroll-reset").addEventListener("click", resetScroll);
 
-    $("#scroll-reset").addEventListener("click", resetScroll);
-
-    $("#scroll-speed").addEventListener("input", (e) => {
-      scrollSpeed = parseInt(e.target.value, 10);
-      if (scrollInterval) {
-        stopScroll();
-        startScroll(); // restart with new speed
-      }
-    });
-
-    // Chords toggle
-    $("#toggle-chords").addEventListener("click", toggleChordSection);
-
-    // ✅ Initial chord rendering
-    if (window.SONG && Array.isArray(window.SONG.chords)) {
-      renderChordDiagrams(window.SONG.chords);
-    } else {
-      console.warn("⚠️ No chords found in SONG object.");
+  $("#scroll-speed").addEventListener("input", (e) => {
+    scrollSpeed = parseInt(e.target.value, 10);
+    if (scrollInterval) {
+      stopScroll();
+      startScroll(); // restart with new speed
     }
   });
+
+  // Chords toggle
+  $("#toggle-chords").addEventListener("click", toggleChordSection);
+
+  // --- Load chords from <script id="chords-data"> ---
+  const chordDataEl = document.getElementById("chords-data");
+  if (chordDataEl) {
+    try {
+      const chords = JSON.parse(chordDataEl.textContent);
+      console.log("✅ Parsed chords from template:", chords);  // DEBUG LOG
+
+      if (Array.isArray(chords) && chords.length > 0) {
+        renderChordDiagrams(chords);
+      } else {
+        console.warn("⚠️ No chords found in parsed JSON.");
+      }
+    } catch (err) {
+      console.error("❌ Failed to parse chords JSON:", err);
+    }
+  } else {
+    console.warn("⚠️ No <script id='chords-data'> element found.");
+  }
+});
+
+
 })();
