@@ -4,11 +4,15 @@
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
   <!-- 📸 Photo count badge (exclude cover) -->
-  {% if event.photos.count > 1 %}
-    <span class="position-absolute top-0 end-0 m-2 text-white bg-dark bg-opacity-75 px-2 py-1 rounded">
-      📸 {{ event.photos.count|add:"-1" }}
-    </span>
-  {% endif %}
+  {# put this where the badge should appear in the card #}
+  {% with gallery_count=event.gallery_assets.exclude(pk=event.cover_asset_id).count photos_count=event.photos.exclude(is_cover=True).count %}
+    {% if gallery_count|add:photos_count %}
+      <span class="position-absolute top-0 end-0 m-2 text-white bg-dark bg-opacity-75 px-2 py-1 rounded">
+        📸 {{ gallery_count|add:photos_count }}
+      </span>
+    {% endif %}
+  {% endwith %}
+  
 
   
   <!-- Card Cover -->

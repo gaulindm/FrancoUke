@@ -60,12 +60,12 @@ function renderChordDiagrams(chords) {
       wrapper.style.display = "inline-block";
       wrapper.style.margin = "10px";
 
-      const label = document.createElement("div");
-      label.textContent =
-        chord.name + (chord.variations.length > 1 ? ` (v${idx + 1})` : "");
-      label.style.textAlign = "center";
-      label.style.marginBottom = "4px";
-      wrapper.appendChild(label);
+      //const label = document.createElement("div");
+      //label.textContent =
+      //  chord.name + (chord.variations.length > 1 ? ` (v${idx + 1})` : "");
+      //label.style.textAlign = "center";
+      //label.style.marginBottom = "4px";
+      //wrapper.appendChild(label);
 
       container.appendChild(wrapper);
 

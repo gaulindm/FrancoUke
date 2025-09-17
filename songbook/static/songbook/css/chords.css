@@ -1,3 +1,10 @@
+:root {
+    --chord-text-color: red;
+    --chord-line-color: white;
+    --chord-dot-color: orange;
+  }
+
+
 /* 🎵 Chord Dictionary Styles */
 #chord-tables table {
     width: 100%;
@@ -27,6 +34,12 @@
     background-color: #e2f0d9;
     cursor: pointer;
 }
+
+.chord-wrapper {
+    display: inline-block;
+    transform: scale(0.65);
+    transform-origin: top left;
+  }
 
 @media (max-width: 768px) {
     #chord-tables table {
