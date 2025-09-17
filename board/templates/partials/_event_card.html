@@ -1,41 +1,32 @@
 {% load static %}
-<div class="card position-relative"
-     style="background:white; padding:10px; margin-bottom:10px; border-radius:4px; cursor:pointer;"
+<div class="card position-relative mb-3 p-2 rounded cursor-pointer"
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
   <!-- 📸 Photo count badge (exclude cover) -->
-  {# put this where the badge should appear in the card #}
-  {% with gallery_count=event.gallery_assets.exclude(pk=event.cover_asset_id).count photos_count=event.photos.exclude(is_cover=True).count %}
-    {% if gallery_count|add:photos_count %}
-      <span class="position-absolute top-0 end-0 m-2 text-white bg-dark bg-opacity-75 px-2 py-1 rounded">
-        📸 {{ gallery_count|add:photos_count }}
-      </span>
-    {% endif %}
-  {% endwith %}
-  
+  {% if event.non_cover_images_count %}
+    <span class="badge rounded-pill bg-dark position-absolute top-0 end-0 m-2">
+      📸 {{ event.non_cover_images_count }}
+    </span>
+  {% endif %}
 
-  
   <!-- Card Cover -->
-<!-- Card Cover -->
-{% if event.cover_asset and event.cover_asset.file %}
-  <img src="{{ event.cover_asset.file.url }}"
-       alt="{{ event.cover_asset.title|default:event.title }}"
-       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-{% elif event.venue and event.venue.image %}
-  <img src="{{ event.venue.image.url }}" 
-       alt="{{ event.venue.name }}"
-       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-{% elif event.cover_photo and event.cover_photo.image %}
-  <img src="{{ event.cover_photo.image.url }}" 
-       alt="{{ event.title }}"
-       style="max-width:100%; height:auto; border-radius:4px; display:block; margin:0 auto;">
-{% else %}
-  <div style="background:#eee; padding:20px; text-align:center; border-radius:4px; color:#888;">
-    ❌ No image available
-  </div>
-{% endif %}
-
-
+  {% if event.cover_asset and event.cover_asset.file %}
+    <img src="{{ event.cover_asset.file.url }}"
+         class="img-fluid rounded d-block mx-auto"
+         alt="{{ event.cover_asset.title|default:event.title }}">
+  {% elif event.venue and event.venue.image %}
+    <img src="{{ event.venue.image.url }}"
+         class="img-fluid rounded d-block mx-auto"
+         alt="{{ event.venue.name }}">
+  {% elif event.cover_photo and event.cover_photo.image %}
+    <img src="{{ event.cover_photo.image.url }}"
+         class="img-fluid rounded d-block mx-auto"
+         alt="{{ event.title }}">
+  {% else %}
+    <div class="bg-light text-center rounded text-muted py-4">
+      ❌ No image available
+    </div>
+  {% endif %}
 
   <!-- Title -->
   <div class="d-flex justify-content-between align-items-center mt-2">
@@ -82,7 +73,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">{{ event.title }}</h5>
+        <h5 id="eventModalLabel{{ event.id }}" class="modal-title">{{ event.title }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -102,22 +93,20 @@
                class="img-fluid mb-3 rounded">
         {% endif %}
 
-<!-- 📸 Thumbnail strip (from repository) -->
-{% for asset in event.gallery_assets.all %}
-  {% if asset.thumbnail %}
-    <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
-      <img src="{{ asset.thumbnail.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
-    </a>
-  {% else %}
-    <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
-      <img src="{{ asset.file.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
-    </a>
-  {% endif %}
-{% endfor %}
+        <!-- 📸 Thumbnail strip (assets) -->
+        {% for asset in event.gallery_assets.all %}
+          {% if asset.thumbnail %}
+            <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
+              <img src="{{ asset.thumbnail.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
+            </a>
+          {% else %}
+            <a href="{{ asset.file.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ asset.title }}">
+              <img src="{{ asset.file.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
+            </a>
+          {% endif %}
+        {% endfor %}
 
-
-
-        <!-- 📸 Thumbnail strip (exclude cover) -->
+        <!-- 📸 Thumbnail strip (legacy photos, exclude cover) -->
         {% if event.photos.count > 1 %}
           <hr>
           <h6>📸 Event Photos</h6>
@@ -136,7 +125,7 @@
         <p><strong>Date:</strong> {{ event.event_date|date:"M d, Y" }}</p>
         {% if event.start_time %}
           <p><strong>Time:</strong> {{ event.start_time|time:"g:i A" }}
-            {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
+            {% if event.end_time %} – {{ event.end_time|time:"g:i A" }}{% endif %}
           </p>
         {% endif %}
         {% if event.arrive_by %}
@@ -188,3 +177,17 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".toggle-description").forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      const container = link.closest(".description-preview");
+      container.querySelector(".short-text").classList.toggle("d-none");
+      container.querySelector(".full-text").classList.toggle("d-none");
+      link.textContent = link.textContent.includes("more") ? "See less" : "See more";
+    });
+  });
+});
+</script>

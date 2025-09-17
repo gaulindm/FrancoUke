@@ -283,7 +283,31 @@ class Event(models.Model):
     @property
     def cover_photo(self):
         return self.photos.filter(is_cover=True).first() or self.photos.first()
+    
+    @property
+    def non_cover_gallery_assets(self):
+        if not hasattr(self, "_non_cover_gallery_assets"):
+            if self.cover_asset_id:
+                self._non_cover_gallery_assets = self.gallery_assets.exclude(pk=self.cover_asset_id)
+            else:
+                self._non_cover_gallery_assets = self.gallery_assets.all()
+        return self._non_cover_gallery_assets
 
+    @property
+    def non_cover_gallery_count(self):
+        return self.non_cover_gallery_assets.count()
+
+    @property
+    def non_cover_photos(self):
+        return self.photos.exclude(is_cover=True)
+
+    @property
+    def non_cover_photos_count(self):
+        return self.non_cover_photos.count()
+
+    @property
+    def non_cover_images_count(self):
+        return self.non_cover_gallery_count + self.non_cover_photos_count
 
 '''
 class PerformanceDetails(models.Model):
