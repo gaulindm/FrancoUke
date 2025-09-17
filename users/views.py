@@ -8,6 +8,8 @@ from .models import UserPreference
 from django.urls import reverse
 from .forms import UserPreferenceForm
 from songbook.models import SongFormatting
+from .forms import CustomUserCreationForm, UserPreferenceForm  # ✅ use your custom form
+
 
 
 class CustomLoginView(LoginView):
@@ -19,25 +21,26 @@ class CustomLoginView(LoginView):
         return context
 
 
-
 def register(request):
     site_name = request.GET.get("site", "FrancoUke")  # Default to FrancoUke
 
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)   # ✅ swapped here
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get('username')
+            username = form.cleaned_data.get("username")
 
             messages.success(
                 request,
-                f'Account created for {username}! Visit your <a href="{reverse("users:user_preferences")}?site={site_name}">Preferences</a> page to set up your instrument choices.'
+                f'Account created for {username}! Visit your '
+                f'<a href="{reverse("users:user_preferences")}?site={site_name}">'
+                f'Preferences</a> page to set up your instrument choices.'
             )
-
-            return redirect(f'/users/login/?site={site_name}')
+            return redirect(f"/users/login/?site={site_name}")
     else:
-        form = UserCreationForm()
-    return render(request, 'users/register.html', {'form': form, 'site_name': site_name})
+        form = CustomUserCreationForm()   # ✅ swapped here too
+
+    return render(request, "users/register.html", {"form": form, "site_name": site_name})
 
 
 @login_required

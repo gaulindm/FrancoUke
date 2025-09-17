@@ -1,15 +1,15 @@
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
 from .models import UserPreference
+
+User = get_user_model()
 
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
-        model = CustomUser
+        model = User
         fields = ("username", "email", "first_name", "last_name", "password1", "password2")
-
 
 
 class UserRegisterForm(UserCreationForm):
@@ -18,6 +18,7 @@ class UserRegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+
 
 class UserPreferenceForm(forms.ModelForm):
     class Meta:
@@ -29,8 +30,6 @@ class UserPreferenceForm(forms.ModelForm):
         primary = cleaned_data.get("primary_instrument")
         secondary = cleaned_data.get("secondary_instrument")
 
-        # Prevent users from selecting the same instrument twice
         if primary and secondary and primary == secondary:
             self.add_error("secondary_instrument", "Primary and Secondary instruments must be different.")
-
-        return cleaned_data          
+        return cleaned_data

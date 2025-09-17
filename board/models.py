@@ -282,7 +282,16 @@ class Event(models.Model):
 
     @property
     def cover_photo(self):
-        return self.photos.filter(is_cover=True).first() or self.photos.first()
+        """
+        Legacy support for Photo-based covers.
+        Safe fallback if no photos relation or no cover photo exists.
+        """
+        try:
+            if hasattr(self, "photos"):
+                return self.photos.filter(is_cover=True).first() or self.photos.first()
+        except Exception:
+            pass
+        return None
     
     @property
     def non_cover_gallery_assets(self):
