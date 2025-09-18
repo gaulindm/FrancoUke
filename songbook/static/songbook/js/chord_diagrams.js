@@ -123,11 +123,16 @@ function drawChordDiagram(container, chord) {
   // ✅ Scale wrapper here
   const wrapper = document.createElement("div");
   wrapper.style.display = "inline-block";
-  wrapper.style.transform = "scale(0.65)";
+  wrapper.style.transform = "scale(1.0)";
   wrapper.style.transformOrigin = "top left";
-  wrapper.style.margin = "10px";
+  wrapper.style.margin = "2px";
 
   wrapper.appendChild(svg);
+
+
+  // --- Add a border for debugging ---
+  svg.style.border = "1px solid yellow"; // 🔶 TEMPORARY: highlight SVG bounds
+
   container.appendChild(wrapper);
 }
 

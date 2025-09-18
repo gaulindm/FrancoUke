@@ -39,13 +39,9 @@
     $(".lyrics-container").scrollTo({ top: 0, behavior: "smooth" });
   }
 
-// --- Chord Diagrams ---
+  // --- Chord Diagrams ---
 function renderChordDiagrams(chords) {
-  const container = $("#chord-diagrams");
-  if (!container) {
-    console.error("❌ #chord-diagrams not found in DOM");
-    return;
-  }
+  const container = document.getElementById("chord-diagrams");
   container.innerHTML = "";
 
   chords.forEach((chord) => {
@@ -54,28 +50,43 @@ function renderChordDiagrams(chords) {
       return;
     }
 
-    chord.variations.forEach((variation, idx) => {
+    chord.variations.forEach((variation) => {
       const wrapper = document.createElement("div");
       wrapper.className = "chord-wrapper";
       wrapper.style.display = "inline-block";
-      wrapper.style.margin = "10px";
 
-      //const label = document.createElement("div");
-      //label.textContent =
-      //  chord.name + (chord.variations.length > 1 ? ` (v${idx + 1})` : "");
-      //label.style.textAlign = "center";
-      //label.style.marginBottom = "4px";
-      //wrapper.appendChild(label);
+      // ✅ reduce spacing since diagrams are scaled
+      wrapper.style.margin = "2px 6px";
+
+      if (typeof drawChordDiagram === "function") {
+        drawChordDiagram(wrapper, {
+          name: chord.name,
+          ...variation,
+        });
+      } else {
+        console.error("❌ drawChordDiagram is not defined!");
+      }
 
       container.appendChild(wrapper);
-
-      drawChordDiagram(wrapper, {
-        name: chord.name,
-        ...variation,
-      });
     });
   });
 }
+
+// --- Show/Hide Toggle ---
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("toggle-chords");
+  const container = document.getElementById("chord-diagrams");
+
+  btn.addEventListener("click", () => {
+    if (container.style.display === "none") {
+      container.style.display = "block";
+      btn.textContent = "Hide Chords";
+    } else {
+      container.style.display = "none";
+      btn.textContent = "Show Chords";
+    }
+  });
+});
 
 
   function toggleChordSection() {

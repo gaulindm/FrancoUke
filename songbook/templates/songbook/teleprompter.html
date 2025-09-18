@@ -27,9 +27,6 @@
             <button id="scroll-reset">⏹ Reset</button>
         </div>
     </div>
-      
-    <!-- Toggle Chords Button -->
-    <button id="toggle-chords" class="toggle-btn">Show/Hide Chords</button>
 
     <!-- Lyrics -->
     <div class="tp-main">
@@ -51,18 +48,23 @@
             </div>
         </div>
     </div>
-    
-    <!-- Chord Diagrams -->
-    <div id="chord-section" style="display: block;">
-        <h2>Chord Diagrams</h2>
-        <div id="chord-diagrams"></div>
-      </div>
-      
 
     <!-- Pass chords safely from backend -->
     <script id="chords-data" type="application/json">
         {{ relevant_chords_json|safe }}
     </script>
+
+    <!-- ✅ Chord Diagrams (single section)
+    <div id="chord-section" style="display: block; margin-top: 20px;">
+        <button id="toggle-chords">Hide Chords</button>
+        <h2 style="color: white;">Chord Diagrams</h2>
+        <div id="chord-diagrams"></div>
+    </div> -->
+
+    <div id="chord-section" style="display: block;">
+        <button id="toggle-chords">Hide Chords</button>
+        <div id="chord-diagrams"></div>
+      </div>
 
     <!-- Bootstrap Teleprompter -->
     <script>
@@ -75,6 +77,20 @@
         };
 
         console.log("Loaded SONG chords:", window.SONG.chords);
+
+        // --- Show/Hide Toggle ---
+        const btn = document.getElementById("toggle-chords");
+        const container = document.getElementById("chord-diagrams");
+
+        btn.addEventListener("click", () => {
+            if (container.style.display === "none") {
+                container.style.display = "block";
+                btn.textContent = "Hide Chords";
+            } else {
+                container.style.display = "none";
+                btn.textContent = "Show Chords";
+            }
+        });
     });
     </script>
 </body>
