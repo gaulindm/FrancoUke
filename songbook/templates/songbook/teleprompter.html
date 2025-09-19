@@ -54,44 +54,42 @@
         {{ relevant_chords_json|safe }}
     </script>
 
-    <!-- ✅ Chord Diagrams (single section)
-    <div id="chord-section" style="display: block; margin-top: 20px;">
-        <button id="toggle-chords">Hide Chords</button>
-        <h2 style="color: white;">Chord Diagrams</h2>
-        <div id="chord-diagrams"></div>
-    </div> -->
+    
+<!-- ✅ Chord Diagrams Section -->
+<div id="chord-section">
+    <div id="chord-diagrams"></div>
+    <button id="toggle-chords">Hide Chords</button>
+  </div>
 
-    <div id="chord-section" style="display: block;">
-        <button id="toggle-chords">Hide Chords</button>
-        <div id="chord-diagrams"></div>
-      </div>
 
     <!-- Bootstrap Teleprompter -->
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        window.SONG = {
+        document.addEventListener("DOMContentLoaded", () => {
+          // ✅ Make song data available globally
+          window.SONG = {
             id: "{{ song.id }}",
             title: "{{ song.title|escapejs }}",
             initialTranspose: 0,
             chords: JSON.parse(document.getElementById("chords-data").textContent)
-        };
-
-        console.log("Loaded SONG chords:", window.SONG.chords);
-
-        // --- Show/Hide Toggle ---
-        const btn = document.getElementById("toggle-chords");
-        const container = document.getElementById("chord-diagrams");
-
-        btn.addEventListener("click", () => {
+          };
+        
+          console.log("Loaded SONG chords:", window.SONG.chords);
+        
+          // ✅ Show/Hide Toggle
+          const btn = document.getElementById("toggle-chords");
+          const container = document.getElementById("chord-diagrams");
+        
+          btn.addEventListener("click", () => {
             if (container.style.display === "none") {
-                container.style.display = "block";
-                btn.textContent = "Hide Chords";
+              container.style.display = "flex";   // restore flex layout
+              btn.textContent = "Hide Chords";
             } else {
-                container.style.display = "none";
-                btn.textContent = "Show Chords";
+              container.style.display = "none";
+              btn.textContent = "Show Chords";
             }
+          });
         });
-    });
-    </script>
+        </script>
+        
 </body>
 </html>

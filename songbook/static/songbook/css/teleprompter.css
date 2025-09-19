@@ -67,23 +67,19 @@ body {
 
 /* ===== TELEPROMPTER LAYOUT ===== */
 .tp-main {
-  padding-top: 72px; /* leave room for controls */
-  height: calc(100vh - 72px);
+  /* Use 100dvh instead of 100vh (dynamic viewport height, iOS 16+) */
+  padding-top: 72px;
+  height: calc(100dvh - 72px - 20px); /* adjust chord bar height */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
 }
 
 .lyrics-container {
-  width: 100%;
-  max-width: 1600px;
-  padding: 20px 28px 40px 28px;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  height: 100%;
+  -webkit-overflow-scrolling: touch; /* enables iPad scrolling */
+  padding: 120px 28px 180px 28px; /* space for chord bar */
 }
+
 
 /* ===== LYRICS & TOKENS ===== */
 .line {
@@ -150,10 +146,11 @@ body {
   left: 0;
   right: 0;
   background: rgba(0, 0, 0, 0.85);
-  padding: 6px 3px;
+  padding: 4px 6px 8px;
   border-top: 2px solid #444;
   text-align: center;
   z-index: 1000;
+  pointer-events: none;
 }
 
 #chord-section h2 {
@@ -161,7 +158,14 @@ body {
 }
 
 #toggle-chords {
-  margin-bottom: 4px;
+  display: block;
+  margin: 0 auto;
+  padding: 4px 12px;
+  background: #222;
+  border: 1px solid #666;
+  color: white;
+  border-radius: 4px;
+  pointer-events: auto; /* stays clickable */
 }
 
 #chord-diagrams {
@@ -169,6 +173,13 @@ body {
   flex-wrap: nowrap;
   justify-content: center;
   gap: 1px; /* space between diagrams */
+  margin-bottom: 6px;
+  pointer-events: auto;
+}
+
+#chord-diagrams,
+#toggle-chords {
+  pointer-events: auto; /* allow chords + button to be clickable */
 }
 
 /* Each diagram wrapper */
@@ -179,6 +190,36 @@ body {
   transform-origin: top center;
   border: 1px solid red; /* 🔴 TEMPORARY debug border */
 }
+
+/* ===== VERSES & SECTIONS ===== */
+
+/* Default verses: left aligned */
+.verse {
+  text-align: left;
+  margin: 20px 0;
+}
+
+/* Special sections (chorus, intro, outro, bridge, interlude) */
+.section {
+  text-align: center;
+  margin: 30px 0;
+}
+
+/* Section titles */
+.section-name {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #ffcc00; /* bright yellow accent */
+  margin-bottom: 10px;
+}
+
+/* Section body text stays centered under the section name */
+.section-body {
+  display: inline-block;
+  text-align: center;
+}
+
+
 
 /* ===== SMALL SCREENS ===== */
 @media (max-width: 800px) {
