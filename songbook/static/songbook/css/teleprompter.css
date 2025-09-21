@@ -188,7 +188,7 @@ body {
   margin: 2px; /* reduce spacing */
   transform: scale(0.55);
   transform-origin: top center;
-  border: 1px solid red; /* 🔴 TEMPORARY debug border */
+  /*border: 1px solid red;  🔴 TEMPORARY debug border */
 }
 
 /* ===== VERSES & SECTIONS ===== */

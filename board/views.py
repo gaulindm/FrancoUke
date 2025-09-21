@@ -322,3 +322,28 @@ class EventViewSet(viewsets.ModelViewSet):
     )
     serializer_class = EventSerializer
 
+# board/views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import BoardColumn, BoardMessage
+from .forms import BoardMessageForm
+from .decorators import group_required
+
+
+@login_required
+@group_required("Leaders")  # 👈 only Leaders can access
+def create_board_message(request, column_id):
+    column = get_object_or_404(BoardColumn, pk=column_id)
+
+    if request.method == "POST":
+        form = BoardMessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.column = column          # 👈 set column here
+            message.author = request.user    # 👈 set author here
+            message.save()
+            return redirect("board:full_board")
+    else:
+        form = BoardMessageForm()
+
+    return render(request, "board/message_form.html", {"form": form, "column": column})

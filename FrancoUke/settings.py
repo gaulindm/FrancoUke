@@ -97,15 +97,24 @@ SILENCED_SYSTEM_CHECKS = [
 
 
 CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': 'Basic',
-        'toolbar_Basic': [
-            ['Bold', 'Italic', '-', 'NumberedList', 'BulletedList', '-', 'Undo', 'Redo']
+    "default": {
+        "toolbar": "full",
+        "height": 300,
+        "width": "100%",
+    },
+    "simple": {
+        "toolbar": [
+            {"name": "basicstyles", "items": ["Bold", "Italic", "Underline"]},
+            {"name": "paragraph", "items": ["NumberedList", "BulletedList"]},
+            {"name": "links", "items": ["Link", "Unlink"]},
+            {"name": "clipboard", "items": ["Undo", "Redo"]},
         ],
-        'height': 150,
-        'width': 'auto',
+        "height": 300,
+        "width": "100%",
     },
 }
+
+
 WSGI_APPLICATION = 'FrancoUke.wsgi.application'
 
 

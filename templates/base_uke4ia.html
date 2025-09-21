@@ -18,7 +18,7 @@
     <div class="container-fluid">
 
         <!-- ✅ Brand now links to Full Board -->
-        <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'full_board' %}">
+        <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'board:full_board' %}">
             <img src="{% static 'board/img/logo-100.png' %}" alt="Uke4ia Logo" class="me-2" style="height:40px;">
             
         </a>
@@ -38,14 +38,14 @@
             {% if user.is_authenticated %} 
             <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'full_board' %}active{% endif %}"
-                href="{% url 'full_board' %}">
+                href="{% url 'board:full_board' %}">
                     Full Board
                 </a>
             </li>
 
             <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'performer_gig_list' %}active{% endif %}"
-                href="{% url 'performer_event_list' %}">
+                href="{% url 'board:performer_event_list' %}">
                     Performances
                 </a>
             </li>
@@ -56,7 +56,7 @@
            
             <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'availability_matrix' %}active{% endif %}"
-                href="{% url 'availability_matrix' %}">
+                href="{% url 'board:availability_matrix' %}">
                     Availability Matrix
                 </a>
             </li>

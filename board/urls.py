@@ -8,6 +8,9 @@ from .views import (
     item_photo_list, update_event_availability
 )
 
+app_name = "board"   # 👈 namespace for {% url 'board:...' %}
+
+
 # DRF Router
 router = DefaultRouter()
 #router.register(r"performances", views.PerformanceViewSet)
@@ -32,6 +35,8 @@ urlpatterns = [
 
     # Update availability (AJAX)
     #path("event/<int:event_id>/availability/", views.update_event_availability, name="update_event_availability"),
+
+    path("column/<int:column_id>/messages/new/", views.create_board_message, name="create_board_message"),
 
 
      # --- Event system ---

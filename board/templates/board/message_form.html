@@ -1,0 +1,51 @@
+{% extends "base_uke4ia.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+  .cke {
+      width: 100% !important;
+  }
+  .cke_contents {
+      min-height: 300px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <h2>Add Message to {{ column.name }}</h2>
+
+  {{ form.media }}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {# 🔹 Show form-wide errors #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {# 🔹 Title field with errors #}
+    <div class="mb-3">
+      {{ form.title.label_tag }}
+      {{ form.title }}
+      {% if form.title.errors %}
+        <div class="text-danger small">{{ form.title.errors }}</div>
+      {% endif %}
+    </div>
+
+    {# 🔹 Content field with errors #}
+    <div class="mb-3">
+      {{ form.content.label_tag }}
+      {{ form.content }}
+      {% if form.content.errors %}
+        <div class="text-danger small">{{ form.content.errors }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Message</button>
+    <a href="{% url 'board:full_board' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

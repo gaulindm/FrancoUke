@@ -1,3 +1,5 @@
+{% load board_extras %}
+
 <div class="board-row">
   {% for column in columns %}
 
@@ -40,24 +42,31 @@
         {% endif %}
       </div>
 
-    {% elif column.column_type == "general" %}
+      {% elif column.column_type == "general" %}
       <div class="board-column">
         <h5 class="text-center">{{ column.name }}</h5>
-
+    
         {% if column.sorted_events or column.messages.all %}
-          {# ✅ Events first #}
           {% for event in column.sorted_events %}
             {% include "partials/_event_card.html" with event=event %}
           {% endfor %}
-
-          {# ✅ Messages next #}
+    
           {% for message in column.messages.all %}
             {% include "partials/_board_message_card.html" with message=message %}
           {% endfor %}
         {% else %}
           <p class="text-muted">No updates yet.</p>
         {% endif %}
+    
+        {# 🔗 Add Message button (only for logged in users) #}
+        {% if user|has_group:"Leaders" %}
+        <a href="{% url 'board:create_board_message' column.id %}" class="btn btn-sm btn-primary">
+          ➕ Add Message
+        </a>
+      {% endif %}
       </div>
+    
+    
 
     {% else %}
       <div class="board-column">

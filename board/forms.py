@@ -1,19 +1,13 @@
-'''# board/forms.py
+# board/forms.py
 from django import forms
-from assets.models import Asset
-from assets.widgets import AssetChooserWidget, AssetGalleryChooserWidget
-from .models import Event
+from ckeditor.widgets import CKEditorWidget
+from .models import BoardMessage
 
-class EventAdminForm(forms.ModelForm):
-    gallery_assets = forms.ModelMultipleChoiceField(
-        queryset=Asset.objects.all(),
-        required=False,
-        widget=AssetGalleryChooserWidget()
-    )
-
+class BoardMessageForm(forms.ModelForm):
     class Meta:
-        model = Event
-        fields = "__all__"
+        model = BoardMessage
+        fields = ["title", "content"]  # author handled automatically
         widgets = {
-            "cover_asset": AssetChooserWidget(),
-        }'''
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "content": CKEditorWidget(config_name="simple"),
+        }

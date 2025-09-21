@@ -150,7 +150,7 @@
         </div>
 
         <!-- Availability Form -->
-        <form method="post" action="{% url 'set_event_availability' event.id %}">
+        <form method="post" action="{% url 'board:set_event_availability' event.id %}">
           {% csrf_token %}
           <div class="mb-3">
             <label for="availability{{ event.id }}" class="form-label"><strong>Your Availability:</strong></label>

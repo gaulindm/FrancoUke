@@ -131,7 +131,7 @@ function drawChordDiagram(container, chord) {
 
 
   // --- Add a border for debugging ---
-  svg.style.border = "1px solid yellow"; // 🔶 TEMPORARY: highlight SVG bounds
+  //svg.style.border = "1px solid yellow"; // 🔶 TEMPORARY: highlight SVG bounds
 
   container.appendChild(wrapper);
 }

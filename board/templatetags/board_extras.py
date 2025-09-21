@@ -13,3 +13,8 @@ def get_item(dictionary, key):
 @register.filter
 def cover_or_first(photos):
     return photos.filter(is_cover=True).first() or photos.first()
+
+
+@register.filter
+def has_group(user, group_name):
+    return user.groups.filter(name=group_name).exists()
