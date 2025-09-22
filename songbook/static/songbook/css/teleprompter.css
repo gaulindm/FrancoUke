@@ -67,17 +67,23 @@ body {
 
 /* ===== TELEPROMPTER LAYOUT ===== */
 .tp-main {
-  /* Use 100dvh instead of 100vh (dynamic viewport height, iOS 16+) */
-  padding-top: 72px;
-  height: calc(100dvh - 72px - 20px); /* adjust chord bar height */
+  padding-top: 72px; /* leave room for top controls */
+  height: 100vh;     /* full viewport height */
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;  /* prevent double scrollbars */
 }
 
 .lyrics-container {
+  flex: 1;
+  width: 100%;
+  max-width: 1600px;
+  padding: 20px 28px 40px 28px;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* enables iPad scrolling */
-  padding: 120px 28px 180px 28px; /* space for chord bar */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 
@@ -146,27 +152,26 @@ body {
   left: 0;
   right: 0;
   background: rgba(0, 0, 0, 0.85);
-  padding: 4px 6px 8px;
   border-top: 2px solid #444;
   text-align: center;
   z-index: 1000;
-  pointer-events: none;
+
+  max-height: 100px;   /* diagrams visible */
+  overflow: hidden;
+  transition: max-height 0.4s ease;
 }
+
+#chord-section.hidden {
+  max-height: 0;       /* collapse when hidden */
+  border-top: none;
+}
+
+
 
 #chord-section h2 {
   display: none; /* hide the heading */
 }
 
-#toggle-chords {
-  display: block;
-  margin: 0 auto;
-  padding: 4px 12px;
-  background: #222;
-  border: 1px solid #666;
-  color: white;
-  border-radius: 4px;
-  pointer-events: auto; /* stays clickable */
-}
 
 #chord-diagrams {
   display: flex;

@@ -15,18 +15,19 @@
     <!-- Controls -->
     <div class="controls">
         <div class="left">
-            <span class="song-title">{{ song.title }}</span>
+          <span class="song-title">{{ song.title }}</span>
+          <button id="toggle-chords">Hide Chords</button>
         </div>
         <div class="center">
-            <button id="scroll-toggle">▶️ Start</button>
-            <div class="control-inline">
-                Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
-            </div>
+          <button id="scroll-toggle">▶️ Start</button>
+          <div class="control-inline">
+            Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
+          </div>
         </div>
         <div class="right">
-            <button id="scroll-reset">⏹ Reset</button>
+          <button id="scroll-reset">⏹ Reset</button>
         </div>
-    </div>
+      </div>
 
     <!-- Lyrics -->
     <div class="tp-main">
@@ -55,10 +56,9 @@
     </script>
 
     
-<!-- ✅ Chord Diagrams Section -->
+<!-- Chord Section -->
 <div id="chord-section">
     <div id="chord-diagrams"></div>
-    <button id="toggle-chords">Hide Chords</button>
   </div>
 
 
@@ -80,15 +80,12 @@
           const container = document.getElementById("chord-diagrams");
         
           btn.addEventListener("click", () => {
-            if (container.style.display === "none") {
-              container.style.display = "flex";   // restore flex layout
-              btn.textContent = "Hide Chords";
-            } else {
-              container.style.display = "none";
-              btn.textContent = "Show Chords";
-            }
-          });
-        });
+    section.classList.toggle("hidden");
+    btn.textContent = section.classList.contains("hidden")
+      ? "Show Chords"
+      : "Hide Chords";
+  });
+});
         </script>
         
 </body>

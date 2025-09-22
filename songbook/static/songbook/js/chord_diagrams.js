@@ -37,7 +37,7 @@ function drawChordDiagram(container, chord) {
   title.setAttribute("y", 20);
   title.setAttribute("text-anchor", "middle");
   title.setAttribute("font-family", "Helvetica");
-  title.setAttribute("font-size", "18");
+  title.setAttribute("font-size", "28");
   title.setAttribute("font-weight", "bold");
   title.setAttribute("fill", "white"); // make visible
   title.textContent = name;
