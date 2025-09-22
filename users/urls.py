@@ -13,5 +13,7 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),  # 👈 New profile page
 
     path('preferences/', user_preferences_view, name='user_preferences'),
+    #path("preferences/", UserPreferenceUpdateView.as_view(), name="preferences"),
+
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
 ]

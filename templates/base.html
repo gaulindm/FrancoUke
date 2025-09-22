@@ -28,7 +28,10 @@
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'gigs:my_availability' %}">My Availability</a></li>
+                    {% comment %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'my_availability' %}">My Availability</a></li>
+                    {% endcomment %}
+        
                         <li class="nav-item"><a class="nav-link" href="{% url 'users:logout' %}">Logout</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'users:login' %}">Login</a></li>

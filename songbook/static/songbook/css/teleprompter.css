@@ -80,7 +80,7 @@ body {
   flex: 1;
   width: 100%;
   max-width: 1600px;
-  padding: 20px 28px 40px 28px;
+  padding: 20px 28px 140px 28px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
