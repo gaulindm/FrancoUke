@@ -193,8 +193,28 @@ body {
   margin: 2px; /* reduce spacing */
   transform: scale(0.55);
   transform-origin: top center;
+  vertical-align: top;
   /*border: 1px solid red;  🔴 TEMPORARY debug border */
 }
+
+/* Default scale (e.g. ukulele, mandolin, banjo) */
+.chord-wrapper.scale-4 svg {
+  transform: scale(1.2);
+  transform-origin: top left;
+}
+
+/* Slightly smaller for 5 strings (banjo) */
+.chord-wrapper.scale-5 svg {
+  transform: scale(1.1);
+  transform-origin: top left;
+}
+
+/* Guitar & guitalele (6 strings) */
+.chord-wrapper.scale-6 svg {
+  transform: scale(1.0);
+  transform-origin: top left;
+}
+
 
 /* ===== VERSES & SECTIONS ===== */
 

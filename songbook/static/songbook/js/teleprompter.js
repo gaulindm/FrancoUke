@@ -59,6 +59,15 @@ function renderChordDiagrams(chords) {
       wrapper.style.margin = "2px 6px";
 
       if (typeof drawChordDiagram === "function") {
+        // Add a scale class based on string count
+        const stringCount =
+        variation.positions?.length || (window.userPreferences?.instrument === "guitar" ? 6 : 4);
+        wrapper.classList.add(`scale-${stringCount}`);
+
+
+
+
+
         drawChordDiagram(wrapper, {
           name: chord.name,
           ...variation,
