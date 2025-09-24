@@ -45,5 +45,26 @@
 
   {# ✅ footer partial #}
   {% include "partials/_footer.html" %}
+  <p>DEBUG: User = {{ user.username }}</p>
+  <p>DEBUG: Is authenticated = {{ user.is_authenticated }}</p>
+  <p>DEBUG: Has preference? = {{ user.userpreference }}</p>
+  {% if user.is_authenticated %}
+  {% with user_pref=user.userpreference %}
+    {% if user_pref %}
+      <script>
+        window.userPreferences = {
+          instrument: "{{ user_pref.primary_instrument }}",
+          isLefty: {{ user_pref.is_lefty|yesno:"true,false" }},
+          showAlternate: {{ user_pref.is_printing_alternate_chord|yesno:"true,false" }}
+        };
+        console.log("✅ Injected userPreferences:", window.userPreferences);
+      </script>
+    {% endif %}
+  {% endwith %}
+{% endif %}
+
+  
+<script src="{% static 'js/chord_diagrams.js' %}"></script>
+<script src="{% static 'js/teleprompter.js' %}"></script>
 </body>
 </html>

@@ -19,10 +19,17 @@ def load_chord_library(instrument="ukulele"):
 def teleprompter_view(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
-    # Load correct chord library
-    chord_library = load_chord_library("ukulele")  # 🔜 make this dynamic later
+    # --- Determine instrument ---
+    # Priority: GET param > user preference > default
+    instrument = request.GET.get("instrument")
+    if not instrument and request.user.is_authenticated:
+        instrument = getattr(request.user.userpreference, "primary_instrument", "ukulele")
+    instrument = instrument or "ukulele"  # fallback
 
-    # Convert Song.lyrics_with_chords (list of lists) into raw text
+    # Load the correct chord library
+    chord_library = load_chord_library(instrument)
+
+    # --- Convert Song.lyrics_with_chords to raw text ---
     raw_lines = []
     for block in song.lyrics_with_chords:
         if isinstance(block, list):
@@ -34,12 +41,12 @@ def teleprompter_view(request, song_id):
             raw_lines.append("\n")
     raw_lyrics = "".join(raw_lines)
 
-    # Extract chords from ChordPro-style brackets
+    # --- Extract chords from ChordPro-style brackets ---
     chord_pattern = re.compile(r"\[([A-G][#b]?(?:m|min|maj7|sus4|dim|aug|\d)*)\]")
     found_chords = chord_pattern.findall(raw_lyrics)
     unique_chords = sorted(set(found_chords))
 
-    # Match against chord library
+    # --- Match against chord library ---
     relevant_chords = []
     for chord_name in unique_chords:
         if chord_name in chord_library:
@@ -49,10 +56,13 @@ def teleprompter_view(request, song_id):
             }
             relevant_chords.append(chord_obj)
 
-    # Render pretty lyrics + metadata
+    # --- Render pretty lyrics + metadata ---
     lyrics_html, metadata = render_lyrics_with_chords_html(
         song.lyrics_with_chords, "FrancoUke"
     )
+    # --- Pass instrument and chord display prefs to template ---
+    user_pref = getattr(request.user, "userpreference", None)
+    is_printing_alternate_chord = getattr(user_pref, "is_printing_alternate_chord", False)
 
     return render(
         request,
@@ -61,6 +71,9 @@ def teleprompter_view(request, song_id):
             "song": song,
             "lyrics_with_chords": lyrics_html,
             "metadata": metadata,
-            "relevant_chords_json": json.dumps(relevant_chords),  # ⬅️ pass raw list, not json.dumps
+            "relevant_chords_json": json.dumps(relevant_chords),
+            "user_instrument": instrument,
+            "is_printing_alternate_chord": is_printing_alternate_chord,
         },
     )
+

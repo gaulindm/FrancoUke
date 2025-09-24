@@ -1,22 +1,83 @@
 /* chord_diagrams.js */
+function adaptPositionsForInstrument(positions, instrument) {
+  switch (instrument) {
+    case "baritone_ukulele":
+      // 4-string tuning: D-G-B-E (like top 4 of guitar)
+      return positions.slice(-4);
+    case "guitar":
+      return padTo6Strings(positions);
+    case "guitalele":
+      return padTo6Strings(positions); // but transposed
+    case "mandolin":
+      return positions.slice(-4); // 4 double strings
+    case "banjo":
+      return positions.slice(-5); // standard 5-string
+    default:
+      return positions; // ukulele (default 4 strings)
+  }
+}
+
+function padTo6Strings(positions) {
+  if (positions.length === 6) return positions;
+  if (positions.length < 6) {
+    return new Array(6 - positions.length).fill(-1).concat(positions);
+  }
+  return positions.slice(-6); // trim if too many
+}
+
+
 function drawChordDiagram(container, chord) {
   if (!container) {
-    console.error("❌ No container provided to drawChordDiagram");
+    console.error("❌ drawChordDiagram called with no container");
     return;
   }
+  
+    const prefs = window.userPreferences || {};
+    console.log("📦 Preferences in JS:", prefs);
 
-  console.log("🎸 Drawing chord:", chord);
+    let positions = chord.positions || [];
+    console.log("🎸 Drawing chord:", chord.name);
+    console.log("Raw positions:", positions);
 
-  // chord is already flattened (name + positions + baseFret + barre)
-  const positions = chord.positions || [];
+    console.groupCollapsed(`🎸 Drawing chord: ${chord.name || "Unnamed"}`);
+    console.log("%cRaw positions:", "color: gray", chord.positions);
+
+
+  // 🔄 Left-handed adjustment
+  if (prefs.isLefty) {
+    positions = [...positions].reverse();
+    console.log("%cApplied left-handed flip", "color: orange", positions);
+  }
+
+  // 🎸 Instrument-specific tuning
+  const instrument = prefs.instrument || "ukulele";
+  console.log("Instrument adaptation:", instrument, positions);
+
+  positions = adaptPositionsForInstrument(positions, instrument);
+  console.log("%cInstrument adaptation:", "color: purple", instrument, positions);
+  console.log("Final positions:", positions);
+
+
+  // 🎭 Alternate chords
+  if (prefs.showAlternate && chord.alternates && chord.alternates.length > 0) {
+    positions = chord.alternates[0].positions;
+    console.log("%cUsing alternate chord", "color: teal", positions);
+  }
+
   if (positions.length === 0) {
     console.warn("⚠️ No positions in chord:", chord.name);
+    console.groupEnd();
     return;
   }
 
   const baseFret = chord.baseFret || computeBaseFret(positions);
   const barre = chord.barre || detectBarre(positions);
   const name = chord.name || "Chord";
+
+  console.log("%cFinal positions:", "color: green", positions);
+  console.log("%cBase fret:", "color: green", baseFret);
+  console.log("%cBarre:", "color: green", barre);
+  console.groupEnd();
 
   const stringCount = positions.length;
   const fretCount = 5;
@@ -162,3 +223,5 @@ function detectBarre(positions) {
   }
   return null;
 }
+
+
