@@ -107,10 +107,11 @@
         });
       });
     </script>
+
     <script>
-      window.userPreferences = window.userPreferences || {};
-      window.userPreferences.instrument = "{{ user_instrument }}";
+      window.userPreferences = {{ user_preferences|safe }};
     </script>
+
     
     <script id="chords-data" type="application/json">
       {{ relevant_chords_json|safe }}

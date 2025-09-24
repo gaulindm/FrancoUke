@@ -60,20 +60,21 @@ def teleprompter_view(request, song_id):
     lyrics_html, metadata = render_lyrics_with_chords_html(
         song.lyrics_with_chords, "FrancoUke"
     )
+    
     # --- Pass instrument and chord display prefs to template ---
     user_pref = getattr(request.user, "userpreference", None)
-    is_printing_alternate_chord = getattr(user_pref, "is_printing_alternate_chord", False)
+    user_preferences = {
+        "instrument": getattr(user_pref, "primary_instrument", "ukulele"),
+        "isLefty": getattr(user_pref, "is_lefty", False),
+        "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
+    }
 
-    return render(
-        request,
-        "songbook/teleprompter.html",
-        {
-            "song": song,
-            "lyrics_with_chords": lyrics_html,
-            "metadata": metadata,
-            "relevant_chords_json": json.dumps(relevant_chords),
-            "user_instrument": instrument,
-            "is_printing_alternate_chord": is_printing_alternate_chord,
-        },
-    )
+    return render(request, "songbook/teleprompter.html", {
+        "song": song,
+        "lyrics_with_chords": lyrics_html,
+        "metadata": metadata,
+        "relevant_chords_json": json.dumps(relevant_chords),
+        "userPreferences": user_preferences,
+    })
+
 
