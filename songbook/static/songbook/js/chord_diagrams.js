@@ -34,30 +34,50 @@ function drawChordDiagram(container, chord) {
   const prefs = window.userPreferences || {};
   console.log("📦 Preferences in JS:", prefs);
 
-  let positions = chord.positions || [];
-  console.log("🎸 Drawing chord:", chord.name, "Raw positions:", positions);
+  // 🎸 Extract positions + baseFret from chord (support both schemas)
+  let positions = [];
+  let baseFret = 1;
 
-  // 🔄 Left-handed adjustment (reverse string order only)
-  const isLefty = prefs.isLefty || false;
-  if (isLefty) {
-    positions = [...positions].reverse();
-    console.log("🔁 Applied left-handed flip:", positions);
+  if (chord.variations && chord.variations.length > 0) {
+    // ✅ JSON schema with variations
+    positions = chord.variations[0].positions || [];
+    baseFret = chord.variations[0].baseFret || 1;
+  } else {
+    // ✅ Old style fallback
+    positions = chord.positions || [];
+    baseFret = chord.baseFret || 1;
   }
 
-  // 🎸 Instrument-specific adaptation
+  console.groupCollapsed(`🎸 Drawing chord: ${chord.name || "Unnamed"}`);
+  console.log("Raw positions:", positions, "baseFret:", baseFret);
+
+  // 🔄 Left-handed adjustment
+  if (prefs.isLefty) {
+    positions = [...positions].reverse();
+    console.log("%cApplied left-handed flip", "color: orange", positions);
+  }
+
+  // 🎸 Instrument-specific tuning
   const instrument = prefs.instrument || "ukulele";
   positions = adaptPositionsForInstrument(positions, instrument);
-  console.log("Instrument adaptation:", instrument, positions);
+
+  console.log("%cInstrument adaptation:", "color: purple", instrument, positions);
 
   if (positions.length === 0) {
     console.warn("⚠️ No positions in chord:", chord.name);
+    console.groupEnd();
     return;
   }
 
-  const baseFret = chord.baseFret || computeBaseFret(positions);
   const barre = chord.barre || detectBarre(positions);
   const name = chord.name || "Chord";
 
+  console.log("%cFinal positions:", "color: green", positions);
+  console.log("%cBase fret:", "color: green", baseFret);
+  console.log("%cBarre:", "color: green", barre);
+  console.groupEnd();
+
+  // --- SVG SETUP ---
   const stringCount = positions.length;
   const fretCount = 5;
   const stringSpacing = 20;
@@ -71,7 +91,7 @@ function drawChordDiagram(container, chord) {
   svg.setAttribute("width", width);
   svg.setAttribute("height", height);
 
-  // --- Title (Chord Name) stays upright ---
+  // --- Title (Chord Name) ---
   const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
   title.setAttribute("x", width / 2);
   title.setAttribute("y", 20);
@@ -92,7 +112,7 @@ function drawChordDiagram(container, chord) {
     line.setAttribute("x2", x);
     line.setAttribute("y2", 40 + fretCount * fretSpacing);
     line.setAttribute("stroke", "white");
-    line.setAttribute("stroke-width", 2);
+    line.setAttribute("stroke-width", "2");
     svg.appendChild(line);
   }
 
@@ -107,6 +127,18 @@ function drawChordDiagram(container, chord) {
     fretLine.setAttribute("stroke", "white");
     fretLine.setAttribute("stroke-width", j === 0 && baseFret === 1 ? 4 : 2);
     svg.appendChild(fretLine);
+  }
+
+  // --- Fret number label (offset) ---
+  if (baseFret > 1) {
+    const fretLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    fretLabel.setAttribute("x", -1);
+    fretLabel.setAttribute("y", 55);
+    fretLabel.setAttribute("font-family", "Helvetica");
+    fretLabel.setAttribute("font-size", "18px");
+    fretLabel.setAttribute("fill", "white");
+    fretLabel.textContent = `${baseFret}`;
+    svg.appendChild(fretLabel);
   }
 
   // --- Barre ---
@@ -144,7 +176,7 @@ function drawChordDiagram(container, chord) {
       o.setAttribute("x", x);
       o.setAttribute("y", 30);
       o.setAttribute("text-anchor", "middle");
-      o.setAttribute("font-size", 12);
+      o.setAttribute("font-size", "12");
       o.setAttribute("fill", "white");
       o.textContent = "O";
       svg.appendChild(o);
@@ -153,13 +185,14 @@ function drawChordDiagram(container, chord) {
       xMark.setAttribute("x", x);
       xMark.setAttribute("y", 30);
       xMark.setAttribute("text-anchor", "middle");
-      xMark.setAttribute("font-size", 12);
+      xMark.setAttribute("font-size", "12");
       xMark.setAttribute("fill", "white");
       xMark.textContent = "X";
       svg.appendChild(xMark);
     }
   });
 
+  // ✅ Wrapper
   const wrapper = document.createElement("div");
   wrapper.style.display = "inline-block";
   wrapper.style.transform = "scale(1.0)";

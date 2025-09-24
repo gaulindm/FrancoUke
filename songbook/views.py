@@ -400,7 +400,7 @@ class SongCreateView(LoginRequiredMixin, CreateView):
         """Redirect to the correct song list based on the site edition."""
         site_name = self.kwargs.get('site_name', 'FrancoUke')
         
-        return reverse(f"{site_name.lower()}:song-list")
+        return reverse("songbook:song_list")
 
 
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
