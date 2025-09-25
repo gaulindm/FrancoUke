@@ -40,44 +40,44 @@
   }
 
   // --- Chord Diagrams ---
-  function renderChordDiagrams(chords) {
-    const container = document.getElementById("chord-diagrams");
-    container.innerHTML = "";
-  
-    const prefs = window.userPreferences || {};
-    const showAlternate = prefs.showAlternate || false;
-  
-    chords.forEach((chord) => {
-      if (!chord.variations || chord.variations.length === 0) {
-        console.warn("⚠️ No variations for chord", chord.name);
-        return;
+function renderChordDiagrams(chords) {
+  const container = document.getElementById("chord-diagrams");
+  container.innerHTML = "";
+
+  const prefs = window.userPreferences || {};
+  const showAlternate = prefs.showAlternate || false;
+
+  chords.forEach((chord) => {
+    if (!chord.variations || chord.variations.length === 0) {
+      console.warn("⚠️ No variations for chord", chord.name);
+      return;
+    }
+
+    // Only show first variation unless user wants all
+    const variationsToRender = showAlternate
+      ? chord.variations
+      : [chord.variations[0]];
+
+    variationsToRender.forEach((variation) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "chord-wrapper";
+      wrapper.style.display = "inline-block";
+      //wrapper.style.margin = "2px 6px"; // reduce spacing
+      wrapper.style.margin = "0"; // reduce spacing
+      if (typeof drawChordDiagram === "function") {
+        drawChordDiagram(wrapper, {
+          name: chord.name,
+          ...variation,
+        });
+      } else {
+        console.error("❌ drawChordDiagram is not defined!");
       }
-  
-      // Only show first variation unless user wants all
-      const variationsToRender = showAlternate
-        ? chord.variations
-        : [chord.variations[0]];
-  
-      variationsToRender.forEach((variation) => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "chord-wrapper";
-        wrapper.style.display = "inline-block";
-        wrapper.style.margin = "2px 6px"; // reduce spacing
-  
-        if (typeof drawChordDiagram === "function") {
-          drawChordDiagram(wrapper, {
-            name: chord.name,
-            ...variation,
-          });
-        } else {
-          console.error("❌ drawChordDiagram is not defined!");
-        }
-  
-        container.appendChild(wrapper);
-      });
+
+      container.appendChild(wrapper);
     });
-  }
-  
+  });
+}
+
 // --- Show/Hide Toggle ---
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("toggle-chords");

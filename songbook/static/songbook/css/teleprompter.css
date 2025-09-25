@@ -80,7 +80,7 @@ body {
   flex: 1;
   width: 100%;
   max-width: 1600px;
-  padding: 20px 28px 140px 28px;
+  padding: 20px 28px 200px 28px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
@@ -145,77 +145,61 @@ body {
   margin-top: 4px;
 }
 
+
 /* ===== CHORD DIAGRAMS SECTION ===== */
 #chord-section {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
+  display: flex;
+  justify-content: center;   /* center the row */
+  align-items: flex-end;
   background: rgba(0, 0, 0, 0.85);
   border-top: 2px solid #444;
-  text-align: center;
+  padding: 0.5rem 0.5rem;
   z-index: 1000;
-
-  max-height: 100px;   /* diagrams visible */
+  max-height: 210px;
   overflow: hidden;
-  transition: max-height 0.4s ease;
+  transition: max-height 1.4s ease;
 }
 
 #chord-section.hidden {
-  max-height: 0;       /* collapse when hidden */
+  max-height: 0;
   border-top: none;
 }
 
-
-
 #chord-section h2 {
-  display: none; /* hide the heading */
+  display: none;
 }
 
-
+/* Diagrams container */
+/* Container for all diagrams */
 #chord-diagrams {
   display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  gap: 1px; /* space between diagrams */
-  margin-bottom: 6px;
+  flex-wrap: nowrap;         /* keep diagrams in one row */
+  justify-content: center;   /* center the row */
+  gap: 0px;                  /* remove extra spacing between diagrams */
   pointer-events: auto;
 }
 
-#chord-diagrams,
-#toggle-chords {
-  pointer-events: auto; /* allow chords + button to be clickable */
-}
-
-/* Each diagram wrapper */
-.chord-wrapper {
-  display: inline-block;
-  margin: 2px; /* reduce spacing */
-  transform: scale(0.55);
-  transform-origin: top center;
+/* Outer wrapper around each diagram */
+.chord-outer-wrapper {
+  display: flex;             /* use flex to shrink to fit inner */
+  margin: 0;                 /* no spacing between wrappers */
+  padding: 0;                /* remove padding */
   vertical-align: top;
-  border: 1px solid red; /* 🔴 TEMPORARY debug border */
 }
 
-/* Default scale (e.g. ukulele, mandolin, banjo) */
-.chord-wrapper.scale-4 svg {
-  transform: scale(1.2);
-  transform-origin: top left;
+/* Inner wrapper holding the scaled SVG */
+.chord-wrapper {
+  display: block;
+  transform: scale(0.7);       /* slightly bigger */
+  transform-origin: top center;
+  border: 1px solid rgb(0, 68, 255);  /* 🔵 debug border */
+  margin: 2;   
+  padding:2;
 }
-
-/* Slightly smaller for 5 strings (banjo) */
-.chord-wrapper.scale-5 svg {
-  transform: scale(1.1);
-  transform-origin: top left;
-}
-
-/* Guitar & guitalele (6 strings) */
-.chord-wrapper.scale-6 svg {
-  transform: scale(1.0);
-  transform-origin: top left;
-}
-
-
 /* ===== VERSES & SECTIONS ===== */
 
 /* Default verses: left aligned */

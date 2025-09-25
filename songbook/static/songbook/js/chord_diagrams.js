@@ -135,7 +135,7 @@ function drawChordDiagram(container, chord) {
     fretLabel.setAttribute("x", -1);
     fretLabel.setAttribute("y", 55);
     fretLabel.setAttribute("font-family", "Helvetica");
-    fretLabel.setAttribute("font-size", "18px");
+    fretLabel.setAttribute("font-size", "30px");
     fretLabel.setAttribute("fill", "white");
     fretLabel.textContent = `${baseFret}`;
     svg.appendChild(fretLabel);
@@ -192,15 +192,19 @@ function drawChordDiagram(container, chord) {
     }
   });
 
-  // ✅ Wrapper
-  const wrapper = document.createElement("div");
-  wrapper.style.display = "inline-block";
-  wrapper.style.transform = "scale(1.0)";
-  wrapper.style.transformOrigin = "top left";
-  wrapper.style.margin = "2px";
-  wrapper.appendChild(svg);
+// --- create outer wrapper ---
+const outerWrapper = document.createElement("div");
+outerWrapper.classList.add("chord-outer-wrapper");
 
-  container.appendChild(wrapper);
+// --- create inner wrapper with SVG ---
+const innerWrapper = document.createElement("div");
+innerWrapper.classList.add("chord-wrapper");
+innerWrapper.appendChild(svg);
+
+// --- append inner to outer, then outer to container ---
+outerWrapper.appendChild(innerWrapper);
+container.appendChild(outerWrapper);
+
 }
 
 
