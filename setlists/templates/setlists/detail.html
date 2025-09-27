@@ -1,0 +1,36 @@
+{% extends base_template %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>{{ setlist.name }}</h1>
+
+  <ol class="list-group list-group-numbered mt-3">
+    {% for item in songs %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ item.song.songTitle }}
+        <a href="{% url 'songbook:score_view' item.song.pk %}" class="btn btn-sm btn-outline-primary">
+          View
+        </a>
+      </li>
+    {% endfor %}
+  </ol>
+</div>
+<h2>{{ setlist.name }}</h2>
+
+<ul>
+  {% for sls in songs %}
+    <li>{{ sls.order }}. {{ sls.song.songTitle }}</li>
+  {% endfor %}
+</ul>
+
+{% if songs %}
+  <p>
+    <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" class="btn btn-primary">
+      🎤 Start Teleprompter
+    </a>
+  </p>
+{% endif %}
+
+
+
+{% endblock %}

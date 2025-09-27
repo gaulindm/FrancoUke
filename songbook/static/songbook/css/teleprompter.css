@@ -228,6 +228,39 @@ body {
   text-align: center;
 }
 
+/* Overlay navigation buttons */
+#nav-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; /* clicks pass through by default */
+  z-index: 2000;
+}
+
+.overlay-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 4rem;
+  color: white;
+  text-decoration: none;
+  background: rgba(0,0,0,0.3);
+  padding: 20px;
+  border-radius: 50%;
+  pointer-events: auto;  /* make the button clickable */
+  transition: background 0.3s;
+}
+
+.overlay-btn:hover {
+  background: rgba(0,0,0,0.6);
+}
+
+.overlay-btn.left {
+  left: 20px;
+}
+
+.overlay-btn.right {
+  right: 20px;
+}
 
 
 /* ===== SMALL SCREENS ===== */

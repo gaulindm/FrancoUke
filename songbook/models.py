@@ -27,6 +27,9 @@ class Song(models.Model):
     date_posted = models.DateField(default=timezone.now)
     contributor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    scroll_speed = models.PositiveIntegerField(default=40)   # pixels/sec
+
+
     acknowledgement = models.CharField(max_length=100, blank=True, null=True)
     site_name = models.CharField(
     max_length=20,
@@ -36,6 +39,7 @@ class Song(models.Model):
     default=None,     # ✅ No default, so can be hidden
     help_text="Leave empty to hide this song from all platforms"
 )
+
 
 
     def save(self, *args, **kwargs):

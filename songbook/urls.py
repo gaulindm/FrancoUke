@@ -59,7 +59,6 @@ urlpatterns = [
     path('generate_multi_song_pdf/', views.generate_multi_song_pdf, name='generate_multi_song_pdf'),
 
 
-
     # 🔹 Static / Informational Views
     #path('about/', views.about, name='songbook-about'),
     path('whats-new/', whats_new, name='whats_new'),

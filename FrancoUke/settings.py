@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'public',
     'assets',
     'teleprompter',
+     "setlists",   # 👈 make sure this is here
+
 
     
 

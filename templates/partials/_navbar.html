@@ -20,7 +20,7 @@
     {% site_url 'availability_matrix' as avail_matrix_url %}
 
     <!-- 🔹 Brand -->
-    <a class="navbar-brand mr-4" href="{% url home_url %}">
+    <a class="navbar-brand mr-4" href="{% url 'songbook:home' %}">
       {% if site_name == "FrancoUke" %}
         🎵 Chansonnier FrancoUke
       {% elif site_name == "StrumSphere" %}
@@ -41,13 +41,13 @@
 
         {# 🔹 FrancoUke & StrumSphere songbook links #}
         {% if site_name in "FrancoUke StrumSphere" %}
-          <a class="nav-item nav-link" href="{% url song_list_url %}">
+          <a class="nav-item nav-link" href="{% url 'songbook:song_list' %}">
             {% if site_name == "FrancoUke" %} Partitions {% else %} Songs {% endif %}
           </a>
-          <a class="nav-item nav-link" href="{% url artist_list_url %}">
+          <a class="nav-item nav-link" href="{% url 'songbook:artist_list' %}">
             {% if site_name == "FrancoUke" %} Artistes {% else %} Artists {% endif %}
           </a>
-          <a class="nav-item nav-link" href="{% url chord_dict_url %}">
+          <a class="nav-item nav-link" href="{% url 'songbook:chord_dictionary' %}">
             {% if site_name == "FrancoUke" %} Dictionnaire d'accord {% else %} Chord Dictionary {% endif %}
           </a>
         {% endif %}
@@ -74,7 +74,7 @@
 
               {% if site_name in "FrancoUke StrumSphere" %}
                 <li>
-                  <a class="dropdown-item" href="{% url song_create_url %}">
+                  <a class="dropdown-item" href="{% url 'songbook:song_create' %}">
                     {% if site_name == "FrancoUke" %} Créer une chanson {% else %} New Song {% endif %}
                   </a>
                 </li>

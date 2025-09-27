@@ -143,8 +143,12 @@ class SongAdmin(admin.ModelAdmin):
         return obj.metadata.get('artist', 'Unknown') if obj.metadata else ''
     get_artist.short_description = 'Artist'
 
+
     def get_view_on_site_url(self, obj):
+        if obj is None or obj.pk is None:
+            return None
         return reverse("songbook:score_view", kwargs={"pk": obj.pk})
+
 
     def get_tags(self, obj):
         return ", ".join(obj.tags.names())

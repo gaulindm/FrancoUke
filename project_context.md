@@ -13,10 +13,13 @@ All apps share a single Django project with namespaced URLs and site-specific te
 
 - **Framework**: Django 5.x
 - **Apps**:
+  - `teleprompter`: A telepromter style of Lyrics with chords including chord diagram for many strumming instruments
+  - `public`: Public version of the board unauthenticated user.  "A basic about us site
+  - `board`: Kanban or trello style view of Uke4ia events, and notes includes performers availability
+  - `assets`: manage photos to be used as cover images or photo gallery of Uke4ia events
   - `songbook`: Manages songs, tags, formatting, and metadata
   - `users`: Handles custom user model, registration, login, preferences
   - `tools`: Helper utilities (transposition, chord rendering, PDF generation)
-  - `gigs`: Manage gigs sessions and availability 
 - **Custom User Model**: Implemented (`users.CustomUser`)
 - **Authentication**: Includes registration, login, password reset
 - **Database**:
@@ -92,9 +95,6 @@ We introduced a new `public` app to cleanly separate visitor-facing pages from p
 ### Next Steps
 - Potentially add filtering so only "public" columns/events show in `/public-board/`.
 - Expand the `public` app with more static pages or features (gallery, news, donations).
-
-
-
 
 
 ### 2025-08-28

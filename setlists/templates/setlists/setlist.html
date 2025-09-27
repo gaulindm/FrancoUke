@@ -1,0 +1,16 @@
+{% extends "base_uke4ia.html" %}
+{% block content %}
+<h2>{{ setlist.name }}</h2>
+<ol>
+  {% for s in songs %}
+    <li>
+      <a href="{% url 'setlists:teleprompter' setlist.pk s.song.pk %}">
+        {{ s.song.songTitle }}
+      </a>
+      {% if s.rehearsal_notes %}
+        <p><em>{{ s.rehearsal_notes }}</em></p>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ol>
+{% endblock %}

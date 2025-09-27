@@ -20,6 +20,8 @@ urlpatterns = [
 
     path('teleprompter/', include('teleprompter.urls', namespace='teleprompter')),
 
+    path("setlists/", include("setlists.urls", namespace="setlists")),
+
 #    path("assets/", include("assets.urls", namespace="asset_repo")),  # ✅ add this line
 
 

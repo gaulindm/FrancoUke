@@ -1,0 +1,89 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ song.title }}</title>
+  <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+
+  <!-- User Preferences -->
+  {% if user.is_authenticated and user.userpreference %}
+  <script>
+    window.userPreferences = {
+      instrument: "{{ user.userpreference.primary_instrument }}",
+      isLefty: {{ user.userpreference.is_lefty|yesno:"true,false" }},
+      showAlternate: {{ user.userpreference.is_printing_alternate_chord|yesno:"true,false" }}
+    };
+  </script>
+  {% else %}
+  <script>
+    window.userPreferences = { instrument: "ukulele", isLefty: false, showAlternate: false };
+  </script>
+  {% endif %}
+
+  <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+  <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
+</head>
+<body>
+
+  <!-- Top Controls (same as teleprompter.html) -->
+  <div class="controls">
+    <div class="left">
+      <span class="song-title">{{ song.title }}</span>
+      <button id="toggle-chords">Hide Chords</button>
+    </div>
+    <div class="center">
+      <button id="scroll-toggle">▶️ Start</button>
+      <div class="control-inline">
+        Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
+      </div>
+    </div>
+    <div class="right">
+      <button id="scroll-reset">⏹ Reset</button>
+    </div>
+  </div>
+
+  <!-- Lyrics -->
+  <div class="tp-main">
+    <div class="lyrics-container">
+      <div class="lyrics">
+        <div class="metadata">
+          <h1>{{ song.title }}</h1>
+          {% if metadata.songwriter %}
+            <div class="songwriter">{{ metadata.songwriter }}</div>
+          {% endif %}
+          {% if metadata.artist %}
+            <div class="recording">
+              {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        {{ lyrics_with_chords|safe }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Chords JSON -->
+  <script id="chords-data" type="application/json">
+    {{ relevant_chords_json|safe }}
+  </script>
+
+  <!-- Chord Section -->
+  <div id="chord-section">
+    <div id="chord-diagrams"></div>
+  </div>
+
+  <!-- Overlay Navigation -->
+  <div id="nav-overlay" class="overlay-nav">
+    {% if prev_song %}
+      <a href="{% url 'setlists:setlist_teleprompter' setlist.id prev_song.id %}" class="nav-btn left">⬅ Prev</a>
+    {% endif %}
+    {% if next_song %}
+      <a href="{% url 'setlists:setlist_teleprompter' setlist.id next_song.id %}" class="nav-btn right">Next ➡</a>
+    {% endif %}
+  </div>
+
+</body>
+</html>
