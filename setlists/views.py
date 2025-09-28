@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import SetList, SetListSong
 from songbook.models import Song
+from songbook.utils.chord_library import extract_relevant_chords
+
 
 def setlist_list(request):
     setlists = SetList.objects.all().order_by("-created_at")
@@ -25,33 +27,73 @@ def setlist_detail(request, pk):
 from django.shortcuts import get_object_or_404, render
 from .models import SetList, SetListSong
 
+import re
+from django.utils.safestring import mark_safe
+
+import json
+import re
+from django.shortcuts import render, get_object_or_404
+from .models import SetList, SetListSong
+from songbook.utils.chord_library import load_chord_dict
+from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
+
+import json
+from django.shortcuts import render, get_object_or_404
+from .models import SetList, SetListSong
+from songbook.utils.chord_library import extract_relevant_chords
+from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
+
 def setlist_teleprompter(request, setlist_id, order):
     """Teleprompter view for a song within a setlist."""
     setlist = get_object_or_404(SetList, pk=setlist_id)
 
+    # Ordered songs in the setlist
+    songs = setlist.songs.select_related("song").order_by("order")
+    total_songs = songs.count()
+
     # Find the current song in this setlist
-    current = get_object_or_404(
-        SetListSong.objects.select_related("song"),
-        setlist=setlist,
-        order=order,
-    )
+    current = get_object_or_404(songs, setlist=setlist, order=order)
 
     # Find neighbors
-    prev_song = (
-        setlist.songs.filter(order__lt=current.order).order_by("-order").first()
+    prev_song = songs.filter(order__lt=current.order).order_by("-order").first()
+    next_song = songs.filter(order__gt=current.order).order_by("order").first()
+
+    # --- Determine instrument ---
+    instrument = request.GET.get("instrument")
+    if not instrument and request.user.is_authenticated:
+        instrument = getattr(request.user.userpreference, "primary_instrument", "ukulele")
+    instrument = instrument or "ukulele"
+
+    # --- Extract relevant chords ---
+    relevant_chords = extract_relevant_chords(current.song.lyrics_with_chords, instrument)
+
+    # --- Render lyrics + metadata ---
+    lyrics_html, metadata = render_lyrics_with_chords_html(
+        current.song.lyrics_with_chords, "FrancoUke"
     )
-    next_song = (
-        setlist.songs.filter(order__gt=current.order).order_by("order").first()
-    )
+
+    # --- User preferences ---
+    user_pref = getattr(request.user, "userpreference", None)
+    user_preferences = {
+        "instrument": getattr(user_pref, "primary_instrument", "ukulele"),
+        "isLefty": getattr(user_pref, "is_lefty", False),
+        "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
+    }
 
     return render(
         request,
         "setlists/setlist_teleprompter.html",
         {
             "setlist": setlist,
-            "current": current,
+            "song": current.song,          # expose the actual Song object
+            "song_order": current.order,   # current song position
+            "total_songs": total_songs,    # total count
             "prev_song": prev_song,
             "next_song": next_song,
+            "lyrics_with_chords": lyrics_html,
+            "metadata": metadata,
+            "relevant_chords_json": json.dumps(relevant_chords),
+            "userPreferences": user_preferences,
         },
     )
 

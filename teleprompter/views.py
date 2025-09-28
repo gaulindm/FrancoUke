@@ -5,29 +5,31 @@ from pathlib import Path
 from django.shortcuts import render, get_object_or_404
 from songbook.models import Song
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
+from songbook.utils.chord_library import extract_relevant_chords
+
 
 # Correct location of your JSON chord files
 CHORDS_DIR = Path(__file__).resolve().parent.parent / "songbook" / "chords"
 
-
-def load_chord_library(instrument="ukulele"):
-    chords_file = CHORDS_DIR / f"{instrument}.json"
-    with open(chords_file, "r", encoding="utf-8") as f:
-        return {ch["name"]: ch for ch in json.load(f)}
+import json
+import re
+from django.shortcuts import render, get_object_or_404
+from songbook.models import Song
+from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
+from songbook.utils.chord_library import load_chord_dict
 
 
 def teleprompter_view(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
     # --- Determine instrument ---
-    # Priority: GET param > user preference > default
     instrument = request.GET.get("instrument")
     if not instrument and request.user.is_authenticated:
         instrument = getattr(request.user.userpreference, "primary_instrument", "ukulele")
     instrument = instrument or "ukulele"  # fallback
 
-    # Load the correct chord library
-    chord_library = load_chord_library(instrument)
+    # Load the correct chord library (dict for fast lookup)
+    chord_library = load_chord_dict(instrument)
 
     # --- Convert Song.lyrics_with_chords to raw text ---
     raw_lines = []
@@ -41,27 +43,23 @@ def teleprompter_view(request, song_id):
             raw_lines.append("\n")
     raw_lyrics = "".join(raw_lines)
 
-    # --- Extract chords from ChordPro-style brackets ---
+    # --- Extract chords ---
     chord_pattern = re.compile(r"\[([A-G][#b]?(?:m|min|maj7|sus4|dim|aug|\d)*)\]")
     found_chords = chord_pattern.findall(raw_lyrics)
     unique_chords = sorted(set(found_chords))
 
     # --- Match against chord library ---
-    relevant_chords = []
-    for chord_name in unique_chords:
-        if chord_name in chord_library:
-            chord_obj = {
-                "name": chord_name,
-                "variations": chord_library[chord_name]["variations"],
-            }
-            relevant_chords.append(chord_obj)
+    relevant_chords = [
+        {"name": name, "variations": chord_library[name]["variations"]}
+        for name in unique_chords if name in chord_library
+    ]
 
     # --- Render pretty lyrics + metadata ---
     lyrics_html, metadata = render_lyrics_with_chords_html(
         song.lyrics_with_chords, "FrancoUke"
     )
-    
-    # --- Pass instrument and chord display prefs to template ---
+
+    # --- User preferences ---
     user_pref = getattr(request.user, "userpreference", None)
     user_preferences = {
         "instrument": getattr(user_pref, "primary_instrument", "ukulele"),
@@ -76,5 +74,4 @@ def teleprompter_view(request, song_id):
         "relevant_chords_json": json.dumps(relevant_chords),
         "userPreferences": user_preferences,
     })
-
 
