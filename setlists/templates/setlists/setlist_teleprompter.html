@@ -1,11 +1,9 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <meta charset="UTF-8">
-  <title>{{ song.title }}</title>
+  <title>{{ current.song.songTitle }}</title>
   <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -28,87 +26,86 @@
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 
   <style>
-
-/* Navigation buttons */
-.nav-zone {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 4rem;           /* bigger */
-  color: rgba(255,255,255,0.8); /* bright white */
-  text-decoration: none;
-  z-index: 1000;
-  transition: color 0.2s ease, transform 0.2s ease;
-}
-.nav-zone:hover {
-  color: #ffffff;           /* pure white */
-  transform: translateY(-50%) scale(1.1); /* pop effect */
-}
-.nav-left { left: 20px; }
-.nav-right { right: 20px; }
-
-/* Invisible tap zones for navigation */
-.touch-zone {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 20%;
-  z-index: 900; /* below controls, above content */
-}
-
-.touch-left {
-  left: 0;
-}
-
-.touch-right {
-  right: 0;
-}
-
-/* Optional: Add faint visual feedback for testing */
-.touch-zone:active {
-  background: rgba(255, 255, 255, 0.1);
-}
-
+    .song-title {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--fg);
+    }
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    select#song-selector {
+      font-size: 0.9rem;
+      padding: 2px 6px;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Controls -->
   <div class="controls">
+
+    <!-- Left -->
     <div class="left">
-      <span class="setlist-info">
-        🎵 {{ setlist.name }} — Song {{ song_order }} / {{ total_songs }}
+      <span class="song-title">
+        Setlist {{ setlist.id }} – {{ setlist.name }}
       </span>
+      <button id="toggle-chords">Hide Chords</button>
     </div>
-  
+
+    <!-- Center -->
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline">
         Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
       </div>
-    </div>
-  
-    <div class="right">
       <button id="scroll-reset">⏹ Reset</button>
-  
-      <!-- Song dropdown selector -->
+    </div>
+
+    <!-- Right -->
+    <div class="right">
+      {% if prev_song %}
+        <button class="nav-btn"
+                onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'">
+          ⬅️
+        </button>
+      {% else %}
+        <button class="nav-btn" disabled>⬅️</button>
+      {% endif %}
+
       <select id="song-selector">
-        {% for s in setlist.setlistsong_set.all %}
+        {% for s in setlist.songs.all %}
           <option value="{% url 'setlists:setlist_teleprompter' setlist.id s.order %}"
-            {% if s.song.id == song.id %}selected{% endif %}>
+            {% if s.id == current.id %}selected{% endif %}>
             {{ s.order }}. {{ s.song.songTitle }}
           </option>
         {% endfor %}
       </select>
+
+      {% if next_song %}
+        <button class="nav-btn"
+                onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'">
+          ➡️
+        </button>
+      {% else %}
+        <button class="nav-btn" disabled>➡️</button>
+      {% endif %}
     </div>
   </div>
-  
 
   <!-- Lyrics -->
   <div class="tp-main">
     <div class="lyrics-container">
       <div class="lyrics">
         <div class="metadata">
-          <h1>{{ song.title }}</h1>
+          <h1>{{ current.song.songTitle }}</h1>
           {% if metadata.songwriter %}
             <div class="songwriter">{{ metadata.songwriter }}</div>
           {% endif %}
@@ -124,55 +121,49 @@
     </div>
   </div>
 
-<!-- Touch zones for mobile navigation -->
-{% if prev_song %}
-<div class="touch-zone touch-left"
-     onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'">
-</div>
-{% endif %}
-
-{% if next_song %}
-<div class="touch-zone touch-right"
-     onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'">
-</div>
-{% endif %}
-
+  <!-- Touch zones for mobile nav -->
+  {% if prev_song %}
+  <div class="touch-zone touch-left"
+       onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'"></div>
+  {% endif %}
+  {% if next_song %}
+  <div class="touch-zone touch-right"
+       onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'"></div>
+  {% endif %}
 
   <!-- Chords JSON -->
   <script id="chords-data" type="application/json">
     {{ relevant_chords_json|safe }}
   </script>
 
+  <!-- Keyboard nav + dropdown -->
   <script>
-    // Keyboard navigation
     document.addEventListener("keydown", function(event) {
       if (event.key === "ArrowLeft") {
-        const prev = document.querySelector(".nav-left");
-        if (prev) prev.click();
+        {% if prev_song %}
+          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}";
+        {% endif %}
       } else if (event.key === "ArrowRight") {
-        const next = document.querySelector(".nav-right");
-        if (next) next.click();
+        {% if next_song %}
+          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}";
+        {% endif %}
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const selector = document.getElementById("song-selector");
+      if (selector) {
+        selector.addEventListener("change", (e) => {
+          window.location.href = e.target.value;
+        });
       }
     });
   </script>
-  
 
   <!-- Chord Section -->
   <div id="chord-section">
     <div id="chord-diagrams"></div>
   </div>
 
- 
-
 </body>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const selector = document.getElementById("song-selector");
-    if (selector) {
-      selector.addEventListener("change", (e) => {
-        window.location.href = e.target.value;
-      });
-    }
-  });
-</script>
 </html>
