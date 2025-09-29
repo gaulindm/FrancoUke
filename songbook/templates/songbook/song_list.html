@@ -122,7 +122,7 @@
                   {% endif %}</td>
                 <td class="text-center">
                     {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
-                    <a href="{% url pdf_url item.song.id %}?site_name={{ site_name }}">
+                    <a href="{% url pdf_url item.song.id %}">
                       PDF
                     </a>
                     {% endwith %}

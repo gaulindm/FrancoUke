@@ -19,6 +19,8 @@ from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 from songbook.utils.chord_library import load_chord_dict
 
 
+from songbook.context_processors import site_context
+
 def teleprompter_view(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
@@ -26,9 +28,9 @@ def teleprompter_view(request, song_id):
     instrument = request.GET.get("instrument")
     if not instrument and request.user.is_authenticated:
         instrument = getattr(request.user.userpreference, "primary_instrument", "ukulele")
-    instrument = instrument or "ukulele"  # fallback
+    instrument = instrument or "ukulele"
 
-    # Load the correct chord library (dict for fast lookup)
+    # Load the correct chord library
     chord_library = load_chord_dict(instrument)
 
     # --- Convert Song.lyrics_with_chords to raw text ---
@@ -54,9 +56,13 @@ def teleprompter_view(request, song_id):
         for name in unique_chords if name in chord_library
     ]
 
-    # --- Render pretty lyrics + metadata ---
+    # --- Get correct site_name ---
+    context_data = site_context(request)
+    site_name = context_data["site_name"]
+
+    # --- Render lyrics with proper site ---
     lyrics_html, metadata = render_lyrics_with_chords_html(
-        song.lyrics_with_chords, "FrancoUke"
+        song.lyrics_with_chords, site_name
     )
 
     # --- User preferences ---
@@ -73,5 +79,6 @@ def teleprompter_view(request, song_id):
         "metadata": metadata,
         "relevant_chords_json": json.dumps(relevant_chords),
         "userPreferences": user_preferences,
+        **context_data,  # makes site_name/base_template available in template
     })
 

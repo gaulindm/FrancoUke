@@ -25,64 +25,49 @@ from .forms import SongForm, TagFilterForm, SongFormattingForm
 from .parsers import parse_song_data
 from songbook.utils.transposer import extract_chords, transpose_lyrics
 from songbook.utils.pdf_generator import generate_songs_pdf, load_chords
+from songbook.context_processors import site_context
 from songbook.utils.ABC2audio import convert_abc_to_audio
 from users.models import UserPreference
 import urllib.parse
 import logging
 
-logger = logging.getLogger(__name__)
+from .context_processors import site_context
+
 @login_required
 @permission_required("songbook.change_songformatting", raise_exception=True)
-def edit_song_formatting(request, song_id, site_name=None):
+def edit_song_formatting(request, song_id):
     """Edit song formatting with Dual Edition support."""
+    context_data = site_context(request)
+    site_name = context_data["site_name"]
 
-    # 🔹 Ensure `site_name` is retrieved properly
-    if not site_name:
-        site_name = request.GET.get("site")  # Try getting from GET parameters
-        if not site_name:
-            site_name = "FrancoUke" if "FrancoUke" in request.path else "StrumSphere"
-
-    print(f"DEBUG: site_name received in view: {site_name}, Song ID: {song_id}")  # ✅ Debugging output
-
-    # Retrieve or create formatting settings for the user
     formatting, created = SongFormatting.objects.get_or_create(
         user=request.user, song_id=song_id,
         defaults={'intro': {}, 'verse': {}, 'chorus': {}, 'bridge': {}, 'interlude': {}, 'outro': {}}
     )
 
-    # If newly created, try to copy from Gaulind's formatting
     if created:
-        gaulind_formatting = SongFormatting.objects.filter(user__username="Gaulind", song_id=song_id).first()
+        gaulind_formatting = SongFormatting.objects.filter(
+            user__username="Gaulind", song_id=song_id
+        ).first()
         if gaulind_formatting:
-            formatting.intro = gaulind_formatting.intro
-            formatting.verse = gaulind_formatting.verse
-            formatting.chorus = gaulind_formatting.chorus
-            formatting.bridge = gaulind_formatting.bridge
-            formatting.interlude = gaulind_formatting.interlude
-            formatting.outro = gaulind_formatting.outro
+            for section in ["intro", "verse", "chorus", "bridge", "interlude", "outro"]:
+                setattr(formatting, section, getattr(gaulind_formatting, section))
             formatting.save()
 
-    # Process form submission
     if request.method == "POST":
         form = SongFormattingForm(request.POST, instance=formatting)
         if form.is_valid():
             form.save()
             messages.success(request, "Formatting updated successfully!")
-
-            # 🔹 Redirect back to the correct ScoreView after formatting update
-            if site_name == "FrancoUke":
-                return redirect("francouke:score-view", pk=song_id)
-            else:
-                return redirect("strumsphere:score-view", pk=song_id)
+            return redirect(f"{context_data['site_namespace']}:score_view", pk=song_id)
     else:
         form = SongFormattingForm(instance=formatting)
 
-    # ✅ Ensure `site_name` is correctly passed to the template
     return render(request, "songbook/edit_formatting.html", {
         "form": form,
         "pk": song_id,
         "formatting": formatting,
-        "site_name": site_name  # ✅ Ensure site_name is properly included in the context
+        **context_data,  # adds site_name, base_template, site_namespace
     })
 
 
@@ -119,6 +104,8 @@ class ArtistListView(SiteContextMixin, ListView):
         })
         return context
 
+
+
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from .models import Song
@@ -128,36 +115,19 @@ from django.http import HttpResponse
 
 
 def preview_pdf(request, song_id):
-    """Generate a transposed PDF with user-defined font sizes stored in JSON fields."""
     song = get_object_or_404(Song, pk=song_id)
     user = request.user
 
-    existing_formatting = SongFormatting.objects.filter(user=user, song=song).exists()
-    formatting = SongFormatting.objects.filter(user=user, song=song).first()
-
-    if not formatting:
-        # 🚀 If no formatting exists for the user, use Gaulind’s formatting as the default
-        formatting = SongFormatting.objects.filter(user__username="Gaulind", song=song).first()
-
-    after_retrieval_formatting = SongFormatting.objects.filter(user=user, song=song).exists()
     transpose_value = int(request.GET.get("transpose", 0))
-
-    # Transpose the song if needed
     if transpose_value != 0:
         song.lyrics_with_chords = transpose_lyrics(song.lyrics_with_chords, transpose_value)
 
+    context_data = site_context(request)
+    site_name = context_data["site_name"]
+
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="{song.songTitle}_preview.pdf"'
-
-    # 🔍 Debug request.GET
-    print(f"DEBUG: request.GET (query parameters) → {request.GET}")
-
-    # ✅ Read site_name from query params correctly
-    site_name = request.GET.get("site_name", "FrancoUke")  # Fallback to FrancoUke if missing
-
-    print(f"DEBUG: Determined site_name → {site_name}")
-
-    generate_songs_pdf(response, [song], user, 0, None, site_name=site_name)
+    generate_songs_pdf(response, [song], user, transpose_value, None, site_name=site_name)
     return response
 
 
@@ -186,23 +156,17 @@ def generate_multi_song_pdf(request):
 
 @login_required
 def generate_single_song_pdf(request, song_id):
-    """Generate a PDF for a single song, adapting to the site edition."""
     song = get_object_or_404(Song, pk=song_id)
     user = request.user
 
+    context_data = site_context(request)
+    site_name = context_data["site_name"]
+
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="{song.songTitle}.pdf"'
-
-    # ✅ Fix: Get site_name from query parameters
-    site_name = request.GET.get("site_name", "FrancoUke")  # Default to FrancoUke if missing
-
-    print(f"DEBUG: request.GET → {request.GET}")  # 🔍 Check query parameters
-    print(f"DEBUG: Determined site_name → {site_name}")
-
-    # ✅ Ensure PDF generation respects `site_name`
     generate_songs_pdf(response, [song], user, transpose_value=0, formatting=None, site_name=site_name)
-
     return response
+
 
 def get_chord_definition(request, chord_name):
     """
@@ -216,16 +180,9 @@ def get_chord_definition(request, chord_name):
 
 from django.shortcuts import render
 
-
 def chord_dictionary(request):
-    site_name = "FrancoUke" if request.resolver_match.namespace == "francouke" else "StrumSphere"
-    base_template = f"base_{site_name.lower()}.html"
-
-    return render(request, "songbook/chord_dictionary.html", {
-        "site_name": site_name,
-        "base_template": base_template,
-    })
-
+    context_data = site_context(request)
+    return render(request, "songbook/chord_dictionary.html", context_data)
 
 
 
@@ -244,14 +201,15 @@ from songbook.utils.transposer import extract_chords
 from django.views.generic import TemplateView
 
 class LandingView(TemplateView):
-    template_name = "songbook/home_francouke.html"
-
     def get_template_names(self):
-        ns = self.request.resolver_match.namespace
-        if ns == "strumsphere":
-            return ["songbook/home_strumsphere.html"]
-        return ["songbook/home_francouke.html"]
+        context_data = site_context(self.request)
+        site_name = context_data["site_name"]
 
+        if site_name == "StrumSphere":
+            return ["songbook/home_strumsphere.html"]
+        elif site_name == "Uke4ia":
+            return ["songbook/home_uke4ia.html"]
+        return ["songbook/home_francouke.html"]
 
 
 class UserSongListView(ListView):
@@ -278,15 +236,8 @@ class ScoreView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # ✅ Determine site_name from request.path (not kwargs)
-        if "FrancoUke" in self.request.path:
-            context['site_name'] = "FrancoUke"
-        elif "StrumSphere" in self.request.path:
-            context['site_name'] = "StrumSphere"
-        else:
-            context['site_name'] = "FrancoUke"  # Default fallback
-
-        # ✅ Ensure song object is available
+        # ✅ song object already available as "score" (context_object_name),
+        # but you can keep this alias if templates expect "song"
         context['song'] = self.get_object()
 
         # ✅ Fetch user preferences if logged in
@@ -296,9 +247,7 @@ class ScoreView(LoginRequiredMixin, DetailView):
         else:
             context["preferences"] = None
 
-        print(f"DEBUG: site_name in context → {context['site_name']}")  # 🔍 Debugging output
-
-        return context  # ✅ Return context at the end
+        return context
 
 from .mixins import SiteContextMixin  # Make sure this is imported
 
@@ -375,75 +324,49 @@ class SongListView(SiteContextMixin, ListView):
         context['song_data'] = song_data
         return context
 
-
 class SongCreateView(LoginRequiredMixin, CreateView):
     model = Song
     fields = ['songTitle', 'songChordPro', 'metadata', 'tags', 'acknowledgement']
 
     def form_valid(self, form):
-        """Assign the current user as the contributor and ensure site_name is set."""
         form.instance.contributor = self.request.user
-
-        # 🔹 Ensure the song belongs to the correct site
-        site_name = self.kwargs.get('site_name', 'FrancoUke')  # Default to FrancoUke
-        form.instance.site_name = site_name
-
+        context_data = site_context(self.request)
+        form.instance.site_name = context_data["site_name"]
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        """Pass `site_name` to the template to keep the correct edition."""
         context = super().get_context_data(**kwargs)
-        context['site_name'] = self.kwargs.get('site_name', 'FrancoUke')  # Default to FrancoUke
+        context.update(site_context(self.request))
         return context
 
     def get_success_url(self):
-        """Redirect to the correct song list based on the site edition."""
-        site_name = self.kwargs.get('site_name', 'FrancoUke')
-        
         return reverse("songbook:song_list")
-
 
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Song
     fields = ['songTitle', 'songChordPro', 'lyrics_with_chords', 'metadata', 'tags', 'acknowledgement']
 
     def get_success_url(self):
-        # ✅ Redirect using the song's real site_name, not the one from the URL
-        site_name = self.object.site_name or 'FrancoUke'
+        site_name = self.object.site_name or site_context(self.request)["site_name"]
         return reverse(f"{site_name.lower()}:score_view", kwargs={'pk': self.object.pk})
 
-
     def form_valid(self, form):
-        form.instance.contributor = self.request.user  # Still set contributor
-
-        # ❌ Do NOT reassign site_name during updates
-        # site_name = self.kwargs.get('site_name', 'FrancoUke')
-        # form.instance.site_name = site_name
-
-        # 🔹 Parse ChordPro data
+        form.instance.contributor = self.request.user
         raw_lyrics = form.cleaned_data['songChordPro']
         try:
             parsed_lyrics = parse_song_data(raw_lyrics)
         except Exception as e:
             form.add_error('songChordPro', f"Error parsing song data: {e}")
             return self.form_invalid(form)
-
         form.instance.lyrics_with_chords = parsed_lyrics
         return super().form_valid(form)
-
 
     def test_func(self):
         return self.request.user.is_authenticated
 
-    def get_object(self, queryset=None):
-        """No longer restrict song updates based on site name."""
-        return super().get_object(queryset)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        site_name = self.kwargs.get('site_name', 'FrancoUke')
-        context['site_name'] = site_name
-        print(f"DEBUG: site_name in SongUpdateView = {site_name}")
+        context.update(site_context(self.request))
         return context
 
 
@@ -455,11 +378,8 @@ class SongDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         song = self.get_object()
         return self.request.user == song.contributor
 
+def about(request):
+    return render(request, "songbook/about.html", site_context(request))
 
-def about(request, site_name="FrancoUke"):
-    """Render the About page with site-specific content."""
-    return render(request, "songbook/about.html", {"site_name": site_name})
-
-def whats_new(request, site_name=None):
-    """Render the 'What's New' page with dual edition support."""
-    return render(request, 'songbook/whats_new.html', {'site_name': site_name})
+def whats_new(request):
+    return render(request, "songbook/whats_new.html", site_context(request))

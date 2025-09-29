@@ -101,8 +101,8 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
                  is_printing_alternate_chord=False, acknowledgement='',
                  rows_needed=1, diagram_height=0):
     
-    print(f"DEBUG: draw_footer called with instrument='{instrument}', secondary_instrument='{secondary_instrument}'")
-    print(f"DEBUG: relevant_chords count = {len(relevant_chords)}")
+    #print(f"DEBUG: draw_footer called with instrument='{instrument}', secondary_instrument='{secondary_instrument}'")
+    #print(f"DEBUG: relevant_chords count = {len(relevant_chords)}")
 
     page_width, _ = doc.pagesize
     max_per_row = 12 if not secondary_instrument else 6
@@ -110,7 +110,7 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
     def prepare_chords(chords):
         diagrams = []
         for chord in chords:
-            print(f"DEBUG: Preparing chord '{chord.get('name')}' for instrument '{chord.get('instrument')}'")
+            #print(f"DEBUG: Preparing chord '{chord.get('name')}' for instrument '{chord.get('instrument')}'")
             diagrams.append({
                 "name": chord["name"],
                 "variation": chord["variations"][0]
@@ -125,12 +125,12 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
     primary_diagrams = prepare_chords(
         [chord for chord in relevant_chords if chord.get("instrument") == instrument]
     )
-    print(f"DEBUG: primary_diagrams count = {len(primary_diagrams)}")
+    #print(f"DEBUG: primary_diagrams count = {len(primary_diagrams)}")
 
     secondary_diagrams = prepare_chords(
         [chord for chord in relevant_chords if secondary_instrument and chord.get("instrument") == secondary_instrument]
     )
-    print(f"DEBUG: secondary_diagrams count = {len(secondary_diagrams)}")
+    #print(f"DEBUG: secondary_diagrams count = {len(secondary_diagrams)}")
 
     if secondary_instrument:
         primary_rows = (len(primary_diagrams) + max_per_row - 1) // max_per_row
@@ -139,7 +139,7 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
     else:
         rows_needed = (len(primary_diagrams) + max_per_row - 1) // max_per_row
 
-    print(f"DEBUG: rows_needed = {rows_needed}")
+    #print(f"DEBUG: rows_needed = {rows_needed}")
 
 
 

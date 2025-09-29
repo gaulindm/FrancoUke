@@ -45,9 +45,7 @@
 
   {# ✅ footer partial #}
   {% include "partials/_footer.html" %}
-  <p>DEBUG: User = {{ user.username }}</p>
-  <p>DEBUG: Is authenticated = {{ user.is_authenticated }}</p>
-  <p>DEBUG: Has preference? = {{ user.userpreference }}</p>
+  
   {% if user.is_authenticated %}
   {% with user_pref=user.userpreference %}
     {% if user_pref %}

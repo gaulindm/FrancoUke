@@ -64,6 +64,30 @@ Implements a mix of CBVs and FBVs:
 
 ---
 
+### Setlists App
+
+The **Setlists app** allows users to group songs into ordered collections for performances or rehearsals.  
+It integrates directly with the teleprompter engine to provide seamless navigation between songs.
+
+**Key Features:**
+- **SetList model**: stores metadata about a performance list.
+- **SetListSong model**: links songs to a setlist with an explicit order and optional rehearsal notes.
+- **Admin support**: create and reorder setlists via the Django admin panel.
+- **Teleprompter view (`setlist_teleprompter`)**:
+  - Displays songs with chords, lyrics, and metadata.
+  - Provides a **control bar**:
+    - **Left**: setlist title + current song number and title + Hide/Show chords toggle.
+    - **Center**: teleprompter scroll controls (Start/Pause, Speed slider, Reset).
+    - **Right**: navigation controls (⬅️ previous, ⬇️ dropdown selector, ➡️ next).
+  - **Touch navigation zones**: swipe/tap left or right side of the screen to switch songs.
+  - **Keyboard navigation**: use arrow keys to move between songs.
+  - **Dropdown selector**: quickly jump to any song in the setlist.
+- **Chord diagrams**: dynamically rendered per user instrument and preferences.
+- **User preferences**: instrument, left-handed mode, and alternate chord display applied automatically.
+
+This app is designed to make live performance navigation smooth, allowing musicians to move through a setlist without breaking flow.
+
+
 ## 🛠 Notable Features
 - **Multi-site Logic**: Single codebase powers two branded experiences.
 - **Dynamic Metadata Extraction**: Parses ChordPro content for structured metadata.

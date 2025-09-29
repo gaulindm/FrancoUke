@@ -43,6 +43,8 @@ from .models import SetList, SetListSong
 from songbook.utils.chord_library import extract_relevant_chords
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 
+from songbook.context_processors import site_context
+
 def setlist_teleprompter(request, setlist_id, order):
     """Teleprompter view for a song within a setlist."""
     setlist = get_object_or_404(SetList, pk=setlist_id)
@@ -67,9 +69,13 @@ def setlist_teleprompter(request, setlist_id, order):
     # --- Extract relevant chords ---
     relevant_chords = extract_relevant_chords(current.song.lyrics_with_chords, instrument)
 
+    # --- Get correct site_name ---
+    context_data = site_context(request)
+    site_name = context_data["site_name"]
+
     # --- Render lyrics + metadata ---
     lyrics_html, metadata = render_lyrics_with_chords_html(
-        current.song.lyrics_with_chords, "FrancoUke"
+        current.song.lyrics_with_chords, site_name
     )
 
     # --- User preferences ---
@@ -85,15 +91,16 @@ def setlist_teleprompter(request, setlist_id, order):
         "setlists/setlist_teleprompter.html",
         {
             "setlist": setlist,
-            "song": current.song,          # expose the actual Song object
-            "song_order": current.order,   # current song position
-            "total_songs": total_songs,    # total count
+            "song": current.song,
+            "song_order": current.order,
+            "total_songs": total_songs,
             "prev_song": prev_song,
             "next_song": next_song,
             "lyrics_with_chords": lyrics_html,
             "metadata": metadata,
             "relevant_chords_json": json.dumps(relevant_chords),
             "userPreferences": user_preferences,
+            **context_data,  # ✅ makes site_name/base_template available in template
         },
     )
 
