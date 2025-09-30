@@ -21,22 +21,24 @@
             border-collapse: collapse;
             width: 100%;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-            vertical-align: top;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
+        /* shrink table cells to fit scaled diagrams */
+td {
+    padding: 6px;   /* less padding */
+    width: 70px;    /* narrower columns */
+    height: 100px;  /* reduce row height */
+    vertical-align: top;
+}
+
+/* adjust header for balance */
+th {
+    padding: 8px;
+}
         .diagram-container {
-            position: relative;
-            width: 80px; /* adjust as needed */
-            height: 125px;
-            display: inline-block;
-            margin: 5px;
-        }
+    transform: scale(0.8);          /* scale to 80% */
+    transform-origin: top left;     /* keep alignment tidy */
+    width: 80px;   /* original size, still needed for Raphael canvas */
+    height: 125px;
+}
     </style>
 </head>
 <body>

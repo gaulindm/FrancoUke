@@ -208,37 +208,19 @@ def get_chords_json(request, instrument):
     return JsonResponse(data, safe=False)
 
 
-import os
 import json
-from django.conf import settings
+from pathlib import Path
 from django.http import JsonResponse, Http404
 
+CHORDS_DIR = Path(__file__).resolve().parent / "chords"
+
 def serve_chords_json(request, instrument):
-    """
-    Serve chord definitions as if they were static JSON:
-    /chords/<instrument>.json
-    """
-    allowed_instruments = {
-        "ukulele",
-        "guitar",
-        "guitalele",
-        "banjo",
-        "mandolin",
-        "baritoneUke",
-    }
+    file_path = CHORDS_DIR / f"{instrument}.json"
+    if not file_path.exists():
+        raise Http404(f"No chord definition for {instrument}")
 
-    if instrument not in allowed_instruments:
-        raise Http404("Instrument not supported")
-
-    file_path = os.path.join(settings.BASE_DIR, "songbook", "chords", f"{instrument}.json")
-    if not os.path.exists(file_path):
-        raise Http404("Chord file not found")
-
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception as e:
-        raise Http404(f"Invalid JSON: {e}")
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
     return JsonResponse(data, safe=False)
 

@@ -14,18 +14,25 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Flowable
 
 class ChordDiagram(Flowable):
-    def __init__(self, chord_name, variation, scale=0.5, is_lefty=False):
+    def __init__(self, chord_name, variation, scale=0.5, is_lefty=False, instrument="ukulele"):
         super().__init__()
         self.chord_name = chord_name
         self.variation = normalize_variation(variation)
         self.scale = scale
-        self.is_lefty = is_lefty  # not used yet; we can add mirroring later if you want
+        self.is_lefty = is_lefty
+        self.instrument = instrument  # NEW: store instrument
 
     def draw(self):
         self.canv.saveState()
         self.canv.scale(self.scale, self.scale)
-        # Draw at (0, 0); draw_footer already translates to correct spot
-        draw_chord_diagram(self.canv, 0, 0, self.variation, self.chord_name)
+        draw_chord_diagram(
+            self.canv,
+            0,
+            0,
+            self.variation,
+            self.chord_name,
+            instrument=self.instrument  # pass instrument down
+        )
         self.canv.restoreState()
 
 
@@ -241,13 +248,9 @@ def detect_barre(positions):
         i += 1
     return None
 
-# --- Chord Drawing ---
-def draw_chord_diagram(c, x, y, variation, chord_name=""):
+def draw_chord_diagram(c, x, y, variation, chord_name="", instrument="ukulele"):
     """
-    Draw a chord diagram on a reportlab canvas `c` at position (x,y).
-    variation can be:
-      - Old style: [0, 0, 1, 0]
-      - Modern style: { positions:[...], baseFret:..., barre:{...} }
+    Draw a chord diagram. Only guitar diagrams show muted/open string markers.
     """
     # Normalize variation
     if isinstance(variation, dict):
@@ -259,44 +262,44 @@ def draw_chord_diagram(c, x, y, variation, chord_name=""):
         base_fret = compute_base_fret(positions)
         barre = detect_barre(positions)
 
-    # Adjust positions if base_fret > 1 (offset)
     adjusted_positions = [
         (f - (base_fret - 1) if f > 0 else f)
         for f in positions
     ]
 
-    # Diagram settings
     string_count = len(positions)
     fret_count = 5
     string_spacing = 15
     fret_spacing = 15
     radius = 4
 
-    # Draw chord name
+    # Chord name
     if chord_name:
         c.setFont("Helvetica-Bold", 18)
-        c.drawCentredString(x + (string_count - 1) * string_spacing / 2,
-                            y + fret_count * fret_spacing + 18,
-                            chord_name)
+        c.drawCentredString(
+            x + (string_count - 1) * string_spacing / 2,
+            y + fret_count * fret_spacing + 18,
+            chord_name
+        )
 
-    # Draw base fret label if needed
+    # Base fret
     if base_fret > 1:
         c.setFont("Helvetica", 14)
         c.drawString(x - 20, y + fret_count * fret_spacing - 10, f"{base_fret}fr")
 
-    # Draw strings
+    # Strings
     for i in range(string_count):
         c.setStrokeColor(colors.black)
         c.setLineWidth(2)
         c.line(x + i * string_spacing, y, x + i * string_spacing, y + fret_count * fret_spacing)
 
-    # Draw frets (top line is nut if base_fret == 1)
+    # Frets
     for j in range(fret_count + 1):
         y_line = y + j * fret_spacing
         c.setLineWidth(4 if (j == fret_count and base_fret == 1) else 2)
         c.line(x, y_line, x + (string_count - 1) * string_spacing, y_line)
 
-    # --- Barre ---
+    # Barre
     if barre:
         adj_fret = barre["fret"] - (base_fret - 1)
         if 1 <= adj_fret <= fret_count:
@@ -306,22 +309,19 @@ def draw_chord_diagram(c, x, y, variation, chord_name=""):
             x_start = x + start_string * string_spacing - radius
             width = (end_string - start_string) * string_spacing + 2 * radius
             c.setFillColor(colors.black)
-            c.roundRect(
-                x_start, y_bar - radius, width, 2 * radius, 2, stroke=0, fill=1
-            )
+            c.roundRect(x_start, y_bar - radius, width, 2 * radius, 2, stroke=0, fill=1)
 
-    # Draw dots / markers
+    # Dots + markers
     for i, fret in enumerate(adjusted_positions):
         x_dot = x + i * string_spacing
         if fret > 0:
-            #y_dot = y + (fret - 1) * fret_spacing + fret_spacing / 2   #This draw bottom up
             y_dot = y + (fret_count - fret) * fret_spacing + fret_spacing / 2
-            
             c.setFillColor(colors.black)
             c.circle(x_dot, y_dot, radius, stroke=0, fill=1)
-        elif fret == 0:
-            c.setFont("Helvetica", 12)
-            c.drawCentredString(x_dot, y + fret_count * fret_spacing + 5, "O")
-        elif fret == -1:
-            c.setFont("Helvetica", 11)
-            c.drawCentredString(x_dot, y + fret_count * fret_spacing + 4, "X")
+        elif instrument == "guitar":
+            if fret == 0:
+                c.setFont("Helvetica", 12)
+                c.drawCentredString(x_dot, y + fret_count * fret_spacing + 5, "O")
+            elif fret == -1:
+                c.setFont("Helvetica", 11)
+                c.drawCentredString(x_dot, y + fret_count * fret_spacing + 4, "X")

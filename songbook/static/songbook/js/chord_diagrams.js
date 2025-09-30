@@ -162,6 +162,7 @@ function drawChordDiagram(container, chord) {
   // --- Dots / Open / Muted ---
   positions.forEach((fret, i) => {
     const x = 20 + i * stringSpacing;
+
     if (fret > 0) {
       const adjFret = fret - (baseFret - 1);
       const y = 40 + (adjFret - 0.5) * fretSpacing;
@@ -171,24 +172,27 @@ function drawChordDiagram(container, chord) {
       circle.setAttribute("r", radius);
       circle.setAttribute("fill", "white");
       svg.appendChild(circle);
-    } else if (fret === 0) {
-      const o = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      o.setAttribute("x", x);
-      o.setAttribute("y", 30);
-      o.setAttribute("text-anchor", "middle");
-      o.setAttribute("font-size", "12");
-      o.setAttribute("fill", "white");
-      o.textContent = "O";
-      svg.appendChild(o);
-    } else if (fret === -1) {
-      const xMark = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      xMark.setAttribute("x", x);
-      xMark.setAttribute("y", 30);
-      xMark.setAttribute("text-anchor", "middle");
-      xMark.setAttribute("font-size", "12");
-      xMark.setAttribute("fill", "white");
-      xMark.textContent = "X";
-      svg.appendChild(xMark);
+    } else if (instrument === "guitar") {
+      // ✅ Only guitar shows open/muted markers
+      if (fret === 0) {
+        const o = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        o.setAttribute("x", x);
+        o.setAttribute("y", 30);
+        o.setAttribute("text-anchor", "middle");
+        o.setAttribute("font-size", "12");
+        o.setAttribute("fill", "white");
+        o.textContent = "O";
+        svg.appendChild(o);
+      } else if (fret === -1) {
+        const xMark = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        xMark.setAttribute("x", x);
+        xMark.setAttribute("y", 30);
+        xMark.setAttribute("text-anchor", "middle");
+        xMark.setAttribute("font-size", "12");
+        xMark.setAttribute("fill", "white");
+        xMark.textContent = "X";
+        svg.appendChild(xMark);
+      }
     }
   });
 

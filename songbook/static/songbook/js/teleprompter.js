@@ -1,196 +1,161 @@
 /* teleprompter.js
-   - Handles teleprompter scrolling
+   - Robust teleprompter scrolling (requestAnimationFrame)
    - Toggles chord diagrams
    - Swipe navigation between songs
    - Auto-hide overlay controls
-   - Uses chord_diagrams.js to render backend-provided chord shapes
+   - Responsive lyrics container sizing
 */
 
 (function () {
-  function $(sel, root = document) {
-    return root.querySelector(sel);
+  "use strict";
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+
+  // --- State ---
+  let rafId = null;
+  let lastRafTime = null;
+  let isAutoScrolling = false;
+  let speedSetting = 5;
+  const SPEED_MULTIPLIER = 60; // px/sec per slider unit
+
+  function pixelsPerSecond() {
+    return Math.max(1, speedSetting) * SPEED_MULTIPLIER;
   }
 
-  // --- Auto Scroll ---
-  let scrollInterval = null;
-  let scrollSpeed = 3; // default speed, 1–10 from UI (pixels per tick)
+  function updateLyricsContainerHeight() {
+    const container = $(".lyrics-container");
+    if (!container) return;
+    const controlsH = $(".controls")?.getBoundingClientRect().height || 0;
+    const chordH = !$("#chord-section")?.classList.contains("hidden")
+      ? $("#chord-section").getBoundingClientRect().height
+      : 0;
+    const available = Math.max(120, window.innerHeight - controlsH - chordH);
+    container.style.height = available + "px";
+    container.style.overflowY = "auto";
+    container.style.WebkitOverflowScrolling = "touch";
+  }
+
+  function stepScroll(ts) {
+    if (!lastRafTime) lastRafTime = ts;
+    const dt = (ts - lastRafTime) / 1000;
+    lastRafTime = ts;
+
+    const c = $(".lyrics-container");
+    if (!c) return stopScroll();
+
+    const delta = pixelsPerSecond() * dt;
+    c.scrollTop = Math.min(c.scrollTop + delta, c.scrollHeight - c.clientHeight);
+
+    if (c.scrollTop + c.clientHeight >= c.scrollHeight - 0.5) return stopScroll();
+    rafId = requestAnimationFrame(stepScroll);
+  }
 
   function startScroll() {
-    if (scrollInterval) return; // already running
-    const container = $(".lyrics-container");
-
-    scrollInterval = setInterval(() => {
-      container.scrollBy(0, scrollSpeed);
-      if (
-        container.scrollTop + container.clientHeight >=
-        container.scrollHeight
-      ) {
-        stopScroll(); // stop at bottom
-      }
-    }, 30); // fixed tick interval, smooth across devices
-
-    const btn = $("#scroll-toggle");
-    btn.textContent = "⏸ Pause";
-    btn.classList.add("active");
+    if (isAutoScrolling) return;
+    const c = $(".lyrics-container");
+    if (!c || c.scrollHeight <= c.clientHeight) return;
+    isAutoScrolling = true;
+    lastRafTime = null;
+    rafId = requestAnimationFrame(stepScroll);
+    $("#scroll-toggle").textContent = "⏸ Pause";
   }
 
   function stopScroll() {
-    clearInterval(scrollInterval);
-    scrollInterval = null;
-
-    const btn = $("#scroll-toggle");
-    btn.textContent = "▶️ Start";
-    btn.classList.remove("active");
+    if (!isAutoScrolling) return;
+    cancelAnimationFrame(rafId);
+    rafId = null;
+    isAutoScrolling = false;
+    $("#scroll-toggle").textContent = "▶️ Start";
   }
 
   function resetScroll() {
     stopScroll();
-    $(".lyrics-container").scrollTo({ top: 0, behavior: "smooth" });
+    $(".lyrics-container")?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // --- Chord Diagrams ---
+  function bindPauseOnUserScroll(c) {
+    if (!c) return;
+    const pause = () => isAutoScrolling && stopScroll();
+    c.addEventListener("touchstart", pause, { passive: true });
+    c.addEventListener("wheel", pause, { passive: true });
+    c.addEventListener("pointerdown", pause, { passive: true });
+  }
+
+  // --- Chords ---
   function renderChordDiagrams(chords) {
-    const container = document.getElementById("chord-diagrams");
-    container.innerHTML = "";
-
+    const cont = $("#chord-diagrams");
+    if (!cont) return;
+    cont.innerHTML = "";
     const prefs = window.userPreferences || {};
-    const showAlternate = prefs.showAlternate || false;
-
+    const showAlternate = !!prefs.showAlternate;
     chords.forEach((chord) => {
-      if (!chord.variations || chord.variations.length === 0) {
-        console.warn("⚠️ No variations for chord", chord.name);
-        return;
-      }
-
-      // Only show first variation unless user wants all
-      const variationsToRender = showAlternate
-        ? chord.variations
-        : [chord.variations[0]];
-
-      variationsToRender.forEach((variation) => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "chord-wrapper";
-        wrapper.style.display = "inline-block";
-        wrapper.style.margin = "0";
-
-        if (typeof drawChordDiagram === "function") {
-          drawChordDiagram(wrapper, {
-            name: chord.name,
-            ...variation,
-          });
-        } else {
-          console.error("❌ drawChordDiagram is not defined!");
-        }
-
-        container.appendChild(wrapper);
+      const vars = showAlternate ? chord.variations : [chord.variations[0]];
+      vars.forEach((v) => {
+        const wrap = document.createElement("div");
+        wrap.className = "chord-wrapper";
+        if (typeof drawChordDiagram === "function")
+          drawChordDiagram(wrap, { name: chord.name, ...v });
+        cont.appendChild(wrap);
       });
     });
   }
 
   function toggleChordSection() {
-    const section = $("#chord-section");
-    section.classList.toggle("hidden");
-
-    const btn = $("#toggle-chords");
-    btn.textContent = section.classList.contains("hidden")
+    $("#chord-section").classList.toggle("hidden");
+    $("#toggle-chords").textContent = $("#chord-section").classList.contains("hidden")
       ? "Show Chords"
       : "Hide Chords";
-
-    // (Re)draw chords when showing
-    if (!section.classList.contains("hidden") && window.SONG?.chords) {
+    setTimeout(updateLyricsContainerHeight, 60);
+    if (!$("#chord-section").classList.contains("hidden") && window.SONG?.chords)
       renderChordDiagrams(window.SONG.chords);
-    }
   }
 
-  // --- Swipe detection for navigation ---
+  // --- Swipe ---
   let touchStartX = 0;
-  let touchEndX = 0;
-
-  function handleSwipe() {
-    if (touchEndX < touchStartX - 50) {
-      // Swipe left → next song
-      const nextBtn = document.querySelector("#nav-overlay .right");
-      if (nextBtn) window.location.href = nextBtn.href;
-    }
-    if (touchEndX > touchStartX + 50) {
-      // Swipe right → prev song
-      const prevBtn = document.querySelector("#nav-overlay .left");
-      if (prevBtn) window.location.href = prevBtn.href;
-    }
-  }
-
-  document.addEventListener("touchstart", (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-  });
-
+  document.addEventListener("touchstart", (e) => (touchStartX = e.touches[0].screenX), { passive: true });
   document.addEventListener("touchend", (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  });
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (dx < -50) window.location.href = $("#nav-overlay .right")?.href || "#";
+    if (dx > 50) window.location.href = $("#nav-overlay .left")?.href || "#";
+  }, { passive: true });
 
-  // --- Overlay auto-hide ---
+  // --- Overlay ---
   let overlayTimer = null;
-  const overlay = $("#nav-overlay");
-
   function showOverlay() {
-    if (!overlay) return;
-    overlay.classList.remove("hidden");
-
+    $("#nav-overlay")?.classList.remove("hidden");
     clearTimeout(overlayTimer);
-    overlayTimer = setTimeout(() => {
-      overlay.classList.add("hidden");
-    }, 3000); // hide after 3s of inactivity
-  }
-
-  function resetOverlayTimer() {
-    showOverlay();
+    overlayTimer = setTimeout(() => $("#nav-overlay")?.classList.add("hidden"), 3000);
   }
 
   // --- Init ---
   document.addEventListener("DOMContentLoaded", () => {
-    // Scroll controls
-    $("#scroll-toggle")?.addEventListener("click", () => {
-      if (scrollInterval) stopScroll();
-      else startScroll();
-    });
-
+    $("#scroll-toggle")?.addEventListener("click", () => (isAutoScrolling ? stopScroll() : startScroll()));
     $("#scroll-reset")?.addEventListener("click", resetScroll);
-
-    $("#scroll-speed")?.addEventListener("input", (e) => {
-      scrollSpeed = parseInt(e.target.value, 10);
-    });
-
-    // Chords toggle
+    $("#scroll-speed")?.addEventListener("input", (e) => (speedSetting = +e.target.value));
     $("#toggle-chords")?.addEventListener("click", toggleChordSection);
 
-    // --- Load chords from <script id="chords-data"> ---
-    const chordDataEl = document.getElementById("chords-data");
-    if (chordDataEl) {
-      try {
-        const chords = JSON.parse(chordDataEl.textContent);
-        console.log("✅ Parsed chords from template:", chords);
+    updateLyricsContainerHeight();
+    window.addEventListener("resize", updateLyricsContainerHeight, { passive: true });
+    window.addEventListener("orientationchange", () => setTimeout(updateLyricsContainerHeight, 200));
 
-        if (Array.isArray(chords) && chords.length > 0) {
-          renderChordDiagrams(chords);
-        } else {
-          console.warn("⚠️ No chords found in parsed JSON.");
-        }
-      } catch (err) {
-        console.error("❌ Failed to parse chords JSON:", err);
+    bindPauseOnUserScroll($(".lyrics-container"));
+
+    const chordEl = [...document.querySelectorAll("#chords-data")].pop();
+    if (chordEl) {
+      try {
+        const chords = JSON.parse(chordEl.textContent);
+        window.SONG = { ...window.SONG, chords };
+        if (!$("#chord-section").classList.contains("hidden")) renderChordDiagrams(chords);
+      } catch (e) {
+        console.error("Chord JSON parse error:", e);
       }
-    } else {
-      console.warn("⚠️ No <script id='chords-data'> element found.");
     }
 
-    // Overlay auto-hide logic
-    if (overlay) {
-      // Show immediately on load
+    if ($("#nav-overlay")) {
       showOverlay();
-
-      // Reset timer on interactions
-      ["mousemove", "touchstart", "click"].forEach((evt) => {
-        document.addEventListener(evt, resetOverlayTimer);
-      });
+      ["mousemove", "touchstart", "click"].forEach((evt) =>
+        document.addEventListener(evt, showOverlay, { passive: true })
+      );
     }
   });
 })();
