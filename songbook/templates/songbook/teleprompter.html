@@ -1,121 +1,80 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ song.title }}</title>
-    <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+  <meta charset="UTF-8">
+  <title>{{ song.title }}</title>
+  <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+  
+  <!-- User Preferences -->
+  <script>
+    window.userPreferences = {{ user_preferences|safe }};
+  </script>
 
-    {# 🔹 Inject user preferences before loading any JS #}
-    {% if user.is_authenticated and user.userpreference %}
-    <script>
-      window.userPreferences = {
-        instrument: "{{ user.userpreference.primary_instrument }}",
-        isLefty: {{ user.userpreference.is_lefty|yesno:"true,false" }},
-        showAlternate: {{ user.userpreference.is_printing_alternate_chord|yesno:"true,false" }}
-      };
-      console.log("✅ Injected userPreferences:", window.userPreferences);
-    </script>
-    {% else %}
-    <script>
-      window.userPreferences = {
-        instrument: "ukulele",
-        isLefty: false,
-        showAlternate: false
-      };
-      console.log("⚠️ Using fallback preferences:", window.userPreferences);
-    </script>
-    {% endif %}
-
-    <!-- Diagram renderer -->
-    <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
-    <!-- Teleprompter engine -->
-    <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
+  <!-- Diagram renderer -->
+  <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+  <!-- Teleprompter engine -->
+  <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 </head>
 <body>
-    <!-- Controls -->
-    <div class="controls">
-        <div class="left">
-          <span class="song-title">{{ song.title }}</span>
-          <button id="toggle-chords">Hide Chords</button>
-        </div>
-        <div class="center">
-          <button id="scroll-toggle">▶️ Start</button>
-          <div class="control-inline">
-            Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
-          </div>
-        </div>
-        <div class="right">
-          <button id="scroll-reset">⏹ Reset</button>
-        </div>
+  <!-- Controls -->
+  <div class="controls">
+    <div class="left">
+      <span class="song-title">{{ song.title }}</span>
+      <button id="toggle-chords">Hide Chords</button>
     </div>
+    <div class="center">
+      <button id="scroll-toggle">▶️ Start</button>
+      <div class="control-inline">
+        Speed: <input type="range" id="scroll-speed" min="1" max="10" value="3">
+      </div>
+    </div>
+    <div class="right">
+      <button id="scroll-reset">⏹ Reset</button>
+    </div>
+  </div>
 
-    <!-- Lyrics -->
-    <div class="tp-main">
-        <div class="lyrics-container">
-            <div class="lyrics">
-                <div class="metadata">
-                    <h1>{{ song.title }}</h1>
-                    {% if metadata.songwriter %}
-                        <div class="songwriter">{{ metadata.songwriter }}</div>
-                    {% endif %}
-                    {% if metadata.artist %}
-                        <div class="recording">
-                            {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                {{ lyrics_with_chords|safe }}
+  <!-- Lyrics -->
+  <div class="tp-main">
+    <div class="lyrics-container">
+      <div class="lyrics">
+        <div class="metadata">
+          <h1>{{ song.title }}</h1>
+          {% if metadata.songwriter %}
+            <div class="songwriter">{{ metadata.songwriter }}</div>
+          {% endif %}
+          {% if metadata.artist %}
+            <div class="recording">
+              {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
             </div>
+          {% endif %}
         </div>
+        {{ lyrics_with_chords|safe }}
+      </div>
     </div>
+  </div>
 
-    <!-- Pass chords safely from backend -->
-    <script id="chords-data" type="application/json">
-        {{ relevant_chords_json|safe }}
-    </script>
+  <!-- Chords data -->
+  <script id="chords-data" type="application/json">
+    {{ relevant_chords_json|safe }}
+  </script>
 
-    <!-- Chord Section -->
-    <div id="chord-section">
-        <div id="chord-diagrams"></div>
-    </div>
+  <!-- Chord Section -->
+  <div id="chord-section">
+    <div id="chord-diagrams"></div>
+  </div>
 
-    <!-- Bootstrap Teleprompter -->
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        // ✅ Make song data available globally
-        window.SONG = {
-          id: "{{ song.id }}",
-          title: "{{ song.title|escapejs }}",
-          initialTranspose: 0,
-          chords: JSON.parse(document.getElementById("chords-data").textContent)
-        };
-
-        console.log("Loaded SONG chords:", window.SONG.chords);
-
-        // ✅ Show/Hide Toggle
-        const btn = document.getElementById("toggle-chords");
-        const section = document.getElementById("chord-section");
-
-        btn.addEventListener("click", () => {
-          section.classList.toggle("hidden");
-          btn.textContent = section.classList.contains("hidden")
-            ? "Show Chords"
-            : "Hide Chords";
-        });
-      });
-    </script>
-
-    <script>
-      window.userPreferences = {{ user_preferences|safe }};
-    </script>
-
-    
-    <script id="chords-data" type="application/json">
-      {{ relevant_chords_json|safe }}
-    </script>
-    
+  <!-- Initialize SONG -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      window.SONG = {
+        id: "{{ song.id }}",
+        title: "{{ song.title|escapejs }}",
+        initialTranspose: 0,
+        chords: JSON.parse(document.getElementById("chords-data").textContent)
+      };
+      console.log("✅ SONG loaded:", window.SONG);
+    });
+  </script>
 </body>
 </html>

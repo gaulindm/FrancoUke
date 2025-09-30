@@ -67,24 +67,26 @@ body {
 
 /* ===== TELEPROMPTER LAYOUT ===== */
 .tp-main {
-  padding-top: 72px; /* leave room for top controls */
-  height: 100vh;     /* full viewport height */
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: hidden;  /* prevent double scrollbars */
+  overflow: hidden; /* stop double scrollbars */
 }
 
+/* Lyrics fill space between controls and chord section */
 .lyrics-container {
-  flex: 1;
-  width: 100%;
-  max-width: 1600px;
-  padding: 20px 28px 200px 28px;
+  height: calc(100vh - 64px - 210px); /* controls bar (64px) + chord section max (210px) */
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
   scroll-behavior: smooth;
+  padding: 20px 28px;
 }
+
+/* When chords hidden, free up space */
+#chord-section.hidden ~ .tp-main .lyrics-container {
+  height: calc(100vh - 64px);
+}
+
 
 
 /* ===== LYRICS & TOKENS ===== */

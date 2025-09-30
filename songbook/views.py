@@ -173,6 +173,75 @@ def generate_single_song_pdf(request, song_id):
     generate_songs_pdf(response, [song], user, transpose_value=0, formatting=None, site_name=site_name)
     return response
 
+import os
+import json
+from django.conf import settings
+from django.http import JsonResponse, Http404
+
+def get_chords_json(request, instrument):
+    """
+    Serve chord definitions from songbook/chords as JSON.
+    Example: /chords/json/ukulele/
+    """
+    allowed_instruments = {
+        "ukulele",
+        "guitar",
+        "guitalele",
+        "banjo",
+        "mandolin",
+        "baritoneUke",
+    }
+
+    if instrument not in allowed_instruments:
+        raise Http404("Instrument not supported")
+
+    file_path = os.path.join(settings.BASE_DIR, "songbook", "chords", f"{instrument}.json")
+    if not os.path.exists(file_path):
+        raise Http404("Chord file not found")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        raise Http404(f"Invalid JSON: {e}")
+
+    return JsonResponse(data, safe=False)
+
+
+import os
+import json
+from django.conf import settings
+from django.http import JsonResponse, Http404
+
+def serve_chords_json(request, instrument):
+    """
+    Serve chord definitions as if they were static JSON:
+    /chords/<instrument>.json
+    """
+    allowed_instruments = {
+        "ukulele",
+        "guitar",
+        "guitalele",
+        "banjo",
+        "mandolin",
+        "baritoneUke",
+    }
+
+    if instrument not in allowed_instruments:
+        raise Http404("Instrument not supported")
+
+    file_path = os.path.join(settings.BASE_DIR, "songbook", "chords", f"{instrument}.json")
+    if not os.path.exists(file_path):
+        raise Http404("Chord file not found")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        raise Http404(f"Invalid JSON: {e}")
+
+    return JsonResponse(data, safe=False)
+
 
 def get_chord_definition(request, chord_name):
     """

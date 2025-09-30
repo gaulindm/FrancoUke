@@ -79,13 +79,14 @@
         ];
     
         const CHORD_DEFINITIONS = {
-            ukulele: "{% static 'js/ukulele_chords_frontend.json' %}",
-            guitalele: "{% static 'js/guitalele_chords_frontend.json' %}",
-            guitar: "{% static 'js/guitar_chords_frontend.json' %}",
-            banjo: "{% static 'js/banjo_chords_frontend.json' %}",
-            mandolin: "{% static 'js/mandolin_chords_frontend.json' %}",
-            baritoneUke: "{% static 'js/baritoneUke_chords_frontend.json' %}"
-        };
+    ukulele: "/{{ site_name|lower }}/chords/ukulele.json",
+    guitalele: "/{{ site_name|lower }}/chords/guitalele.json",
+    guitar: "/{{ site_name|lower }}/chords/guitar.json",
+    banjo: "/{{ site_name|lower }}/chords/banjo.json",
+    mandolin: "/{{ site_name|lower }}/chords/mandolin.json",
+    baritoneUke: "/{{ site_name|lower }}/chords/baritoneUke.json"
+};
+
     
         async function loadChordData(path) {
             const resp = await fetch(path);

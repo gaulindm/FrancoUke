@@ -13,27 +13,34 @@
 
   // --- Auto Scroll ---
   let scrollInterval = null;
-  let scrollSpeed = 5; // 1–10 from UI
+  let scrollSpeed = 3; // default speed, 1–10 from UI (pixels per tick)
 
   function startScroll() {
     if (scrollInterval) return; // already running
     const container = $(".lyrics-container");
+
     scrollInterval = setInterval(() => {
-      container.scrollBy(0, 1);
+      container.scrollBy(0, scrollSpeed);
       if (
         container.scrollTop + container.clientHeight >=
         container.scrollHeight
       ) {
         stopScroll(); // stop at bottom
       }
-    }, 30 - scrollSpeed);
-    $("#scroll-toggle").textContent = "⏸ Pause";
+    }, 30); // fixed tick interval, smooth across devices
+
+    const btn = $("#scroll-toggle");
+    btn.textContent = "⏸ Pause";
+    btn.classList.add("active");
   }
 
   function stopScroll() {
     clearInterval(scrollInterval);
     scrollInterval = null;
-    $("#scroll-toggle").textContent = "▶️ Start";
+
+    const btn = $("#scroll-toggle");
+    btn.textContent = "▶️ Start";
+    btn.classList.remove("active");
   }
 
   function resetScroll() {
@@ -151,10 +158,6 @@
 
     $("#scroll-speed")?.addEventListener("input", (e) => {
       scrollSpeed = parseInt(e.target.value, 10);
-      if (scrollInterval) {
-        stopScroll();
-        startScroll(); // restart with new speed
-      }
     });
 
     // Chords toggle
