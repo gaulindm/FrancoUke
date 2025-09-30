@@ -81,12 +81,18 @@ class ArtistListView(SiteContextMixin, ListView):
             "metadata__artist", flat=True
         ).distinct()
 
+        # Ensure self.selected_letter exists even if not passed
+        self.selected_letter = self.kwargs.get("letter", None)
+
         # Filter by letter if provided
-        self.selected_letter = self.kwargs.get("letter")
         if self.selected_letter:
             queryset = [a for a in queryset if a and a.upper().startswith(self.selected_letter.upper())]
 
+        # Remove None values, then sort
+        queryset = [a for a in queryset if a]
         return sorted(queryset)
+
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
