@@ -29,20 +29,20 @@ class ChordDiagram(Flowable):
         self.canv.restoreState()
 
 
-
-
 def load_chords(instrument):
     """
     Load chord definitions based on the selected instrument.
     """
-    static_dir = os.path.join(settings.BASE_DIR, 'static', 'js')
+    # Point to the songbook/chords folder instead of static/js
+    chords_dir = os.path.join(settings.BASE_DIR, 'songbook', 'chords')
+    
     file_map = {
-        'ukulele': os.path.join(static_dir, 'ukulele_chords_backend.json'),
-        'guitar': os.path.join(static_dir, 'guitar_chords_backend.json'),
-        'guitalele': os.path.join(static_dir, 'guitalele_chords_backend.json'),
-        'mandolin': os.path.join(static_dir, 'mandolin_chords_backend.json'),
-        "banjo": os.path.join(static_dir, "banjo_chords_backend.json"),
-        "baritone_ukulele": os.path.join(static_dir, "baritoneUke_chords_backend.json"),
+        'ukulele': os.path.join(chords_dir, 'ukulele.json'),
+        'guitar': os.path.join(chords_dir, 'guitar.json'),
+        'guitalele': os.path.join(chords_dir, 'guitalele.json'),
+        'mandolin': os.path.join(chords_dir, 'mandolin.json'),
+        'banjo': os.path.join(chords_dir, 'banjo.json'),
+        'baritone_ukulele': os.path.join(chords_dir, 'baritoneUke.json'),
     }
 
     file_path = file_map.get(instrument, file_map['ukulele'])
@@ -62,6 +62,8 @@ def load_chords(instrument):
     except json.JSONDecodeError as e:
         print(f"ERROR: Invalid JSON format in {file_path}: {e}")
         return []
+
+
     
 def extract_used_chords(lyrics_with_chords):
     """

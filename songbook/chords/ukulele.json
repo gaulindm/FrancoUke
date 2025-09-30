@@ -43,7 +43,7 @@
 {"name":"Daug","variations":[{"positions":[3,2,2,1],"baseFret":1,"barre":{"fromString":2,"toString":3,"fret":2}},{"positions":[2,2,2,3],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":2}}]},
 {"name":"D5","variations":[{"positions":[2,2,0,0],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":2}},{"positions":[0,2,0,0],"baseFret":1}]},
 {"name":"D6","variations":[{"positions":[2,2,2,2],"baseFret":1,"barre":{"fromString":1,"toString":4,"fret":2}},{"positions":[0,2,0,2],"baseFret":1}]},
-{"name":"D7","variations":[{"positions":[2,2,2,3],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":2}},{"positions":[0,2,2,3],"baseFret":1,"barre":{"fromString":2,"toString":3,"fret":2}}]},
+{"name":"D7","variations":[{"positions":[2,0,2,0],"baseFret":1},{"positions":[2,2,2,3],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":2}},{"positions":[0,2,2,3],"baseFret":1,"barre":{"fromString":2,"toString":3,"fret":2}}]},
 {"name":"Dmaj9","variations":[{"positions":[2,4,2,4],"baseFret":1},{"positions":[0,2,2,2],"baseFret":1,"barre":{"fromString":2,"toString":4,"fret":2}}]},
 {"name":"Dmaj13","variations":[{"positions":[2,4,2,2],"baseFret":1,"barre":{"fromString":3,"toString":4,"fret":2}},{"positions":[5,4,4,4],"baseFret":4,"barre":{"fromString":2,"toString":4,"fret":4}}]},
 {"name":"D11","variations":[{"positions":[2,0,3,0],"baseFret":1},{"positions":[5,4,5,3],"baseFret":1}]},
