@@ -3,7 +3,7 @@
 
 <div class="content-section">
     {% if user.is_authenticated %}
-
+        <!-- 🎼 Song Editor Section -->
         {% if site_name == "FrancoUke" %}
             <h3>Éditeur de partition</h3>
             <p class="text-muted">Modifier le contenu de la chanson sans modifier l'apparence</p>
@@ -13,19 +13,35 @@
         {% endif %}
 
         <div class="d-flex gap-2">
-            <a class="btn btn-secondary btn-sm" 
-            href="{% url site_namespace|add:':song_update' pk=song.pk %}" 
-            title="{% if site_name == 'FrancoUke' %}Modifier le fichier Chordpro{% else %}Edit the original ChordPro file{% endif %}">
-                {% if site_name == "FrancoUke" %}
-                    Modifier les données ChordPro
-                {% else %}
-                    Modify ChordPro Data
-                {% endif %}
-            </a>
+            {% if user == score.contributor or user.is_superuser %}
+                <a class="btn btn-secondary btn-sm" 
+                   href="{% url site_namespace|add:':song_update' pk=song.pk %}" 
+                   title="{% if site_name == 'FrancoUke' %}Modifier le fichier Chordpro{% else %}Edit the original ChordPro file{% endif %}">
+                    {% if site_name == "FrancoUke" %}
+                        Modifier les données ChordPro
+                    {% else %}
+                        Modify ChordPro Data
+                    {% endif %}
+                </a>
+            {% else %}
+                <p class="text-muted small">
+                    {% if site_name == "FrancoUke" %}
+                        Vous ne pouvez modifier que vos propres chansons.
+                    {% else %}
+                        You can only edit songs you contributed.
+                    {% endif %}
+                </p>
+            {% endif %}
         </div>
-
+    {% else %}
+        <p class="text-muted small">
+            {% if site_name == "FrancoUke" %}
+                Connectez-vous pour modifier vos chansons.
+            {% else %}
+                Log in to edit your songs.
+            {% endif %}
+        </p>
     {% endif %}
-
 
     <hr>
 
@@ -35,177 +51,166 @@
         <p class="text-muted">Changer la tonalité de la chanson pour mieux s'adapter à votre voix ou pour un meilleur choix d'accord</p>
         <label for="transpose-select">Transpose:</label>
         <select id="transpose-select" class="form-control w-auto d-inline-block">
-            <option value="0">Tonalité originale</option>
-            <option value="-7">-7 demi-tons</option>
-            <option value="-6">-6 demi-tons</option>
-            <option value="-5">-5 demi-tons</option>
-            <option value="-4">-4 demi-tons</option>
-            <option value="-3">-3 demi-tons</option>
-            <option value="-2">-2 demi-tons</option>
-            <option value="-1">-1 demi-ton</option>
-            <option value="1">+1 demi-ton</option>
-            <option value="2">+2 demi-tons</option>
-            <option value="3">+3 demi-tons</option>
-            <option value="4">+4 demi-tons</option>
-            <option value="5">+5 demi-tons</option>
-            <option value="6">+6 demi-tons</option>
-            <option value="7">+7 demi-tons</option>
+            <option value="0">
+                {% if site_name == "FrancoUke" %}Tonalité originale{% else %}Original Key{% endif %}
+            </option>
+            <option value="-7">-7 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="-6">-6 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="-5">-5 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="-4">-4 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="-3">-3 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="-2">-2 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="-1">-1 {% if site_name == "FrancoUke" %}demi-ton{% else %}semitone{% endif %}</option>
+            <option value="1">+1 {% if site_name == "FrancoUke" %}demi-ton{% else %}semitone{% endif %}</option>
+            <option value="2">+2 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="3">+3 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="4">+4 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="5">+5 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="6">+6 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+            <option value="7">+7 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
         </select>
         
         <button id="update-preview" class="btn btn-primary btn-sm mt-2">
             🔄 Appliquer la Transposition
         </button>
-        {% else %}
+    {% else %}
         <h3>Transpose Chords</h3>
         <p class="text-muted">Change the key of the song to adapt to your voice or to use different chords</p>
         <label for="transpose-select">Transpose:</label>
-        <select id="transpose-select" class="form-control w-auto d-inline-block">
-            <option value="0">Original Key</option>
-            <option value="-7">-7 semitone</option>
-            <option value="-6">-6 semitone</option>
-            <option value="-5">-5 semitone</option>
-            <option value="-4">-4 semitone</option>
-            <option value="-3">-3 semitone</option>
-            <option value="-2">-2 semitone</option>
-            <option value="-1">-1 semitone</option>
-            <option value="1">+1 semitone</option>
-            <option value="2">+2 semitone</option>
-            <option value="3">+3 semitone</option>
-            <option value="4">+4 semitone</option>
-            <option value="5">+5 semitone</option>
-            <option value="6">+6 semitone</option>
-            <option value="7">+7 semitone</option>
-        </select>
-        
+\<select id="transpose-select" class="form-control w-auto d-inline-block">
+    <option value="0">
+        {% if site_name == "FrancoUke" %}Tonalité originale{% else %}Original Key{% endif %}
+    </option>
+    <option value="-7">-7 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="-6">-6 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="-5">-5 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="-4">-4 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="-3">-3 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="-2">-2 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="-1">-1 {% if site_name == "FrancoUke" %}demi-ton{% else %}semitone{% endif %}</option>
+    <option value="1">+1 {% if site_name == "FrancoUke" %}demi-ton{% else %}semitone{% endif %}</option>
+    <option value="2">+2 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="3">+3 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="4">+4 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="5">+5 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="6">+6 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+    <option value="7">+7 {% if site_name == "FrancoUke" %}demi-tons{% else %}semitones{% endif %}</option>
+</select>
+
         <button id="update-preview" class="btn btn-primary btn-sm mt-2">
             🔄 Apply Transposition
         </button>
     {% endif %}
 
+    <hr>
+
+    <!-- 🎨 Song Formatting Section -->
+    <h3>
+        🎨 {% if site_name == "FrancoUke" %}
+            Mise en Forme des Chansons
+        {% else %}
+            Song Formatting
+        {% endif %}
+    </h3>
+    <p class="text-muted">
+        {% if site_name == "FrancoUke" %}
+            Ajustez la mise en forme via l’Éditeur de Mise en Forme
+        {% else %}
+            Adjust formatting via the Song Formatting Editor
+        {% endif %}
+    </p>
+
+    <div class="me-3">
+        {% if user.is_authenticated %}
+            {% with site_namespace|add:':edit_formatting' as edit_url_name %}
+                {% if user.is_superuser or user|has_group:"Power Users" or user == score.contributor %}
+                    <a href="{% url edit_url_name score.id %}" class="btn btn-warning">
+                        {% if site_name == "FrancoUke" %}
+                            Modifier la mise en forme
+                        {% else %}
+                            Edit Song Formatting
+                        {% endif %}
+                    </a>
+                {% else %}
+                    <p class="text-muted small">
+                        {% if site_name == "FrancoUke" %}
+                            Veuillez envoyer un message à gaulindm@gmail.com pour demander la permission Power User.
+                        {% else %}
+                            Please send an email to gaulindm@gmail.com to request Power User permission.
+                        {% endif %}
+                    </p>
+                {% endif %}
+            {% endwith %}
+        {% else %}
+            <p class="text-muted small">
+                {% if site_name == "FrancoUke" %}
+                    Connectez-vous pour modifier la mise en forme.
+                {% else %}
+                    Log in to edit formatting.
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
 
     <hr>
 
-    <!-- 🎨 Edit Song Formatting (Handled Separately) -->
-
-        <!-- 🎨 Song Formatting Section (Multi-language & Namespace Safe) -->
-<h3>
-    🎨 {% if site_name == "FrancoUke" %}
-      Mise en Forme des Chansons
-    {% else %}
-      Song Formatting
-    {% endif %}
-  </h3>
-  
-  <p class="text-muted">
-    {% if site_name == "FrancoUke" %}
-      Ajustez la taille de la police, les couleurs et l’espacement via l’Éditeur de Mise en Forme
-    {% else %}
-      Adjust font size, colors, and spacing via the Song Formatting Editor
-    {% endif %}
-  </p>
-  
-
-
-  <div class="me-3">
-    {% if user.is_authenticated %}
-        {% with site_namespace|add:':edit_formatting' as edit_url_name %}
-            {% if user.is_superuser or user|has_group:"Power Users" %}
-                <a href="{% url edit_url_name score.id %}" class="btn btn-warning">
+    <!-- 🎥 YouTube Player Section -->
+    {% if score.metadata.youtube %}
+        <div>
+            <p>
+                {% if site_name == "FrancoUke" %}
+                    Lien YouTube: 
+                {% else %}
+                    YouTube link:
+                {% endif %}
+                <a href="{{ score.metadata.youtube }}" target="_blank">
                     {% if site_name == "FrancoUke" %}
-                        Modifier la mise en forme
+                        Visionner sur YouTube
                     {% else %}
-                        Edit Song Formatting
+                        Watch on YouTube
                     {% endif %}
                 </a>
+            </p>
+        </div>
+        <div id="youtube-player-container" style="margin-top: 20px; max-width: 320px; position: relative;"></div>
+    {% else %}
+        <p class="text-muted">
+            {% if site_name == "FrancoUke" %}
+                Pas de clip Youtube de la chanson.
             {% else %}
-                <p class="text-muted small">
-                    {% if site_name == "FrancoUke" %}
-                        Veuillez envoyer un message à gaulindm@gmail.com pour demander la permission Power User.
-                    {% else %}
-                        Please send an email to gaulindm@gmail.com to request Power User permission.
-                    {% endif %}
-                </p>
+                No YouTube video available for this song.
             {% endif %}
-        {% endwith %}
+        </p>
     {% endif %}
 </div>
-  
-  
-  
 
-
-
-
-
-    <!-- 🎥 YouTube Player Section -->
-            {% if site_name == "FrancoUke" %}
-                <div>
-                    {% if score.metadata.youtube %}
-                    <p>Lien YouTube: <a href="{{ score.metadata.youtube }}" target="_blank">Visionner sur YouTube</a></p>
-                </div>
-                
-                <!-- The YouTube player will be embedded here on page load -->
-                <div id="youtube-player-container" style="margin-top: 20px; max-width: 320px; position: relative;"></div>
-                {% else %}
-                    <p>Pas de clip Youtube de la chanson.</p>
-                {% endif %}
-            {% else %}
-                <div>
-                    {% if score.metadata.youtube %}
-                    <p>Lien YouTube: <a href="{{ score.metadata.youtube }}" target="_blank">Visionner sur YouTube</a></p>
-                </div>
-                
-                <!-- The YouTube player will be embedded here on page load -->
-                <div id="youtube-player-container" style="margin-top: 20px; max-width: 320px; position: relative;"></div>
-                {% else %}
-                    <p>No YouTube video available for this song.</p>
-                {% endif %}
-            {% endif %}
-            </div>
 <script>
-
 document.addEventListener("DOMContentLoaded", function () {
     let youtubeUrl = "{{ score.metadata.youtube }}";
 
-    if (!youtubeUrl) {
-        console.warn("No YouTube URL found.");
-        return;
-    }
-
     function extractVideoId(url) {
-        if (url.includes("youtu.be/")) {
-            return url.split("youtu.be/")[1]?.split("?")[0];
-        } else if (url.includes("youtube.com/watch?v=")) {
-            return url.split("v=")[1]?.split("&")[0];
-        } else if (url.includes("youtube.com/embed/")) {
-            return url.split("embed/")[1]?.split("?")[0];
-        }
+        if (!url) return null;
+        if (url.includes("youtu.be/")) return url.split("youtu.be/")[1]?.split("?")[0];
+        if (url.includes("youtube.com/watch?v=")) return url.split("v=")[1]?.split("&")[0];
+        if (url.includes("youtube.com/embed/")) return url.split("embed/")[1]?.split("?")[0];
         return null;
     }
 
     let videoId = extractVideoId(youtubeUrl);
-
-    if (!videoId) {
-        console.error("Invalid YouTube URL");
-        return;
-    }
-
-    let playerContainer = document.getElementById("youtube-player-container");
-    if (playerContainer) {
-        playerContainer.innerHTML = `
-            <iframe width="320" height="180" 
-                    src="https://www.youtube.com/embed/${videoId}" 
-                    title="YouTube video player" frameborder="0" 
-                    style="border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-            </iframe>`;
-        console.log("YouTube player embedded successfully.");
-    } else {
-        console.error("YouTube player container not found.");
+    if (videoId) {
+        let playerContainer = document.getElementById("youtube-player-container");
+        if (playerContainer) {
+            playerContainer.innerHTML = `
+                <iframe width="320" height="180" 
+                        src="https://www.youtube.com/embed/${videoId}" 
+                        title="YouTube video player" frameborder="0" 
+                        style="border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                </iframe>`;
+        }
     }
 });
-
 
 document.addEventListener("DOMContentLoaded", function() {
     let updatePreviewBtn = document.getElementById("update-preview");
@@ -216,9 +221,10 @@ document.addEventListener("DOMContentLoaded", function() {
             let transposeValue = transposeSelect.value;
             let pdfIframe = document.getElementById("pdf-preview");
             if (pdfIframe) {
-              let url = new URL(pdfIframe.src);
-              url.searchParams.set("transpose", transposeValue);
-              pdfIframe.src = url.toString();            }
+                let url = new URL(pdfIframe.src);
+                url.searchParams.set("transpose", transposeValue);
+                pdfIframe.src = url.toString();
+            }
         });
     }
 });

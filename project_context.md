@@ -26,7 +26,30 @@ All apps share a single Django project with namespaced URLs and site-specific te
   - **Development**: SQLite (default, simple local dev)
   - **Production (planned)**: MySQL on PythonAnywhere
 
+Oct 1st 2025
 
+### 🔐 Permissions & Access Control
+## General Rules
+
+- Read-Only Access
+  - Most views (ScoreView, SongListView, ArtistListView, etc.) are publicly accessible — no login required.
+  - This allows anonymous visitors to browse, view, and preview songs.
+
+-  Authenticated-Only Actions
+- Certain actions require login, e.g.:
+  - Creating, updating, or deleting songs
+  - Editing song formatting
+  - Generating personal PDFs
+- Role-based restrictions
+  - Contributor (owner of a song): can update and delete only their own songs.
+  - Admins / Superusers: can update or delete any song.
+  - Other authenticated users: cannot edit or delete songs they didn’t contribute.
+
+Key Permissions
+- songbook.change_songformatting → required to edit song formatting (checked with @permission_required decorator).
+- Song updates/deletes → enforced via UserPassesTestMixin:
+- SongUpdateView → allows update if the request user is authenticated and is the contributor (or admin).
+- SongDeleteView → allows delete only if the request user is the contributor.
 
 
 ## 🧩 Core App Structure
