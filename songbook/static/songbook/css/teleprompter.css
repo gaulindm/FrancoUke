@@ -67,26 +67,56 @@ body {
 
 /* ===== TELEPROMPTER LAYOUT ===== */
 .tp-main {
-  height: 100vh;
+  /* Fallback for older Safari that doesn't understand 100dvh */
+  height: calc(100vh - 72px);          /* fallback first */
+
+   /* JS-updated value that always matches innerHeight */
+  height: calc(var(--app-height) - 72px);
+
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* stop double scrollbars */
 }
 
-/* Lyrics fill space between controls and chord section */
 .lyrics-container {
-  height: calc(100vh - 64px - 210px); /* controls bar (64px) + chord section max (210px) */
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
-  scroll-behavior: smooth;
-  padding: 20px 28px;
+  -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
+  padding: 120px 28px 80px 28px;
 }
 
-/* When chords hidden, free up space */
-#chord-section.hidden ~ .tp-main .lyrics-container {
-  height: calc(100vh - 64px);
+#chord-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  /* don’t let it block scroll gestures */
+  pointer-events: none;
 }
 
+#chord-section button,
+#chord-section #chord-diagrams {
+  pointer-events: auto; /* restore interactivity only where needed */
+}
+
+/* ===== TOUCH ZONES for navigation ===== */
+
+.touch-zone {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 25%;                 /* adjust as needed */
+  z-index: 1500;
+  background: transparent;    /* keep invisible but clickable */
+}
+
+.touch-left {
+  left: 0;
+}
+
+.touch-right {
+  right: 0;
+}
 
 
 /* ===== LYRICS & TOKENS ===== */

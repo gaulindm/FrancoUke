@@ -24,21 +24,38 @@ def draw_footer_with_doc(canvas, doc):
     )
 
 
+# songbook/utils/pdf_generator.py
+from users.models import UserPreference
+
 def get_user_preferences(user):
-    user_preferences = getattr(user, "userpreference", None)
-    if not user_preferences:
-        raise ValueError("User preferences not found")
-
-    primary_instrument = user_preferences.primary_instrument
-    if not primary_instrument:
-        raise ValueError("Primary instrument not found in user preferences")
-
-    return {
-        "primary_instrument": primary_instrument,
-        "secondary_instrument": getattr(user_preferences, "secondary_instrument", None),
-        "is_lefty": user_preferences.is_lefty,
-        "is_printing_alternate_chord": user_preferences.is_printing_alternate_chord
+    """
+    Return user preferences if available, otherwise sensible defaults.
+    Falls back safely for anonymous users.
+    """
+    default_prefs = {
+        "primary_instrument": "ukulele",
+        "secondary_instrument": None,
+        "is_left_handed": False,
+        "show_alternate_chords": False,
     }
+
+    if not user or not user.is_authenticated:
+        return default_prefs
+
+    try:
+        prefs, _ = UserPreference.objects.get_or_create(
+            user=user,
+            defaults=default_prefs,
+        )
+        return {
+            "primary_instrument": prefs.primary_instrument,
+            "secondary_instrument": getattr(prefs, "secondary_instrument", None),
+            "is_left_handed": getattr(prefs, "is_left_handed", False),
+            "show_alternate_chords": getattr(prefs, "show_alternate_chords", False),
+        }
+    except Exception:
+        return default_prefs
+
 
 
 def load_relevant_chords(songs, user_prefs, transpose_value):
@@ -104,8 +121,8 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     doc.secondary_instrument = user_prefs["secondary_instrument"]
     doc.chord_spacing = 45 if user_prefs["primary_instrument"] == "ukulele" else 60
     doc.row_spacing = 70
-    doc.is_lefty = user_prefs["is_lefty"]
-    doc.is_printing_alternate_chord = user_prefs["is_printing_alternate_chord"]
+    doc.is_lefty = user_prefs["is_left_handed"]
+    doc.is_printing_alternate_chord = user_prefs["show_alternate_chords"]
     doc.acknowledgement = songs[0].acknowledgement if hasattr(songs[0], 'acknowledgement') else ""
 
     # Adjust bottom margin based on chord diagrams

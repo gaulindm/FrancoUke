@@ -49,7 +49,7 @@ urlpatterns = [
      # 🔹 Song Formatting
     path('songs/<int:song_id>/edit_formatting/', edit_song_formatting, name='edit_formatting'),
 
-    path("chords/json/<str:instrument>/", views.get_chords_json, name="get_chords_json"),
+#    path("chords/json/<str:instrument>/", views.get_chords_json, name="get_chords_json"),
 
     path("chords/<str:instrument>.json", views.serve_chords_json, name="serve_chords_json"),
 
