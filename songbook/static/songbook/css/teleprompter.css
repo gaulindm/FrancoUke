@@ -81,6 +81,11 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
   padding: 120px 28px 80px 28px;
+  scroll-behavior: smooth;
+}
+
+body.scrolling .controls {
+  opacity: 0.5;
 }
 
 #chord-section {
