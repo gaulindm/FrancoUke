@@ -21,14 +21,24 @@ class SetList(models.Model):
         return self.name
 
 class SetListSong(models.Model):
-    setlist = models.ForeignKey(SetList, on_delete=models.CASCADE, related_name="songs")
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)
-    order = models.PositiveIntegerField(default=0)
+    setlist = models.ForeignKey("SetList", related_name="songs", on_delete=models.CASCADE)
+    song = models.ForeignKey("songbook.Song", on_delete=models.CASCADE)
+    order = models.PositiveIntegerField()
     rehearsal_notes = models.TextField(blank=True)
     scroll_speed = models.PositiveIntegerField(default=40)  # override per setlist if needed
 
     class Meta:
+        unique_together = ("setlist", "order")
         ordering = ["order"]
 
+    def save(self, *args, **kwargs):
+        # If no order is given, place it at the end
+        if self.order is None:
+            max_order = SetListSong.objects.filter(setlist=self.setlist).aggregate(
+                Max("order")
+            )["order__max"] or 0
+            self.order = max_order + 1
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.order}. {self.song.songTitle}"
+        return f"{self.setlist.name} – {self.order}. {self.song.songTitle}"

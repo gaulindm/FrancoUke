@@ -83,16 +83,7 @@
       {% else %}
         <button class="nav-btn" disabled>⬅️</button>
       {% endif %}
-
-      <select id="song-selector">
-        {% for s in setlist.songs.all %}
-          <option value="{% url 'setlists:setlist_teleprompter' setlist.id s.order %}"
-            {% if s.id == current.id %}selected{% endif %}>
-            {{ s.order }}. {{ s.song.songTitle }}
-          </option>
-        {% endfor %}
-      </select>
-
+    
       {% if next_song %}
         <button class="nav-btn"
                 onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'">
@@ -102,6 +93,7 @@
         <button class="nav-btn" disabled>➡️</button>
       {% endif %}
     </div>
+    
   </div>
 
   <!-- Lyrics -->
@@ -109,7 +101,7 @@
     <div class="lyrics-container">
       <div class="lyrics">
         <div class="metadata">
-          <h1>Title of song{{ song.songTitle }}</h1>
+          <h1>{{ song.songTitle }}</h1>
           {% if metadata.songwriter %}
             <div class="songwriter">{{ metadata.songwriter }}</div>
           {% endif %}
@@ -154,14 +146,7 @@
       }
     });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const selector = document.getElementById("song-selector");
-      if (selector) {
-        selector.addEventListener("change", (e) => {
-          window.location.href = e.target.value;
-        });
-      }
-    });
+ 
   </script>
 
   <!-- Chord Section -->

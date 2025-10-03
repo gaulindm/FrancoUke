@@ -417,6 +417,7 @@ class SongCreateView(LoginRequiredMixin, CreateView):
         form.instance.contributor = self.request.user
         context_data = site_context(self.request)
         form.instance.site_name = context_data.get("site_name")
+
         # parse and store lyrics_with_chords if possible
         raw = form.cleaned_data.get("songChordPro", "")
         try:
@@ -433,7 +434,10 @@ class SongCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse("songbook:song_list")
+        site_name = getattr(self.object, "site_name", None) or site_context(self.request).get("site_name")
+        return reverse(f"{site_name.lower()}:score_view", kwargs={"pk": self.object.pk})
+
+
 
 
 class SongUpdateView(LoginRequiredMixin, ContributorOrAdminMixin, UpdateView):

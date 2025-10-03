@@ -110,3 +110,62 @@ class Command(BaseCommand):
 
             except Exception as e:
                 self.stderr.write(self.style.ERROR(f"Failed for {pdf_file}: {e}"))
+
+'''
+🚀 Usage Scenarios
+1. Convert one PDF into a .cho file
+python manage.py convertpdf path/to/song.pdf
+
+
+Creates song.cho next to the PDF.
+
+Doesn’t touch the database.
+
+2. Convert a whole folder of PDFs into .cho files
+python manage.py import_songbook_pdf path/to/folder/
+
+
+Loops through all *.pdf in the folder.
+
+Saves each as .cho in the same folder.
+
+3. Convert a single PDF and save it to the DB
+python manage.py convertpdf path/to/song.pdf --to-db --contributor-id=1
+
+
+Extracts text from song.pdf.
+
+Converts it to ChordPro.
+
+Saves a new Song object with:
+
+songTitle = value from {title:...} (or filename fallback)
+
+songChordPro = full ChordPro text
+
+site_name = "StrumSphere" (default)
+
+metadata = includes original PDF path
+
+contributor = user with ID 1
+
+4. Convert a folder of PDFs straight into DB
+python manage.py convertpdf path/to/folder/ --to-db --contributor-id=1
+
+
+Processes all .pdf files in the folder.
+
+Creates one Song DB entry per PDF.
+
+🔍 Example
+
+If you have AmazingGrace.pdf and its text starts with:
+
+{title:Amazing Grace}
+{artist:Traditional}
+
+
+Running:
+
+python manage.py convertpdf AmazingGrace.pdf --to-db --contributor-id=2
+'''

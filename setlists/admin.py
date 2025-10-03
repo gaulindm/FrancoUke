@@ -19,7 +19,12 @@ class SetListAdmin(admin.ModelAdmin):
 
 @admin.register(SetListSong)
 class SetListSongAdmin(admin.ModelAdmin):
-    list_display = ("setlist", "song", "order", "scroll_speed")
+    list_display = ("setlist", "order", "song")
     list_filter = ("setlist",)
-    ordering = ["setlist", "order"]
-    search_fields = ("song__songTitle", "setlist__name")
+    ordering = ("setlist", "order")
+
+    def get_fields(self, request, obj=None):
+        if obj:  # editing existing entry
+            return ("setlist", "song", "order")
+        return ("setlist", "song")  # creating new entry
+
