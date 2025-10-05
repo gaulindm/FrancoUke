@@ -23,6 +23,14 @@
   {% endif %}
 
   <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+
+  <script>
+    window.initialScrollSpeed = {{ song.scroll_speed|default:40 }};
+    window.SONG = { id: "{{ song.id }}", title: "{{ song.songTitle|escapejs }}" };
+  </script>
+
+
+
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 
   <style>
@@ -68,8 +76,15 @@
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline">
-        Speed: <input type="range" id="scroll-speed" min="1" max="100" value="{{ song.scroll_speed|default:40 }}">
+        <button id="speed-decrease">-</button>
+        <span id="scroll-speed-display">{{ song.scroll_speed|default:40 }} px/s</span>
+        <button id="speed-increase">+</button>
+        <button id="speed-save">💾 Save</button>
       </div>
+      
+
+
+
       <button id="scroll-reset">⏹ Reset</button>
     </div>
 
