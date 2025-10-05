@@ -27,8 +27,12 @@ class Song(models.Model):
     date_posted = models.DateField(default=timezone.now)
     contributor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    scroll_speed = models.PositiveIntegerField(default=40)   # pixels/sec
-
+    scroll_speed = models.PositiveIntegerField(
+        default=30,
+        null=True,
+        blank=True,
+        help_text="Teleprompter scroll speed in pixels per second (default 30 if unset)"
+    )
 
     acknowledgement = models.CharField(max_length=100, blank=True, null=True)
     site_name = models.CharField(

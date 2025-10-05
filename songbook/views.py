@@ -405,6 +405,46 @@ class SongListView(SiteContextMixin, ListView):
         context.update(site_context(self.request))
         return context
 
+# songbook/views.py
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from .models import Song
+
+@csrf_exempt
+def set_scroll_speed(request, song_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            song = Song.objects.get(pk=song_id)
+            song.scroll_speed = data.get("scroll_speed", song.scroll_speed)
+            song.save(update_fields=["scroll_speed"])
+            return JsonResponse({"status": "ok", "scroll_speed": song.scroll_speed})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Invalid request"}, status=405)
+
+
+# songbook/views.py
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+@require_POST
+@csrf_exempt  # or use @csrf_protect + pass CSRF token via JS
+def update_scroll_speed(request, song_id):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        new_speed = int(data.get("scroll_speed", 30))
+    except (ValueError, json.JSONDecodeError):
+        return JsonResponse({"error": "Invalid data"}, status=400)
+
+    song = get_object_or_404(Song, pk=song_id)
+    song.scroll_speed = new_speed
+    song.save(update_fields=["scroll_speed"])
+
+    return JsonResponse({"status": "ok", "new_speed": new_speed})
+
 
 class SongCreateView(LoginRequiredMixin, CreateView):
     """

@@ -21,6 +21,11 @@ from songbook.utils.chord_library import load_chord_dict
 
 from songbook.context_processors import site_context
 
+import json
+import re
+from django.shortcuts import render, get_object_or_404
+
+
 def teleprompter_view(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
@@ -73,12 +78,16 @@ def teleprompter_view(request, song_id):
         "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
     }
 
+    initial_scroll_speed = song.scroll_speed or 30  # fallback if null
+
+    # --- Return context ---
     return render(request, "songbook/teleprompter.html", {
         "song": song,
         "lyrics_with_chords": lyrics_html,
         "metadata": metadata,
         "relevant_chords_json": json.dumps(relevant_chords),
-        "userPreferences": user_preferences,
+        # 👇 JSON-encode preferences safely for the template
+        "user_preferences_json": json.dumps(user_preferences),
+        "initial_scroll_speed": initial_scroll_speed,
         **context_data,  # makes site_name/base_template available in template
     })
-

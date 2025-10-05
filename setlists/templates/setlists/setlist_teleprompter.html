@@ -68,7 +68,7 @@
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline">
-        Speed: <input type="range" id="scroll-speed" min="1" max="10" value="5">
+        Speed: <input type="range" id="scroll-speed" min="1" max="100" value="{{ song.scroll_speed|default:40 }}">
       </div>
       <button id="scroll-reset">⏹ Reset</button>
     </div>

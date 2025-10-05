@@ -25,7 +25,6 @@ class SetListSong(models.Model):
     song = models.ForeignKey("songbook.Song", on_delete=models.CASCADE)
     order = models.PositiveIntegerField()
     rehearsal_notes = models.TextField(blank=True)
-    scroll_speed = models.PositiveIntegerField(default=40)  # override per setlist if needed
 
     class Meta:
         unique_together = ("setlist", "order")

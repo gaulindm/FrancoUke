@@ -14,6 +14,7 @@ from .views import (
     preview_pdf,
     about,
     whats_new,
+    update_scroll_speed
 )
 from songbook import views
 
@@ -60,6 +61,8 @@ urlpatterns = [
     path('generate-song-pdf/<int:song_id>/', views.generate_single_song_pdf, name='generate_single_song_pdf'),
     path('generate_multi_song_pdf/', views.generate_multi_song_pdf, name='generate_multi_song_pdf'),
 
+    path("songs/<int:song_id>/set-scroll-speed/", views.set_scroll_speed, name="set_scroll_speed"),
+    path("song/<int:song_id>/set-speed/", update_scroll_speed, name="update_scroll_speed"),
 
 
     # 🔹 Static / Informational Views

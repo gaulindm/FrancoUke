@@ -65,6 +65,22 @@ body {
 }
 .control-inline input[type=range] { vertical-align: middle; }
 
+.speed-btn {
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.speed-btn:hover {
+  background: #666;
+}
+
+
+
 /* ===== TELEPROMPTER LAYOUT ===== */
 .tp-main {
   /* Fallback for older Safari that doesn't understand 100dvh */

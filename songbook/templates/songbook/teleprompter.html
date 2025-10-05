@@ -6,9 +6,14 @@
   <title>{{ song.title }}</title>
   <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
   
+
+
+
+  
   <!-- User Preferences -->
   <script>
-    window.userPreferences = {{ user_preferences|safe }};
+  window.userPreferences = JSON.parse('{{ user_preferences_json|escapejs }}');
+  window.initialScrollSpeed = {{ song.scroll_speed|default:20 }};
   </script>
 
   <!-- Diagram renderer -->
@@ -25,8 +30,14 @@
     </div>
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
+      <!-- Sroll Speed adjustement -->
       <div class="control-inline">
-        Speed: <input type="range" id="scroll-speed" min="1" max="10" value="3">
+        <span>Speed:</span>
+        <button id="speed-decrease" class="speed-btn">−</button>
+        <span id="scroll-speed-display">{{ song.scroll_speed|default:30 }}</span>
+        <button id="speed-increase" class="speed-btn">+</button>
+        <button id="speed-save" class="speed-btn">💾 Save</button>
+
       </div>
     </div>
     <div class="right">
