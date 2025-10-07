@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{{ song.title }}</title>
+  <title>{{ song.songTitle }}</title>
   <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
   
 
@@ -12,9 +12,20 @@
   
   <!-- User Preferences -->
   <script>
-  window.userPreferences = JSON.parse('{{ user_preferences_json|escapejs }}');
-  window.initialScrollSpeed = {{ song.scroll_speed|default:20 }};
+    try {
+      window.userPreferences = JSON.parse('{{ user_preferences_json|escapejs }}');
+    } catch (e) {
+      console.warn("⚠️ Could not parse user preferences JSON:", e);
+      window.userPreferences = {};
+    }
+  
+    // Safe numeric or string fallback
+    window.initialScrollSpeed = {{ initial_scroll_speed|default:"20" }};
   </script>
+  
+  
+  
+
 
   <!-- Diagram renderer -->
   <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
@@ -25,7 +36,7 @@
   <!-- Controls -->
   <div class="controls">
     <div class="left">
-      <span class="song-title">{{ song.title }}</span>
+      <span class="song-title">{{ song.songTitle }}</span>
       <button id="toggle-chords">Hide Chords</button>
     </div>
     <div class="center">
@@ -50,7 +61,7 @@
     <div class="lyrics-container">
       <div class="lyrics">
         <div class="metadata">
-          <h1>{{ song.title }}</h1>
+          <h1>{{ song.songTitle }}</h1>
           {% if metadata.songwriter %}
             <div class="songwriter">{{ metadata.songwriter }}</div>
           {% endif %}

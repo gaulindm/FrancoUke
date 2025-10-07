@@ -45,6 +45,21 @@ def clean_chord(chord):
     """Removes strumming indicators (slashes) from chords."""
     return re.sub(r"/+", "", chord)  # ✅ Replace one or more slashes with nothing
 
+def clean_chord(chord):
+    """
+    Removes strumming indicators (slashes) from chords like Em/// → Em
+    but preserves real slash chords like D/F#.
+    """
+    # If chord contains a valid slash chord like D/F#, keep it
+    if re.match(r"^[A-G][#b]?[^/\]\s]*/[A-G][#b]?$", chord):
+        return chord  # Keep legitimate slash chord
+    
+    # Otherwise, remove trailing slashes (Em/// -> Em)
+    return re.sub(r"/+$", "", chord)
+
+
+
+
 def extract_chords(parsed_data, unique=False):
     """Extract chords from parsed data, removing duplicates if needed."""
     chords = []

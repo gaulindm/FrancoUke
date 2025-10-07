@@ -10,12 +10,13 @@
   <!-- User Preferences -->
   {% if user.is_authenticated and user.userpreference %}
   <script>
-    window.userPreferences = {
-      instrument: "{{ user.userpreference.primary_instrument }}",
-      isLefty: {{ user.userpreference.is_lefty|yesno:"true,false" }},
-      showAlternate: {{ user.userpreference.is_printing_alternate_chord|yesno:"true,false" }}
-    };
+    window.userPreferences = {{ userPreferences|default:"{}"|safe }};
+    if (typeof window.userPreferences !== 'object') {
+      window.userPreferences = {};
+    }
+    window.initialScrollSpeed = {{ initialScrollSpeed|default:40 }};
   </script>
+  
   {% else %}
   <script>
     window.userPreferences = { instrument: "ukulele", isLefty: false, showAlternate: false };
@@ -169,91 +170,6 @@
     <div id="chord-diagrams"></div>
   </div>
 
-  <!-- Gesture controls -->
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const chordSection = document.getElementById("chord-section");
-    const lyricsContainer = document.querySelector(".lyrics-container");
-
-    let scrollActive = false;
-    let autoScrollInterval = null;
-    let lastTapTime = 0;
-
-    function startScrolling() {
-      if (scrollActive) return;
-      scrollActive = true;
-      document.body.classList.add("scrolling");
-      hideChords(); // auto-hide chords once scrolling starts
-
-      const speedInput = document.getElementById("scroll-speed");
-      autoScrollInterval = setInterval(() => {
-        lyricsContainer.scrollTop += parseInt(speedInput.value, 10);
-      }, 200);
-    }
-
-    function stopScrolling() {
-      scrollActive = false;
-      document.body.classList.remove("scolling");
-      clearInterval(autoScrollInterval);
-    }
-
-    function toggleScrolling() {
-      if (scrollActive) {
-        stopScrolling();
-      } else {
-        startScrolling();
-      }
-    }
-
-    function hideChords() {
-      chordSection.classList.add("hidden");
-    }
-
-    function toggleChords() {
-      chordSection.classList.toggle("hidden");
-    }
-
-    // Swipe + Tap detection
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    document.addEventListener("touchstart", (e) => {
-      const touch = e.changedTouches[0];
-      touchStartX = touch.pageX;
-      touchStartY = touch.pageY;
-    });
-
-    document.addEventListener("touchend", (e) => {
-      const touch = e.changedTouches[0];
-      const dx = touch.pageX - touchStartX;
-      const dy = touch.pageY - touchStartY;
-
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 0) {
-          // Swipe right = prev song
-          {% if prev_song %}
-          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}";
-          {% endif %}
-        } else {
-          // Swipe left = next song
-          {% if next_song %}
-          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}";
-          {% endif %}
-        }
-        return;
-      }
-
-      // Tap / Double tap
-      const now = Date.now();
-      if (now - lastTapTime < 300) {
-        toggleChords(); // double tap -> toggle chords
-      } else {
-        toggleScrolling(); // single tap -> start/stop scrolling
-      }
-      lastTapTime = now;
-    });
-  });
-  </script>
 
 </body>
 </html>

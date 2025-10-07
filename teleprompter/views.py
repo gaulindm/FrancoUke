@@ -78,7 +78,7 @@ def teleprompter_view(request, song_id):
         "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
     }
 
-    initial_scroll_speed = song.scroll_speed or 30  # fallback if null
+    initial_scroll_speed = song.scroll_speed or 20  # fallback if null
 
     # --- Return context ---
     return render(request, "songbook/teleprompter.html", {

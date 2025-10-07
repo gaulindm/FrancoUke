@@ -94,11 +94,19 @@ body {
 }
 
 .lyrics-container {
+  /*height: auto; /* let JS calculate height */
+  height:calc(100vh -150 px);
+  max-height: calc(100vh - 72px - 64px); /* viewport minus controls & chords */
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
-  padding: 120px 28px 80px 28px;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 28px 80px 28px; /* reduce top padding for better scrolling */
   scroll-behavior: smooth;
+  touch-action: pan-y; /* crucial for iPad */
+  border: 2px solid red; /* debug */
+  transform: none;
+  position: relative;
 }
+
 
 body.scrolling .controls {
   opacity: 0.5;
