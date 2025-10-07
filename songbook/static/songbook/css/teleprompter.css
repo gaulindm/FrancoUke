@@ -99,6 +99,23 @@ body {
   pointer-events: auto; /* restore interactivity only where needed */
 }
 
+#speed-decrease,
+#speed-increase {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 1.2em;
+}
+
+#speed-display {
+  min-width: 40px;
+  display: inline-block;
+  text-align: center;
+  font-weight: bold;
+  color: var(--accent);
+}
 
 
 

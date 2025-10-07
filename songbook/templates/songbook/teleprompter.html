@@ -23,8 +23,12 @@
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline">
-        Speed: <input type="range" id="scroll-speed" min="1" max="10" value="3">
+        <button id="speed-decrease">−</button>
+        <span id="speed-display">3</span> px/s
+        <button id="speed-increase">+</button>
       </div>
+      
+
     </div>
     <div class="right">
       <button id="scroll-reset">⏹ Reset</button>
@@ -55,6 +59,14 @@
   <script id="chords-data" type="application/json">
     {{ relevant_chords_json|safe }}
   </script>
+  <script id="teleprompter-config" type="application/json">
+    {
+      "initialScrollSpeed": {{ initial_scroll_speed|default:20 }},
+      "userPreferences": {{ user_preferences_json|safe }}
+    }
+  </script>
+  
+
 
   <!-- Chord Section -->
   <div id="chord-section">

@@ -4,6 +4,7 @@
    - Swipe navigation between songs
    - Auto-hide overlay controls
    - Uses chord_diagrams.js to render backend-provided chord shapes
+   - Loads scroll speed & user preferences from <script id="teleprompter-config">
 */
 
 (function () {
@@ -11,36 +12,43 @@
     return root.querySelector(sel);
   }
 
-  // --- Auto Scroll ---
+  // --- Config & State ---
   let scrollInterval = null;
-  let scrollSpeed = 3; // default speed, 1–10 from UI (pixels per tick)
+  let scrollSpeed = 20; // default pixels/sec equivalent
+  const MIN_SPEED = 5;
+  const MAX_SPEED = 300;
+  const STEP = 5;
 
+  function loadConfig() {
+    const configEl = document.getElementById("teleprompter-config");
+    if (!configEl) return console.warn("⚠️ No teleprompter config found.");
+    try {
+      const config = JSON.parse(configEl.textContent);
+      window.userPreferences = config.userPreferences || {};
+      scrollSpeed = parseInt(config.initialScrollSpeed, 10) || 20;
+      console.log("✅ Loaded teleprompter config:", config);
+    } catch (e) {
+      console.error("❌ Failed to parse teleprompter config:", e);
+    }
+  }
+
+  // --- Auto Scroll ---
   function startScroll() {
-    if (scrollInterval) return; // already running
+    if (scrollInterval) return;
     const container = $(".lyrics-container");
-
     scrollInterval = setInterval(() => {
-      container.scrollBy(0, scrollSpeed);
-      if (
-        container.scrollTop + container.clientHeight >=
-        container.scrollHeight
-      ) {
-        stopScroll(); // stop at bottom
-      }
-    }, 30); // fixed tick interval, smooth across devices
+      container.scrollBy(0, scrollSpeed / 30); // smooth ~30fps
+      if (container.scrollTop + container.clientHeight >= container.scrollHeight)
+        stopScroll();
+    }, 30);
 
-    const btn = $("#scroll-toggle");
-    btn.textContent = "⏸ Pause";
-    btn.classList.add("active");
+    $("#scroll-toggle").textContent = "⏸ Pause";
   }
 
   function stopScroll() {
     clearInterval(scrollInterval);
     scrollInterval = null;
-
-    const btn = $("#scroll-toggle");
-    btn.textContent = "▶️ Start";
-    btn.classList.remove("active");
+    $("#scroll-toggle").textContent = "▶️ Start";
   }
 
   function resetScroll() {
@@ -48,41 +56,23 @@
     $(".lyrics-container").scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // --- Chord Diagrams ---
+  // --- Chord rendering ---
   function renderChordDiagrams(chords) {
-    const container = document.getElementById("chord-diagrams");
+    const container = $("#chord-diagrams");
+    if (!container) return;
     container.innerHTML = "";
 
     const prefs = window.userPreferences || {};
     const showAlternate = prefs.showAlternate || false;
 
     chords.forEach((chord) => {
-      if (!chord.variations || chord.variations.length === 0) {
-        console.warn("⚠️ No variations for chord", chord.name);
-        return;
-      }
-
-      // Only show first variation unless user wants all
-      const variationsToRender = showAlternate
-        ? chord.variations
-        : [chord.variations[0]];
-
-      variationsToRender.forEach((variation) => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "chord-wrapper";
-        wrapper.style.display = "inline-block";
-        wrapper.style.margin = "0";
-
-        if (typeof drawChordDiagram === "function") {
-          drawChordDiagram(wrapper, {
-            name: chord.name,
-            ...variation,
-          });
-        } else {
-          console.error("❌ drawChordDiagram is not defined!");
-        }
-
-        container.appendChild(wrapper);
+      const variations = showAlternate ? chord.variations : [chord.variations[0]];
+      variations.forEach((v) => {
+        const wrap = document.createElement("div");
+        wrap.className = "chord-wrapper";
+        if (typeof drawChordDiagram === "function")
+          drawChordDiagram(wrap, { name: chord.name, ...v });
+        container.appendChild(wrap);
       });
     });
   }
@@ -90,65 +80,35 @@
   function toggleChordSection() {
     const section = $("#chord-section");
     section.classList.toggle("hidden");
-
-    const btn = $("#toggle-chords");
-    btn.textContent = section.classList.contains("hidden")
+    $("#toggle-chords").textContent = section.classList.contains("hidden")
       ? "Show Chords"
       : "Hide Chords";
-
-    // (Re)draw chords when showing
-    if (!section.classList.contains("hidden") && window.SONG?.chords) {
+    if (!section.classList.contains("hidden") && window.SONG?.chords)
       renderChordDiagrams(window.SONG.chords);
-    }
   }
 
-  // --- Swipe detection for navigation ---
+  // --- Swipe Navigation ---
   let touchStartX = 0;
-  let touchEndX = 0;
-
-  function handleSwipe() {
-    if (touchEndX < touchStartX - 50) {
-      // Swipe left → next song
-      const nextBtn = document.querySelector("#nav-overlay .right");
-      if (nextBtn) window.location.href = nextBtn.href;
-    }
-    if (touchEndX > touchStartX + 50) {
-      // Swipe right → prev song
-      const prevBtn = document.querySelector("#nav-overlay .left");
-      if (prevBtn) window.location.href = prevBtn.href;
-    }
-  }
-
-  document.addEventListener("touchstart", (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-  });
-
+  document.addEventListener("touchstart", (e) => (touchStartX = e.touches[0].screenX));
   document.addEventListener("touchend", (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (dx < -50) $("#nav-overlay .right")?.click();
+    if (dx > 50) $("#nav-overlay .left")?.click();
   });
 
-  // --- Overlay auto-hide ---
+  // --- Overlay ---
   let overlayTimer = null;
-  const overlay = $("#nav-overlay");
-
   function showOverlay() {
-    if (!overlay) return;
-    overlay.classList.remove("hidden");
-
+    $("#nav-overlay")?.classList.remove("hidden");
     clearTimeout(overlayTimer);
-    overlayTimer = setTimeout(() => {
-      overlay.classList.add("hidden");
-    }, 3000); // hide after 3s of inactivity
-  }
-
-  function resetOverlayTimer() {
-    showOverlay();
+    overlayTimer = setTimeout(() => $("#nav-overlay")?.classList.add("hidden"), 3000);
   }
 
   // --- Init ---
   document.addEventListener("DOMContentLoaded", () => {
-    // Scroll controls
+    loadConfig();
+
+    // Scroll buttons
     $("#scroll-toggle")?.addEventListener("click", () => {
       if (scrollInterval) stopScroll();
       else startScroll();
@@ -156,41 +116,43 @@
 
     $("#scroll-reset")?.addEventListener("click", resetScroll);
 
-    $("#scroll-speed")?.addEventListener("input", (e) => {
-      scrollSpeed = parseInt(e.target.value, 10);
+    // --- Speed controls (− / +) ---
+    const disp = $("#speed-display");
+    const updateDisplay = () => {
+      if (disp) disp.textContent = Math.round(scrollSpeed);
+    };
+
+    $("#speed-decrease")?.addEventListener("click", () => {
+      scrollSpeed = Math.max(MIN_SPEED, scrollSpeed - STEP);
+      updateDisplay();
     });
+
+    $("#speed-increase")?.addEventListener("click", () => {
+      scrollSpeed = Math.min(MAX_SPEED, scrollSpeed + STEP);
+      updateDisplay();
+    });
+
+    updateDisplay();
 
     // Chords toggle
     $("#toggle-chords")?.addEventListener("click", toggleChordSection);
 
-    // --- Load chords from <script id="chords-data"> ---
-    const chordDataEl = document.getElementById("chords-data");
-    if (chordDataEl) {
+    // Chord data
+    const chordsEl = document.getElementById("chords-data");
+    if (chordsEl) {
       try {
-        const chords = JSON.parse(chordDataEl.textContent);
-        console.log("✅ Parsed chords from template:", chords);
-
-        if (Array.isArray(chords) && chords.length > 0) {
+        const chords = JSON.parse(chordsEl.textContent);
+        if (Array.isArray(chords) && chords.length > 0)
           renderChordDiagrams(chords);
-        } else {
-          console.warn("⚠️ No chords found in parsed JSON.");
-        }
-      } catch (err) {
-        console.error("❌ Failed to parse chords JSON:", err);
+      } catch (e) {
+        console.error("❌ Error parsing chords JSON:", e);
       }
-    } else {
-      console.warn("⚠️ No <script id='chords-data'> element found.");
     }
 
-    // Overlay auto-hide logic
-    if (overlay) {
-      // Show immediately on load
-      showOverlay();
-
-      // Reset timer on interactions
-      ["mousemove", "touchstart", "click"].forEach((evt) => {
-        document.addEventListener(evt, resetOverlayTimer);
-      });
-    }
+    // Overlay handling
+    showOverlay();
+    ["mousemove", "touchstart", "click"].forEach((evt) =>
+      document.addEventListener(evt, showOverlay, { passive: true })
+    );
   });
 })();
