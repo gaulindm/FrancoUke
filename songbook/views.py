@@ -260,6 +260,30 @@ def chord_dictionary(request):
     return render(request, "songbook/chord_dictionary.html", context_data)
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import Song
+
+@csrf_exempt  # You can remove this later if you handle CSRF properly
+def save_scroll_speed(request, song_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        new_speed = int(data.get("scroll_speed", 20))
+
+        song = Song.objects.get(pk=song_id)
+        song.scroll_speed = new_speed
+        song.save()
+
+        return JsonResponse({"status": "ok", "scroll_speed": new_speed})
+    except Song.DoesNotExist:
+        return JsonResponse({"error": "Song not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
 
 def home(request, site_name):
     return render(request, 'index.html', {'site_name': site_name})

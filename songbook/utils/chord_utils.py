@@ -39,6 +39,7 @@ class ChordDiagram(Flowable):
 def load_chords(instrument):
     """
     Load chord definitions based on the selected instrument.
+    Also adds common name aliases like Cmaj7 → CM7 automatically.
     """
     # Point to the songbook/chords folder instead of static/js
     chords_dir = os.path.join(settings.BASE_DIR, 'songbook', 'chords')
@@ -59,17 +60,29 @@ def load_chords(instrument):
         with open(file_path, 'r', encoding='utf-8') as file:
             chords = json.load(file)
             print(f"DEBUG: Loaded {len(chords)} chords for {instrument}")
-            # Ensure instrument field exists
+
+            extended_chords = []
+
             for chord in chords:
                 chord["instrument"] = instrument
-            return chords
+                extended_chords.append(chord)
+
+                # ✅ Add alias: Cmaj7 → CM7
+                if chord["name"].endswith("maj7"):
+                    alias = chord["name"].replace("maj7", "M7")
+                    alias_chord = dict(chord)
+                    alias_chord["name"] = alias
+                    extended_chords.append(alias_chord)
+
+            print(f"DEBUG: Added {len(extended_chords) - len(chords)} alias chords for {instrument}")
+            return extended_chords
+
     except FileNotFoundError:
         print(f"ERROR: Chord file not found for {instrument} at {file_path}")
         return []
     except json.JSONDecodeError as e:
         print(f"ERROR: Invalid JSON format in {file_path}: {e}")
         return []
-
 
     
 def extract_used_chords(lyrics_with_chords):

@@ -60,6 +60,9 @@ urlpatterns = [
     path('generate-song-pdf/<int:song_id>/', views.generate_single_song_pdf, name='generate_single_song_pdf'),
     path('generate_multi_song_pdf/', views.generate_multi_song_pdf, name='generate_multi_song_pdf'),
 
+    path("song/<int:song_id>/save_scroll_speed/", views.save_scroll_speed, name="save_scroll_speed"),
+
+
 
     # 🔹 Static / Informational Views
     #path('about/', views.about, name='songbook-about'),

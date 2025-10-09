@@ -11,7 +11,7 @@
   <!-- Diagram renderer -->
   <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
   <!-- Teleprompter engine -->
-  <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
+
 </head>
 <body>
   <!-- Controls -->
@@ -23,12 +23,11 @@
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline">
-        <button id="speed-decrease">−</button>
-        <span id="speed-display">3</span> px/s
-        <button id="speed-increase">+</button>
+        <button id="speed-down">−</button>
+        <span id="speed-value">3</span>
+        <button id="speed-up">+</button>
+        <button id="save-speed" class="secondary">💾 Save</button>
       </div>
-      
-
     </div>
     <div class="right">
       <button id="scroll-reset">⏹ Reset</button>
@@ -40,7 +39,7 @@
     <div class="lyrics-container">
       <div class="lyrics">
         <div class="metadata">
-          <h1>{{ song.title }}</h1>
+          <h1>{{ song.songTitle }}</h1>
           {% if metadata.songwriter %}
             <div class="songwriter">{{ metadata.songwriter }}</div>
           {% endif %}
@@ -85,5 +84,6 @@
       console.log("✅ SONG loaded:", window.SONG);
     });
   </script>
+    <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 </body>
 </html>

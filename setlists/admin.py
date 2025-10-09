@@ -7,7 +7,7 @@ class SetListSongInline(admin.TabularInline):
     extra = 1
     ordering = ["order"]
     autocomplete_fields = ["song"]  # helpful if you have 800+ songs
-    fields = ["song", "order", "scroll_speed"]
+    fields = ["song", "order"]
 
 
 @admin.register(SetList)

@@ -14,6 +14,8 @@ import os
 import re
 
 
+
+
 def draw_footer_with_doc(canvas, doc):
     draw_footer(
         canvas, doc, doc.relevant_chords, doc.chord_spacing, doc.row_spacing, doc.is_lefty,
@@ -56,6 +58,46 @@ def get_user_preferences(user):
     except Exception:
         return default_prefs
 
+import re
+
+def chord_equivalent(a: str, b: str) -> bool:
+    """
+    Smart chord name comparison (FrancoUke-safe):
+    - Treats CM7 == Cmaj7 == CMAJ7
+    - Keeps Cm7 (minor) distinct from CM7 (major)
+    - Ignores strumming slashes (Em/// == Em)
+    - Case-insensitive for maj-variants only
+    """
+    import re
+
+    if not a or not b:
+        return False
+
+    a = a.strip()
+    b = b.strip()
+
+    # 🧹 Remove trailing slashes (Em/// → Em)
+    a = re.sub(r'/+$', '', a)
+    b = re.sub(r'/+$', '', b)
+
+    # 🧹 Remove alternate bass chords (D/F# → D)
+    a = re.sub(r'/[A-G][#b]?$', '', a)
+    b = re.sub(r'/[A-G][#b]?$', '', b)
+
+    # 🧠 If either chord explicitly uses "m" and not "maj" → it's a minor chord → exact match only
+    if re.match(r'^[A-G][#b]?m(?!aj)', a):
+        return a == b
+
+    # 🧠 Normalize "maj" variants: CM7, Cmaj7, CΔ7 → all become CM7
+    def normalize_maj(name):
+        name = re.sub(r'(?i)maj', 'M', name)
+        name = re.sub(r'(?i)Δ', 'M', name)
+        return name
+
+    a_norm = normalize_maj(a).lower()
+    b_norm = normalize_maj(b).lower()
+
+    return a_norm == b_norm
 
 
 def load_relevant_chords(songs, user_prefs, transpose_value):
@@ -71,8 +113,10 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
     used_chords = [normalize_chord(chord).strip() for chord in extract_used_chords(songs[0].lyrics_with_chords)]
     transposed_chords = {transpose_chord(chord.strip(), transpose_value).strip() for chord in used_chords}
 
-
-    return [chord for chord in all_chords if chord["name"].lower() in map(str.lower, transposed_chords)]
+    return [
+        chord for chord in all_chords
+        if any(chord_equivalent(chord["name"], t) for t in transposed_chords)
+    ]
 
 
 def get_paragraph_styles(formatting):

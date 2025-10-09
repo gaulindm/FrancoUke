@@ -1,10 +1,18 @@
 # transposer.py
+
 from collections import Counter
 import re
 
-CHORD_REGEX = re.compile(r"\[([A-G][#b]?[^/\]\s]*)\]")  # you may already have this!
-
-
+# 🎸 Updated regex — detects case-sensitive chords, slash chords, and trailing strumming slashes
+CHORD_REGEX = re.compile(
+    r"\[("
+    r"[A-G][#b]?"                            # Root note
+    r"(?:m(?!aj)|M|maj|min|dim|aug|sus|add)?" # Quality (m, M, maj, min, etc.)
+    r"[0-9]*"                                # Optional extension (7, 9, 13...)
+    r"(?:/[A-G][#b]?)?"                      # Optional slash chord (D/F#)
+    r"/*"                                    # Optional trailing slashes (Em///)
+    r")\]"
+)
 
 def detect_key(parsed_data):
     key_chords = {
@@ -42,8 +50,35 @@ def transpose_chordpro(text, semitones):
 
 
 def clean_chord(chord):
-    """Removes strumming indicators (slashes) from chords."""
-    return re.sub(r"/+", "", chord)  # ✅ Replace one or more slashes with nothing
+    """
+    FrancoUke cleanup:
+    - Removes trailing slashes used as strumming marks (Em/// → Em)
+    - Removes alternate bass note chords (D/F# → D)
+    - Keeps [N.C.] intact
+    """
+    if not chord:
+        return ""
+
+    chord = chord.strip()
+
+    # ✅ Leave [N.C.] untouched
+    if chord.upper() == "[N.C.]":
+        return chord
+
+    # ✅ 1️⃣ Remove trailing slashes used as strumming marks (Em/// → Em)
+    # Must come before alternate bass cleanup
+    chord = re.sub(r"/{2,}$", "", chord)
+
+    # ✅ 2️⃣ Remove alternate bass note (D/F# → D)
+    chord = re.sub(r"/[A-G][#b]?$", "", chord)
+
+    # ✅ 3️⃣ Clean up stray spaces or brackets
+    chord = chord.strip("[] ").strip()
+
+    return chord
+
+
+
 
 def extract_chords(parsed_data, unique=False):
     """Extract chords from parsed data, removing duplicates if needed."""
@@ -71,6 +106,22 @@ NOTES_FLAT = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
 def normalize_chord(chord):
     """Convert enharmonic chords to a consistent sharp (#) format."""
     return ENHARMONIC_EQUIVALENTS.get(chord, chord)  # ✅ Convert flats to sharps
+
+import re
+
+def normalize_chords_in_text(song_text: str) -> str:
+    """
+    Cleans all chords in a ChordPro-style song text.
+    e.g. [Em///] -> [Em], [A7////] -> [A7], [D/F#] -> [D]
+    """
+    def replacer(match):
+        chord = match.group(1)
+        cleaned = clean_chord(chord)
+        return f"[{cleaned}]"
+
+    return CHORD_REGEX.sub(replacer, song_text)
+
+
 
 def transpose_chord(chord, semitones):
     """Transpose a chord by a given number of semitones, but keep [N.C.] unchanged."""

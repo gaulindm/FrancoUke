@@ -117,6 +117,19 @@ body {
   color: var(--accent);
 }
 
+#save-speed {
+  background: var(--accent);
+  color: black;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#save-speed:hover {
+  background: #ffe082;
+}
+
 
 
 

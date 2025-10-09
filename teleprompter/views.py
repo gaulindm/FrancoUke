@@ -25,20 +25,20 @@ import json
 import re
 from django.shortcuts import render, get_object_or_404
 
+import json
 
 def teleprompter_view(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
-    # --- Determine instrument ---
+    # Determine instrument
     instrument = request.GET.get("instrument")
     if not instrument and request.user.is_authenticated:
         instrument = getattr(request.user.userpreference, "primary_instrument", "ukulele")
     instrument = instrument or "ukulele"
 
-    # Load the correct chord library
     chord_library = load_chord_dict(instrument)
 
-    # --- Convert Song.lyrics_with_chords to raw text ---
+    # Convert lyrics with chords
     raw_lines = []
     for block in song.lyrics_with_chords:
         if isinstance(block, list):
@@ -50,27 +50,27 @@ def teleprompter_view(request, song_id):
             raw_lines.append("\n")
     raw_lyrics = "".join(raw_lines)
 
-    # --- Extract chords ---
+    # Extract chords
     chord_pattern = re.compile(r"\[([A-G][#b]?(?:m|min|maj7|sus4|dim|aug|\d)*)\]")
     found_chords = chord_pattern.findall(raw_lyrics)
     unique_chords = sorted(set(found_chords))
 
-    # --- Match against chord library ---
+    # Match chords
     relevant_chords = [
         {"name": name, "variations": chord_library[name]["variations"]}
         for name in unique_chords if name in chord_library
     ]
 
-    # --- Get correct site_name ---
+    # Site context
     context_data = site_context(request)
     site_name = context_data["site_name"]
 
-    # --- Render lyrics with proper site ---
+    # Render lyrics HTML
     lyrics_html, metadata = render_lyrics_with_chords_html(
         song.lyrics_with_chords, site_name
     )
 
-    # --- User preferences ---
+    # User preferences
     user_pref = getattr(request.user, "userpreference", None)
     user_preferences = {
         "instrument": getattr(user_pref, "primary_instrument", "ukulele"),
@@ -78,16 +78,15 @@ def teleprompter_view(request, song_id):
         "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
     }
 
-    initial_scroll_speed = song.scroll_speed or 30  # fallback if null
-
-    # --- Return context ---
-    return render(request, "songbook/teleprompter.html", {
+    # ✅ These two are what your JS needs
+    context = {
         "song": song,
         "lyrics_with_chords": lyrics_html,
         "metadata": metadata,
         "relevant_chords_json": json.dumps(relevant_chords),
-        # 👇 JSON-encode preferences safely for the template
         "user_preferences_json": json.dumps(user_preferences),
-        "initial_scroll_speed": initial_scroll_speed,
-        **context_data,  # makes site_name/base_template available in template
-    })
+        "initial_scroll_speed": song.scroll_speed or 40,
+        **context_data,
+    }
+
+    return render(request, "songbook/teleprompter.html", context)

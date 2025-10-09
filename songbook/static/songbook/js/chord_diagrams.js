@@ -17,6 +17,30 @@ function adaptPositionsForInstrument(positions, instrument) {
   }
 }
 
+/**
+ * Normalize and clean chord names so they match the chord dictionary keys.
+ * Handles things like Em/// → Em, D/F# → D, Cmaj7 → CM7.
+ */
+function cleanChordName(chord) {
+  if (!chord) return "";
+
+  // Trim brackets if passed in like "[Em///]"
+  chord = chord.replace(/^\[|\]$/g, "").trim();
+
+  // 🧹 Remove trailing strumming slashes (Em/// → Em)
+  chord = chord.replace(/\/+$/g, "");
+
+  // 🧹 Remove alternate bass (D/F# → D)
+  chord = chord.replace(/\/[A-G][#b]?$/i, "");
+
+  // 🧠 Normalize maj variants (Cmaj7, CΔ7 → CM7)
+  chord = chord.replace(/maj/i, "M").replace(/Δ/g, "M");
+
+  return chord;
+}
+
+
+
 function padTo6Strings(positions) {
   if (positions.length === 6) return positions;
   if (positions.length < 6) {

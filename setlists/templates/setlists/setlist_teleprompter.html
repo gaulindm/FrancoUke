@@ -7,30 +7,18 @@
   <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- User Preferences -->
-  {% if user.is_authenticated and user.userpreference %}
-  <script>
-    window.userPreferences = {
-      instrument: "{{ user.userpreference.primary_instrument }}",
-      isLefty: {{ user.userpreference.is_lefty|yesno:"true,false" }},
-      showAlternate: {{ user.userpreference.is_printing_alternate_chord|yesno:"true,false" }}
-    };
-  </script>
-  {% else %}
-  <script>
-    window.userPreferences = { instrument: "ukulele", isLefty: false, showAlternate: false };
-  </script>
-  {% endif %}
 
+  <!-- Teleprompter config -->
+  <script id="teleprompter-config" type="application/json">
+    {
+      "initialScrollSpeed": {{ song.scroll_speed|default:40 }},
+      "userPreferences": {{ user_preferences_json|default:"{}"|safe }}
+    }
+  </script>
+
+<!-- Diagram renderer -->
   <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
-
-  <script>
-    window.initialScrollSpeed = {{ song.scroll_speed|default:40 }};
-    window.SONG = { id: "{{ song.id }}", title: "{{ song.songTitle|escapejs }}" };
-  </script>
-
-
-
+  <!-- Teleprompter engine -->
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 
   <style>
@@ -76,9 +64,9 @@
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline">
-        <button id="speed-decrease">-</button>
+        <button id="speed-down">-</button>
         <span id="scroll-speed-display">{{ song.scroll_speed|default:40 }} px/s</span>
-        <button id="speed-increase">+</button>
+        <button id="speed-up">+</button>
         <button id="speed-save">💾 Save</button>
       </div>
       
@@ -147,113 +135,13 @@
     {{ relevant_chords_json|safe }}
   </script>
 
-  <!-- Keyboard nav + dropdown -->
-  <script>
-    document.addEventListener("keydown", function(event) {
-      if (event.key === "ArrowLeft") {
-        {% if prev_song %}
-          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}";
-        {% endif %}
-      } else if (event.key === "ArrowRight") {
-        {% if next_song %}
-          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}";
-        {% endif %}
-      }
-    });
 
- 
-  </script>
 
   <!-- Chord Section -->
   <div id="chord-section">
     <div id="chord-diagrams"></div>
   </div>
 
-  <!-- Gesture controls -->
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const chordSection = document.getElementById("chord-section");
-    const lyricsContainer = document.querySelector(".lyrics-container");
-
-    let scrollActive = false;
-    let autoScrollInterval = null;
-    let lastTapTime = 0;
-
-    function startScrolling() {
-      if (scrollActive) return;
-      scrollActive = true;
-      document.body.classList.add("scrolling");
-      hideChords(); // auto-hide chords once scrolling starts
-
-      const speedInput = document.getElementById("scroll-speed");
-      autoScrollInterval = setInterval(() => {
-        lyricsContainer.scrollTop += parseInt(speedInput.value, 10);
-      }, 200);
-    }
-
-    function stopScrolling() {
-      scrollActive = false;
-      document.body.classList.remove("scolling");
-      clearInterval(autoScrollInterval);
-    }
-
-    function toggleScrolling() {
-      if (scrollActive) {
-        stopScrolling();
-      } else {
-        startScrolling();
-      }
-    }
-
-    function hideChords() {
-      chordSection.classList.add("hidden");
-    }
-
-    function toggleChords() {
-      chordSection.classList.toggle("hidden");
-    }
-
-    // Swipe + Tap detection
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    document.addEventListener("touchstart", (e) => {
-      const touch = e.changedTouches[0];
-      touchStartX = touch.pageX;
-      touchStartY = touch.pageY;
-    });
-
-    document.addEventListener("touchend", (e) => {
-      const touch = e.changedTouches[0];
-      const dx = touch.pageX - touchStartX;
-      const dy = touch.pageY - touchStartY;
-
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 0) {
-          // Swipe right = prev song
-          {% if prev_song %}
-          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}";
-          {% endif %}
-        } else {
-          // Swipe left = next song
-          {% if next_song %}
-          window.location.href = "{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}";
-          {% endif %}
-        }
-        return;
-      }
-
-      // Tap / Double tap
-      const now = Date.now();
-      if (now - lastTapTime < 300) {
-        toggleChords(); // double tap -> toggle chords
-      } else {
-        toggleScrolling(); // single tap -> start/stop scrolling
-      }
-      lastTapTime = now;
-    });
-  });
-  </script>
 
 </body>
 </html>
