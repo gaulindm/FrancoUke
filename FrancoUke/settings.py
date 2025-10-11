@@ -180,7 +180,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Use during deployment
 
 # Additional directories to search for static files
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Add your static directory here
+    os.path.join(BASE_DIR, 'static'),                # your app-wide static assets
+    os.path.join(BASE_DIR, 'songbook', 'chords'),    # 🎸 make chord JSONs accessible
 ]
 
 

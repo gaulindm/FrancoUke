@@ -65,7 +65,7 @@
     ]
   },
   {
-    "name": "Cmaj7",
+    "name": "CM7",
     "variations": [
       {
         "positions": [
@@ -375,7 +375,7 @@
     ]
   },
   {
-    "name": "Cmaj9",
+    "name": "CM9",
     "variations": [
       {
         "positions": [
@@ -405,7 +405,7 @@
     ]
   },
   {
-    "name": "Cmaj13",
+    "name": "CM13",
     "variations": [
       {
         "positions": [
@@ -550,7 +550,7 @@
     ]
   },
   {
-    "name": "C#maj7",
+    "name": "C#M7",
     "variations": [
       {
         "positions": [
@@ -870,7 +870,7 @@
     ]
   },
   {
-    "name": "C#maj9",
+    "name": "C#M9",
     "variations": [
       {
         "positions": [
@@ -900,7 +900,7 @@
     ]
   },
   {
-    "name": "C#maj13",
+    "name": "C#M13",
     "variations": [
       {
         "positions": [
@@ -1045,7 +1045,7 @@
     ]
   },
   {
-    "name": "Dmaj7",
+    "name": "DM7",
     "variations": [
       {
         "positions": [
@@ -1365,7 +1365,7 @@
     ]
   },
   {
-    "name": "Dmaj9",
+    "name": "DM9",
     "variations": [
       {
         "positions": [
@@ -1395,7 +1395,7 @@
     ]
   },
   {
-    "name": "Dmaj13",
+    "name": "DM13",
     "variations": [
       {
         "positions": [
@@ -1540,7 +1540,7 @@
     ]
   },
   {
-    "name": "Ebmaj7",
+    "name": "EbM7",
     "variations": [
       {
         "positions": [
@@ -1860,7 +1860,7 @@
     ]
   },
   {
-    "name": "Ebmaj9",
+    "name": "EbM9",
     "variations": [
       {
         "positions": [
@@ -1890,7 +1890,7 @@
     ]
   },
   {
-    "name": "Ebmaj13",
+    "name": "EbM13",
     "variations": [
       {
         "positions": [
@@ -2035,7 +2035,7 @@
     ]
   },
   {
-    "name": "Emaj7",
+    "name": "EM7",
     "variations": [
       {
         "positions": [
@@ -2355,7 +2355,7 @@
     ]
   },
   {
-    "name": "Emaj9",
+    "name": "EM9",
     "variations": [
       {
         "positions": [
@@ -2385,7 +2385,7 @@
     ]
   },
   {
-    "name": "Emaj13",
+    "name": "EM13",
     "variations": [
       {
         "positions": [
@@ -2530,7 +2530,7 @@
     ]
   },
   {
-    "name": "Fmaj7",
+    "name": "FM7",
     "variations": [
       {
         "positions": [
@@ -2850,7 +2850,7 @@
     ]
   },
   {
-    "name": "Fmaj9",
+    "name": "FM9",
     "variations": [
       {
         "positions": [
@@ -2880,7 +2880,7 @@
     ]
   },
   {
-    "name": "Fmaj13",
+    "name": "FM13",
     "variations": [
       {
         "positions": [
@@ -3025,7 +3025,7 @@
     ]
   },
   {
-    "name": "F#maj7",
+    "name": "F#M7",
     "variations": [
       {
         "positions": [
@@ -3345,7 +3345,7 @@
     ]
   },
   {
-    "name": "F#maj9",
+    "name": "F#M9",
     "variations": [
       {
         "positions": [
@@ -3375,7 +3375,7 @@
     ]
   },
   {
-    "name": "F#maj13",
+    "name": "F#M13",
     "variations": [
       {
         "positions": [
@@ -3520,7 +3520,7 @@
     ]
   },
   {
-    "name": "Gmaj7",
+    "name": "GM7",
     "variations": [
       {
         "positions": [
@@ -3810,7 +3810,7 @@
     ]
   },
   {
-    "name": "Gmaj9",
+    "name": "GM9",
     "variations": [
       {
         "positions": [
@@ -3835,7 +3835,7 @@
     ]
   },
   {
-    "name": "Gmaj13",
+    "name": "GM13",
     "variations": [
       {
         "positions": [
@@ -3995,7 +3995,7 @@
     ]
   },
   {
-    "name": "Abmaj7",
+    "name": "AbM7",
     "variations": [
       {
         "positions": [
@@ -4325,7 +4325,7 @@
     ]
   },
   {
-    "name": "Abmaj9",
+    "name": "AbM9",
     "variations": [
       {
         "positions": [
@@ -4355,7 +4355,7 @@
     ]
   },
   {
-    "name": "Abmaj13",
+    "name": "AbM13",
     "variations": [
       {
         "positions": [
@@ -4520,7 +4520,7 @@
     ]
   },
   {
-    "name": "Amaj7",
+    "name": "AM7",
     "variations": [
       {
         "positions": [
@@ -4850,7 +4850,7 @@
     ]
   },
   {
-    "name": "Amaj9",
+    "name": "AM9",
     "variations": [
       {
         "positions": [
@@ -4880,7 +4880,7 @@
     ]
   },
   {
-    "name": "Amaj13",
+    "name": "AM13",
     "variations": [
       {
         "positions": [
@@ -5045,7 +5045,7 @@
     ]
   },
   {
-    "name": "Bbmaj7",
+    "name": "BbM7",
     "variations": [
       {
         "positions": [
@@ -5375,7 +5375,7 @@
     ]
   },
   {
-    "name": "Bbmaj9",
+    "name": "BbM9",
     "variations": [
       {
         "positions": [
@@ -5405,7 +5405,7 @@
     ]
   },
   {
-    "name": "Bbmaj13",
+    "name": "BbM13",
     "variations": [
       {
         "positions": [
@@ -5570,7 +5570,7 @@
     ]
   },
   {
-    "name": "Bmaj7",
+    "name": "BM7",
     "variations": [
       {
         "positions": [
@@ -5900,7 +5900,7 @@
     ]
   },
   {
-    "name": "Bmaj9",
+    "name": "BM9",
     "variations": [
       {
         "positions": [
@@ -5930,7 +5930,7 @@
     ]
   },
   {
-    "name": "Bmaj13",
+    "name": "BM13",
     "variations": [
       {
         "positions": [

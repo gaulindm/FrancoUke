@@ -50,7 +50,7 @@ def load_chords(instrument):
         'guitalele': os.path.join(chords_dir, 'guitalele.json'),
         'mandolin': os.path.join(chords_dir, 'mandolin.json'),
         'banjo': os.path.join(chords_dir, 'banjo.json'),
-        'baritone_ukulele': os.path.join(chords_dir, 'baritoneUke.json'),
+        'baritone_ukulele': os.path.join(chords_dir, 'baritone_ukulele.json'),
     }
 
     file_path = file_map.get(instrument, file_map['ukulele'])

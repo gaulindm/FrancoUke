@@ -54,6 +54,19 @@
     </div>
   </div>
 
+<!-- ✅ Embedded chords JSON for teleprompter.js -->
+<script id="chords-data" type="application/json">
+  {{ relevant_chords_json|safe }}
+</script>
+
+<!-- ✅ Embedded user preferences -->
+<script id="teleprompter-config" type="application/json">
+  {
+    "initialScrollSpeed": {{ initial_scroll_speed|default:40 }},
+    "userPreferences": {{ user_preferences_json|safe }}
+  }
+</script>
+
   <!-- Chords data -->
   <script id="chords-data" type="application/json">
     {{ relevant_chords_json|safe }}

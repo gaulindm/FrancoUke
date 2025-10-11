@@ -36,8 +36,9 @@ function cleanChordName(chord) {
   // 🧠 Normalize maj variants (Cmaj7, CΔ7 → CM7)
   chord = chord.replace(/maj/i, "M").replace(/Δ/g, "M");
 
-  return chord;
+  return chord.toUpperCase();
 }
+
 
 
 

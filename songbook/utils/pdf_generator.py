@@ -1,3 +1,4 @@
+#pdf_generator.py
 from reportlab.graphics.shapes import Drawing, Line
 from reportlab.graphics import renderPDF
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable, Table, TableStyle, Spacer, PageBreak
@@ -98,6 +99,160 @@ def chord_equivalent(a: str, b: str) -> bool:
     b_norm = normalize_maj(b).lower()
 
     return a_norm == b_norm
+
+
+# Put this helper near the top of your file (you already import `re`).
+def apply_color_markup(text):
+    """
+    Convert simple custom tags into reportlab-compatible <font color="..."> tags.
+    Supports: <red>...</red>, <blue>...</blue>, <highlight color="...">...</highlight>
+    and short tags <r>...</r>, <g>...</g>, etc.
+    """
+    color_map = {
+        'red': 'red',
+        'blue': 'blue',
+        'green': 'green',
+        'yellow': 'gold',
+        'orange': 'orange',
+        'pink': 'hotpink',
+        'purple': 'purple',
+    }
+
+    # Named color tags like <red>...</red>
+    for tag, color in color_map.items():
+        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
+        text = pattern.sub(lambda m: f"<font color='{color}'>{m.group(1)}</font>", text)
+
+    # <highlight color="...">...</highlight>
+    pattern = re.compile(r'<highlight\s+color="(.*?)">(.*?)</highlight>', re.IGNORECASE | re.DOTALL)
+    text = pattern.sub(lambda m: f"<font color='{m.group(1)}'>{m.group(2)}</font>", text)
+
+    # Short tags like <r>...</r> (r=red, g=green, b=blue, y=yellow/gold)
+    short_map = {'r': 'red', 'g': 'green', 'blue': 'blue', 'y': 'gold'}
+    for tag, color in short_map.items():
+        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
+        text = pattern.sub(lambda m: f"<font color='{color}'>{m.group(1)}</font>", text)
+
+    return text
+
+
+def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name):
+    elements = []
+    paragraph_buffer = []
+    section_type = None
+
+    # Directive map (same as your code)
+    directive_map = {
+        "FrancoUke": {
+            "{soi}": "Intro",
+            "{soc}": "Refrain",
+            "{sov}": "Couplet",
+            "{sob}": "Pont",
+            "{soo}": "Outro",
+            "{sod}": "Interlude",
+            "{eoi}": None,
+            "{eoc}": None,
+            "{eov}": None,
+            "{eob}": None,
+            "{eoo}": None,
+            "{eod}": None
+        },
+        "StrumSphere": {
+            "{soi}": "Intro",
+            "{soc}": "Chorus",
+            "{sov}": "Verse",
+            "{sob}": "Bridge",
+            "{soo}": "Outro",
+            "{sod}": "Interlude",
+            "{eoi}": None,
+            "{eoc}": None,
+            "{eov}": None,
+            "{eob}": None,
+            "{eoo}": None,
+            "{eod}": None
+        }
+    }
+
+    selected_directive_map = directive_map.get(site_name, directive_map["StrumSphere"])
+
+    for group in lyrics_with_chords:
+        for item in group:
+            if "directive" in item:
+                directive = item["directive"].lower()
+                if directive in selected_directive_map:
+                    # flush existing paragraph buffer
+                    if paragraph_buffer:
+                        paragraph_text = "".join(paragraph_buffer)
+                        paragraph_text = apply_color_markup(paragraph_text)  # apply color tags
+                        style = styles_dict.get(section_type.lower(), styles_dict["verse"]) if section_type else styles_dict["verse"]
+
+                        if section_type and section_type.lower() != "verse":
+                            # Non-verse sections in a table with section name
+                            section_table = Table([
+                                [Paragraph(f"<b>{section_type}:</b>", base_style), Paragraph(paragraph_text, style)]
+                            ], colWidths=[60, 460], hAlign='LEFT')
+                            section_table.setStyle(TableStyle([
+                                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                            ]))
+                            elements.append(section_table)
+                        else:
+                            # Verses as simple paragraphs
+                            elements.append(Paragraph(paragraph_text, style))
+
+                        paragraph_buffer = []
+
+                    # update current section type and continue
+                    section_type = selected_directive_map[directive]
+                    continue
+
+            elif "lyric" in item:
+                chord = item.get("chord", "")
+                lyric = item["lyric"]
+
+                # build the line with chord markup as before
+                if chord:
+                    if lyric.startswith("-"):
+                        # Chord is inside a hyphenated word — no space before
+                        line = f"<b>[{chord}]</b>{lyric}"
+                    elif lyric[:1].isalpha():
+                        if paragraph_buffer and paragraph_buffer[-1].endswith("-"):
+                            # No space before chord if previous content ends in hyphen
+                            line = f"<b>[{chord}]</b>{lyric}"
+                        else:
+                            # Otherwise, it's a new word — space before chord
+                            line = f" <b>[{chord}]</b>{lyric}"
+                    else:
+                        # Default case — no space
+                        line = f"<b>[{chord}]</b>{lyric}"
+                else:
+                    line = lyric
+
+                paragraph_buffer.append(line)
+
+            elif "format" in item and item["format"] == "LINEBREAK":
+                paragraph_buffer.append("<br/>")
+
+    # flush any remaining buffer after loop
+    if paragraph_buffer:
+        paragraph_text = "".join(paragraph_buffer)
+        paragraph_text = apply_color_markup(paragraph_text)  # apply color tags
+        style = styles_dict.get(section_type.lower(), styles_dict["verse"]) if section_type else styles_dict["verse"]
+
+        if section_type and section_type.lower() != "verse":
+            section_table = Table([
+                [Paragraph(f"<b>{section_type}:</b>", base_style), Paragraph(paragraph_text, style)]
+            ], colWidths=[70, 450], hAlign='LEFT')
+            section_table.setStyle(TableStyle([
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('BOX', (0, 0), (-1, -1), 0.5, colors.grey)
+            ]))
+            elements.append(section_table)
+        else:
+            elements.append(Paragraph(paragraph_text, style))
+
+    return elements
 
 
 def load_relevant_chords(songs, user_prefs, transpose_value):
@@ -320,7 +475,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
     paragraph_buffer = []
     section_type = None
 
-    # ✅ Select correct directive_map based on site_name
+    # Directive map (same as your code)
     directive_map = {
         "FrancoUke": {
             "{soi}": "Intro",
@@ -352,18 +507,19 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
         }
     }
 
-    # Get the correct dictionary based on site_name (default to English)
     selected_directive_map = directive_map.get(site_name, directive_map["StrumSphere"])
 
     for group in lyrics_with_chords:
-        
         for item in group:
             if "directive" in item:
                 directive = item["directive"].lower()
                 if directive in selected_directive_map:
+                    # flush existing paragraph buffer
                     if paragraph_buffer:
                         paragraph_text = "".join(paragraph_buffer)
+                        paragraph_text = apply_color_markup(paragraph_text)  # apply color tags
                         style = styles_dict.get(section_type.lower(), styles_dict["verse"]) if section_type else styles_dict["verse"]
+
                         if section_type and section_type.lower() != "verse":
                             # Non-verse sections in a table with section name
                             section_table = Table([
@@ -377,14 +533,18 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                         else:
                             # Verses as simple paragraphs
                             elements.append(Paragraph(paragraph_text, style))
+
                         paragraph_buffer = []
+
+                    # update current section type and continue
                     section_type = selected_directive_map[directive]
                     continue
+
             elif "lyric" in item:
                 chord = item.get("chord", "")
                 lyric = item["lyric"]
 
-
+                # build the line with chord markup as before
                 if chord:
                     if lyric.startswith("-"):
                         # Chord is inside a hyphenated word — no space before
@@ -396,20 +556,23 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                         else:
                             # Otherwise, it's a new word — space before chord
                             line = f" <b>[{chord}]</b>{lyric}"
-
                     else:
                         # Default case — no space
                         line = f"<b>[{chord}]</b>{lyric}"
                 else:
                     line = lyric
+
                 paragraph_buffer.append(line)
 
             elif "format" in item and item["format"] == "LINEBREAK":
                 paragraph_buffer.append("<br/>")
 
+    # flush any remaining buffer after loop
     if paragraph_buffer:
         paragraph_text = "".join(paragraph_buffer)
+        paragraph_text = apply_color_markup(paragraph_text)  # apply color tags
         style = styles_dict.get(section_type.lower(), styles_dict["verse"]) if section_type else styles_dict["verse"]
+
         if section_type and section_type.lower() != "verse":
             section_table = Table([
                 [Paragraph(f"<b>{section_type}:</b>", base_style), Paragraph(paragraph_text, style)]
