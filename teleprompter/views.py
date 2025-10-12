@@ -23,12 +23,15 @@ def clean_chord_name(chord: str) -> str:
     # Remove bass notes like D/F#
     chord = re.sub(r"/[A-G][#b]?$", "", chord)
 
-    # Normalize maj, Maj, MAJ, etc. — convert all to M
-    chord = re.sub(r"maj(?=\d*)", "M", chord, flags=re.IGNORECASE)
-    chord = re.sub(r"M(aj)(?=\d*)", "M", chord, flags=re.IGNORECASE)  # catch FMaj7 too
-    chord = re.sub(r"min", "m", chord, flags=re.IGNORECASE)
-    chord = chord.replace("Δ", "M")  # jazz delta
+    # --- Normalize chord quality naming ---
+    # maj7, Maj7, MAJ7 → M7  (and same for maj9, etc.)
+    chord = re.sub(r"(?i)maj(?=\d*)", "M", chord)
+    # min → m
+    chord = re.sub(r"(?i)min", "m", chord)
+    # Jazz delta symbol → M
+    chord = chord.replace("Δ", "M")
 
+    # Standardize capitalization (e.g., fm7 → Fm7)
     chord = chord.strip().replace(" ", "")
     if len(chord) > 1:
         chord = chord[0].upper() + chord[1:]
@@ -36,6 +39,7 @@ def clean_chord_name(chord: str) -> str:
         chord = chord.upper()
 
     return chord
+
 
 
 # -----------------------------
@@ -71,10 +75,9 @@ def teleprompter_view(request, song_id):
         r"\[([A-G][#b]?(?:m|min|maj7|maj9|maj|sus2|sus4|dim|aug|\d)*(?:/[A-G#b]*)*/*)\]"
     )
     found_chords = chord_pattern.findall(raw_lyrics)
-    unique_chords = sorted(set(found_chords))
 
-    # Normalize chord names
-    normalized_map = {ch: clean_chord_name(ch) for ch in unique_chords}
+    # 🧹 Normalize chords *before* deduplication
+    normalized_map = {raw: clean_chord_name(raw) for raw in found_chords}
     normalized_unique = sorted(set(normalized_map.values()))
 
     print("\n🎶 Found chords:")
@@ -82,7 +85,7 @@ def teleprompter_view(request, song_id):
         print(f"   {raw:<10} → {norm}")
     print(f"✅ Total unique (normalized): {len(normalized_unique)}\n")
 
-    # Match chords to chord library
+    # 🎸 Match to chord library
     relevant_chords = []
     for name in normalized_unique:
         if name in chord_library:
@@ -92,6 +95,7 @@ def teleprompter_view(request, song_id):
             })
         else:
             print(f"⚠️ Missing chord in library: {name}")
+
 
     # Site context
     context_data = site_context(request)
