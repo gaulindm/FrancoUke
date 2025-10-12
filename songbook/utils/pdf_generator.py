@@ -101,13 +101,20 @@ def chord_equivalent(a: str, b: str) -> bool:
     return a_norm == b_norm
 
 
-# Put this helper near the top of your file (you already import `re`).
+import re
+
 def apply_color_markup(text):
     """
-    Convert simple custom tags into reportlab-compatible <font color="..."> tags.
-    Supports: <red>...</red>, <blue>...</blue>, <highlight color="...">...</highlight>
-    and short tags <r>...</r>, <g>...</g>, etc.
+    Convert custom tags into reportlab-compatible <font> and <u> tags.
+    Supports:
+        - Named colors: <red>…</red>, <green>…</green>, etc.
+        - Short colors: <r>…</r>, <g>…</g>, etc.
+        - Underline: <u>…</u>
+        - Highlight: <highlight color="...">…</highlight> and <h>…</h> (default yellow)
+        - Bold: <b>…</b> remains unchanged
     """
+
+    # Named color tags
     color_map = {
         'red': 'red',
         'blue': 'blue',
@@ -117,21 +124,29 @@ def apply_color_markup(text):
         'pink': 'hotpink',
         'purple': 'purple',
     }
-
-    # Named color tags like <red>...</red>
     for tag, color in color_map.items():
         pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
         text = pattern.sub(lambda m: f"<font color='{color}'>{m.group(1)}</font>", text)
 
-    # <highlight color="...">...</highlight>
-    pattern = re.compile(r'<highlight\s+color="(.*?)">(.*?)</highlight>', re.IGNORECASE | re.DOTALL)
-    text = pattern.sub(lambda m: f"<font color='{m.group(1)}'>{m.group(2)}</font>", text)
-
-    # Short tags like <r>...</r> (r=red, g=green, b=blue, y=yellow/gold)
-    short_map = {'r': 'red', 'g': 'green', 'blue': 'blue', 'y': 'gold'}
+    # Short color tags
+    short_map = {'r': 'red', 'g': 'green', 'y': 'gold'}
     for tag, color in short_map.items():
         pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
         text = pattern.sub(lambda m: f"<font color='{color}'>{m.group(1)}</font>", text)
+
+    # Highlight with specified color
+    pattern = re.compile(r'<highlight\s+color="(.*?)">(.*?)</highlight>', re.IGNORECASE | re.DOTALL)
+    text = pattern.sub(lambda m: f"<font backColor='{m.group(1)}'>{m.group(2)}</font>", text)
+
+    # Short highlight tag defaults to yellow
+    text = re.sub(r'<h>(.*?)</h>', r"<font backColor='yellow'>\1</font>", text, flags=re.IGNORECASE | re.DOTALL)
+
+    # Underline tags (<u> supported by ReportLab ≥ 3.6)
+    text = text.replace("<u>", "<u>")
+    text = text.replace("</u>", "</u>")
+
+    # Optional cleanup: remove nested </font></font>
+    text = re.sub(r"</font>\s*</font>", "</font>", text)
 
     return text
 
@@ -277,6 +292,13 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
 def get_paragraph_styles(formatting):
     styles = getSampleStyleSheet()
     base_style = styles["BodyText"]
+
+    underline_style = ParagraphStyle(
+    "Underline",
+    parent=base_style,
+    underline=True,
+)
+
 
     def create_style(section):
         config = getattr(formatting, section, {})
