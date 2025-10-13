@@ -1,18 +1,26 @@
 import json
+import re
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import SetList, SetListSong
 from songbook.models import Song
 from songbook.utils.chord_library import extract_relevant_chords
+from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
+from songbook.context_processors import site_context
 
 
+# ----------------------------
+# 📋 List of all setlists
+# ----------------------------
 def setlist_list(request):
     setlists = SetList.objects.all().order_by("-created_at")
     return render(request, "setlists/setlist_list.html", {"setlists": setlists})
 
-from django.shortcuts import render, get_object_or_404
-from .models import SetList
 
+# ----------------------------
+# 📄 Setlist detail view
+# ----------------------------
 def setlist_detail(request, pk):
     setlist = get_object_or_404(SetList, pk=pk)
     songs = setlist.songs.select_related("song").order_by("order")
@@ -24,27 +32,9 @@ def setlist_detail(request, pk):
     )
 
 
-from django.shortcuts import get_object_or_404, render
-from .models import SetList, SetListSong
-
-import re
-from django.utils.safestring import mark_safe
-
-import json
-import re
-from django.shortcuts import render, get_object_or_404
-from .models import SetList, SetListSong
-from songbook.utils.chord_library import load_chord_dict
-from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
-
-import json
-from django.shortcuts import render, get_object_or_404
-from .models import SetList, SetListSong
-from songbook.utils.chord_library import extract_relevant_chords
-from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
-
-from songbook.context_processors import site_context
-
+# ----------------------------
+# 🎤 Teleprompter for a setlist song
+# ----------------------------
 def setlist_teleprompter(request, setlist_id, order):
     """Teleprompter view for a song within a setlist."""
     setlist = get_object_or_404(SetList, pk=setlist_id)
@@ -69,7 +59,7 @@ def setlist_teleprompter(request, setlist_id, order):
     # --- Extract relevant chords ---
     relevant_chords = extract_relevant_chords(current.song.lyrics_with_chords, instrument)
 
-    # --- Get correct site_name ---
+    # --- Site context ---
     context_data = site_context(request)
     site_name = context_data["site_name"]
 
@@ -86,6 +76,25 @@ def setlist_teleprompter(request, setlist_id, order):
         "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
     }
 
+    # ----------------------------
+    # 🐛 DEBUGGING OUTPUT
+    # ----------------------------
+    print("\n====== 🎶 TELEPROMPTER DEBUG ======")
+    print(f"Setlist: {setlist.name} (ID {setlist.id})")
+    print(f"Order: {current.order} / {total_songs}")
+    print(f"Song: {current.song.songTitle} (ID {current.song.id})")
+    print(f"Song.scroll_speed from DB: {getattr(current.song, 'scroll_speed', '❌ MISSING')}")
+    print(f"Metadata scroll_speed (if any): {current.song.metadata.get('scroll_speed') if current.song.metadata else 'None'}")
+    print(f"User: {request.user if request.user.is_authenticated else 'Anonymous'}")
+    print("==================================\n")
+
+    # --- Use scroll speed from the Song model ---
+    initial_scroll_speed = getattr(current.song, "scroll_speed", 40) or 40
+
+    # 🐛 Confirm what we’re actually passing to the template
+    print(f"✅ Passing scroll speed to template: {initial_scroll_speed}\n")
+
+    # --- Render template ---
     return render(
         request,
         "setlists/setlist_teleprompter.html",
@@ -99,12 +108,16 @@ def setlist_teleprompter(request, setlist_id, order):
             "lyrics_with_chords": lyrics_html,
             "metadata": metadata,
             "relevant_chords_json": json.dumps(relevant_chords),
-            "userPreferences": user_preferences,
-            **context_data,  # ✅ makes site_name/base_template available in template
+            "user_preferences_json": json.dumps(user_preferences),
+            "initial_scroll_speed": initial_scroll_speed,
+            **context_data,
         },
     )
 
 
+# ----------------------------
+# 📦 Export / Import Setlists
+# ----------------------------
 def export_setlist(request, pk):
     setlist = get_object_or_404(SetList, pk=pk)
     data = {
@@ -113,7 +126,7 @@ def export_setlist(request, pk):
                 "order": s.order,
                 "title": s.song.songTitle,
                 "lyrics": s.song.render_lyrics_with_chords_html(),
-                "scroll_speed": s.scroll_speed,
+                "scroll_speed": getattr(s.song, "scroll_speed", 40),  # ✅ from Song
                 "tempo": s.song.metadata.get("tempo") if s.song.metadata else None,
                 "notes": s.rehearsal_notes,
             }
@@ -121,8 +134,9 @@ def export_setlist(request, pk):
         ]
     }
     response = HttpResponse(json.dumps(data, indent=2), content_type="application/json")
-    response["Content-Disposition"] = f'attachment; filename="setlist_{setlist.pk}.json"'
+    response["Content-Disposition"] = f'attachment; filename=\"setlist_{setlist.pk}.json\"'
     return response
+
 
 def import_setlist(request):
     if request.method == "POST" and request.FILES.get("setlist_file"):
@@ -135,6 +149,7 @@ def import_setlist(request):
                 songTitle=song_data["title"],
                 defaults={
                     "songChordPro": song_data.get("lyrics", ""),
+                    "scroll_speed": song_data.get("scroll_speed", 40),
                 }
             )
             SetListSong.objects.create(
@@ -142,17 +157,15 @@ def import_setlist(request):
                 song=song,
                 order=song_data["order"],
                 rehearsal_notes=song_data.get("notes", ""),
-                scroll_speed=song_data.get("scroll_speed", 40),
             )
         return redirect("setlists:detail", pk=new_setlist.pk)
 
     return render(request, "setlists/import_setlist.html")
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import SetList, SetListSong
-from songbook.models import Song
 
+# ----------------------------
+# 🧱 Setlist Builder (Admin tool)
+# ----------------------------
 @login_required
 def setlist_builder(request, pk=None):
     """Create or edit a setlist via UI builder."""
@@ -179,7 +192,6 @@ def setlist_builder(request, pk=None):
                 song_id=song_id,
                 order=idx,
                 rehearsal_notes=request.POST.get(f"notes_{song_id}", ""),
-                scroll_speed=request.POST.get(f"scroll_{song_id}", 0),
             )
 
         return redirect("setlists:detail", pk=setlist.pk)

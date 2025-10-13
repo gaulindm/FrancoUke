@@ -8,12 +8,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 
-  <!-- Teleprompter config -->
-  <script id="teleprompter-config" type="application/json">
-    {
-      "initialScrollSpeed": {{ song.scroll_speed|default:40 }},
-      "userPreferences": {{ user_preferences_json|default:"{}"|safe }}
-    }
+<!-- ✅ Embedded teleprompter configuration -->
+<script id="teleprompter-config" type="application/json">
+  {
+    "initialScrollSpeed": {{ initial_scroll_speed|default:40 }},
+    "userPreferences": {{ user_preferences_json|safe }}
+  }
   </script>
 
 <!-- Diagram renderer -->
