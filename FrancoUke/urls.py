@@ -19,6 +19,7 @@ urlpatterns = [
     path('board/', include('board.urls')),
 
     path('teleprompter/', include('teleprompter.urls', namespace='teleprompter')),
+    path('tinymce/', include('tinymce.urls')),
 
     path("setlists/", include("setlists.urls", namespace="setlists")),
 

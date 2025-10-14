@@ -12,6 +12,9 @@ from .models import (
     Event, EventPhoto, EventAvailability, Venue
 )
 
+from . import admin_rehearsal
+
+
 # -------------------------
 # Inlines
 # -------------------------
@@ -28,6 +31,24 @@ class EventForm(forms.ModelForm):
         widgets = {
             "cover_asset": AssetChooserWidget(),  # 👈 your chooser widget
         }
+
+
+# in board/admin.py (Event admin section)
+from django.urls import reverse
+from django.utils.html import format_html
+from .rehearsal_notes import RehearsalDetails
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ("title", "event_date", "rehearsal_link")
+
+    def rehearsal_link(self, obj):
+        details, created = RehearsalDetails.objects.get_or_create(event=obj)
+        url = reverse("admin:board_rehearsaldetails_change", args=[details.pk])
+        return format_html('<a class="button" href="{}">Open Rehearsal Notes</a>', url)
+
+    rehearsal_link.short_description = "Rehearsal Details"
+
 
 
 from django.contrib import admin
@@ -101,7 +122,7 @@ class EventPhotoInline(admin.TabularInline):
     fields = ("image", "is_cover", "uploaded_at")
     readonly_fields = ("uploaded_at",)
 
-
+'''
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     form = EventForm
@@ -159,6 +180,8 @@ class EventAdmin(admin.ModelAdmin):
 
     duplicate_events.short_description = "Duplicate selected events"
 
+    '''
+
 @admin.register(Venue)
 class VenueAdmin(admin.ModelAdmin):
     list_display = ("name", "address", "position")
@@ -169,6 +192,8 @@ from django import forms
 from django.contrib import admin
 from .models import Event
 from assets.widgets import AssetChooserWidget  # ✅ custom widget we made earlier
+from tinymce.widgets import TinyMCE
+
 
 class EventAdminForm(forms.ModelForm):
     gallery_assets = forms.ModelMultipleChoiceField(
@@ -182,5 +207,36 @@ class EventAdminForm(forms.ModelForm):
         fields = "__all__"
         widgets = {
             "cover_asset": AssetChooserWidget(),
+            "rich_description": TinyMCE(attrs={"cols": 80, "rows": 20}),
+            "rich_notes": TinyMCE(attrs={"style": "height: 100px; width: 95%;"}),
             # gallery_assets uses the explicit field above
         }
+
+
+from django.contrib import admin
+from .rehearsal_notes import (
+    RehearsalDetails,
+    RehearsalSection,
+    SongRehearsalNote,
+)
+'''
+@admin.register(RehearsalDetails)
+class RehearsalDetailsAdmin(admin.ModelAdmin):
+    list_display = ("event",)
+    search_fields = ("event__title",)
+'''
+    
+
+@admin.register(RehearsalSection)
+class RehearsalSectionAdmin(admin.ModelAdmin):
+    list_display = ("title", "rehearsal", "order", "created_by")
+    list_filter = ("rehearsal__event__event_date",)
+    search_fields = ("title", "body")
+
+@admin.register(SongRehearsalNote)
+class SongRehearsalNoteAdmin(admin.ModelAdmin):
+    list_display = ("song", "section", "created_by", "created_at")
+    list_filter = ("section__rehearsal__event__event_date", "created_by")
+    search_fields = ("song__title", "notes")
+
+

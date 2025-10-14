@@ -33,6 +33,8 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'  # Allows embedding on the same domain
 # Application definition
 
 INSTALLED_APPS = [
+    'nested_admin',
+    'tinymce',
     'songbook.apps.SongbookConfig',
     'users.apps.UsersConfig',
     'crispy_forms',
@@ -46,7 +48,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'taggit',
     'core',
-    'ckeditor',
     'board',
     'django.contrib.sites',
     "rest_framework",
@@ -97,24 +98,29 @@ SILENCED_SYSTEM_CHECKS = [
     'ckeditor.W001',
 ]
 
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 250,  # Comfortable default height
+    "width": "100%",  # Expand to container width
+    "menubar": False,  # Hide top menus (File/Edit/View etc.)
+    "statusbar": True,  # Keep bottom resize/status bar
+    "resize": True,  # Allow user to resize editor
 
-CKEDITOR_CONFIGS = {
-    "default": {
-        "toolbar": "full",
-        "height": 300,
-        "width": "100%",
-    },
-    "simple": {
-        "toolbar": [
-            {"name": "basicstyles", "items": ["Bold", "Italic", "Underline"]},
-            {"name": "paragraph", "items": ["NumberedList", "BulletedList"]},
-            {"name": "links", "items": ["Link", "Unlink"]},
-            {"name": "clipboard", "items": ["Undo", "Redo"]},
-        ],
-        "height": 300,
-        "width": "100%",
-    },
+    # ✨ Light, focused toolbar
+    "toolbar": (
+        "undo redo | bold italic underline | bullist numlist | "
+        "link unlink | blockquote | removeformat | code"
+    ),
+
+    # 🎛️ Useful plugins, nothing bloated
+    "plugins": "link lists code paste",
+    "branding": False,  # Removes “Powered by TinyMCE”
+    "cleanup_on_startup": True,
+    "custom_undo_redo_levels": 10,
+    "paste_as_text": True,  # Prevent weird formatting from Word/Google Docs
 }
+
+
+
 
 
 WSGI_APPLICATION = 'FrancoUke.wsgi.application'

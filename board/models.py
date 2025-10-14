@@ -3,12 +3,15 @@ from django.conf import settings
 from ckeditor.fields import RichTextField
 from urllib.parse import urlparse, parse_qs
 from assets.models import Asset  # central repository
+from tinymce.models import HTMLField
 
 from django.db import models
 from django.conf import settings
-from ckeditor.fields import RichTextField
 
 
+
+# board/models.py
+from .rehearsal_notes import *
 
 
 # -------------------------
@@ -57,7 +60,7 @@ class Venue(models.Model):
 class BoardMessage(models.Model):
     column = models.ForeignKey("BoardColumn", related_name="messages", on_delete=models.CASCADE)
     title = models.CharField(max_length=255, blank=True)
-    content = RichTextField()
+    content = HTMLField(blank=True, null=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -78,7 +81,7 @@ class BoardItem(models.Model):
 
     # Fields for non-event cards
     title = models.CharField(max_length=255, blank=True)
-    rich_description = RichTextField(blank=True, null=True)
+    rich_description = HTMLField(blank=True, null=True)
     youtube_url = models.URLField(blank=True, null=True)
     media_file = models.FileField(upload_to="board_media/", blank=True, null=True)
     link = models.URLField(blank=True, null=True)
@@ -230,8 +233,8 @@ class Event(models.Model):
     )
 
     title = models.CharField(max_length=255)
-    rich_description = RichTextField(blank=True)  
-    rich_notes = RichTextField(blank=True)       
+    rich_description = HTMLField(blank=True, null=True)
+    rich_notes = HTMLField(blank=True, null=True)      
 
     event_type = models.CharField(
         max_length=20,
@@ -329,11 +332,11 @@ class PerformanceDetails(models.Model):
     def __str__(self):
         return f"Performance Details for {self.event.title}"
 '''
-
+'''
 class RehearsalDetails(models.Model):
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="rehearsal_details")
     notes = models.TextField(blank=True, null=True)
-
+'''
 
 class EventPhoto(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="photos")
