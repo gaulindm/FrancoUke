@@ -166,60 +166,49 @@
     }));
   }
 
-// --- 🎸 Lookup a chord by cleaned name ---
-function findChord(chordName) {
-  if (!window.CLEANED_CHORD_LIBRARY?.length) {
-    console.warn("⚠️ Chord library not loaded yet.");
-    return null;
-  }
-
-  const cleaned = cleanChordName(chordName);
-  const match = window.CLEANED_CHORD_LIBRARY.find(
-    (ch) => ch.cleanedName === cleaned
-  );
-
-  if (!match) {
-    console.warn(`⚠️ No chord match found for "${chordName}" → "${cleaned}"`);
-  }
-
-  return match || null;
-}
-
-
-// --- 🎸 Simple Chord Library Loader (no fetch, uses embedded JSON) ---
-async function loadChordLibrary(instrument = "ukulele") {
-  try {
-    const embedded = document.getElementById("chords-data");
-    if (!embedded) {
-      console.warn("⚠️ No embedded chord JSON found — skipping loadChordLibrary");
-      window.CHORD_LIBRARY = [];
-      return;
+  // --- 🎸 Lookup a chord by cleaned name ---
+  function findChord(chordName) {
+    if (!window.CLEANED_CHORD_LIBRARY?.length) {
+      console.warn("⚠️ Chord library not loaded yet.");
+      return null;
     }
 
-    const data = JSON.parse(embedded.textContent);
-    window.CHORD_LIBRARY = data;
-    window.CLEANED_CHORD_LIBRARY = data.map(ch => ({
-      ...ch,
-      cleanedName: cleanChordName(ch.name),
-    }));
+    const cleaned = cleanChordName(chordName);
+    const match = window.CLEANED_CHORD_LIBRARY.find(
+      (ch) => ch.cleanedName === cleaned
+    );
 
-    console.log(`✅ Loaded ${data.length} chords from embedded data`);
-  } catch (err) {
-    console.error("❌ Failed to parse embedded chord JSON:", err);
-    window.CHORD_LIBRARY = [];
-    window.CLEANED_CHORD_LIBRARY = [];
+    if (!match) {
+      console.warn(`⚠️ No chord match found for "${chordName}" → "${cleaned}"`);
+    }
+
+    return match || null;
   }
-}
 
-// --- 🎸 Lookup a chord by cleaned name ---
-function findChord(chordName) {
-  if (!window.CLEANED_CHORD_LIBRARY?.length) return null;
-  const cleaned = cleanChordName(chordName);
-  return window.CLEANED_CHORD_LIBRARY.find(
-    (ch) => ch.cleanedName === cleaned
-  );
-}
+  // --- 🎸 Simple Chord Library Loader (no fetch, uses embedded JSON) ---
+  async function loadChordLibrary(instrument = "ukulele") {
+    try {
+      const embedded = document.getElementById("chords-data");
+      if (!embedded) {
+        console.warn("⚠️ No embedded chord JSON found — skipping loadChordLibrary");
+        window.CHORD_LIBRARY = [];
+        return;
+      }
 
+      const data = JSON.parse(embedded.textContent);
+      window.CHORD_LIBRARY = data;
+      window.CLEANED_CHORD_LIBRARY = data.map(ch => ({
+        ...ch,
+        cleanedName: cleanChordName(ch.name),
+      }));
+
+      console.log(`✅ Loaded ${data.length} chords from embedded data`);
+    } catch (err) {
+      console.error("❌ Failed to parse embedded chord JSON:", err);
+      window.CHORD_LIBRARY = [];
+      window.CLEANED_CHORD_LIBRARY = [];
+    }
+  }
 
   // -----------------------------
   // 🎵 Chord Rendering
@@ -230,18 +219,18 @@ function findChord(chordName) {
     cont.innerHTML = "";
     const prefs = window.userPreferences || {};
     const showAlternate = !!prefs.showAlternate;
-  
+
     chords.forEach((chord) => {
       const match = findChord(chord.name);
       if (!match) {
         console.warn(`⚠️ No matching chord found for "${chord.name}" → "${cleanChordName(chord.name)}"`);
         return;
       }
-  
+
       const vars = showAlternate
         ? match.variations
         : [match.variations[0]];
-  
+
       vars.forEach((v) => {
         const wrap = document.createElement("div");
         wrap.className = "chord-wrapper";
@@ -251,7 +240,7 @@ function findChord(chordName) {
       });
     });
   }
-  
+
   function toggleChordSection() {
     const section = $("#chord-section");
     if (!section) return;
@@ -369,20 +358,114 @@ function findChord(chordName) {
       setTimeout(() => overlay.classList.add("hidden"), 3000);
     }
 
-    // Tap gestures
+    // --- 🎯 Gesture Enhancements (moved inside DOMContentLoaded) ---
     const lyrics = $(".lyrics-container");
     if (lyrics) {
       let lastTap = 0;
-      lyrics.addEventListener("touchend", e => {
+      let startY = 0;
+      let startX = 0;
+      let endY = 0;
+      let endX = 0;
+      const SWIPE_THRESHOLD = 50; // px minimum swipe distance
+      const TAP_ZONE_RATIO = 0.3; // left/right screen zones for prev/next
+
+      // Capture swipe start
+      lyrics.addEventListener("touchstart", (e) => {
+        const touch = e.touches[0];
+        startY = touch.clientY;
+        startX = touch.clientX;
+      }, { passive: true });
+
+      // Capture swipe end (and taps)
+      lyrics.addEventListener("touchend", (e) => {
         const now = Date.now();
-        const delta = now - lastTap;
+        const deltaTime = now - lastTap;
+        const touch = e.changedTouches[0];
+        endY = touch.clientY;
+        endX = touch.clientX;
+        const diffY = endY - startY;
+        const diffX = endX - startX;
+        const absY = Math.abs(diffY);
+        const absX = Math.abs(diffX);
         lastTap = now;
-        if (delta < 300) toggleChordSection();
-        else isAutoScrolling ? stopScroll() : startScroll();
+
+        // --- Double Tap (toggle chords) ---
+        if (deltaTime < 300 && absX < 10 && absY < 10) {
+          toggleChordSection();
+          return;
+        }
+
+        // --- Swipe Up/Down to Adjust Speed ---
+        if (absY > SWIPE_THRESHOLD && absY > absX) {
+          if (diffY < 0) {
+            // Swipe Up → Increase speed
+            scrollSpeed = Math.min(1000, scrollSpeed + 1);
+            console.log("⬆️ Increased scroll speed:", scrollSpeed);
+          } else {
+            // Swipe Down → Decrease speed
+            scrollSpeed = Math.max(1, scrollSpeed - 1);
+            console.log("⬇️ Decreased scroll speed:", scrollSpeed);
+          }
+          updateSpeedDisplay();
+          return;
+        }
+
+        // --- Tap zones for previous / next song ---
+        const screenWidth = window.innerWidth;
+        const leftZone = screenWidth * TAP_ZONE_RATIO;
+        const rightZone = screenWidth * (1 - TAP_ZONE_RATIO);
+
+        if (absX < 10 && absY < 10) {
+          if (endX < leftZone) {
+            console.log("⏮️ Previous song");
+            if (typeof window.navigateToPreviousSong === "function") {
+              window.navigateToPreviousSong();
+            } else {
+              alert("Previous song not implemented yet.");
+            }
+          } else if (endX > rightZone) {
+            console.log("⏭️ Next song");
+            if (typeof window.navigateToNextSong === "function") {
+              window.navigateToNextSong();
+            } else {
+              alert("Next song not implemented yet.");
+            }
+          } else {
+            // --- Center Tap toggles scroll ---
+            isAutoScrolling ? stopScroll() : startScroll();
+          }
+        }
       }, { passive: true });
     }
-  });
 
+  }); // end DOMContentLoaded
+
+  // --- 🎵 Navigation Helpers (global functions) ---
+// --- 🎵 Navigation Helpers (match Django buttons) ---
+window.navigateToNextSong = function() {
+  const nextOrder = window.SONG?.next_order;
+  const setlistId = window.SONG?.setlist_id;
+  if (nextOrder && setlistId) {
+    console.log("⏭️ Navigating to next song (setlist order):", nextOrder);
+    window.location.href = `/setlists/${setlistId}/teleprompter/${nextOrder}/`;
+  } else {
+    alert("No next song available.");
+  }
+};
+
+window.navigateToPreviousSong = function() {
+  const prevOrder = window.SONG?.previous_order;
+  const setlistId = window.SONG?.setlist_id;
+  if (prevOrder && setlistId) {
+    console.log("⏮️ Navigating to previous song (setlist order):", prevOrder);
+    window.location.href = `/setlists/${setlistId}/teleprompter/${prevOrder}/`;
+  } else {
+    alert("No previous song available.");
+  }
+};
+
+
+  // --- ✅ Teleprompter public API ---
   window.teleprompter = {
     start: startScroll,
     stop: stopScroll,

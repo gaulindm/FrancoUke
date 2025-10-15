@@ -2,7 +2,6 @@
 
 from django.db import models
 from django.conf import settings
-#from ckeditor.fields import RichTextField
 from tinymce.models import HTMLField
 
 
@@ -26,6 +25,10 @@ class RehearsalDetails(models.Model):
     )
     notes = HTMLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  # ✅ add this
+
+    class Meta:
+        verbose_name = "Rehearsal Detail"
+        verbose_name_plural = "Rehearsal Details"
 
     def __str__(self):
         return f"Rehearsal Details for {self.event.title if self.event else 'Unknown Event'}"

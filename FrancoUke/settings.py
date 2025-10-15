@@ -99,24 +99,25 @@ SILENCED_SYSTEM_CHECKS = [
 ]
 
 TINYMCE_DEFAULT_CONFIG = {
-    "height": 250,  # Comfortable default height
-    "width": "100%",  # Expand to container width
-    "menubar": False,  # Hide top menus (File/Edit/View etc.)
-    "statusbar": True,  # Keep bottom resize/status bar
-    "resize": True,  # Allow user to resize editor
-
-    # ✨ Light, focused toolbar
+    "height": 300,
+    "width": "100%",
+    "menubar": False,
+    "plugins": "advlist autolink lists link charmap preview anchor "
+               "searchreplace visualblocks code fullscreen "
+               "insertdatetime table paste code help wordcount",
     "toolbar": (
-        "undo redo | bold italic underline | bullist numlist | "
-        "link unlink | blockquote | removeformat | code"
+        "undo redo | styles | bold italic underline | "
+        "alignleft aligncenter alignright alignjustify | "
+        "bullist numlist outdent indent | link | removeformat | help"
     ),
-
-    # 🎛️ Useful plugins, nothing bloated
-    "plugins": "link lists code paste",
-    "branding": False,  # Removes “Powered by TinyMCE”
-    "cleanup_on_startup": True,
-    "custom_undo_redo_levels": 10,
-    "paste_as_text": True,  # Prevent weird formatting from Word/Google Docs
+    "block_formats": "Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3",
+    "style_formats": [
+        {"title": "Paragraph", "block": "p"},
+        {"title": "Heading 1", "block": "h1"},
+        {"title": "Heading 2", "block": "h2"},
+        {"title": "Heading 3", "block": "h3"},
+    ],
+    "content_style": "body { font-family: Helvetica, Arial, sans-serif; font-size: 14px }",
 }
 
 

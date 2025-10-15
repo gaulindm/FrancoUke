@@ -219,12 +219,7 @@ from .rehearsal_notes import (
     RehearsalSection,
     SongRehearsalNote,
 )
-'''
-@admin.register(RehearsalDetails)
-class RehearsalDetailsAdmin(admin.ModelAdmin):
-    list_display = ("event",)
-    search_fields = ("event__title",)
-'''
+
     
 
 @admin.register(RehearsalSection)

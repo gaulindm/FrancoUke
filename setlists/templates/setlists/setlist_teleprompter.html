@@ -18,6 +18,18 @@
 
 <!-- Diagram renderer -->
   <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+
+  <script>
+    window.SONG = {
+      id: {{ song.id }},
+      setlist_id: {{ setlist.id }},
+      next_order: {% if next_song %}{{ next_song.order }}{% else %}null{% endif %},
+      previous_order: {% if prev_song %}{{ prev_song.order }}{% else %}null{% endif %}
+    };
+  </script>
+  
+  
+
   <!-- Teleprompter engine -->
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 

@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from ckeditor.fields import RichTextField
 from urllib.parse import urlparse, parse_qs
 from assets.models import Asset  # central repository
 from tinymce.models import HTMLField
@@ -199,7 +198,7 @@ class BoardItemPhoto(models.Model):
 # Events
 # -------------------------
 from django.db import models
-from ckeditor.fields import RichTextField
+
 
 class Event(models.Model):
     EVENT_TYPES = [

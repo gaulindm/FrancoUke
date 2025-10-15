@@ -28,7 +28,7 @@ class Song(models.Model):
     contributor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     scroll_speed = models.PositiveIntegerField(
-        default=30,
+        default=10,
         null=True,
         blank=True,
         help_text="Teleprompter scroll speed in pixels per second (default 30 if unset)"
