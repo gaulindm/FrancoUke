@@ -320,22 +320,7 @@ class Event(models.Model):
     def non_cover_images_count(self):
         return self.non_cover_gallery_count + self.non_cover_photos_count
 
-'''
-class PerformanceDetails(models.Model):
-    """Extra fields only for performances."""
-    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="performance_details")
-    attire = models.CharField(max_length=255, null=True, blank=True)
-    chairs = models.CharField(max_length=255, null=True, blank=True)
-    arrive_by = models.TimeField(null=True, blank=True)
 
-    def __str__(self):
-        return f"Performance Details for {self.event.title}"
-'''
-'''
-class RehearsalDetails(models.Model):
-    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="rehearsal_details")
-    notes = models.TextField(blank=True, null=True)
-'''
 
 class EventPhoto(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="photos")

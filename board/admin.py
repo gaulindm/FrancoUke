@@ -113,6 +113,8 @@ class EventAdminForm(forms.ModelForm):
             "rich_notes": TinyMCE(attrs={"style": "height: 100px; width: 95%;"}),
         }
 
+from django.contrib import admin
+from django.utils.html import format_html
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
@@ -143,16 +145,32 @@ class EventAdmin(admin.ModelAdmin):
         }),
     )
 
-    # --------------------------------------------------------
-    # Custom admin methods
-    # --------------------------------------------------------
+    def get_fieldsets(self, request, obj=None):
+        """Show 'rehearsal_link' only if the event type is 'rehearsal'."""
+        fieldsets = list(super().get_fieldsets(request, obj))
+        if obj and getattr(obj, "event_type", "").lower() == "rehearsal":
+            for name, section in fieldsets:
+                if name is None:
+                    section_fields = list(section["fields"])
+                    if "rehearsal_link" not in section_fields:
+                        section_fields.append("rehearsal_link")
+                        section["fields"] = tuple(section_fields)
+                    break
+        return fieldsets
 
     def rehearsal_link(self, obj):
-        """Shortcut button to open related rehearsal notes."""
+        """Show a link to rehearsal details only if this is a rehearsal event."""
+        event_type_value = getattr(obj, "event_type", "").lower()
+        if event_type_value != "rehearsal":
+            return ""  # Hide for non-rehearsals
+
+        # If rehearsal, show link to the related RehearsalDetails admin
         details, _ = RehearsalDetails.objects.get_or_create(event=obj)
         url = reverse("admin:board_rehearsaldetails_change", args=[details.pk])
         return format_html('<a class="button" href="{}">Rehearsal Notes</a>', url)
+
     rehearsal_link.short_description = "Rehearsal"
+    rehearsal_link.allow_tags = True
 
     def duplicate_events(self, request, queryset):
         """Admin action: duplicate selected events."""
