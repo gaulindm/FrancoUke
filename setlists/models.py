@@ -11,11 +11,13 @@ class SetList(models.Model):
         null=True, blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    event = models.ForeignKey(
-        Event, on_delete=models.SET_NULL,
-        null=True, blank=True,
-        help_text="Optional: link this setlist to a Uke4ia event"
-    )
+    event = models.OneToOneField(
+    Event,
+    on_delete=models.SET_NULL,
+    null=True, blank=True,
+    related_name="setlist",  # 👈 gives us event.setlist
+    help_text="Optional: link this setlist to a Uke4ia event"
+)
 
     def __str__(self):
         return self.name

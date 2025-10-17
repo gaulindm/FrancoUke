@@ -81,16 +81,19 @@
         <!-- Cover -->
         {% if event.cover_asset %}
           <img src="{{ event.cover_asset.file.url }}" 
-               alt="{{ event.cover_asset.title|default:event.title }}" 
-               class="img-fluid mb-3 rounded">
+              alt="{{ event.cover_asset.title|default:event.title }}" 
+              class="img-fluid mb-3 rounded" 
+              style="max-height: 250px; object-fit: cover; width: 100%;">
         {% elif event.cover_photo %}
           <img src="{{ event.cover_photo.image.url }}" 
-               alt="{{ event.title }}" 
-               class="img-fluid mb-3 rounded">
+              alt="{{ event.title }}" 
+              class="img-fluid mb-3 rounded" 
+              style="max-height: 250px; object-fit: cover; width: 100%;">
         {% else %}
           <img src="{% static 'images/fallback.jpg' %}" 
-               alt="No cover available" 
-               class="img-fluid mb-3 rounded">
+              alt="No cover available" 
+              class="img-fluid mb-3 rounded"
+              style="max-height: 250px; object-fit: cover; width: 100%;">
         {% endif %}
 
         <!-- 📸 Thumbnail strip (assets) -->
@@ -138,16 +141,36 @@
           <p><strong>Chairs:</strong> {{ event.chairs }}</p>
         {% endif %}
 
-        <!-- Description -->
-        <div class="description-preview">
-          <div class="short-text" style="max-height: 4.5em; overflow: hidden;">
-            {{ event.rich_description|safe }}
-          </div>
-          <div class="full-text d-none">
-            {{ event.rich_description|safe }}
-          </div>
-          <a href="#" class="toggle-description">See more</a>
+      <!-- Description -->
+      <div class="description-preview mb-3">
+        <div class="short-text" style="max-height: 4.5em; overflow: hidden;">
+          {{ event.rich_description|safe }}
         </div>
+        <div class="full-text d-none">
+          {{ event.rich_description|safe }}
+        </div>
+        <a href="#" class="toggle-description small text-primary d-none">See more</a>
+      </div>
+
+
+
+
+        <!-- 🎵 Setlist Section -->
+        {% if event.setlist %}
+        <div class="mt-3">
+          <a href="{% url 'setlists:detail' event.setlist.id %}" 
+             class="btn btn-outline-primary w-100">
+             🎵 View Setlist
+          </a>
+        </div>
+      {% elif user.is_staff %}
+        <div class="mt-3">
+          <button class="btn btn-outline-secondary w-100" disabled>
+            ➕ Create Setlist (use Admin)
+          </button>
+        </div>
+      {% endif %}
+      
 
         <!-- Availability Form -->
         <form method="post" action="{% url 'board:set_event_availability' event.id %}">
@@ -179,15 +202,32 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".toggle-description").forEach(link => {
-    link.addEventListener("click", e => {
-      e.preventDefault();
-      const container = link.closest(".description-preview");
-      container.querySelector(".short-text").classList.toggle("d-none");
-      container.querySelector(".full-text").classList.toggle("d-none");
-      link.textContent = link.textContent.includes("more") ? "See less" : "See more";
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".description-preview").forEach(container => {
+      const shortText = container.querySelector(".short-text");
+      const fullText = container.querySelector(".full-text");
+      const toggleLink = container.querySelector(".toggle-description");
+  
+      // Only show "See more" if the text actually overflows
+      if (shortText.scrollHeight > shortText.clientHeight + 5) {
+        toggleLink.classList.remove("d-none");
+      }
+  
+      // Toggle show/hide
+      toggleLink.addEventListener("click", e => {
+        e.preventDefault();
+        const isExpanding = toggleLink.textContent.includes("more");
+  
+        shortText.classList.toggle("d-none");
+        fullText.classList.toggle("d-none");
+  
+        toggleLink.textContent = isExpanding ? "See less" : "See more";
+  
+        // When collapsing ("See less"), smoothly scroll back to top of description
+        if (!isExpanding) {
+          container.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
     });
   });
-});
-</script>
+  </script>

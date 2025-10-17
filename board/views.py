@@ -51,8 +51,10 @@ def full_board_view(request):
         .order_by("position")
     )
 
+    print("🎯 [DEBUG] Rendering full_board_view with columns:")
+
     for column in columns:
-        print(f"\n🟦 Column: {column.name} (type={column.column_type})")
+        print(f"🟦 Column: {column.name}")
 
         # 1️⃣ Select events depending on venue binding
         if column.venue:
@@ -73,40 +75,23 @@ def full_board_view(request):
         else:
             column.sorted_events = list(upcoming) + list(past)
 
-        # Debug: show what events are attached
-        for e in column.sorted_events:
-            print(f"   🎭 Event → {e.title} [{e.event_date}]")
+        # 3️⃣ Debug each event and its setlist relationship
+        for event in getattr(column, "sorted_events", []):
+            print(f"   🎭 Event: {event.title} (ID={event.id})")
 
-        # 3️⃣ Enrich events with availability + cover photo
-        for event in column.sorted_events:
-            availability = event.availabilities.filter(user=user).first()
-            event.my_availability = availability.status if availability else None
-
-            avails = event.availabilities.all()
-            event.avail_summary = {
-                "yes": avails.filter(status="yes").count(),
-                "no": avails.filter(status="no").count(),
-                "maybe": avails.filter(status="maybe").count(),
-            }
-
-            event._cover_photo = (
-                event.photos.filter(is_cover=True).first() or event.photos.first()
-            )
-
-        # 4️⃣ Messages for general columns
-        if column.column_type == "general":
-            column.sorted_messages = column.messages.order_by("-created_at")
-            for m in column.sorted_messages:
-                print(f"   💬 Message → {m.title or '(no title)'} by {m.author}")
-
-        # 5️⃣ Songs for songs_to_listen columns
-        if column.column_type == "songs_to_listen":
-            for item in column.items.all():
-                print(f"   🎵 Song → {item.title}")
+            # ✅ Check if the event has a related setlist (FK or reverse FK)
+            setlist = getattr(event, "setlist", None)
+            if setlist:
+                print(f"      ✅ Found setlist via event.setlist: {setlist} (ID={setlist.id})")
+            else:
+                # Try the reverse relation in case we haven’t added related_name
+                related_setlists = getattr(event, "setlist_set", None)
+                if related_setlists and related_setlists.exists():
+                    print(f"      ✅ Found setlist(s) via event.setlist_set: {[s.name for s in related_setlists]}")
+                else:
+                    print("      🚫 No setlist found (neither event.setlist nor event.setlist_set)")
 
     return render(request, "board/full_board.html", {"columns": columns})
-
-
 
 
 @require_POST
@@ -156,7 +141,7 @@ def item_photo_list(request, item_id):
     } for i, photo in enumerate(photos)]
 
     # ✅ Debug output in server log
-    print(f"DEBUG: Photos for item {item_id}: {data}")
+    #print(f"DEBUG: Photos for item {item_id}: {data}")
 
     return JsonResponse(data, safe=False)
 
@@ -240,25 +225,43 @@ def performer_event_list(request):
     })
 
 
-
+'''
 def event_detail_partial(request, event_id):
     """
     Returns the modal content for an Event (used in AJAX).
     """
     event = get_object_or_404(Event, id=event_id)
     return render(request, "partials/_event_card.html", {"event": event})
-
+'''
 # board/views.py
 
 
 # --- New: Event Detail ---
-def event_detail(request, event_id):
+# views.py
+from django.shortcuts import render, get_object_or_404
+from .models import Event, EventAvailability
+from setlists.models import SetList
+
+'''def event_detail(request, event_id):
     """
-    Renders the modal body for an event.
+    Renders the modal body for an event, including related setlist (if exists).
+    Includes debug prints for troubleshooting setlist linkage.
     """
     event = get_object_or_404(Event, id=event_id)
+    print("🧩 [DEBUG:event_detail] Loaded Event:", event.title, f"(ID={event.id})")
 
-    # Look up this user's availability if logged in
+    # --- Try to get the related setlist (if it exists) ---
+    if hasattr(event, "setlist"):
+        setlist = getattr(event, "setlist", None)
+        if setlist:
+            print(f"🎵 [DEBUG:event_detail] Found related Setlist: {setlist} (ID={setlist.id})")
+        else:
+            print("🚫 [DEBUG:event_detail] Event has a 'setlist' attribute, but it's None.")
+    else:
+        print("❓ [DEBUG:event_detail] Event has no 'setlist' attribute — check model relationship.")
+        setlist = None
+
+    # --- Look up this user's availability if logged in ---
     user_status = None
     if request.user.is_authenticated:
         user_status = (
@@ -267,13 +270,23 @@ def event_detail(request, event_id):
             .values_list("status", flat=True)
             .first()
         )
+        print(f"👤 [DEBUG:event_detail] User '{request.user.username}' availability:", user_status)
+    else:
+        print("👤 [DEBUG:event_detail] Anonymous user — skipping availability lookup.")
 
-    return render(request, "partials/_event_detail.html", {
+    # --- Build context ---
+    context = {
         "event": event,
+        "setlist": setlist,
         "user_status": user_status,
-    })
+    }
 
+    print("📦 [DEBUG:event_detail] Context keys:", list(context.keys()))
+    print("📦 [DEBUG:event_detail] Setlist in context:", context["setlist"])
 
+    return render(request, "partials/_event_detail.html", context)
+
+'''
 # --- New: Update Event Availability ---
 @login_required
 def update_event_availability(request, event_id):
@@ -298,7 +311,7 @@ def update_event_availability(request, event_id):
                 "user": request.user.username
             })
 
-    return redirect("full_board")
+    return redirect("board:full_board")
 
 
 

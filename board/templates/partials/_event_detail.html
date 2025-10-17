@@ -1,4 +1,3 @@
-{# partials/_event_detail.html #}
 <div class="container">
   <h3>{{ event.title }}</h3>
 
@@ -25,5 +24,22 @@
     </form>
   {% else %}
     <p><a href="{% url 'login' %}?next={{ request.path }}">Login</a> to set your availability.</p>
+  {% endif %}
+
+  <!-- 👇 New section for Setlist access -->
+  {% if event.setlist %}
+    <div class="mt-4">
+      <a href="{% url 'setlist_detail' event.setlist.id %}" class="btn btn-primary btn-sm">
+        🎵 View Setlist
+      </a>
+    </div>
+  {% else %}
+    {% if user.is_staff %}
+      <div class="mt-4">
+        <a href="{% url 'setlist_create' event.id %}" class="btn btn-outline-secondary btn-sm">
+          ➕ Create Setlist
+        </a>
+      </div>
+    {% endif %}
   {% endif %}
 </div>

@@ -40,7 +40,7 @@ urlpatterns = [
 
 
      # --- Event system ---
-    path('event/<int:event_id>/', views.event_detail, name='event_detail'),
+    #path('event/<int:event_id>/', views.event_detail, name='event_detail'),
     path("availability/<int:event_id>/", update_event_availability, name="set_event_availability"),
 
     # --- Performance system (legacy, will be removed later) ---
