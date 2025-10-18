@@ -21,9 +21,15 @@ from .models import (
 )
 from .rehearsal_notes import (
     RehearsalDetails,
-    RehearsalSection,
+   # RehearsalSection,
     SongRehearsalNote,
 )
+
+
+# board/admin.py
+
+from . import admin_rehearsal  # ✅ This ensures Django registers RehearsalDetailsAdmin
+
 
 # ------------------------------------------------------------
 # 🧩 INLINE CLASSES
@@ -200,7 +206,7 @@ class VenueAdmin(admin.ModelAdmin):
 # ------------------------------------------------------------
 # 🧾 REHEARSAL ADMIN
 # ------------------------------------------------------------
-
+'''
 @admin.register(RehearsalSection)
 class RehearsalSectionAdmin(admin.ModelAdmin):
     list_display = ("title", "rehearsal", "order", "created_by")
@@ -218,3 +224,4 @@ class SongRehearsalNoteAdmin(admin.ModelAdmin):
 class RehearsalDetailsAdmin(admin.ModelAdmin):
     list_display = ("event", "created_at")
     search_fields = ("event__title",)
+'''

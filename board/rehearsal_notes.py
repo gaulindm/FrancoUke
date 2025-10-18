@@ -12,19 +12,22 @@ from tinymce.models import HTMLField
 # Optional: If songs live in `songbook` app
 #from songbook.models import Song  # Adjust path if needed
 
+from django.db import models
+from django.conf import settings
+from tinymce.models import HTMLField
+
 
 class RehearsalDetails(models.Model):
     """
     One-to-one model with Event, used for detailed rehearsal notes.
-    This replaces the inline definition from models.py.
     """
     event = models.OneToOneField(
-        "board.Event", 
+        "board.Event",
         on_delete=models.CASCADE,
         related_name="rehearsal_details"
     )
     notes = HTMLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # ✅ add this
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Rehearsal Detail"
@@ -34,6 +37,41 @@ class RehearsalDetails(models.Model):
         return f"Rehearsal Details for {self.event.title if self.event else 'Unknown Event'}"
 
 
+class SongRehearsalNote(models.Model):
+    """
+    Individual song notes linked to a rehearsal.
+    """
+    rehearsal = models.ForeignKey(
+        RehearsalDetails,
+        on_delete=models.CASCADE,
+        related_name="song_notes"
+    )
+    song = models.ForeignKey(
+        "songbook.Song",
+        on_delete=models.CASCADE,
+        related_name="rehearsal_notes"
+    )
+    notes = HTMLField(blank=True, null=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["song__songTitle", "created_at"]
+        verbose_name = "Song Rehearsal Note"
+        verbose_name_plural = "Song Rehearsal Notes"
+
+    def __str__(self):
+        event_title = self.rehearsal.event.title if self.rehearsal and self.rehearsal.event else "Unknown Event"
+        song_title = self.song.songTitle if self.song else "Unknown Song"
+        return f"{song_title} @ {event_title}"
+
+'''
 class RehearsalSection(models.Model):
     """
     Logical section within a rehearsal, e.g.:
@@ -64,18 +102,4 @@ class RehearsalSection(models.Model):
         return f"{self.rehearsal.event.title} - {self.title}"
 
 
-class SongRehearsalNote(models.Model):
-    section = models.ForeignKey(RehearsalSection, on_delete=models.CASCADE, related_name="song_notes")
-    song = models.ForeignKey("songbook.Song", on_delete=models.CASCADE, related_name="rehearsal_notes")
-    notes = HTMLField(blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ["song", "created_at"]  # ✅ fixed
-        verbose_name = "Song Rehearsal Note"
-        verbose_name_plural = "Song Rehearsal Notes"
-
-    def __str__(self):
-        return f"{self.song.songTitle} @ {self.section.rehearsal.event.title}"
+'''
