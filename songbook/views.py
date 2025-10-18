@@ -1,54 +1,91 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models.functions import Lower
-from django.db.models import CharField
-from django.db.models.functions import Cast
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib import messages
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.urls import reverse, reverse_lazy
-from django.db.models import Q
-from django.utils.timezone import now
-from django.contrib.auth.models import User
-from django.template.loader import render_to_string
-from taggit.models import Tag
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
-from collections import defaultdict
-from django.core.exceptions import PermissionDenied
-from .mixins import SiteContextMixin
-# Import project-specific modules
-from .models import Song, SongFormatting
-from .forms import SongForm, TagFilterForm, SongFormattingForm
-from .parsers import parse_song_data
-from songbook.utils.transposer import extract_chords, transpose_lyrics
-from songbook.utils.pdf_generator import generate_songs_pdf, load_chords
-from songbook.context_processors import site_context
-from songbook.utils.ABC2audio import convert_abc_to_audio
-from users.models import UserPreference
-import urllib.parse
+"""
+songbook/views.py — cleaned and consolidated.
+
+Features:
+- edit_song_formatting (permissions-protected)
+- ArtistListView
+- LandingView (per-site template selection)
+- UserSongListView
+- ScoreView (detail view for a song)
+- SongListView (site-scoped listing with search/tag/artist filters)
+- SongCreateView, SongUpdateView, SongDeleteView
+- PDF helpers + endpoints (single, multiple, preview)
+- Chord JSON endpoints + chord lookup
+- chord_dictionary, about, whats_new
+- save_scroll_speed (simple AJAX endpoint)
+"""
+
+import json
 import logging
+import os
+from collections import defaultdict
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import (
+    CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
+)
+
+from taggit.models import Tag
 
 from .context_processors import site_context
+from .forms import SongFormattingForm
+from .mixins import SiteContextMixin
+from .models import Song, SongFormatting
+from .parsers import parse_song_data
+from songbook.utils.pdf_generator import generate_songs_pdf, load_chords
+from songbook.utils.transposer import extract_chords, transpose_lyrics
+from users.models import UserPreference
 
+logger = logging.getLogger(__name__)
+
+# Allowed instruments for chord JSON endpoints
+ALLOWED_INSTRUMENTS = {
+    "ukulele",
+    "guitar",
+    "guitalele",
+    "banjo",
+    "mandolin",
+    "baritoneUke",
+}
+
+
+# ---------------------------------------------------------------------
+# Formatting editor (per-user song formatting)
+# ---------------------------------------------------------------------
 @login_required
 @permission_required("songbook.change_songformatting", raise_exception=True)
 def edit_song_formatting(request, song_id):
-    """Edit song formatting with Dual Edition support."""
+    """
+    Edit per-user SongFormatting with a dual-edit copy-from-Gaulind on first creation.
+    """
     context_data = site_context(request)
-    site_name = context_data["site_name"]
-
+    # Ensure formatting exists for (user, song)
     formatting, created = SongFormatting.objects.get_or_create(
-        user=request.user, song_id=song_id,
-        defaults={'intro': {}, 'verse': {}, 'chorus': {}, 'bridge': {}, 'interlude': {}, 'outro': {}}
+        user=request.user,
+        song_id=song_id,
+        defaults={
+            "intro": {},
+            "verse": {},
+            "chorus": {},
+            "bridge": {},
+            "interlude": {},
+            "outro": {},
+        },
     )
 
+    # If just created, attempt to copy Gaulind's formatting (if present)
     if created:
-        gaulind_formatting = SongFormatting.objects.filter(
-            user__username="Gaulind", song_id=song_id
-        ).first()
+        gaulind_formatting = SongFormatting.objects.filter(user__username="Gaulind", song_id=song_id).first()
         if gaulind_formatting:
             for section in ["intro", "verse", "chorus", "bridge", "interlude", "outro"]:
                 setattr(formatting, section, getattr(gaulind_formatting, section))
@@ -63,171 +100,140 @@ def edit_song_formatting(request, song_id):
     else:
         form = SongFormattingForm(instance=formatting)
 
-    return render(request, "songbook/edit_formatting.html", {
-        "form": form,
-        "pk": song_id,
-        "formatting": formatting,
-        **context_data,  # adds site_name, base_template, site_namespace
-    })
+    return render(
+        request,
+        "songbook/edit_formatting.html",
+        {
+            "form": form,
+            "pk": song_id,
+            "formatting": formatting,
+            **context_data,
+        },
+    )
 
 
+# ---------------------------------------------------------------------
+# Artist listing
+# ---------------------------------------------------------------------
 class ArtistListView(SiteContextMixin, ListView):
     template_name = "songbook/artist_list.html"
     context_object_name = "artists"
 
     def get_queryset(self):
         site_name = self.get_site_name()
-        queryset = Song.objects.filter(site_name=site_name).values_list(
-            "metadata__artist", flat=True
-        ).distinct()
+        artists_qs = (
+            Song.objects.filter(site_name=site_name)
+            .values_list("metadata__artist", flat=True)
+            .distinct()
+        )
+        artists = [a for a in artists_qs if a]  # Remove empty/None
+        letter = self.kwargs.get("letter")
 
-        # Ensure self.selected_letter exists even if not passed
-        self.selected_letter = self.kwargs.get("letter", None)
+        if letter:
+            artists = [a for a in artists if a.upper().startswith(letter.upper())]
 
-        # Filter by letter if provided
-        if self.selected_letter:
-            queryset = [a for a in queryset if a and a.upper().startswith(self.selected_letter.upper())]
-
-        # Remove None values, then sort
-        queryset = [a for a in queryset if a]
-        return sorted(queryset)
-
-
+        return sorted(artists)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         all_artists = self.get_queryset()
         first_letters = sorted({a[0].upper() for a in all_artists if a})
-
-        # ✅ Extra artist context
-        context.update({
-            "first_letters": first_letters,
-            "selected_letter": self.selected_letter,
-            "artist_columns": [
-                all_artists[i::4] for i in range(4)  # 4 columns layout
-            ],
-        })
+        context.update(
+            {
+                "first_letters": first_letters,
+                "selected_letter": self.kwargs.get("letter"),
+                "artist_columns": [all_artists[i::4] for i in range(4)],
+            }
+        )
         return context
 
 
-
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from .models import Song
-from songbook.utils.transposer import transpose_chord # <- assuming this exists
-
-from django.http import HttpResponse
-
-
-def preview_pdf(request, song_id):
-    song = get_object_or_404(Song, pk=song_id)
-    user = request.user
-
-    transpose_value = int(request.GET.get("transpose", 0))
-    if transpose_value != 0:
-        song.lyrics_with_chords = transpose_lyrics(song.lyrics_with_chords, transpose_value)
-
-    context_data = site_context(request)
-    site_name = context_data["site_name"]
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="{song.songTitle}_preview.pdf"'
-    generate_songs_pdf(response, [song], user, transpose_value, None, site_name=site_name)
-    return response
-
-
-
-
-import logging
-
-logger = logging.getLogger(__name__)
-
-#For the action button
-def generate_pdf_response(filename, songs, user=None):
-    """Reusable function to generate and return a PDF response."""
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}.pdf"'
-    generate_songs_pdf(response, songs, user)
+# ---------------------------------------------------------------------
+# PDF helpers and endpoints
+# ---------------------------------------------------------------------
+def generate_pdf_response(filename, songs, user=None, transpose_value=0, formatting=None, site_name=None, inline=False):
+    """
+    Generic PDF response generator that delegates to generate_songs_pdf.
+    - filename: base filename (no extension)
+    - songs: iterable of Song objects
+    - user: the requesting user (or None)
+    - transpose_value: integer semitone shift (0 for none)
+    - formatting: optional formatting object or None
+    - site_name: optional site name passed to generate_songs_pdf
+    - inline: if True, Content-Disposition is inline, otherwise attachment
+    """
+    content_type = "application/pdf"
+    response = HttpResponse(content_type=content_type)
+    disposition_type = "inline" if inline else "attachment"
+    response["Content-Disposition"] = f'{disposition_type}; filename="{filename}.pdf"'
+    generate_songs_pdf(response, songs, user, transpose_value, formatting, site_name=site_name)
     return response
 
 
 def generate_multi_song_pdf(request):
-    """Generates a PDF for multiple songs filtered by tag."""
-    tag_name = request.POST.get('tag_name', '').strip()
-    songs = Song.objects.filter(tags__name=tag_name) if tag_name else Song.objects.none()
+    """
+    POST endpoint to generate a PDF of songs filtered by tag (expects 'tag_name' in POST).
+    """
+    tag_name = request.POST.get("tag_name", "").strip()
+    if not tag_name:
+        return JsonResponse({"error": "Missing tag_name"}, status=400)
 
-    return generate_pdf_response("multi_song_report", songs, request.user)
+    songs = Song.objects.filter(tags__name=tag_name)
+    return generate_pdf_response("multi_song_report", songs, user=request.user)
 
 
 @login_required
 def generate_single_song_pdf(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
-    user = request.user
-
     context_data = site_context(request)
-    site_name = context_data["site_name"]
+    site_name = context_data.get("site_name")
+    return generate_pdf_response(
+        filename=song.songTitle,
+        songs=[song],
+        user=request.user,
+        transpose_value=0,
+        formatting=None,
+        site_name=site_name,
+        inline=True,
+    )
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="{song.songTitle}.pdf"'
-    generate_songs_pdf(response, [song], user, transpose_value=0, formatting=None, site_name=site_name)
-    return response
 
-import os
-import json
-from django.conf import settings
-from django.http import JsonResponse, Http404
-
-def get_chords_json(request, instrument):
+def preview_pdf(request, song_id):
     """
-    Serve chord definitions from songbook/chords as JSON.
-    Example: /chords/json/ukulele/
+    Preview a single-song PDF (inline). Accepts optional ?transpose=<int>.
     """
-    allowed_instruments = {
-        "ukulele",
-        "guitar",
-        "guitalele",
-        "banjo",
-        "mandolin",
-        "baritoneUke",
-    }
+    song = get_object_or_404(Song, pk=song_id)
+    transpose_value = int(request.GET.get("transpose", "0") or 0)
 
-    if instrument not in allowed_instruments:
-        raise Http404("Instrument not supported")
+    # Do not modify DB object in-place: create a shallow copy for preview
+    preview_song = song
+    if transpose_value != 0 and preview_song.lyrics_with_chords:
+        # produce a transposed preview string and attach temporarily to the object
+        preview_song = Song(
+            **{f.name: getattr(song, f.name) for f in song._meta.fields}
+        )
+        preview_song.lyrics_with_chords = transpose_lyrics(song.lyrics_with_chords, transpose_value)
 
-    file_path = os.path.join(settings.BASE_DIR, "songbook", "chords", f"{instrument}.json")
-    if not os.path.exists(file_path):
-        raise Http404("Chord file not found")
+    site_name = site_context(request).get("site_name")
+    return generate_pdf_response(
+        filename=f"{song.songTitle}_preview",
+        songs=[preview_song],
+        user=request.user if request.user.is_authenticated else None,
+        transpose_value=transpose_value,
+        formatting=None,
+        site_name=site_name,
+        inline=True,
+    )
 
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception as e:
-        raise Http404(f"Invalid JSON: {e}")
 
-    return JsonResponse(data, safe=False)
-
-
-import os
-import json
-from django.conf import settings
-from django.http import JsonResponse, Http404
-
+# ---------------------------------------------------------------------
+# Chord JSON endpoints and dictionary page
+# ---------------------------------------------------------------------
 def serve_chords_json(request, instrument):
     """
-    Serve chord definitions as if they were static JSON:
-    /chords/<instrument>.json
+    Serve chord definitions from songbook/chords/<instrument>.json
     """
-    allowed_instruments = {
-        "ukulele",
-        "guitar",
-        "guitalele",
-        "banjo",
-        "mandolin",
-        "baritoneUke",
-    }
-
-    if instrument not in allowed_instruments:
+    if instrument not in ALLOWED_INSTRUMENTS:
         raise Http404("Instrument not supported")
 
     file_path = os.path.join(settings.BASE_DIR, "songbook", "chords", f"{instrument}.json")
@@ -236,201 +242,187 @@ def serve_chords_json(request, instrument):
 
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            return JsonResponse(json.load(f), safe=False)
     except Exception as e:
+        logger.exception("Failed to load chord JSON for %s: %s", instrument, e)
         raise Http404(f"Invalid JSON: {e}")
-
-    return JsonResponse(data, safe=False)
 
 
 def get_chord_definition(request, chord_name):
     """
-    Django view to fetch the definition of a specific chord.
+    Return a JSON object describing a chord by name (case-insensitive).
+    Relies on load_chords() util.
     """
     chords = load_chords()
     for chord in chords:
-        if chord["name"].lower() == chord_name.lower():
+        if chord.get("name", "").lower() == chord_name.lower():
             return JsonResponse({"success": True, "chord": chord})
     return JsonResponse({"success": False, "error": f"Chord '{chord_name}' not found."})
 
-from django.shortcuts import render
 
 def chord_dictionary(request):
+    """
+    Render a human-facing chord dictionary page (uses site_context).
+    """
     context_data = site_context(request)
     return render(request, "songbook/chord_dictionary.html", context_data)
 
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from .models import Song
-
-@csrf_exempt  # You can remove this later if you handle CSRF properly
+# ---------------------------------------------------------------------
+# Simple AJAX endpoint: save scroll speed for a song
+# ---------------------------------------------------------------------
+@csrf_exempt  # Keep for legacy clients; remove if you enforce CSRF via fetch/XHR tokens
 def save_scroll_speed(request, song_id):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
     try:
-        data = json.loads(request.body.decode("utf-8"))
-        new_speed = int(data.get("scroll_speed", 20))
+        payload = json.loads(request.body.decode("utf-8"))
+        new_speed = int(payload.get("scroll_speed", 20))
+    except Exception:
+        return JsonResponse({"error": "Invalid payload"}, status=400)
 
+    try:
         song = Song.objects.get(pk=song_id)
         song.scroll_speed = new_speed
-        song.save()
-
+        song.save(update_fields=["scroll_speed"])
         return JsonResponse({"status": "ok", "scroll_speed": new_speed})
     except Song.DoesNotExist:
         return JsonResponse({"error": "Song not found"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
 
 
-def home(request, site_name):
-    return render(request, 'index.html', {'site_name': site_name})
-
-from django.views.generic import ListView
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from django.db.models import Q
-from taggit.models import Tag
-
-from songbook.models import Song, SongFormatting
-from songbook.utils.transposer import extract_chords
-
-from django.views.generic import TemplateView
-
+# ---------------------------------------------------------------------
+# Site landing + lists + CRUD views
+# ---------------------------------------------------------------------
 class LandingView(TemplateView):
+    """
+    Choose a different landing template based on site_name from site_context.
+    """
     def get_template_names(self):
         context_data = site_context(self.request)
-        site_name = context_data["site_name"]
-
+        site_name = context_data.get("site_name")
         if site_name == "StrumSphere":
             return ["songbook/home_strumsphere.html"]
-        elif site_name == "Uke4ia":
+        if site_name == "Uke4ia":
             return ["songbook/home_uke4ia.html"]
         return ["songbook/home_francouke.html"]
 
 
 class UserSongListView(ListView):
     model = Song
-    template_name = 'songbook/user_songs.html'
-    context_object_name = 'songs'
-    ordering = ['songTitle']
+    template_name = "songbook/user_songs.html"
+    context_object_name = "songs"
+    ordering = ["songTitle"]
     paginate_by = 15
 
     def get_queryset(self):
-        user = get_object_or_404(User, username=self.kwargs.get('username'))
-        site_name = self.kwargs.get('site_name')  # Get site name from URL
-        return Song.objects.filter(contributor=user, site_name=site_name).order_by('songTitle')
+        user = get_object_or_404(User, username=self.kwargs.get("username"))
+        site_name = self.kwargs.get("site_name")
+        return Song.objects.filter(contributor=user, site_name=site_name).order_by("songTitle")
 
 
-#This is second column of home.html
 class ScoreView(LoginRequiredMixin, DetailView):
+    """
+    Detail view for a single song, requiring login.
+    Provides user preferences to the template.
+    """
     model = Song
-    template_name = 'songbook/song_simplescore.html'
-    context_object_name = 'score'
+    template_name = "songbook/song_simplescore.html"
+    context_object_name = "score"
     login_url = "/users/login/"
     redirect_field_name = "next"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # ✅ song object already available as "score" (context_object_name),
-        # but you can keep this alias if templates expect "song"
-        context['song'] = self.get_object()
-
-        # ✅ Fetch user preferences if logged in
-        if self.request.user.is_authenticated:
-            preferences, created = UserPreference.objects.get_or_create(user=self.request.user)
-            context["preferences"] = preferences
-        else:
-            context["preferences"] = None
-
+        context["song"] = self.get_object()  # alias for templates
+        preferences, _ = UserPreference.objects.get_or_create(user=self.request.user)
+        context["preferences"] = preferences
         return context
 
-from .mixins import SiteContextMixin  # Make sure this is imported
 
 class SongListView(SiteContextMixin, ListView):
     model = Song
-    template_name = 'songbook/song_list.html'
-    context_object_name = 'songs'
-    ordering = ['songTitle']
+    template_name = "songbook/song_list.html"
+    context_object_name = "songs"
+    ordering = ["songTitle"]
     paginate_by = 25
 
     def dispatch(self, request, *args, **kwargs):
-        # Optional: show auth modal if not logged in
+        # If not logged in, show a modal to prompt auth (legacy UX). If you want anonymous browsing,
+        # remove this and let anonymous users see the list.
         if not request.user.is_authenticated:
             return render(request, "users/auth_modal.html", {"next_url": request.path})
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        qs = super().get_queryset()
+        site_name = self.get_site_name()
+        qs = qs.filter(site_name=site_name)
 
-        site_name = self.get_site_name()  # From the mixin
-        queryset = queryset.filter(site_name=site_name)
-
-        # Filters
+        # formatted filter
         if self.request.GET.get("formatted") == "1":
-            queryset = queryset.filter(songformatting__isnull=False)
+            qs = qs.filter(songformatting__isnull=False)
 
-        search_query = self.request.GET.get('q', '')
-        selected_tag = self.request.GET.get('tag', '')
-        artist_name = self.kwargs.get('artist_name')
+        # search and tag filters
+        search_query = self.request.GET.get("q", "").strip()
+        selected_tag = self.request.GET.get("tag", "").strip()
+        artist_name = self.kwargs.get("artist_name")
 
         if search_query:
-            queryset = queryset.filter(
-                Q(songTitle__icontains=search_query) |
-                Q(metadata__artist__icontains=search_query) |
-                Q(metadata__songwriter__icontains=search_query)
+            qs = qs.filter(
+                Q(songTitle__icontains=search_query)
+                | Q(metadata__artist__icontains=search_query)
+                | Q(metadata__songwriter__icontains=search_query)
             )
 
         if selected_tag:
-            queryset = queryset.filter(tags__name=selected_tag)
+            qs = qs.filter(tags__name=selected_tag)
 
         if artist_name:
-            queryset = queryset.filter(metadata__artist__iexact=artist_name)
+            qs = qs.filter(metadata__artist__iexact=artist_name)
 
-        return queryset
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        site_name = self.get_site_name()
+        context["selected_artist"] = self.kwargs.get("artist_name")
+        context["search_query"] = self.request.GET.get("q", "")
+        context["selected_tag"] = self.request.GET.get("tag", "")
 
-        site_name = self.get_site_name()  # From mixin
-        context['selected_artist'] = self.kwargs.get('artist_name')
-        context['search_query'] = self.request.GET.get('q', '')
-        context['selected_tag'] = self.request.GET.get('tag', '')
-
-        # Tags for the current site
+        # Tags for the site
         site_songs = Song.objects.filter(site_name=site_name)
-        all_tags = Tag.objects.filter(song__in=site_songs).distinct().values_list('name', flat=True)
-        context['all_tags'] = all_tags
+        all_tags = Tag.objects.filter(song__in=site_songs).distinct().values_list("name", flat=True)
+        context["all_tags"] = all_tags
 
-        # Song parsing
+        # Precompute song_data (chords, tags, formatted flag) for list rendering
         song_data = []
-        for song in context['songs']:
+        for song in context["songs"]:
             parsed_data = song.lyrics_with_chords or ""
             chords = extract_chords(parsed_data, unique=True) if parsed_data else []
             tags = [tag.name for tag in song.tags.all()]
             is_formatted = SongFormatting.objects.filter(song=song).exists()
+            song_data.append(
+                {
+                    "song": song,
+                    "chords": ", ".join(chords),
+                    "tags": ", ".join(tags),
+                    "is_formatted": is_formatted,
+                }
+            )
 
-            song_data.append({
-                'song': song,
-                'chords': ', '.join(chords),
-                'tags': ', '.join(tags),
-                'is_formatted': is_formatted,
-            })
-
-        context['song_data'] = song_data
+        context["song_data"] = song_data
         return context
+
 
 class SongCreateView(LoginRequiredMixin, CreateView):
     model = Song
-    fields = ['songTitle', 'songChordPro', 'metadata', 'tags', 'acknowledgement']
+    fields = ["songTitle", "songChordPro", "metadata", "tags", "acknowledgement"]
 
     def form_valid(self, form):
         form.instance.contributor = self.request.user
         context_data = site_context(self.request)
-        form.instance.site_name = context_data["site_name"]
+        form.instance.site_name = context_data.get("site_name")
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -439,29 +431,35 @@ class SongCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse("songbook:song_list")
+        site_name = self.object.site_name or site_context(self.request)["site_name"]
+        return reverse(f"{site_name.lower()}:score_view", kwargs={"pk": self.object.pk})
+
+
 
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Song
-    fields = ['songTitle', 'songChordPro', 'lyrics_with_chords', 'metadata', 'tags', 'acknowledgement']
+    fields = ["songTitle", "songChordPro", "lyrics_with_chords", "metadata", "tags", "acknowledgement"]
 
-    def get_success_url(self):
-        site_name = self.object.site_name or site_context(self.request)["site_name"]
-        return reverse(f"{site_name.lower()}:score_view", kwargs={'pk': self.object.pk})
+    def test_func(self):
+        # Allow only authenticated users (actual contributor check enforced in test_func of delete view)
+        return self.request.user.is_authenticated
 
     def form_valid(self, form):
-        form.instance.contributor = self.request.user
-        raw_lyrics = form.cleaned_data['songChordPro']
+        # Parse the raw chordpro input into lyrics_with_chords
+        raw_lyrics = form.cleaned_data.get("songChordPro", "")
         try:
             parsed_lyrics = parse_song_data(raw_lyrics)
         except Exception as e:
-            form.add_error('songChordPro', f"Error parsing song data: {e}")
+            form.add_error("songChordPro", f"Error parsing song data: {e}")
             return self.form_invalid(form)
+
         form.instance.lyrics_with_chords = parsed_lyrics
+        form.instance.contributor = self.request.user
         return super().form_valid(form)
 
-    def test_func(self):
-        return self.request.user.is_authenticated
+    def get_success_url(self):
+        site_name = self.object.site_name or site_context(self.request)["site_name"]
+        return reverse(f"{site_name.lower()}:score_view", kwargs={"pk": self.object.pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -471,14 +469,19 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class SongDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Song
-    success_url = reverse_lazy('songbook-home')  # Use reverse_lazy for better practice.
+    success_url = reverse_lazy("songbook-home")
 
     def test_func(self):
         song = self.get_object()
         return self.request.user == song.contributor
 
+
+# ---------------------------------------------------------------------
+# Simple static-ish pages
+# ---------------------------------------------------------------------
 def about(request):
     return render(request, "songbook/about.html", site_context(request))
+
 
 def whats_new(request):
     return render(request, "songbook/whats_new.html", site_context(request))

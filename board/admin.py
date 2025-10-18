@@ -125,7 +125,7 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ("event_type", "status", "venue", "column")
     search_fields = ("title", "rich_description", "location")
     ordering = ("event_date", "start_time")
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at","rehearsal_link")
     inlines = [EventAvailabilityInline, EventPhotoInline]
     actions = ["duplicate_events"]
 
