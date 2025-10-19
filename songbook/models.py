@@ -26,6 +26,11 @@ class Song(models.Model):
     metadata = models.JSONField(blank=True, null=True)  # Stores metadata as JSON
     date_posted = models.DateField(default=timezone.now)
     contributor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    revised_on = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Revision date as provided by the contributor (optional)"
+    )
 
     scroll_speed = models.PositiveIntegerField(
         default=10,

@@ -418,7 +418,7 @@ class SongListView(SiteContextMixin, ListView):
 
 class SongCreateView(LoginRequiredMixin, CreateView):
     model = Song
-    fields = ["songTitle", "songChordPro", "metadata", "tags", "acknowledgement"]
+    fields = ["songTitle", "songChordPro", "metadata", "revised_on", "tags", "acknowledgement"]
 
     def form_valid(self, form):
         form.instance.contributor = self.request.user
@@ -439,7 +439,7 @@ class SongCreateView(LoginRequiredMixin, CreateView):
 
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Song
-    fields = ["songTitle", "songChordPro", "lyrics_with_chords", "metadata", "tags", "acknowledgement"]
+    fields = ["songTitle", "songChordPro", "lyrics_with_chords", "metadata", "revised_on", "tags", "acknowledgement"]
 
     def test_func(self):
         # Allow only authenticated users (actual contributor check enforced in test_func of delete view)

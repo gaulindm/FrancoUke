@@ -10,7 +10,7 @@ from django.conf import settings
 
 
 # board/models.py
-from .rehearsal_notes import *
+from .rehearsal_notes import RehearsalDetails, SongRehearsalNote
 
 
 # -------------------------
@@ -348,3 +348,5 @@ class EventAvailability(models.Model):
             ("maybe", "Maybe"),
         ],
     )
+
+from .rehearsal_notes import RehearsalDetails, SongRehearsalNote
