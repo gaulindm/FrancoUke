@@ -26,11 +26,26 @@ def setlist_detail(request, pk):
     setlist = get_object_or_404(SetList, pk=pk)
     songs = setlist.songs.select_related("song").order_by("order")
 
+    # ✅ Group check
+    can_edit = (
+        request.user.is_authenticated
+        and request.user.groups.filter(name="Leaders").exists()
+    )
+
+    # ✅ Event info (optional)
+    event = setlist.event  # might be None
+
     return render(
         request,
         "setlists/detail.html",
-        {"setlist": setlist, "songs": songs},
+        {
+            "setlist": setlist,
+            "songs": songs,
+            "event": event,
+            "can_edit": can_edit,
+        },
     )
+
 
 
 # ----------------------------

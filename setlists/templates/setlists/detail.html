@@ -2,60 +2,72 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h1 class="mb-1">{{ setlist.name }}</h1>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">{{ setlist.name }}</h1>
 
-  {% if setlist.event_name %}
-    <p class="text-muted mb-3">
-      🎵 <strong>{{ setlist.event_name }}</strong><br>
-      {% if setlist.event_date %}
-        <small>{{ setlist.event_date|date:"l, F j, Y" }} at {{ setlist.event_date|time:"H:i" }}</small>
-      {% endif %}
+    {% if can_edit %}
+    <a href="{% url 'setlists:setlist_builder' setlist.id %}" 
+       class="btn btn-sm btn-outline-secondary">
+      ✏️ Edit Setlist
+    </a>
+  {% endif %}
+  
+  </div>
+
+
+  {% if event %}
+    <p class="text-muted">
+      📅 <strong>{{ event.event_name }}</strong> — 
+      {{ event.event_date|date:"M d, Y" }} at {{ event.event_time|time:"H:i" }}
     </p>
   {% endif %}
 
-  {% if songs %}
-    <ol class="list-group list-group-numbered compact-list">
-      {% for item in songs %}
-        <li class="list-group-item d-flex justify-content-between align-items-center py-1 px-2">
-          <span class="text-truncate">{{ item.order }}. {{ item.song.songTitle }}</span>
-          <a href="{% url 'songbook:score_view' item.song.pk %}" class="btn btn-sm btn-outline-primary">
-            View
-          </a>
-        </li>
-      {% endfor %}
-    </ol>
+  
 
-    <div class="mt-3">
-      <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" class="btn btn-primary">
-        🎤 Start Teleprompter
-      </a>
 
-      {% if request.user.is_staff %}
-        <a href="{% url 'setlists:setlist_builder' setlist.id %}" class="btn btn-outline-secondary btn-sm ms-2">
-          ✏️ Edit Setlist
+  <ol class="list-group list-group-numbered">
+    {% for item in songs %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 ms-3">
+          <strong>{{ item.song.songTitle }}</strong>
+          {% if item.rehearsal_notes %}
+            <span class="text-muted small fst-italic ms-2">
+              — {{ item.rehearsal_notes }}
+            </span>
+          {% endif %}
+        </div>
+        <a href="{% url 'songbook:score_view' item.song.pk %}" 
+           class="btn btn-sm btn-outline-primary">
+          View
         </a>
-      {% endif %}
-    </div>
-  {% else %}
-    <p class="text-muted">No songs in this setlist yet.</p>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No songs in this setlist yet.</li>
+    {% endfor %}
+  </ol>
+
+  {% if songs %}
+  <div class="mt-4 text-center">
+    <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" 
+       class="btn btn-primary btn-lg">
+      🎤 Start Teleprompter
+    </a>
+  </div>
   {% endif %}
 </div>
 
 <style>
-  /* --- Compact List Styling --- */
-  .compact-list .list-group-item {
-    padding-top: 0.25rem !important;
-    padding-bottom: 0.25rem !important;
+  .list-group-item {
+    padding: 0.45rem 0.7rem;
   }
-  .compact-list .btn-sm {
-    padding: 0.1rem 0.4rem;
-    font-size: 0.8rem;
+
+  .list-group-numbered > li::marker {
+    content: counter(list-item) ".    ";
+    font-weight: bold;
   }
-  .text-truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 80%;
+
+  .list-group-numbered {
+    padding-left: 1.2rem;
   }
 </style>
 {% endblock %}
