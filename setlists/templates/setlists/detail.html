@@ -2,35 +2,60 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h1>{{ setlist.name }}</h1>
+  <h1 class="mb-1">{{ setlist.name }}</h1>
 
-  <ol class="list-group list-group-numbered mt-3">
-    {% for item in songs %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        {{ item.song.songTitle }}
-        <a href="{% url 'songbook:score_view' item.song.pk %}" class="btn btn-sm btn-outline-primary">
-          View
+  {% if setlist.event_name %}
+    <p class="text-muted mb-3">
+      🎵 <strong>{{ setlist.event_name }}</strong><br>
+      {% if setlist.event_date %}
+        <small>{{ setlist.event_date|date:"l, F j, Y" }} at {{ setlist.event_date|time:"H:i" }}</small>
+      {% endif %}
+    </p>
+  {% endif %}
+
+  {% if songs %}
+    <ol class="list-group list-group-numbered compact-list">
+      {% for item in songs %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-1 px-2">
+          <span class="text-truncate">{{ item.order }}. {{ item.song.songTitle }}</span>
+          <a href="{% url 'songbook:score_view' item.song.pk %}" class="btn btn-sm btn-outline-primary">
+            View
+          </a>
+        </li>
+      {% endfor %}
+    </ol>
+
+    <div class="mt-3">
+      <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" class="btn btn-primary">
+        🎤 Start Teleprompter
+      </a>
+
+      {% if request.user.is_staff %}
+        <a href="{% url 'setlists:setlist_builder' setlist.id %}" class="btn btn-outline-secondary btn-sm ms-2">
+          ✏️ Edit Setlist
         </a>
-      </li>
-    {% endfor %}
-  </ol>
+      {% endif %}
+    </div>
+  {% else %}
+    <p class="text-muted">No songs in this setlist yet.</p>
+  {% endif %}
 </div>
-<h2>{{ setlist.name }}</h2>
 
-<ul>
-  {% for sls in songs %}
-    <li>{{ sls.order }}. {{ sls.song.songTitle }}</li>
-  {% endfor %}
-</ul>
-
-{% if songs %}
-  <p>
-    <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" class="btn btn-primary">
-      🎤 Start Teleprompter
-    </a>
-  </p>
-{% endif %}
-
-
-
+<style>
+  /* --- Compact List Styling --- */
+  .compact-list .list-group-item {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+  .compact-list .btn-sm {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.8rem;
+  }
+  .text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 80%;
+  }
+</style>
 {% endblock %}

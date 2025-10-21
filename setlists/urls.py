@@ -14,4 +14,10 @@ urlpatterns = [
     path("export/<int:pk>/", views.export_setlist, name="export"),
     path("import/", views.import_setlist, name="import"),
 
+    # 🧱 The missing line — Add this one:
+    path("builder/", views.setlist_builder, name="setlist_builder"),
+    path("builder/<int:pk>/", views.setlist_builder, name="setlist_builder"),
+    path("ajax/song-search/", views.song_search, name="ajax_song_search"),
+
+
 ]

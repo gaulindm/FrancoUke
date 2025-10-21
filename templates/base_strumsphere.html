@@ -46,6 +46,8 @@
   {# ✅ footer partial #}
   {% include "partials/_footer.html" %}
   
+  {% block extra_js %}{% endblock %}
+  
   {% if user.is_authenticated %}
   {% with user_pref=user.userpreference %}
     {% if user_pref %}

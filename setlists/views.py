@@ -1,6 +1,7 @@
 import json
 import re
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import SetList, SetListSong
@@ -182,7 +183,7 @@ def setlist_builder(request, pk=None):
             setlist.save()
 
         # Clear old songs
-        setlist.songs.clear()
+        setlist.songs.all().delete()
 
         # Rebuild setlist order from POST data
         orders = request.POST.getlist("order[]")
@@ -201,3 +202,23 @@ def setlist_builder(request, pk=None):
         "setlist": setlist,
         "songs": songs,
     })
+
+# ----------------------------
+# 🧱 AJAX filter for setlist builder
+# ----------------------------
+
+@login_required
+def song_search(request):
+    """AJAX endpoint to filter songs for the builder."""
+    query = request.GET.get("q", "").strip().lower()
+    songs = Song.objects.all()
+
+    if query:
+        songs = songs.filter(songTitle__icontains=query)
+
+    results = [
+        {"id": s.id, "title": s.songTitle}
+        for s in songs.order_by("songTitle")[:100]  # Limit to 100 results for speed
+    ]
+
+    return JsonResponse({"songs": results})

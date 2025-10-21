@@ -1,144 +1,223 @@
-<div class="row">
-    <!-- Song Library -->
-    <div class="col-md-6">
-      <h4>Song Library</h4>
-      <input type="text" id="song-search" placeholder="Search songs…" class="form-control mb-2">
-      <ul id="song-list" class="list-group">
-        {% for song in songs %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span>{{ song.songTitle }}</span>
-          <button type="button" 
-                  class="btn btn-sm btn-success add-song" 
-                  data-id="{{ song.id }}" 
-                  data-title="{{ song.songTitle }}">
-            + Add
-          </button>
-        </li>
-        {% endfor %}
-      </ul>
+{% extends base_template %}
+{% load static %}
+
+{% block extra_head %}
+  <style>
+    /* Tighten spacing for readability */
+    .list-group-item {
+      padding: 0.4rem 0.6rem;
+    }
+    .drag-handle {
+      cursor: grab;
+      font-size: 1.2rem;
+    }
+    #song-search:focus {
+      outline: none;
+      border-color: #198754;
+      box-shadow: 0 0 0 0.2rem rgba(25,135,84,.25);
+    }
+    #song-list mark {
+      background: #ffeb3b;
+      color: inherit;
+      padding: 0;
+    }
+    /* Toast styling */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #198754;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 2000;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>🎵 Setlist Builder</h2>
+
+  <form method="post" id="setlist-form">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="setlist-name" class="form-label">Setlist Name</label>
+      <input type="text" id="setlist-name" name="name" 
+             value="{{ setlist.name|default:'Untitled Setlist' }}" 
+             class="form-control">
     </div>
-  
-    <!-- Current Setlist -->
-    <div class="col-md-6">
-      <h4>Current Setlist</h4>
-      <form method="post" id="setlist-form">
-        {% csrf_token %}
-        <input type="text" name="name" value="{{ setlist.name|default:'Untitled Setlist' }}" class="form-control mb-3">
-  
-        <ul id="setlist-songs" class="list-group">
-          {% for item in setlist.setlistsong_set.all %}
+
+    <div class="row">
+      <!-- SONG LIBRARY -->
+      <div class="col-md-6">
+        <h5>Song Library</h5>
+
+        <!-- Search input + clear button -->
+        <div class="input-group mb-2">
+          <input type="text" id="song-search" placeholder="Search songs…" class="form-control">
+          <button type="button" id="clear-search" class="btn btn-outline-secondary">✖</button>
+        </div>
+
+        <ul id="song-list" class="list-group" style="max-height: 70vh; overflow-y: auto;">
+          {% for song in songs %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ song.songTitle }}</span>
+            <button type="button"
+                    class="btn btn-sm btn-success add-song"
+                    data-id="{{ song.id }}"
+                    data-title="{{ song.songTitle }}">
+              + Add
+            </button>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- CURRENT SETLIST -->
+      <div class="col-md-6">
+        <h5>Current Setlist</h5>
+        <ul id="setlist-songs" class="list-group mb-3" style="max-height: 70vh; overflow-y: auto;">
+          {% for item in setlist.songs.all %}
           <li class="list-group-item d-flex align-items-center" data-id="{{ item.song.id }}">
             <span class="drag-handle me-2">☰</span>
-            <strong>{{ item.song.songTitle }}</strong>
+            <strong class="flex-grow-1">{{ item.song.songTitle }}</strong>
             <input type="hidden" name="order[]" value="{{ item.song.id }}">
-  
-            <input type="number" name="scroll_{{ item.song.id }}" value="{{ item.scroll_speed }}" 
-                   placeholder="Scroll" class="form-control form-control-sm mx-2" style="width: 80px;">
             <input type="text" name="notes_{{ item.song.id }}" value="{{ item.rehearsal_notes }}" 
-                   placeholder="Notes" class="form-control form-control-sm flex-grow-1 mx-2">
+                   placeholder="Notes" class="form-control form-control-sm mx-2" style="width: 180px;">
             <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
           </li>
           {% endfor %}
         </ul>
-  
-        <button type="submit" class="btn btn-primary mt-3">💾 Save Setlist</button>
-      </form>
+
+        <button type="submit" class="btn btn-primary w-100">💾 Save Setlist</button>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <!-- Song Library -->
-    <div class="col-md-6">
-      <h4>Song Library</h4>
-      <input type="text" id="song-search" placeholder="Search songs…" class="form-control mb-2">
-      <ul id="song-list" class="list-group">
-        {% for song in songs %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span>{{ song.songTitle }}</span>
-          <button type="button" 
-                  class="btn btn-sm btn-success add-song" 
-                  data-id="{{ song.id }}" 
-                  data-title="{{ song.songTitle }}">
-            + Add
-          </button>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-  
-    <!-- Current Setlist -->
-    <div class="col-md-6">
-      <h4>Current Setlist</h4>
-      <form method="post" id="setlist-form">
-        {% csrf_token %}
-        <input type="text" name="name" value="{{ setlist.name|default:'Untitled Setlist' }}" class="form-control mb-3">
-  
-        <ul id="setlist-songs" class="list-group">
-          {% for item in setlist.setlistsong_set.all %}
-          <li class="list-group-item d-flex align-items-center" data-id="{{ item.song.id }}">
-            <span class="drag-handle me-2">☰</span>
-            <strong>{{ item.song.songTitle }}</strong>
-            <input type="hidden" name="order[]" value="{{ item.song.id }}">
-  
-            <input type="number" name="scroll_{{ item.song.id }}" value="{{ item.scroll_speed }}" 
-                   placeholder="Scroll" class="form-control form-control-sm mx-2" style="width: 80px;">
-            <input type="text" name="notes_{{ item.song.id }}" value="{{ item.rehearsal_notes }}" 
-                   placeholder="Notes" class="form-control form-control-sm flex-grow-1 mx-2">
-            <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
-          </li>
-          {% endfor %}
-        </ul>
-  
-        <button type="submit" class="btn btn-primary mt-3">💾 Save Setlist</button>
-      </form>
-    </div>
-  </div>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const setlistEl = document.getElementById("setlist-songs");
-    
-      // Make setlist draggable
-      Sortable.create(setlistEl, {
-        handle: ".drag-handle",
-        animation: 150,
-      });
-    
-      // Add song from library
-      document.querySelectorAll(".add-song").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const songId = btn.dataset.id;
-          const songTitle = btn.dataset.title;
-    
-          // Prevent duplicate
-          if (document.querySelector(`#setlist-songs li[data-id="${songId}"]`)) {
-            alert("This song is already in the setlist.");
-            return;
-          }
-    
-          // Create new LI
+  </form>
+</div>
+
+<!-- Toast notification -->
+<div id="toast">✅ Song added!</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+console.log("🎶 Setlist Builder (AJAX) JS loaded!");
+
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("song-search");
+  const clearBtn = document.getElementById("clear-search");
+  const songList = document.getElementById("song-list");
+  const toast = document.getElementById("toast");
+  const setlistEl = document.getElementById("setlist-songs");
+  let currentAjax = null;
+
+  // ✅ Prevent Enter key from submitting
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") e.preventDefault();
+  });
+
+  // ✅ Debounced search
+  let debounceTimer = null;
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim();
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => fetchSongs(query), 250);
+  });
+
+  // ✅ Clear button resets search
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    fetchSongs("");
+    searchInput.focus();
+  });
+
+  // ✅ Fetch filtered songs via AJAX
+  function fetchSongs(query) {
+    if (currentAjax) currentAjax.abort?.(); // cancel previous request if still pending
+
+    fetch(`/setlists/ajax/song-search/?q=${encodeURIComponent(query)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        songList.innerHTML = "";
+
+        if (data.songs.length === 0) {
+          songList.innerHTML = `<li class="list-group-item text-muted">No songs found.</li>`;
+          return;
+        }
+
+        data.songs.forEach(song => {
           const li = document.createElement("li");
-          li.className = "list-group-item d-flex align-items-center";
-          li.dataset.id = songId;
+          li.className = "list-group-item d-flex justify-content-between align-items-center";
           li.innerHTML = `
-            <span class="drag-handle me-2">☰</span>
-            <strong>${songTitle}</strong>
-            <input type="hidden" name="order[]" value="${songId}">
-            <input type="number" name="scroll_${songId}" placeholder="Scroll" 
-                   class="form-control form-control-sm mx-2" style="width: 80px;">
-            <input type="text" name="notes_${songId}" placeholder="Notes" 
-                   class="form-control form-control-sm flex-grow-1 mx-2">
-            <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
-          `;
-          setlistEl.appendChild(li);
-    
-          // Rebind remove button
-          li.querySelector(".remove-song").addEventListener("click", () => li.remove());
+            <span>${song.title}</span>
+            <button type="button"
+                    class="btn btn-sm btn-success add-song"
+                    data-id="${song.id}"
+                    data-title="${song.title}">
+              + Add
+            </button>`;
+          songList.appendChild(li);
         });
+
+        bindAddButtons(); // rebind add-song events
+      })
+      .catch((err) => {
+        console.error("Search failed:", err);
       });
-    
-      // Remove existing songs
-      document.querySelectorAll(".remove-song").forEach(btn => {
-        btn.addEventListener("click", () => btn.closest("li").remove());
+  }
+
+  // ✅ Add song from search results
+  function bindAddButtons() {
+    document.querySelectorAll(".add-song").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const songId = btn.dataset.id;
+        const songTitle = btn.dataset.title;
+
+        if (document.querySelector(`#setlist-songs li[data-id="${songId}"]`)) {
+          showToast("⚠️ Already in setlist", "warning");
+          return;
+        }
+
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex align-items-center";
+        li.dataset.id = songId;
+        li.innerHTML = `
+          <span class="drag-handle me-2">☰</span>
+          <strong class="flex-grow-1">${songTitle}</strong>
+          <input type="hidden" name="order[]" value="${songId}">
+          <input type="text" name="notes_${songId}" placeholder="Notes"
+                 class="form-control form-control-sm mx-2" style="width: 180px;">
+          <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
+        `;
+        setlistEl.appendChild(li);
+
+        li.querySelector(".remove-song").addEventListener("click", () => li.remove());
+        showToast(`✅ Added "${songTitle}"`);
       });
     });
-    </script>
-     
+  }
+
+  // ✅ Toast helper
+  function showToast(message, type="success") {
+    toast.textContent = message;
+    toast.style.background = type === "warning" ? "#dc3545" : "#198754";
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+  }
+
+  // Load initial songs
+  fetchSongs("");
+});
+</script>
+{% endblock %}

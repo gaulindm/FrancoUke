@@ -1,0 +1,112 @@
+/* ===========================================================
+   🎛️ Setlist Builder Styles
+   Compact layout + better UX for drag, add, and remove actions
+   =========================================================== */
+
+/* Overall layout */
+.container {
+    max-width: 1100px;
+  }
+  
+  /* Headings */
+  h4 {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Search field */
+  #song-search {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.5rem;
+  }
+  
+  /* Song Library list items */
+  #song-list .list-group-item {
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  #song-list .list-group-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  /* Add button */
+  .add-song {
+    padding: 0.15rem 0.45rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Current Setlist list items */
+  #setlist-songs .list-group-item {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+    cursor: grab;
+  }
+  
+  #setlist-songs .list-group-item:active {
+    cursor: grabbing;
+    background-color: #f0f0f0;
+  }
+  
+  /* Drag handle */
+  .drag-handle {
+    cursor: grab;
+    font-size: 1.1rem;
+    color: #888;
+    user-select: none;
+  }
+  
+  .drag-handle:hover {
+    color: #333;
+  }
+  
+  /* Small inputs */
+  #setlist-songs input.form-control-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+    height: calc(1.6em + 0.5rem + 2px);
+  }
+  
+  /* Remove button */
+  .remove-song {
+    padding: 0.15rem 0.45rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Save button */
+  #setlist-form button[type="submit"] {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.9rem;
+  }
+  
+  /* Compact spacing for overall lists */
+  .list-group-item strong {
+    font-weight: 500;
+  }
+  
+  .list-group-item + .list-group-item {
+    border-top: 1px solid #eee;
+  }
+  
+  /* Scrollable library if song list is long */
+  #song-list {
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+  
+  /* Compact scrollbars (modern browsers) */
+  #song-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  #song-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  #song-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.35);
+  }
+  
