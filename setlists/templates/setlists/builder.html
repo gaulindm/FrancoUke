@@ -46,6 +46,32 @@
 <div class="container mt-4">
   <h2>🎵 Setlist Builder</h2>
 
+  {% if setlist.event %}
+  <div class="mb-3 p-2 border rounded bg-light">
+    <p class="mb-1">
+      🎤 <strong>{{ setlist.event.title }}</strong>
+      {% if setlist.event.event_type %}
+        <span class="text-muted small">
+          ({{ setlist.event.get_event_type_display }})
+        </span>
+      {% endif %}
+    </p>
+    <p class="mb-1 text-muted small">
+      📅 {{ setlist.event.event_date|date:"D, M d, Y" }}
+      {% if setlist.event.start_time %}
+        at {{ setlist.event.start_time|time:"H:i" }}
+        {% if setlist.event.end_time %}
+          – {{ setlist.event.end_time|time:"H:i" }}
+        {% endif %}
+      {% endif %}
+    </p>
+    {% if setlist.event.location %}
+      <p class="mb-0 text-muted small">📍 {{ setlist.event.location }}</p>
+    {% endif %}
+  </div>
+{% endif %}
+
+
   <form method="post" id="setlist-form">
     {% csrf_token %}
     <div class="mb-3">
@@ -107,10 +133,12 @@
 <div id="toast">✅ Song added!</div>
 {% endblock %}
 
-
 {% block extra_js %}
+<!-- SortableJS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <script>
-console.log("🎶 Setlist Builder (AJAX) JS loaded!");
+console.log("🎶 Setlist Builder (AJAX + Sortable) JS loaded!");
 
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("song-search");
@@ -119,6 +147,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const toast = document.getElementById("toast");
   const setlistEl = document.getElementById("setlist-songs");
   let currentAjax = null;
+
+  // ✅ Enable drag-and-drop sorting
+  Sortable.create(setlistEl, {
+    handle: ".drag-handle",
+    animation: 150,
+  });
 
   // ✅ Prevent Enter key from submitting
   searchInput.addEventListener("keydown", (e) => {
@@ -129,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let debounceTimer = null;
   searchInput.addEventListener("input", () => {
     const query = searchInput.value.trim();
-
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => fetchSongs(query), 250);
   });
@@ -143,18 +176,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ✅ Fetch filtered songs via AJAX
   function fetchSongs(query) {
-    if (currentAjax) currentAjax.abort?.(); // cancel previous request if still pending
-
+    if (currentAjax) currentAjax.abort?.();
     fetch(`/setlists/ajax/song-search/?q=${encodeURIComponent(query)}`)
       .then((res) => res.json())
       .then((data) => {
         songList.innerHTML = "";
-
         if (data.songs.length === 0) {
           songList.innerHTML = `<li class="list-group-item text-muted">No songs found.</li>`;
           return;
         }
-
         data.songs.forEach(song => {
           const li = document.createElement("li");
           li.className = "list-group-item d-flex justify-content-between align-items-center";
@@ -168,15 +198,12 @@ document.addEventListener("DOMContentLoaded", function () {
             </button>`;
           songList.appendChild(li);
         });
-
-        bindAddButtons(); // rebind add-song events
+        bindAddButtons();
       })
-      .catch((err) => {
-        console.error("Search failed:", err);
-      });
+      .catch((err) => console.error("Search failed:", err));
   }
 
-  // ✅ Add song from search results
+  // ✅ Add song
   function bindAddButtons() {
     document.querySelectorAll(".add-song").forEach(btn => {
       btn.addEventListener("click", (e) => {
@@ -218,6 +245,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Load initial songs
   fetchSongs("");
+
+  // ✅ Track unsaved changes
+  let isDirty = false;
+
+  // Mark dirty when the setlist changes
+  function markDirty() {
+    if (!isDirty) {
+      isDirty = true;
+      window.addEventListener("beforeunload", warnUnsaved);
+    }
+  }
+
+  function markClean() {
+    isDirty = false;
+    window.removeEventListener("beforeunload", warnUnsaved);
+  }
+
+  function warnUnsaved(e) {
+    e.preventDefault();
+    e.returnValue = ""; // Required for Chrome
+    return "";
+  }
+
+  // Listen to changes that should mark the form as dirty
+  document.getElementById("setlist-form").addEventListener("input", markDirty);
+  document.getElementById("setlist-form").addEventListener("change", markDirty);
+
+  // Also mark dirty when reordering songs
+  setlistEl.addEventListener("sortupdate", markDirty);
+
+  // Mark clean when saved
+  document.getElementById("setlist-form").addEventListener("submit", function () {
+    markClean();
+  });
+
+
 });
 </script>
 {% endblock %}

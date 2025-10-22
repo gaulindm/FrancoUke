@@ -16,13 +16,32 @@
 
 
   {% if event %}
-    <p class="text-muted">
-      📅 <strong>{{ event.event_name }}</strong> — 
-      {{ event.event_date|date:"M d, Y" }} at {{ event.event_time|time:"H:i" }}
+  <div class="mb-3 p-2 border rounded bg-light">
+    <p class="mb-1">
+      🎤 <strong>{{ event.title }}</strong>
+      {% if event.event_type %}
+        <span class="text-muted small">
+          ({{ event.get_event_type_display }})
+        </span>
+      {% endif %}
     </p>
-  {% endif %}
+    <p class="mb-1 text-muted small">
+      📅 {{ event.event_date|date:"D, M d, Y" }}
+      {% if event.start_time %}
+        at {{ event.start_time|time:"H:i" }}
+        {% if event.end_time %}
+          – {{ event.end_time|time:"H:i" }}
+        {% endif %}
+      {% endif %}
+    </p>
+    {% if event.location %}
+      <p class="mb-0 text-muted small">📍 {{ event.location }}</p>
+    {% endif %}
+  </div>
+{% endif %}
 
-  
+
+
 
 
   <ol class="list-group list-group-numbered">
