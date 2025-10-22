@@ -1,6 +1,7 @@
 # board/urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from . import views
 from .views import (
     full_board_view,
     rehearsal_detail_view,
@@ -29,6 +30,7 @@ urlpatterns = [
     path("rehearsal/<int:pk>/", rehearsal_detail_view, name="rehearsal_detail"),
     path("item/<int:item_id>/gallery/", board_item_gallery_view, name="item_gallery"),
     path("api/items/<int:item_id>/photos/", item_photo_list, name="item_photo_list"),
+    path("event/<int:event_id>/", views.event_detail, name="event_detail"),
 
     # Availability
     path("availability-matrix/", availability_matrix, name="availability_matrix"),

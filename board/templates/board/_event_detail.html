@@ -1,0 +1,50 @@
+<div class="container py-3">
+  {% load group_tags %}
+
+  <h3 class="mb-3">{{ event.title }}</h3>
+
+  {% if event.cover_asset %}
+    <img src="{{ event.cover_asset.file.url }}" class="img-fluid rounded mb-3" alt="{{ event.title }}">
+  {% endif %}
+
+  <p><strong>Date:</strong> {{ event.event_date|date:"l, F j, Y" }}</p>
+  {% if event.start_time %}
+    <p><strong>Time:</strong> {{ event.start_time|time:"g:i A" }}
+      {% if event.end_time %} – {{ event.end_time|time:"g:i A" }}{% endif %}
+    </p>
+  {% endif %}
+
+  {% if event.location %}
+    <p><strong>📍 Location:</strong> {{ event.location }}</p>
+  {% endif %}
+
+  {% if event.rich_description %}
+    <div class="mb-3">{{ event.rich_description|safe }}</div>
+  {% endif %}
+
+  {% if event.arrive_by %}
+    <p><strong>Arrive by:</strong> {{ event.arrive_by|time:"g:i A" }}</p>
+  {% endif %}
+
+  {% if event.attire %}
+    <p><strong>Attire:</strong> {{ event.attire }}</p>
+  {% endif %}
+
+  {% if event.chairs %}
+    <p><strong>Chairs:</strong> {{ event.chairs }}</p>
+  {% endif %}
+
+  {% if setlist %}
+    <div class="mt-4">
+      <a href="{% url 'setlists:detail' setlist.id %}" class="btn btn-primary btn-sm">
+        🎵 View Setlist
+      </a>
+      {% if request.user|has_group:"Leaders" %}
+      <a href="{% url 'setlists:setlist_builder' setlist.id %}" class="btn btn-outline-primary btn-sm">
+        ✏️ Edit Setlist
+      </a>
+      
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

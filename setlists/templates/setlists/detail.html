@@ -5,6 +5,12 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">{{ setlist.name }}</h1>
 
+    <a href="{% url 'board:full_board' %}?event={{ setlist.event.id }}" 
+    class="btn btn-outline-primary btn-sm">
+   🎤 View {{ setlist.event.title }}
+  </a>
+
+
     {% if can_edit %}
     <a href="{% url 'setlists:setlist_builder' setlist.id %}" 
        class="btn btn-sm btn-outline-secondary">
@@ -14,17 +20,12 @@
   
   </div>
 
+ 
+
 
   {% if event %}
   <div class="mb-3 p-2 border rounded bg-light">
-    <p class="mb-1">
-      🎤 <strong>{{ event.title }}</strong>
-      {% if event.event_type %}
-        <span class="text-muted small">
-          ({{ event.get_event_type_display }})
-        </span>
-      {% endif %}
-    </p>
+ 
     <p class="mb-1 text-muted small">
       📅 {{ event.event_date|date:"D, M d, Y" }}
       {% if event.start_time %}

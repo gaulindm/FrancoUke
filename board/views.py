@@ -87,8 +87,6 @@ def full_board_view(request):
     return render(request, "board/full_board.html", {"columns": columns})
 
 
-
-
 @require_POST
 @login_required
 def set_availability(request, event_id):
@@ -237,26 +235,18 @@ from django.shortcuts import render, get_object_or_404
 from .models import Event, EventAvailability
 from setlists.models import SetList
 
-'''def event_detail(request, event_id):
+
+@login_required
+def event_detail(request, event_id):
     """
-    Renders the modal body for an event, including related setlist (if exists).
-    Includes debug prints for troubleshooting setlist linkage.
+    Shared Event detail view (used for standalone page and modal include)
     """
     event = get_object_or_404(Event, id=event_id)
-    print("🧩 [DEBUG:event_detail] Loaded Event:", event.title, f"(ID={event.id})")
 
-    # --- Try to get the related setlist (if it exists) ---
-    if hasattr(event, "setlist"):
-        setlist = getattr(event, "setlist", None)
-        if setlist:
-            print(f"🎵 [DEBUG:event_detail] Found related Setlist: {setlist} (ID={setlist.id})")
-        else:
-            print("🚫 [DEBUG:event_detail] Event has a 'setlist' attribute, but it's None.")
-    else:
-        print("❓ [DEBUG:event_detail] Event has no 'setlist' attribute — check model relationship.")
-        setlist = None
+    # Get linked setlist if it exists
+    setlist = getattr(event, "setlist", None)
 
-    # --- Look up this user's availability if logged in ---
+    # User's availability
     user_status = None
     if request.user.is_authenticated:
         user_status = (
@@ -265,23 +255,15 @@ from setlists.models import SetList
             .values_list("status", flat=True)
             .first()
         )
-        print(f"👤 [DEBUG:event_detail] User '{request.user.username}' availability:", user_status)
-    else:
-        print("👤 [DEBUG:event_detail] Anonymous user — skipping availability lookup.")
 
-    # --- Build context ---
-    context = {
+    return render(request, "board/_event_detail.html", {
         "event": event,
         "setlist": setlist,
         "user_status": user_status,
-    }
+    })
 
-    print("📦 [DEBUG:event_detail] Context keys:", list(context.keys()))
-    print("📦 [DEBUG:event_detail] Setlist in context:", context["setlist"])
 
-    return render(request, "partials/_event_detail.html", context)
 
-'''
 # --- New: Update Event Availability ---
 @login_required
 def update_event_availability(request, event_id):
