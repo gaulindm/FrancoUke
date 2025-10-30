@@ -609,3 +609,4 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             elements.append(Paragraph(paragraph_text, style))
 
     return elements
+
