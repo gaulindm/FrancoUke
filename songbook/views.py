@@ -81,6 +81,8 @@ def edit_song_formatting(request, song_id):
             "bridge": {},
             "interlude": {},
             "outro": {},
+            "centered": {},  # ✅ add this
+
         },
     )
 

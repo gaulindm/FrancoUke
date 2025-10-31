@@ -24,14 +24,22 @@ def parse_song_data(chordpro_text):
                 tab_lines.append(line)
                 continue
 
-            # Directives like {title: ...}
+            # 🎯 NEW: Handle {instruction: ...}
+            if stripped.lower().startswith("{instruction:"):
+                # Extract everything between {instruction: and }
+                instruction_text = stripped[len("{instruction:"):-1].strip()
+                if instruction_text:
+                    result.append([{"instruction": instruction_text}])
+                continue
+
+            # 🎯 Existing: Directives like {soc}, {sov}, {title: ...}, etc.
             directive_match = re.match(r'{(.*?)\s*:?([^}]*)}', stripped)
             if directive_match:
                 directive_str = stripped
                 result.append([{"directive": directive_str}])
                 continue
 
-            # Lyrics/chords parsing
+            # 🎯 Lyrics/chords parsing
             i = 0
             buffer = ""
             group = []

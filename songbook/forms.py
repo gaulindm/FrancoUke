@@ -37,7 +37,7 @@ from .models import SongFormatting
 class SongFormattingForm(forms.ModelForm):
     class Meta:
         model = SongFormatting
-        fields = ["intro", "verse", "chorus", "bridge", "interlude", "outro"]
+        fields = ["intro", "verse", "chorus", "bridge", "interlude", "outro", "centered"]
         widgets = {
             "intro": forms.Textarea(attrs={"rows": 2, "cols": 50}),
             "verse": forms.Textarea(attrs={"rows": 2, "cols": 50}),
@@ -45,6 +45,7 @@ class SongFormattingForm(forms.ModelForm):
             "bridge": forms.Textarea(attrs={"rows": 2, "cols": 50}),
             "interlude": forms.Textarea(attrs={"rows": 2, "cols": 50}),
             "outro": forms.Textarea(attrs={"rows": 2, "cols": 50}),
+            "centered": forms.Textarea(attrs={"rows": 2, "cols": 50}),
         }
 
     def clean(self):

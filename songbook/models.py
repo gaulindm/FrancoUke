@@ -89,6 +89,11 @@ class Song(models.Model):
             "tempo": re.search(r'{tempo:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
             "timeSignature": re.search(r'{timeSignature:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
             "youtube": re.search(r'{youtube:\s*(https?://[^\s\}]+)}', self.songChordPro, re.IGNORECASE),
+
+            # 🆕 NEW TAGS for header short notes
+            "count_in": re.search(r'{count_in:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
+            "short_instruction_1": re.search(r'{short_instruction_1:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
+            "short_instruction_2": re.search(r'{short_instruction_2:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
         }
         metadata = {tag: match.group(1) if match else None for tag, match in tags.items()}
         title = metadata.pop("title", "Untitled Song")
@@ -134,6 +139,8 @@ class SongFormatting(models.Model):
     bridge = models.JSONField(default=dict, blank=True)
     interlude = models.JSONField(default=dict, blank=True)
     outro = models.JSONField(default=dict, blank=True)
+    centered = models.JSONField(default=dict, blank=True)
+
 
     class Meta:
         unique_together = ('user', 'song')  # Ensure each user has only one formatting per song
