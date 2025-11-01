@@ -237,3 +237,26 @@ def song_search(request):
     ]
 
     return JsonResponse({"songs": results})
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import get_object_or_404, redirect
+from board.models import Event
+from .models import SetList
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name="Leaders").exists())
+def create_setlist_for_event(request, event_id):
+    """Create a new setlist and link it to a specific event."""
+    event = get_object_or_404(Event, pk=event_id)
+
+    # Avoid duplicates
+    if hasattr(event, "setlist") and event.setlist:
+        return redirect("setlists:detail", pk=event.setlist.pk)
+
+    setlist = SetList.objects.create(
+        name=f"{event.title} Setlist",
+        created_by=request.user,
+        event=event,
+    )
+
+    return redirect("setlists:setlist_builder", pk=setlist.pk)

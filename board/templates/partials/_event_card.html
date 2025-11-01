@@ -1,4 +1,5 @@
 {% load static %}
+{% load group_tags %}
 
 <div class="card position-relative mb-3 p-2 rounded cursor-pointer"
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
@@ -63,9 +64,6 @@
       </td>
     </tr>
   </table>
-
-  <!-- 🔗 Full page fallback link -->
-
 </div>
 
 <!-- 🪟 Modal -->
@@ -82,49 +80,7 @@
 
       <!-- Body -->
       <div class="modal-body">
-
-
-        <!-- 🎞️ Thumbnail strip (gallery assets) -->
-        {% if event.gallery_assets.exists %}
-          <div class="d-flex flex-wrap gap-2 mb-3">
-            {% for asset in event.gallery_assets.all %}
-            {% if event.cover_asset and event.cover_asset.file %}
-            <img src="{{ event.cover_asset.file.url }}" class="img-fluid rounded mb-3" alt="{{ event.title }}">
-          {% elif event.venue and event.venue.image %}
-            <img src="{{ event.venue.image.url }}" class="img-fluid rounded mb-3" alt="{{ event.venue.name }}">
-          {% else %}
-            <img src="{% static 'images/fallback.jpg' %}" class="img-fluid rounded mb-3" alt="No cover available">
-          {% endif %}
-          
-              </a>
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        <!-- 📸 Legacy photos (non-cover) -->
-        {% if event.photos.count > 1 %}
-          <hr>
-          <h6>📸 Event Photos</h6>
-          <div class="d-flex flex-wrap gap-2">
-            {% for photo in event.photos.all %}
-              {% if not photo.is_cover %}
-                <a href="{{ photo.image.url }}" data-lightbox="event-{{ event.id }}" data-title="{{ event.title }}">
-                  <img src="{{ photo.image.url }}" class="img-thumbnail" style="max-height:100px; max-width:100px;">
-                </a>
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        <hr>
-
-
-
-        <!-- 🧩 Shared Event Details partial -->
         {% include "board/_event_detail.html" with event=event %}
-
-
-
 
         <!-- 📅 Availability Form -->
         <form method="post" action="{% url 'board:set_event_availability' event.id %}" class="mt-3">
@@ -150,22 +106,37 @@
             🤔 Maybe: {{ event.avail_summary.maybe }}
           </div>
         {% endif %}
+
+        <hr>
+
+        <!-- 🎵 Setlist Section -->
+        {% if request.user|has_group:"Performers" %}
+          {% if event.setlist %}
+            <div class="mt-3">
+              <a href="{% url 'setlists:detail' event.setlist.id %}"
+                 class="btn btn-outline-primary w-100">
+                 🎵 View Setlist
+              </a>
+
+              {% if request.user|has_group:"Leaders" %}
+                <a href="{% url 'setlists:setlist_builder' event.setlist.id %}"
+                   class="btn btn-outline-secondary w-100 mt-2">
+                   ✏️ Edit Setlist
+                </a>
+              {% endif %}
+            </div>
+          {% else %}
+            {% if request.user|has_group:"Leaders" %}
+              <div class="mt-3">
+                <a href="{% url 'setlists:setlist_create_for_event' event.id %}"
+                   class="btn btn-success w-100">
+                   ➕ Create Setlist
+                </a>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endif %}
       </div>
-                      <!-- 🎵 Setlist Section -->
-                      {% if event.setlist %}
-                      <div class="mt-3">
-                        <a href="{% url 'setlists:detail' event.setlist.id %}" 
-                           class="btn btn-outline-primary w-100">
-                           🎵 View Setlist
-                        </a>
-                      </div>
-                    {% elif user.is_staff %}
-                      <div class="mt-3">
-                        <button class="btn btn-outline-secondary w-100" disabled>
-                          ➕ Create Setlist (use Admin)
-                        </button>
-                      </div>
-                    {% endif %}
     </div>
   </div>
 </div>
