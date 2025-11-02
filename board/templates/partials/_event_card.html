@@ -1,5 +1,8 @@
 {% load static %}
 {% load group_tags %}
+{% load user_tags %}
+
+
 
 <div class="card position-relative mb-3 p-2 rounded cursor-pointer"
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
@@ -8,6 +11,13 @@
   {% if event.non_cover_images_count %}
     <span class="badge rounded-pill bg-dark position-absolute top-0 end-0 m-2">
       📸 {{ event.non_cover_images_count }}
+    </span>
+  {% endif %}
+
+  <!-- 🏷️ Optional rehearsal badge -->
+  {% if event.is_rehearsal %}
+    <span class="badge bg-info text-dark position-absolute top-0 start-0 m-2">
+      🎤 Rehearsal
     </span>
   {% endif %}
 
@@ -86,7 +96,9 @@
         <form method="post" action="{% url 'board:set_event_availability' event.id %}" class="mt-3">
           {% csrf_token %}
           <div class="mb-3">
-            <label for="availability{{ event.id }}" class="form-label"><strong>Your Availability:</strong></label>
+            <label for="availability{{ event.id }}" class="form-label">
+              <strong>Your Availability:</strong>
+            </label>
             <select id="availability{{ event.id }}" name="status" class="form-select">
               <option value="">-- Select --</option>
               <option value="yes" {% if event.my_availability == "yes" %}selected{% endif %}>✅ Yes</option>
@@ -109,38 +121,126 @@
 
         <hr>
 
-        <!-- 🎵 Setlist Section -->
-        {% if request.user|has_group:"Performers" %}
-          {% if event.setlist %}
-            <div class="mt-3">
-              <a href="{% url 'setlists:detail' event.setlist.id %}"
-                 class="btn btn-outline-primary w-100">
-                 🎵 View Setlist
-              </a>
-
-              {% if request.user|has_group:"Leaders" %}
-                <a href="{% url 'setlists:setlist_builder' event.setlist.id %}"
-                   class="btn btn-outline-secondary w-100 mt-2">
-                   ✏️ Edit Setlist
-                </a>
-              {% endif %}
-            </div>
-          {% else %}
-            {% if request.user|has_group:"Leaders" %}
+        {# 🎵 PERFORMANCE-ONLY SECTION ----------------------------- #}
+        {% if not event.is_rehearsal %}
+          {% if request.user|has_group:"Performers" %}
+            {% if event.setlist %}
               <div class="mt-3">
-                <a href="{% url 'setlists:setlist_create_for_event' event.id %}"
-                   class="btn btn-success w-100">
-                   ➕ Create Setlist
+                <a href="{% url 'setlists:detail' event.setlist.id %}"
+                   class="btn btn-outline-primary w-100">
+                   🎵 View Setlist
                 </a>
+                {% if request.user|has_group:"Leaders" %}
+                  <a href="{% url 'setlists:setlist_builder' event.setlist.id %}"
+                     class="btn btn-outline-secondary w-100 mt-2">
+                     ✏️ Edit Setlist
+                  </a>
+                {% endif %}
               </div>
+            {% else %}
+              {% if request.user|has_group:"Leaders" %}
+                <div class="mt-3">
+                  <a href="{% url 'setlists:setlist_create_for_event' event.id %}"
+                     class="btn btn-success w-100">
+                     ➕ Create Setlist
+                  </a>
+                </div>
+              {% endif %}
             {% endif %}
           {% endif %}
         {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
 
+        {# 🧾 REHEARSAL-ONLY SECTION ------------------------------- #}
+          {% if event.event_type == "rehearsal" %}
+          <div class="accordion mt-4" id="accordionRehearsal{{ event.id }}">
+        
+            <!-- 📝 Rehearsal Details -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingDetails{{ event.id }}">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseDetails{{ event.id }}"
+                        aria-expanded="false" aria-controls="collapseDetails{{ event.id }}">
+                  📝 Rehearsal Details
+                </button>
+              </h2>
+        
+              <div id="collapseDetails{{ event.id }}" class="accordion-collapse collapse"
+                  aria-labelledby="headingDetails{{ event.id }}"
+                  data-bs-parent="#accordionRehearsal{{ event.id }}">
+                <div class="accordion-body">
+        
+                  {% if event.rehearsal_details %}
+                    <div class="mb-2">{{ event.rehearsal_details.notes|safe }}</div>
+                  {% else %}
+                    <p class="text-muted fst-italic">No rehearsal notes yet.</p>
+                  {% endif %}
+        
+                  {% if request.user|has_group:"Leaders" %}
+                    <div class="text-end mt-2">
+                      <a href="{% url 'board:edit_rehearsal_details' event.id %}"
+                        class="btn btn-sm btn-outline-secondary">
+                        ✏️ Edit Rehearsal Notes
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+        
+            <!-- 🎵 Song Rehearsal Notes -->
+            <div class="accordion-item mt-2">
+              <h2 class="accordion-header" id="headingSongs{{ event.id }}">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseSongs{{ event.id }}"
+                        aria-expanded="false" aria-controls="collapseSongs{{ event.id }}">
+                  🎵 Song Rehearsal Notes
+                </button>
+              </h2>
+        
+              <div id="collapseSongs{{ event.id }}" class="accordion-collapse collapse"
+                  aria-labelledby="headingSongs{{ event.id }}"
+                  data-bs-parent="#accordionRehearsal{{ event.id }}">
+                <div class="accordion-body">
+                  {% if event.rehearsal_details and event.rehearsal_details.song_notes.all %}
+                    <ul class="list-group list-group-flush">
+                      {% for note in event.rehearsal_details.song_notes.all %}
+                        <li class="list-group-item">
+                          <strong>{{ note.song.songTitle }}</strong><br>
+                          {{ note.notes|safe }}
+                          <div class="small text-muted">
+                            by {{ note.created_by|get_user_display_name|default:"Unknown" }},
+                            {{ note.created_at|date:"M d, Y" }}
+                          </div>
+                        </li>
+                      {% empty %}
+                        <li class="list-group-item text-muted fst-italic">
+                          No song notes available.
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p class="text-muted fst-italic">No song notes available.</p>
+                  {% endif %}
+        
+                  {% if request.user|has_group:"Leaders" %}
+                    <div class="text-end mt-2">
+                      <a href="{% url 'board:edit_song_rehearsal_notes' event.id %}"
+                        class="btn btn-sm btn-outline-secondary">
+                        🎵 Edit Song Notes
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %} {# end rehearsal-only section #}
+
+        </div> <!-- /.modal-body -->
+      </div> <!-- /.modal-content -->
+    </div> <!-- /.modal-dialog -->
+  </div> <!-- /.modal -->
+  
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".description-preview").forEach(container => {

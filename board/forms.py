@@ -1,3 +1,4 @@
+#board/forms.py
 from django import forms
 from tinymce.widgets import TinyMCE  # ✅ replace CKEditorWidget
 from .models import BoardMessage

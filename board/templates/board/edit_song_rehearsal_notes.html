@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4">🎵 Edit Song Rehearsal Notes – {{ event.title }}</h3>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <table class="table table-bordered align-middle">
+      <thead>
+        <tr>
+          <th>Song</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in formset %}
+          <tr>
+            <td>{{ form.song }}</td>
+            <td>{{ form.notes }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="2">No songs linked to this rehearsal yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+    <a href="{% url 'board:full_board' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

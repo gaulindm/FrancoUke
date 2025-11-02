@@ -70,14 +70,19 @@ def set_availability(request, event_id):
     return update_event_availability(request, event_id)
 
 
+# board/views/event_views.py
+from django.shortcuts import get_object_or_404, render
+from board.models import Event
+
 def rehearsal_detail_view(request, pk):
-    rehearsal = get_object_or_404(BoardItem, pk=pk, is_rehearsal=True)
+    event = get_object_or_404(Event, pk=pk, event_type="rehearsal")
 
     user_availability = None
     if request.user.is_authenticated:
-        user_availability = rehearsal.availabilities.filter(user=request.user).first()
+        user_availability = event.availabilities.filter(user=request.user).first()
 
-    return render(request, 'board/rehearsal_detail.html', {
-        'rehearsal': rehearsal,
-        'user_availability': user_availability,
+    return render(request, "board/rehearsal_detail.html", {
+        "event": event,                     # ✅ add this
+        "rehearsal": event,
+        "user_availability": user_availability,
     })

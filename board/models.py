@@ -72,11 +72,34 @@ class BoardMessage(models.Model):
         return self.title or f"Message by {self.author}"
 
 
-
+from urllib.parse import urlparse, parse_qs
+from django.db import models
+from tinymce.models import HTMLField  # or whatever HTMLField import you use
 
 class BoardItem(models.Model):
-    column = models.ForeignKey("BoardColumn", on_delete=models.CASCADE, null=True, blank=True, related_name="items")
-    event = models.ForeignKey("Event", on_delete=models.CASCADE, null=True, blank=True, related_name="board_items")
+    """
+    BoardItem serves as a unified model for both:
+      1. Event-linked cards (via `event` FK) — e.g. performances or rehearsals
+      2. Standalone informational/media cards — e.g. YouTube links, photo galleries, etc.
+
+    The presence of `event` determines if this item represents an event.
+    Otherwise, non-event fields (`youtube_url`, `media_file`, `link`, etc.) define its content.
+    """
+
+    column = models.ForeignKey(
+        "BoardColumn",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="items"
+    )
+    event = models.ForeignKey(
+        "Event",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="board_items"
+    )
 
     # Fields for non-event cards
     title = models.CharField(max_length=255, blank=True)
@@ -87,8 +110,6 @@ class BoardItem(models.Model):
 
     position = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-
-     # 👇 NEW
     is_public = models.BooleanField(default=False)
 
     class Meta:
@@ -98,6 +119,10 @@ class BoardItem(models.Model):
         if self.event:
             return f"Event: {self.event.title}"
         return self.title or "Board Item"
+
+    # -----------------------------
+    # 🔍 Helper Properties
+    # -----------------------------
 
     @property
     def youtube_embed_url(self):
@@ -118,7 +143,6 @@ class BoardItem(models.Model):
                 video_id = parsed.path.split("/")[-1]
             elif parsed.path.startswith("/shorts/"):
                 video_id = parsed.path.split("/")[-1]
-
             if "t" in query:
                 start_time = query["t"][0].replace("s", "")
 
@@ -141,10 +165,22 @@ class BoardItem(models.Model):
         """Return the cover photo if one is marked, otherwise the first photo."""
         return self.photos.filter(is_cover=True).first() or self.photos.first()
 
+    @property
+    def is_rehearsal_event(self) -> bool:
+        """
+        Determine if this BoardItem represents a rehearsal event.
+        Uses linked Event if available.
+        """
+        if self.event:
+            return self.event.event_type == "rehearsal"
+        return False
+
+
 
 # -------------------------
 # Performances + Availability
 # -------------------------
+'''
 class Performance(models.Model):
     PERFORMANCE_CHOICES = [
         ("upcoming", "Upcoming"),
@@ -182,7 +218,7 @@ class Performance(models.Model):
 
     def __str__(self):
         return f"{self.board_item.title} ({self.get_performance_type_display()})"
-
+'''
 
 class BoardItemPhoto(models.Model):
     board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name="photos")
@@ -320,6 +356,11 @@ class Event(models.Model):
     def non_cover_images_count(self):
         return self.non_cover_gallery_count + self.non_cover_photos_count
 
+
+    @property
+    def is_rehearsal(self) -> bool:
+        """Return True if this event is a rehearsal."""
+        return self.event_type == "rehearsal"
 
 
 class EventPhoto(models.Model):

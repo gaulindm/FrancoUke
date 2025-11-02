@@ -154,6 +154,18 @@ It also automatically detects the revision date from the file name if it is in t
     Song Title (Month Day, Year).pdf
 and stores it in the `revised_on` field.
 
++++++++++++++++++++=
+
+unzip the file
+unzip nov12.zip
+
+Remove junk
+rm -rf __MACOSX
+find . -name "._*" -delete
+find . -name ".DS_Store" -delete
+
+
+
 ------------------------------------------------------------
 1️⃣ Convert a single PDF to a .cho file (does NOT touch the database):
 
@@ -201,6 +213,11 @@ python manage.py import_songbook_pdf path/to/folder/ --to-db --contributor-id=1 
 
 - Use `--site-name=StrumSphere` or `--site-name=FrancoUke`
 - If omitted, the song will remain hidden (site_name = None)
+
+FOR Pythonanywhere with Gaulinbackup use
+
+python manage.py import_songbook_pdf path/to/folder/ --to-db --contributor-id=3 --site-name=StrumSphere
+
 
 ------------------------------------------------------------
 📌 Notes:

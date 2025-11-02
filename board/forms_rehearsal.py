@@ -1,14 +1,54 @@
-# board/forms_rehearsal.py
 from django import forms
-from songs.models import Song
-from .rehearsal_notes import RehearsalSection
+from django.forms import inlineformset_factory
+from tinymce.widgets import TinyMCE
 
-class RehearsalSectionForm(forms.ModelForm):
+from .rehearsal_notes import RehearsalDetails, SongRehearsalNote
+
+
+class RehearsalDetailsForm(forms.ModelForm):
+    """Form for editing general rehearsal notes."""
     class Meta:
-        model = RehearsalSection
-        fields = "__all__"
+        model = RehearsalDetails
+        fields = ["notes"]
+        widgets = {
+            "notes": TinyMCE(
+                attrs={"cols": 80, "rows": 15},
+                mce_attrs={
+                    "menubar": False,
+                    "plugins": "link lists",
+                    "toolbar": "undo redo | bold italic underline | bullist numlist | alignleft aligncenter alignright | link",
+                    "height": 300,
+                },
+            ),
+        }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # ✅ Only include StrumSphere songs
-        self.fields["song"].queryset = Song.objects.filter(site_name="StrumSphere").order_by("songTitle")
+
+class SongRehearsalNoteForm(forms.ModelForm):
+    """Form for editing per-song rehearsal notes."""
+    class Meta:
+        model = SongRehearsalNote
+        fields = ["song", "notes"]
+        widgets = {
+            "song": forms.TextInput(attrs={
+                "readonly": "readonly",
+                "class": "form-control-plaintext"
+            }),
+            "notes": TinyMCE(
+                attrs={"cols": 80, "rows": 6},
+                mce_attrs={
+                    "menubar": False,
+                    "plugins": "link lists",
+                    "toolbar": "undo redo | bold italic underline | bullist numlist | alignleft aligncenter alignright | link",
+                    "height": 200,
+                },
+            ),
+        }
+
+
+SongRehearsalNoteFormSet = inlineformset_factory(
+    RehearsalDetails,
+    SongRehearsalNote,
+    form=SongRehearsalNoteForm,
+    extra=0,
+    can_delete=False,
+)
