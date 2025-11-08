@@ -91,7 +91,7 @@
       <!-- Body -->
       <div class="modal-body">
         {% include "board/_event_detail.html" with event=event %}
-
+        {% if event.event_type != "rehearsal" %}
         <!-- 📅 Availability Form -->
         <form method="post" action="{% url 'board:set_event_availability' event.id %}" class="mt-3">
           {% csrf_token %}
@@ -108,7 +108,7 @@
           </div>
           <button type="submit" class="btn btn-primary">Save</button>
         </form>
-
+      
         <!-- 👥 Group Availability Summary -->
         {% if event.avail_summary %}
           <div class="mt-3">
@@ -118,7 +118,15 @@
             🤔 Maybe: {{ event.avail_summary.maybe }}
           </div>
         {% endif %}
-
+      {% else %}
+        {% comment %}
+          👇 Availability intentionally hidden for rehearsals
+          This makes sense because rehearsals are often scheduled
+          after the fact, or attendance is assumed.
+          To re-enable it, remove the surrounding condition.
+        {% endcomment %}
+      {% endif %}
+      
         <hr>
 
         {# 🎵 PERFORMANCE-ONLY SECTION ----------------------------- #}
@@ -170,10 +178,13 @@
                 <div class="accordion-body">
         
                   {% if event.rehearsal_details %}
-                    <div class="mb-2">{{ event.rehearsal_details.notes|safe }}</div>
-                  {% else %}
-                    <p class="text-muted fst-italic">No rehearsal notes yet.</p>
-                  {% endif %}
+                  <div class="mb-2 rehearsal-notes">
+                    {{ event.rehearsal_details.notes|safe }}
+                  </div>
+                {% else %}
+                  <p class="text-muted fst-italic">No rehearsal notes yet.</p>
+                {% endif %}
+                
         
                   {% if request.user|has_group:"Leaders" %}
                     <div class="text-end mt-2">

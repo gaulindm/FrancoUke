@@ -1,33 +1,183 @@
-{% extends "base.html" %}
+{% extends "base_uke4ia.html" %}
 {% load static %}
 
-{% block content %}
-<div class="container py-4">
-  <h3 class="mb-4">🎵 Edit Song Rehearsal Notes – {{ event.title }}</h3>
+{% block extra_head %}
+<style>
+  #song-search:focus {
+    outline: none;
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25,135,84,.25);
+  }
+  #song-list mark {
+    background: #ffeb3b;
+    color: inherit;
+    padding: 0;
+  }
+  .song-note-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    background-color: #fff;
+  }
+  .remove-song {
+    float: right;
+  }
+</style>
+{% endblock %}
 
-  <form method="post">
+{% block content %}
+<div class="container mt-4">
+  <h3>🎵 Edit Song Rehearsal Notes – {{ event.title }}</h3>
+
+  <form method="post" id="rehearsal-notes-form">
     {% csrf_token %}
-    {{ formset.management_form }}
-    <table class="table table-bordered align-middle">
-      <thead>
-        <tr>
-          <th>Song</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for form in formset %}
-          <tr>
-            <td>{{ form.song }}</td>
-            <td>{{ form.notes }}</td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="2">No songs linked to this rehearsal yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <button type="submit" class="btn btn-primary">💾 Save Changes</button>
-    <a href="{% url 'board:full_board' %}" class="btn btn-secondary">Cancel</a>
+    <div class="row">
+      <!-- 🎶 Song Library -->
+      <div class="col-md-5">
+        <h5>Song Library</h5>
+        <div class="input-group mb-2">
+          <input type="text" id="song-search" placeholder="Search songs…" class="form-control">
+          <button type="button" id="clear-search" class="btn btn-outline-secondary">✖</button>
+        </div>
+
+        <ul id="song-list" class="list-group" style="max-height: 70vh; overflow-y: auto;">
+          {% for song in songs %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ song.songTitle }}</span>
+            <button type="button" class="btn btn-sm btn-success add-song"
+                    data-id="{{ song.id }}"
+                    data-title="{{ song.songTitle }}">
+              + Add
+            </button>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- ✏️ Current Rehearsal Songs -->
+      <div class="col-md-7">
+        <h5>Rehearsal Songs & Notes</h5>
+        <div id="rehearsal-songs">
+          {% for note in notes %}
+          <div class="song-note-card" data-id="{{ note.song.id }}">
+            <h6>{{ note.song.songTitle }}
+              <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
+            </h6>
+            <textarea name="notes_{{ note.song.id }}" class="tinymce form-control">{{ note.notes|safe }}</textarea>
+          </div>
+          {% empty %}
+          <p class="text-muted fst-italic">No songs linked yet.</p>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-3">💾 Save All Notes</button>
+      </div>
+    </div>
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'tinymce/tinymce.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const searchInput = document.getElementById("song-search");
+  const clearBtn = document.getElementById("clear-search");
+  const songList = document.getElementById("song-list");
+  const rehearsalSongs = document.getElementById("rehearsal-songs");
+
+  // ✅ Initialize TinyMCE
+  tinymce.init({
+    selector: '.tinymce',
+    menubar: false,
+    plugins: 'link lists',
+    toolbar: 'undo redo | bold italic underline | bullist numlist | link',
+    height: 200,
+  });
+
+  // ✅ Live song search (reuse same endpoint as setlist builder)
+  let debounceTimer = null;
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim();
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => fetchSongs(query), 250);
+  });
+
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    fetchSongs("");
+  });
+
+  function fetchSongs(query) {
+    fetch(`/setlists/ajax/song-search/?q=${encodeURIComponent(query)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        songList.innerHTML = "";
+        if (data.songs.length === 0) {
+          songList.innerHTML = `<li class="list-group-item text-muted">No songs found.</li>`;
+          return;
+        }
+        data.songs.forEach(song => {
+          const li = document.createElement("li");
+          li.className = "list-group-item d-flex justify-content-between align-items-center";
+          li.innerHTML = `
+            <span>${song.title}</span>
+            <button type="button" class="btn btn-sm btn-success add-song"
+                    data-id="${song.id}" data-title="${song.title}">
+              + Add
+            </button>`;
+          songList.appendChild(li);
+        });
+        bindAddButtons();
+      });
+  }
+
+  // ✅ Add a song note card
+  function bindAddButtons() {
+    document.querySelectorAll(".add-song").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const id = btn.dataset.id;
+        const title = btn.dataset.title;
+        if (rehearsalSongs.querySelector(`[data-id="${id}"]`)) return;
+
+        const div = document.createElement("div");
+        div.className = "song-note-card";
+        div.dataset.id = id;
+        div.innerHTML = `
+          <h6>${title}
+            <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
+          </h6>
+          <textarea name="notes_${id}" class="tinymce form-control" placeholder="Add rehearsal notes…"></textarea>
+        `;
+        rehearsalSongs.appendChild(div);
+
+        tinymce.init({
+          selector: `textarea[name="notes_${id}"]`,
+          menubar: false,
+          plugins: 'link lists',
+          toolbar: 'undo redo | bold italic underline | bullist numlist | link',
+          height: 200,
+        });
+
+        bindRemoveButtons();
+      });
+    });
+  }
+
+  // ✅ Remove a song note
+  function bindRemoveButtons() {
+    document.querySelectorAll(".remove-song").forEach(btn => {
+      btn.addEventListener("click", () => {
+        btn.closest(".song-note-card").remove();
+      });
+    });
+  }
+
+  bindAddButtons();
+  bindRemoveButtons();
+});
+</script>
 {% endblock %}

@@ -180,8 +180,11 @@ def import_setlist(request):
 
 
 # ----------------------------
-# 🧱 Setlist Builder (Admin tool)
+# 🧱 Setlist Builder 
 # ----------------------------
+from django.db.models import Count, Prefetch
+from board.models import SongRehearsalNote
+
 @login_required
 def setlist_builder(request, pk=None):
     """Create or edit a setlist via UI builder."""
@@ -207,16 +210,30 @@ def setlist_builder(request, pk=None):
                 setlist=setlist,
                 song_id=song_id,
                 order=idx,
-                rehearsal_notes=request.POST.get(f"notes_{song_id}", ""),
             )
 
         return redirect("setlists:detail", pk=setlist.pk)
 
-    songs = Song.objects.all().order_by("songTitle")
-    return render(request, "setlists/builder.html", {
-        "setlist": setlist,
-        "songs": songs,
-    })
+    # ✅ Prefetch rehearsal notes + their related rehearsal event titles
+    songs = (
+        Song.objects.all()
+        .annotate(note_count=Count("rehearsal_notes"))
+        .prefetch_related(
+            Prefetch(
+                "rehearsal_notes",
+                queryset=SongRehearsalNote.objects.select_related("rehearsal__event"),
+            )
+        )
+        .order_by("songTitle")
+    )
+
+    return render(
+        request,
+        "setlists/builder.html",
+        {"setlist": setlist, "songs": songs},
+    )
+
+
 
 # ----------------------------
 # 🧱 AJAX filter for setlist builder

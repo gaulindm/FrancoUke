@@ -25,6 +25,7 @@ from .api_views import BoardItemViewSet, EventViewSet
 from .rehearsal_views import (
     edit_rehearsal_details,
     edit_song_rehearsal_notes,
+    song_rehearsal_history,
 )
 
 __all__ = [

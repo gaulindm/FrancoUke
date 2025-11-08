@@ -18,10 +18,6 @@
     <p><strong>📍 Location:</strong> {{ event.location }}</p>
   {% endif %}
 
-  {% if event.rich_description %}
-    <div class="mb-3">{{ event.rich_description|safe }}</div>
-  {% endif %}
-
   {% if event.arrive_by %}
     <p><strong>Arrive by:</strong> {{ event.arrive_by|time:"g:i A" }}</p>
   {% endif %}
@@ -34,6 +30,32 @@
     <p><strong>Chairs:</strong> {{ event.chairs }}</p>
   {% endif %}
 
+
+  {# 🎛️ RICH DESCRIPTION ACCORDION SECTION #}
+  {% if event.rich_description %}
+  <div class="accordion mb-3" id="accordionRichDesc{{ event.id }}">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingRichDesc{{ event.id }}">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseRichDesc{{ event.id }}"
+                aria-expanded="false"
+                aria-controls="collapseRichDesc{{ event.id }}">
+          📖 Event Details
+        </button>
+      </h2>
+
+      <div id="collapseRichDesc{{ event.id }}" class="accordion-collapse collapse"
+           aria-labelledby="headingRichDesc{{ event.id }}"
+           data-bs-parent="#accordionRichDesc{{ event.id }}">
+        <div class="accordion-body">
+          {{ event.rich_description|safe }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if setlist %}
     <div class="mt-4">
       <a href="{% url 'setlists:detail' setlist.id %}" class="btn btn-primary btn-sm">
@@ -43,7 +65,6 @@
       <a href="{% url 'setlists:setlist_builder' setlist.id %}" class="btn btn-outline-primary btn-sm">
         ✏️ Edit Setlist
       </a>
-      
       {% endif %}
     </div>
   {% endif %}

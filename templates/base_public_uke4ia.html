@@ -112,7 +112,21 @@
         });
     });
 </script>
+<style>
+/* 🪄 Normalize TinyMCE list spacing inside rehearsal details */
+.rehearsal-notes ul,
+.rehearsal-notes ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-left: 1.5em;
+}
 
+.rehearsal-notes li {
+  margin-bottom: 0.2em; /* tighter list spacing */
+  line-height: 1.4;
+}
+
+</style>
 <!-- 🔹 Extensible scripts block -->
 {% block extra_scripts %}{% endblock %}
 {% block extra_modals %}{% endblock %}

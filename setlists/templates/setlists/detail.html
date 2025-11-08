@@ -5,60 +5,59 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">{{ setlist.name }}</h1>
 
-    <a href="{% url 'board:full_board' %}?event={{ setlist.event.id }}" 
-    class="btn btn-outline-primary btn-sm">
-   🎤 View {{ setlist.event.title }}
-  </a>
+    <div class="btn-group">
+      <a href="{% url 'board:full_board' %}?event={{ setlist.event.id }}" 
+         class="btn btn-outline-primary btn-sm">
+        🎤 View {{ setlist.event.title }}
+      </a>
 
-
-    {% if can_edit %}
-    <a href="{% url 'setlists:setlist_builder' setlist.id %}" 
-       class="btn btn-sm btn-outline-secondary">
-      ✏️ Edit Setlist
-    </a>
-  {% endif %}
-  
+      {% if can_edit %}
+        <a href="{% url 'setlists:setlist_builder' setlist.id %}" 
+           class="btn btn-sm btn-outline-secondary">
+          ✏️ Edit Setlist
+        </a>
+      {% endif %}
+    </div>
   </div>
-
- 
-
 
   {% if event %}
-  <div class="mb-3 p-2 border rounded bg-light">
- 
-    <p class="mb-1 text-muted small">
-      📅 {{ event.event_date|date:"D, M d, Y" }}
-      {% if event.start_time %}
-        at {{ event.start_time|time:"H:i" }}
-        {% if event.end_time %}
-          – {{ event.end_time|time:"H:i" }}
+    <div class="mb-3 p-2 border rounded bg-light">
+      <p class="mb-1 text-muted small">
+        📅 {{ event.event_date|date:"D, M d, Y" }}
+        {% if event.start_time %}
+          at {{ event.start_time|time:"H:i" }}
+          {% if event.end_time %}
+            – {{ event.end_time|time:"H:i" }}
+          {% endif %}
         {% endif %}
+      </p>
+      {% if event.location %}
+        <p class="mb-0 text-muted small">📍 {{ event.location }}</p>
       {% endif %}
-    </p>
-    {% if event.location %}
-      <p class="mb-0 text-muted small">📍 {{ event.location }}</p>
-    {% endif %}
-  </div>
-{% endif %}
+    </div>
+  {% endif %}
 
-
-
-
-
+  <!-- 🎵 SONG LIST -->
   <ol class="list-group list-group-numbered">
     {% for item in songs %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 ms-3">
           <strong>{{ item.song.songTitle }}</strong>
-          {% if item.rehearsal_notes %}
-            <span class="text-muted small fst-italic ms-2">
-              — {{ item.rehearsal_notes }}
-            </span>
-          {% endif %}
+
+          {% with item.song.rehearsal_notes.count as note_count %}
+            {% if note_count > 0 %}
+              <a href="{% url 'board:song_rehearsal_history' item.song.id %}" 
+                 class="btn btn-sm btn-outline-secondary ms-2"
+                 title="View rehearsal notes for {{ item.song.songTitle }}">
+                📝 {{ note_count }} note{{ note_count|pluralize }}
+              </a>
+            {% endif %}
+          {% endwith %}
         </div>
+
         <a href="{% url 'songbook:score_view' item.song.pk %}" 
            class="btn btn-sm btn-outline-primary">
-          View
+          🎼 View
         </a>
       </li>
     {% empty %}
@@ -67,12 +66,12 @@
   </ol>
 
   {% if songs %}
-  <div class="mt-4 text-center">
-    <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" 
-       class="btn btn-primary btn-lg">
-      🎤 Start Teleprompter
-    </a>
-  </div>
+    <div class="mt-4 text-center">
+      <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" 
+         class="btn btn-primary btn-lg">
+        🎤 Start Teleprompter
+      </a>
+    </div>
   {% endif %}
 </div>
 

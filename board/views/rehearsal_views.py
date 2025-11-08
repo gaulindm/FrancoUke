@@ -2,7 +2,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from board.models import Event, RehearsalDetails
-from board.forms_rehearsal import RehearsalDetailsForm
+from django.contrib import messages  # ✅ Add this
+
+from board.forms_rehearsal import RehearsalDetailsForm, SongRehearsalNote
+from songbook.models import Song
+
 
 # Optional helper: restrict to leaders only
 def is_leader(user):
@@ -32,28 +36,58 @@ def edit_rehearsal_details(request, event_id):
     })
 
 
+from django.shortcuts import render, get_object_or_404
+from board.rehearsal_notes import SongRehearsalNote
+from songbook.models import Song
+
+
+def song_rehearsal_history(request, song_id):
+    """
+    Display all rehearsal notes linked to a specific song across all rehearsals/events.
+    """
+    song = get_object_or_404(Song, pk=song_id)
+
+    # Grab all notes for this song, newest rehearsal first
+    notes = (
+        SongRehearsalNote.objects
+        .filter(song=song)
+        .select_related("rehearsal__event", "created_by")
+        .order_by("-rehearsal__event__event_date", "-created_at")
+    )
+
+    return render(request, "board/song_rehearsal_history.html", {
+        "song": song,
+        "notes": notes,
+    })
 
 
 @login_required
 @user_passes_test(is_leader)
 def edit_song_rehearsal_notes(request, event_id):
-    """
-    Edit individual song rehearsal notes linked to an event’s rehearsal.
-    """
     event = get_object_or_404(Event, id=event_id)
-    rehearsal_details, created = RehearsalDetails.objects.get_or_create(event=event)
+    rehearsal_details, _ = RehearsalDetails.objects.get_or_create(event=event)
+
+    SongNote = SongRehearsalNote
+    existing_notes = SongNote.objects.filter(rehearsal=rehearsal_details).select_related("song")
 
     if request.method == "POST":
-        formset = SongRehearsalNoteFormSet(request.POST, instance=rehearsal_details)
-        if formset.is_valid():
-            formset.save()
-            messages.success(request, "Song rehearsal notes updated successfully.")
-            return redirect("board:rehearsal_detail", pk=event.id)
-    else:
-        formset = SongRehearsalNoteFormSet(instance=rehearsal_details)
+        # Clear existing notes and rebuild from POST
+        SongNote.objects.filter(rehearsal=rehearsal_details).delete()
+        for key, value in request.POST.items():
+            if key.startswith("notes_") and value.strip():
+                song_id = key.split("_")[1]
+                SongNote.objects.create(
+                    rehearsal=rehearsal_details,
+                    song_id=song_id,
+                    notes=value.strip(),
+                    created_by=request.user
+                )
+        messages.success(request, "🎶 Rehearsal song notes updated.")
+        return redirect("board:full_board")
 
+    songs = Song.objects.all().order_by("songTitle")
     return render(
         request,
-        "board/rehearsals/edit_song_rehearsal_notes.html",
-        {"formset": formset, "event": event},
+        "board/edit_song_rehearsal_notes.html",
+        {"event": event, "songs": songs, "notes": existing_notes},
     )

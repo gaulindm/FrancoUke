@@ -1,7 +1,9 @@
 # board/urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from board import views
 from .views import *  # Safe here because __init__.py controls exports
+
 
 app_name = "board"
 
@@ -20,6 +22,12 @@ urlpatterns = [
     path("rehearsal/<int:pk>/", rehearsal_detail_view, name="rehearsal_detail"),
     path("event/<int:event_id>/rehearsal/edit/", edit_rehearsal_details, name="edit_rehearsal_details"),
     path("event/<int:event_id>/song-notes/edit/", edit_song_rehearsal_notes, name="edit_song_rehearsal_notes"),
+    path(
+    "songs/<int:song_id>/rehearsal-notes/",
+    views.song_rehearsal_history,
+    name="song_rehearsal_history",
+),
+
 
     # Performers
     path("performances/", performer_event_list, name="performer_event_list"),

@@ -26,7 +26,7 @@ class SetListSong(models.Model):
     setlist = models.ForeignKey("SetList", related_name="songs", on_delete=models.CASCADE)
     song = models.ForeignKey("songbook.Song", on_delete=models.CASCADE)
     order = models.PositiveIntegerField()
-    rehearsal_notes = models.TextField(blank=True)
+    
 
     class Meta:
         unique_together = ("setlist", "order")
