@@ -124,23 +124,26 @@
       <div class="col-md-6">
         <h5>Current Setlist</h5>
         <ul id="setlist-songs" class="list-group mb-3" style="max-height: 70vh; overflow-y: auto;">
+          
           {% for item in setlist.songs.all %}
-            <li class="list-group-item d-flex align-items-center" data-id="{{ item.song.id }}">
-              <span class="drag-handle me-2">☰</span>
-              <strong class="flex-grow-1">{{ item.song.songTitle }}</strong>
+          <li class="list-group-item d-flex align-items-center" data-id="{{ item.song.id }}">
+            <span class="drag-handle me-2">☰</span>
+            <strong class="flex-grow-1">{{ item.song.songTitle }}</strong>
+            <input type="hidden" name="order[]" value="{{ item.song.id }}">
+            {% if item.song.rehearsal_notes.all %}
+              <a href="{% url 'board:song_rehearsal_history' item.song.id %}"
+                 class="btn btn-sm btn-outline-secondary me-2"
+                 title="View rehearsal notes for {{ item.song.songTitle }}"
+                 data-bs-toggle="tooltip">
+                 📝 Notes
+              </a>
+            {% endif %}
+            <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
+          </li>
+        {% endfor %}
+        
 
-              {% if item.song.rehearsal_notes.all %}
-                <a href="{% url 'board:song_rehearsal_history' item.song.id %}"
-                   class="btn btn-sm btn-outline-secondary me-2"
-                   title="View rehearsal notes for {{ item.song.songTitle }}"
-                   data-bs-toggle="tooltip">
-                   📝 Notes
-                </a>
-              {% endif %}
 
-              <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
-            </li>
-          {% endfor %}
         </ul>
 
         <button type="submit" class="btn btn-primary w-100">💾 Save Setlist</button>
@@ -223,34 +226,47 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((err) => console.error("Search failed:", err));
   }
 
-  // ✅ Add song
-  function bindAddButtons() {
-    document.querySelectorAll(".add-song").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const songId = btn.dataset.id;
-        const songTitle = btn.dataset.title;
+// ✅ Add song
+function bindAddButtons() {
+  document.querySelectorAll(".add-song").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const songId = btn.dataset.id;
+      const songTitle = btn.dataset.title;
 
-        if (document.querySelector(`#setlist-songs li[data-id="${songId}"]`)) {
-          showToast("⚠️ Already in setlist", "warning");
-          return;
-        }
+      if (document.querySelector(`#setlist-songs li[data-id="${songId}"]`)) {
+        showToast("⚠️ Already in setlist", "warning");
+        return;
+      }
 
-        const li = document.createElement("li");
-        li.className = "list-group-item d-flex align-items-center";
-        li.dataset.id = songId;
-        li.innerHTML = `
-          <span class="drag-handle me-2">☰</span>
-          <strong class="flex-grow-1">${songTitle}</strong>
-          <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
-        `;
-        setlistEl.appendChild(li);
-
-        li.querySelector(".remove-song").addEventListener("click", () => li.remove());
-        showToast(\`✅ Added "\${songTitle}"\`);
-      });
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex align-items-center";
+      li.dataset.id = songId;
+      li.innerHTML = `
+        <span class="drag-handle me-2">☰</span>
+        <strong class="flex-grow-1">${songTitle}</strong>
+        <input type="hidden" name="order[]" value="${songId}">
+        <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
+      `;
+      setlistEl.appendChild(li);
+      showToast(`✅ Added "${songTitle}"`);
     });
+  });
+}
+// ✅ Works for both initial and dynamically added items
+setlistEl.addEventListener("click", (e) => {
+  if (e.target.classList.contains("remove-song")) {
+    e.preventDefault();
+    const li = e.target.closest("li");
+    const songTitle = li.querySelector("strong")?.textContent || "Song";
+    li.remove();
+    showToast(`❌ Removed "${songTitle}"`, "warning");
+    markDirty();  // ⚡ now tracked as an unsaved change
   }
+});
+
+
+
 
   // ✅ Toast helper
   function showToast(message, type="success") {
