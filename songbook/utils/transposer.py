@@ -5,14 +5,21 @@ import re
 
 # 🎸 Updated regex — detects case-sensitive chords, slash chords, and trailing strumming slashes
 CHORD_REGEX = re.compile(
-    r"\[("
-    r"[A-G][#b]?"                            # Root note
-    r"(?:m(?!aj)|M|maj|min|dim|aug|sus|add)?" # Quality (m, M, maj, min, etc.)
-    r"[0-9]*"                                # Optional extension (7, 9, 13...)
-    r"(?:/[A-G][#b]?)?"                      # Optional slash chord (D/F#)
-    r"/*"                                    # Optional trailing slashes (Em///)
-    r")\]"
+    r"""
+    \[
+    (                                   # capture the chord name
+      [A-G]                             # root note
+      [#b]?                             # optional accidental
+      (?:m(?!aj))?                      # 'm' for minor, but NOT 'maj'
+      (?:M7|maj7|m7|7|sus2|sus4|dim7?|aug|add9|6|9|11|13)?  # extensions
+      (?:/[A-G][#b]?)?                  # optional slash chord (D/F#)
+      /*                                # optional trailing slashes (Em///)
+    )
+    \]
+    """,
+    re.VERBOSE,
 )
+
 
 def detect_key(parsed_data):
     key_chords = {
@@ -54,6 +61,7 @@ def clean_chord(chord):
     FrancoUke cleanup:
     - Removes trailing slashes used as strumming marks (Em/// → Em)
     - Removes alternate bass note chords (D/F# → D)
+    - Normalizes maj7/Δ7 → M7
     - Keeps [N.C.] intact
     """
     if not chord:
@@ -65,18 +73,20 @@ def clean_chord(chord):
     if chord.upper() == "[N.C.]":
         return chord
 
-    # ✅ 1️⃣ Remove trailing slashes used as strumming marks (Em/// → Em)
-    # Must come before alternate bass cleanup
+    # ✅ Remove trailing strumming slashes
     chord = re.sub(r"/{2,}$", "", chord)
 
-    # ✅ 2️⃣ Remove alternate bass note (D/F# → D)
+    # ✅ Remove alternate bass notes (D/F# → D)
     chord = re.sub(r"/[A-G][#b]?$", "", chord)
 
-    # ✅ 3️⃣ Clean up stray spaces or brackets
+    # ✅ Normalize maj7/Δ7 → M7
+    chord = re.sub(r"maj7", "M7", chord, flags=re.IGNORECASE)
+    chord = chord.replace("Δ7", "M7")
+
+    # ✅ Clean up brackets
     chord = chord.strip("[] ").strip()
 
     return chord
-
 
 
 

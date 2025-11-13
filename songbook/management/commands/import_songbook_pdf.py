@@ -196,6 +196,10 @@ python manage.py import_songbook_pdf path/to/song.pdf --to-db --contributor-id=1
     - site_name = None (hidden) unless specified with --site-name
     - contributor = user with ID 1
 
+ ON PYTHONANYWHERE US
+
+ python manage.py import_songbook_pdf path/to/song.pdf --to-db --contributor-id=3 --site-name=StrumSphere  
+
 ------------------------------------------------------------
 4️⃣ Convert a folder of PDFs and save all to the database:
 

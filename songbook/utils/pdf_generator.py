@@ -45,32 +45,111 @@ def get_user_preferences(user):
     except Exception:
         return default_prefs
 
-
 # =======================
 # CHORD COMPARISON
 # =======================
+# =======================
+# CHORD COMPARISON (enharmonic-aware)
+# =======================
 def chord_equivalent(a: str, b: str) -> bool:
-    import re
+    """
+    Compare two chord names intelligently:
+    - remove trailing strum slashes and alternate bass (/F#)
+    - normalize 'maj' and 'Δ' -> 'M' (major 7 shorthand),
+      but preserve 'm' (minor) vs 'M' (major)
+    - canonicalize enharmonic roots (Db -> C#, Eb -> D#, Bb -> A#, Gb -> F#, Ab -> G#)
+    - treat dim <-> dim7 as equivalent (optional)
+    """
 
+    import re
     if not a or not b:
         return False
 
+    # Basic cleanup: strip outer whitespace and trailing strum slashes
     a = re.sub(r'/+$', '', a.strip())
     b = re.sub(r'/+$', '', b.strip())
 
+    # Remove alternate bass note (D/F# -> D)
     a = re.sub(r'/[A-G][#b]?$', '', a)
     b = re.sub(r'/[A-G][#b]?$', '', b)
 
-    if re.match(r'^[A-G][#b]?m(?!aj)', a):
-        return a == b
-
-    def normalize_maj(name):
-        name = re.sub(r'(?i)maj', 'M', name)
-        name = re.sub(r'(?i)Δ', 'M', name)
+    # Normalize common textual variants (maj -> M, Δ -> M)
+    # Note: do NOT lowercase everything — keep M vs m distinction
+    def normalize_maj_tokens(name: str) -> str:
+        name = re.sub(r'(?i)maj', 'M', name)   # Amaj7 -> AM7
+        name = re.sub(r'(?i)Δ', 'M', name)     # AΔ7 -> AM7
+        # convert 'min' -> 'm' if present, keep explicit 'm'
+        name = re.sub(r'(?i)min', 'm', name)
         return name
 
-    return normalize_maj(a).lower() == normalize_maj(b).lower()
+    a = normalize_maj_tokens(a)
+    b = normalize_maj_tokens(b)
 
+    # --------------------------------
+    # Enharmonic mapping: flats -> sharps
+    # --------------------------------
+    # We canonicalize the root note only, leaving the rest (suffix/extensions) intact.
+    ENHARMONIC_TO_SHARP = {
+        'CB': 'B',  # Cb -> B
+        'DB': 'C#',
+        'EB': 'D#',
+        'GB': 'F#',
+        'AB': 'G#',
+        'BB': 'A#',
+        'FB': 'E',
+        # keep sharps as-is
+        'C#': 'C#', 'D#': 'D#', 'F#': 'F#', 'G#': 'G#', 'A#': 'A#'
+    }
+
+    # Accept common flat symbol 'b' and unicode '♭'
+    def canonicalize_enharmonic(chord_name: str) -> str:
+        """
+        Split chord_name into root (A-G plus optional accidental) and suffix.
+        Convert root flats (e.g. Db, Eb) to sharp equivalents (C#, D#).
+        Return combined string (root + suffix) without lowercasing.
+        """
+        chord_name = chord_name.strip()
+        # match root letter + optional accidental, then the rest
+        m = re.match(r'^([A-Ga-g])([#b♭]?)(.*)$', chord_name)
+        if not m:
+            return chord_name  # can't parse — return as-is
+        root_letter = m.group(1).upper()
+        accidental = m.group(2).replace('♭', 'b')  # normalize unicode flat to 'b'
+        rest = m.group(3) or ''
+
+        root = root_letter + accidental  # e.g. 'D' + 'b' -> 'Db'
+        # map flats to sharps (case-insensitive key)
+        root_key = root.upper()
+        if root_key in ENHARMONIC_TO_SHARP:
+            root_canonical = ENHARMONIC_TO_SHARP[root_key]
+        else:
+            # if not in map, keep original root (covers natural notes and sharps)
+            root_canonical = root_letter + accidental
+
+        return f"{root_canonical}{rest}"
+
+    a_can = canonicalize_enharmonic(a)
+    b_can = canonicalize_enharmonic(b)
+
+    # --------------------------------
+    # Diminished alias: treat dim <-> dim7 as equal
+    # --------------------------------
+    # Normalize whitespace
+    a_can = a_can.strip()
+    b_can = b_can.strip()
+
+    # Quick direct equality first
+    if a_can == b_can:
+        return True
+
+    # treat Ddim and Ddim7 as equivalent
+    if re.match(r'^[A-G][#]?[dD]im$', a_can) and re.match(r'^[A-G][#]?[dD]im7$', b_can):
+        return True
+    if re.match(r'^[A-G][#]?[dD]im7$', a_can) and re.match(r'^[A-G][#]?[dD]im$', b_can):
+        return True
+
+    # Finally, compare normalized names exactly (case sensitive to preserve M vs m)
+    return a_can == b_can
 
 # =======================
 # COLOR MARKUP
@@ -153,7 +232,10 @@ def get_paragraph_styles(formatting):
 # =======================
 def load_relevant_chords(songs, user_prefs, transpose_value):
     chords_primary = load_chords(user_prefs["primary_instrument"])
-    chords_secondary = load_chords(user_prefs["secondary_instrument"]) if user_prefs["secondary_instrument"] else []
+    chords_secondary = (
+        load_chords(user_prefs["secondary_instrument"])
+        if user_prefs["secondary_instrument"] else []
+    )
 
     for chord in chords_primary:
         chord["instrument"] = user_prefs["primary_instrument"]
@@ -161,13 +243,31 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
         chord["instrument"] = user_prefs["secondary_instrument"]
 
     all_chords = chords_primary + chords_secondary
-    used_chords = [normalize_chord(chord).strip() for chord in extract_used_chords(songs[0].lyrics_with_chords)]
-    transposed_chords = {transpose_chord(chord.strip(), transpose_value).strip() for chord in used_chords}
 
-    return [
-        chord for chord in all_chords
-        if any(chord_equivalent(chord["name"], t) for t in transposed_chords)
+    # 🔹 Extract all chords used in the song and normalize them
+    used_chords = [
+        normalize_chord(chord).strip()
+        for chord in extract_used_chords(songs[0].lyrics_with_chords)
     ]
+
+    # 🔹 Transpose the chords if necessary
+    transposed_chords = {
+        transpose_chord(chord.strip(), transpose_value).strip()
+        for chord in used_chords
+    }
+
+    # 🔹 Match chords in the library with transposed chords
+    relevant_chords = []
+    for t_chord in transposed_chords:
+        for chord_def in all_chords:
+            if chord_equivalent(chord_def["name"], t_chord):
+                chord_copy = dict(chord_def)  # make a copy so we don’t mutate the original
+                chord_copy["requested_name"] = t_chord  # 💡 store song’s spelling (e.g. D#dim)
+                relevant_chords.append(chord_copy)
+                break  # stop once a match is found
+
+    return relevant_chords
+
 
 # =======================
 # SONG ELEMENTS

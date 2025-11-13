@@ -132,14 +132,14 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
     def prepare_chords(chords):
         diagrams = []
         for chord in chords:
-            #print(f"DEBUG: Preparing chord '{chord.get('name')}' for instrument '{chord.get('instrument')}'")
+            display_name = chord.get("requested_name", chord["name"])  # ✅ Use original spelling if available
             diagrams.append({
-                "name": chord["name"],
+                "name": display_name,
                 "variation": chord["variations"][0]
             })
             if is_printing_alternate_chord and len(chord["variations"]) > 1:
                 diagrams.append({
-                    "name": chord["name"],
+                    "name": display_name,
                     "variation": chord["variations"][1]
                 })
         return diagrams
