@@ -19,7 +19,11 @@ function adaptPositionsForInstrument(positions, instrument) {
 
 /**
  * Normalize and clean chord names so they match the chord dictionary keys.
- * Handles things like Em/// → Em, D/F# → D, Cmaj7 → CM7.
+ * Handles things like:
+ *   - Em/// → Em
+ *   - D/F# → D
+ *   - Cmaj7 → CM7
+ *   - D#dim → Ebdim (enharmonic normalization)
  */
 function cleanChordName(chord) {
   if (!chord) return "";
@@ -35,6 +39,27 @@ function cleanChordName(chord) {
 
   // 🧠 Normalize maj variants (Cmaj7, CΔ7 → CM7)
   chord = chord.replace(/maj/i, "M").replace(/Δ/g, "M");
+
+  // 🎵 Normalize enharmonic equivalents
+  const ENHARMONIC_EQUIVALENTS = {
+    'Cb': 'B',
+    'Fb': 'E',
+    'E#': 'F',
+    'B#': 'C',
+    'Db': 'C#',
+    'Eb': 'D#',
+    'Gb': 'F#',
+    'Ab': 'G#',
+    'Bb': 'A#',
+  };
+
+  // Break into root + suffix
+  const match = chord.match(/^([A-G][b#]?)(.*)$/);
+  if (match) {
+    const [, root, suffix] = match;
+    const normalizedRoot = ENHARMONIC_EQUIVALENTS[root] || root;
+    chord = normalizedRoot + suffix;
+  }
 
   return chord.toUpperCase();
 }

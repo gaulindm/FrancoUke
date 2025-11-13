@@ -36,7 +36,9 @@ urlpatterns = [
     path("public-board/", public_views.public_board, name="public_board"),
     path("contact/", public_views.contact, name="contact"),
 
-   
+   #nouvel application pour le cube
+    path('cube/', include('cube_prep.urls')),  # 👈 new line
+
 
 ]
 

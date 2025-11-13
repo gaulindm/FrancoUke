@@ -7,6 +7,7 @@ from reportlab.graphics import renderPDF
 from reportlab.platypus import Table, TableStyle, Spacer, Flowable
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from songbook.utils.transposer import clean_chord
 
 
 
@@ -177,7 +178,10 @@ def draw_footer(canvas, doc, relevant_chords, chord_spacing, row_spacing,
         for row in rows:
             x_offset = start_x + (page_width / 4 - len(row) * chord_spacing / 2)
             for chord in row:
-                diagram = ChordDiagram(chord["name"], chord["variation"], scale=0.5, is_lefty=is_lefty)
+                # ✅ Prefer requested_name (song spelling) if available, but clean it
+                display_name = chord.get("requested_name", chord["name"])
+                display_name = clean_chord(display_name)  # remove slashes, bass notes, etc.
+                diagram = ChordDiagram(display_name, chord["variation"], scale=0.5, is_lefty=is_lefty)
                 diagram.canv = canvas
                 canvas.saveState()
                 canvas.translate(x_offset, y_offset)

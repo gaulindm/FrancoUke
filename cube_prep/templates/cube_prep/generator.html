@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rubik's Cube Generator</title>
+</head>
+<body>
+    <h1>Rubik's Cube Scramble Generator</h1>
+    <form method="get" action="{% url 'generate_two_cards' %}">
+        <label for="pattern">Choose a pattern:</label>
+        <select name="pattern" id="pattern">
+            <option value="Face Solved">Face Solved</option>
+            <option value="Checkerboard">Checkerboard</option>
+            <option value="Simple Scramble">Simple Scramble</option>
+        </select>
+        <button type="submit">Generate Two Card View</button>
+    </form>
+</body>
+</html>

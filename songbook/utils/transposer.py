@@ -55,7 +55,6 @@ def transpose_chordpro(text, semitones):
     lines = text.splitlines()
     return "\n".join(transpose_chord_line(line, semitones) for line in lines)
 
-
 def clean_chord(chord):
     """
     FrancoUke cleanup:
@@ -73,8 +72,8 @@ def clean_chord(chord):
     if chord.upper() == "[N.C.]":
         return chord
 
-    # ✅ Remove trailing strumming slashes
-    chord = re.sub(r"/{2,}$", "", chord)
+    # ✅ Remove trailing strumming slashes (C/, C//, C/// → C)
+    chord = re.sub(r"/+$", "", chord)
 
     # ✅ Remove alternate bass notes (D/F# → D)
     chord = re.sub(r"/[A-G][#b]?$", "", chord)

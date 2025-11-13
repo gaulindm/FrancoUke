@@ -34,6 +34,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'  # Allows embedding on the same domain
 
 INSTALLED_APPS = [
     'nested_admin',
+    'cube_prep',
     'tinymce',
     'songbook.apps.SongbookConfig',
     'users.apps.UsersConfig',

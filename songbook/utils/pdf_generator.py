@@ -12,6 +12,8 @@ from songbook.utils.transposer import transpose_chord, normalize_chord
 from users.models import UserPreference
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from songbook.utils.transposer import clean_chord  # ✅ Make sure this import is at the top
+
 import json
 import os
 import re
@@ -244,29 +246,35 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
 
     all_chords = chords_primary + chords_secondary
 
-    # 🔹 Extract all chords used in the song and normalize them
+    # ✅ Clean before normalization and transposition
     used_chords = [
-        normalize_chord(chord).strip()
+        normalize_chord(clean_chord(chord)).strip()
         for chord in extract_used_chords(songs[0].lyrics_with_chords)
     ]
 
-    # 🔹 Transpose the chords if necessary
+    # ✅ Transpose cleaned chords only
     transposed_chords = {
-        transpose_chord(chord.strip(), transpose_value).strip()
+        transpose_chord(clean_chord(chord).strip(), transpose_value).strip()
         for chord in used_chords
     }
 
     # 🔹 Match chords in the library with transposed chords
     relevant_chords = []
+    added_names = set()  # ✅ Track which names were already added
+
     for t_chord in transposed_chords:
         for chord_def in all_chords:
             if chord_equivalent(chord_def["name"], t_chord):
-                chord_copy = dict(chord_def)  # make a copy so we don’t mutate the original
-                chord_copy["requested_name"] = t_chord  # 💡 store song’s spelling (e.g. D#dim)
-                relevant_chords.append(chord_copy)
-                break  # stop once a match is found
+                canonical_name = chord_def["name"].lower()
+                if canonical_name not in added_names:
+                    chord_copy = dict(chord_def)
+                    chord_copy["requested_name"] = t_chord  # 💡 Keep the user spelling (e.g. D#dim)
+                    relevant_chords.append(chord_copy)
+                    added_names.add(canonical_name)
+                break
 
     return relevant_chords
+
 
 
 # =======================
