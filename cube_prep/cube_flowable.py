@@ -71,7 +71,7 @@ class CubeFlowable(Flowable):
                     (x0 + s + skew, y0 + s - skew), # top-right
                     (x0 + skew, y0 + s - skew)             # top-left
                 ]
-                c.setFillColor(colors.yellow)
+                c.setFillColor(colors.red)
                 path = c.beginPath()
                 path.moveTo(*points[0])
                 for p in points[1:]:

@@ -6,6 +6,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from io import BytesIO
 import random, os
+from reportlab.pdfgen import canvas
+from cube_prep.cube_flowable import CubeFlowable
+
+
 
 from .cube_flowable import CubeFlowable
 
@@ -24,97 +28,132 @@ def generator_home(request):
     return render(request, "cube_prep/generator.html")
 
 
-# --- View: Generate single card PDF ---
-def generate_single_card(request):
-    pattern = request.GET.get("pattern", "Face Solved")
-    scramble_seq = random.choice(PATTERNS[pattern])
 
-    # --- Create PDF buffer ---
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    story = []
+def move_to_filename(move):
+    """Convert move notation to PNG filename."""
+    if move.endswith("'"):
+        return move[0] + "_prime.png"   # e.g., R' -> R_prime.png
+    else:
+        return move + ".png"            # e.g., R2 -> R2.png, R -> R.png
 
-    styles = getSampleStyleSheet()
-    story.append(Paragraph(f"Rubik's Cube Card – Pattern: {pattern}", styles['Heading1']))
-    story.append(Spacer(1, 20))
-
-    # --- Cube on the left ---
-    cube_size = 40  # shrink as desired
-    cube = CubeFlowable(size=cube_size)
-    story.append(cube)
-
-    story.append(Spacer(1, 20))
-
-    # --- Scramble moves (icons) on the right ---
-    icon_size = 40  # pixels
-    icons = []
-    for move in scramble_seq.split():
-        # Convert prime moves to filenames, e.g., R' -> R_prime.png
-        filename = move.replace("'", "_prime") + ".png"
-        filepath = os.path.join(MOVE_ICONS_DIR, filename)
-
-        if os.path.exists(filepath):
-            img = Image(filepath, width=icon_size, height=icon_size)
-            icons.append(img)
-
-    # Arrange moves horizontally
-    if icons:
-        table = Table([icons], hAlign='LEFT', colWidths=icon_size)
-        table.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 2),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 2),
-        ]))
-        story.append(table)
-
-    doc.build(story)
-
-    buffer.seek(0)
-    return HttpResponse(buffer, content_type='application/pdf')
-
-
-# --- View: Generate 2 cards PDF ---
 def generate_two_cards_view(request):
-    pattern = request.GET.get("pattern", "Face Solved")
+    """
+    Generate PDF with 2 horizontal cards per page:
+    - Left: cube reference
+    - Right: scramble icons only
+    Only uses R, U, L, D moves for simplicity.
+    """
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="two_horizontal_cube_cards.pdf"'
 
-    # --- Create PDF buffer ---
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    story = []
+    c = canvas.Canvas(response, pagesize=letter)
+    page_width, page_height = letter
 
-    styles = getSampleStyleSheet()
-    story.append(Paragraph(f"Rubik's Cube – Pattern: {pattern}", styles['Heading1']))
-    story.append(Spacer(1, 20))
+    cube_size = 40
+    margin = 20
+    icon_size = 54  # triple previous 18x18
+    MOVE_ICONS_DIR = "cube_prep/static/cube_prep/moves/"  # PNGs for moves
 
-    # --- Loop to generate 2 cards vertically ---
-    for card_index in range(2):
-        scramble_seq = random.choice(PATTERNS[pattern])
+    # Horizontal layout offsets
+    card_positions = [page_height - margin - cube_size*3, margin]  # top and bottom cards
 
-        # Cube
-        cube_size = 40
+    # Scramble moves (no B or F)
+    PATTERNS = ["R", "U", "L", "D", "R'", "U'", "L'", "D'", "R2", "U2", "L2", "D2"]
+
+    for y_offset in card_positions:
+
+        # --- Left: Cube ---
         cube = CubeFlowable(size=cube_size)
+        c.saveState()
+        c.translate(margin, y_offset)
+        cube.canv = c
+        cube.draw()
+        c.restoreState()
 
-        # Scramble icons
-        icon_size = 40
-        icons = []
-        for move in scramble_seq.split():
-            filename = move.replace("'", "_prime") + ".png"
-            filepath = os.path.join(MOVE_ICONS_DIR, filename)
-            if os.path.exists(filepath):
-                img = Image(filepath, width=icon_size, height=icon_size)
-                icons.append(img)
+        # --- Right: Scramble icons only ---
+        seq_moves = random.choices(PATTERNS, k=9)   # 9-move scramble
+        icon_y = y_offset + cube_size*1.2  # start slightly above cube vertical center
+        icon_x = margin + cube.width + 20
 
-        # Arrange cube left, icons right
-        data = [[cube, icons if icons else Paragraph("No icons", styles['Normal'])]]
-        table = Table(data, colWidths=[cube.width + 10, 300], hAlign='LEFT')
-        table.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 2),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 2),
-        ]))
-        story.append(table)
-        story.append(Spacer(1, 50))  # space between cards
+        for move in seq_moves:
+            icon_file = move_to_filename(move)
+            icon_path = f"{MOVE_ICONS_DIR}{icon_file}"
+            try:
+                c.drawImage(icon_path, icon_x, icon_y, width=icon_size, height=icon_size, preserveAspectRatio=True)
+            except:
+                pass
+            icon_x += icon_size + 5  # horizontal spacing
 
-    doc.build(story)
-    buffer.seek(0)
-    return HttpResponse(buffer, content_type='application/pdf')
+        # Optional: horizontal line to separate cards
+        c.setStrokeColor(colors.black)
+        c.setLineWidth(1)
+        c.line(margin, y_offset-5, page_width - margin, y_offset-5)
+
+    c.showPage()
+    c.save()
+    return response
+
+
+def generate_three_cards_view(request):
+    """
+    Generate PDF with 3 vertical cards per page:
+    - Left: cube reference
+    - Right: scramble icons only
+    Only uses R, U, L, D moves for simplicity.
+    """
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="three_vertical_cube_cards.pdf"'
+
+    c = canvas.Canvas(response, pagesize=letter)
+    page_width, page_height = letter
+
+    margin = 20
+    icon_size = 40  # triple previous 18x18
+    MOVE_ICONS_DIR = "cube_prep/static/cube_prep/moves/"  # PNGs for moves
+
+    # Cube size: smaller to fit 3 cards
+    cube_size = (page_height - 4*margin) / 3 * 0.15  # 15% of card height
+    card_height = (page_height - 4*margin) / 3  # height per card
+
+    # Vertical layout offsets for top, middle, bottom cards
+    card_positions = [
+        page_height - margin - card_height,        # top card
+        page_height - 2*margin - 2*card_height,   # middle card
+        margin                                     # bottom card
+    ]
+
+    # Scramble moves (no B or F)
+    MOVES = ["R", "U", "L", "D", "R'", "U'", "L'", "D'", "R2", "U2", "L2", "D2"]
+
+    for y_offset in card_positions:
+        # --- Left: Cube ---
+        cube = CubeFlowable(size=cube_size)
+        c.saveState()
+        vertical_shift = 0.1 * card_height  # shift cube slightly down in card
+        c.translate(margin, y_offset + vertical_shift)
+        cube.canv = c
+        cube.draw()
+        c.restoreState()
+
+        # --- Right: Scramble icons ---
+        seq_moves = random.choices(MOVES, k=9)  # 9-move scramble
+        icon_x = margin + cube_size + 140
+        icon_y = y_offset + cube_size*4  # adjust vertical start of icons
+
+        for move in seq_moves:
+            icon_file = move_to_filename(move)
+            icon_path = os.path.join(MOVE_ICONS_DIR, icon_file)
+            try:
+                c.drawImage(icon_path, icon_x, icon_y, width=icon_size, height=icon_size, preserveAspectRatio=True)
+            except:
+                pass
+            icon_x += icon_size + 5  # horizontal spacing
+
+        # Optional: horizontal line to separate cards
+        c.setStrokeColor(colors.black)
+        c.setLineWidth(1)
+        c.line(margin, y_offset-5, page_width - margin, y_offset-5)
+
+    c.showPage()
+    c.save()
+    return response
