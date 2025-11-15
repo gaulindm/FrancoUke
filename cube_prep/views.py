@@ -99,7 +99,7 @@ def generate_three_cards_view(request):
     Generate PDF with 3 vertical cards per page:
     - Left: cube reference
     - Right: scramble icons only
-    Only uses R, U, L, D moves for simplicity.
+    Only uses R, U, L, D and F moves for simplicity.
     """
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="three_vertical_cube_cards.pdf"'
@@ -123,7 +123,7 @@ def generate_three_cards_view(request):
     ]
 
     # Scramble moves (no B or F)
-    MOVES = ["R", "U", "L", "D", "R'", "U'", "L'", "D'", "R2", "U2", "L2", "D2"]
+    MOVES = ["R", "U", "L", "D", "R'", "U'", "L'", "D'", "R2", "U2", "L2", "D2","F","F'","F2"]
 
     for y_offset in card_positions:
         # --- Left: Cube ---
@@ -157,3 +157,107 @@ def generate_three_cards_view(request):
     c.showPage()
     c.save()
     return response
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import Cube
+
+
+def save_cube_colors(request):
+    """Save the cube matrix JSON to the Cube model."""
+    if request.method == "POST":
+        colors_json = request.POST.get("colors_json")
+        name = request.POST.get("name", "Unnamed Cube")
+
+        cube = Cube.objects.create(name=name, colors=colors_json)
+        return JsonResponse({"success": True, "cube_id": cube.id})
+
+    return JsonResponse({"success": False, "error": "POST request required"})
+
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+import json
+
+# If you eventually save cubes in the database:
+# from .models import MosaicCube
+
+
+def color_matrix_view(request):
+    """Render the cube editor with a default of 1 cube per side."""
+    cubes_per_side = int(request.GET.get("cubes", 1))
+    rows = range(cubes_per_side * 3)
+    cols = range(cubes_per_side * 3)
+    return render(request, "cube_prep/color_matrix.html", {
+        "cubes_per_side": cubes_per_side,
+        "rows": rows,
+        "cols": cols
+    })
+
+
+
+# OPTIONAL — If you want a second URL or future features:
+def color_cube_view(request):
+    """
+    Legacy / alternate URL pointing to the same tool.
+    """
+
+    size = 3  # Keep consistent
+    return render(request, "cube_prep/color_matrix.html", {
+        "size": size,
+        "rows": range(size),
+        "cols": range(size),
+    })
+
+import json
+from django.http import JsonResponse
+from .models import Cube, Mosaic
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import Cube, Mosaic
+import json
+
+def color_mosaic_view(request):
+    """Render the mosaic editor page."""
+    return render(request, "cube_prep/color_mosaic.html")
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from .models import Cube, Mosaic
+
+@csrf_exempt
+def save_mosaic(request):
+    if request.method == "POST":
+        try:
+            mosaic_json = request.POST.get("mosaic_json")
+            mosaic_name = request.POST.get("mosaic_name", "Untitled Mosaic")
+
+            mosaic_data = json.loads(mosaic_json)
+            mosaic_size = int(len(mosaic_data) ** 0.5)  # cube grid = √num_cubes
+
+            mosaic = Mosaic.objects.create(name=mosaic_name)
+
+            letters = "abcdefghijklmnopqrstuvwxyz"
+
+            for index, cube_data in enumerate(mosaic_data):
+
+                row = index // mosaic_size        # 0,1,2...
+                col = index % mosaic_size         # 0,1,2...
+
+                suffix = f"{row+1}{letters[col]}"  # 1a, 1b, 1c...
+
+                cube = Cube.objects.create(
+                    name=f"{mosaic_name}-{suffix}",
+                    colors=json.dumps(cube_data)
+                )
+
+                mosaic.cubes.add(cube)
+
+            return JsonResponse({"success": True, "mosaic_id": mosaic.id})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "POST request required"})

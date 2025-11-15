@@ -37,7 +37,7 @@ urlpatterns = [
     path("contact/", public_views.contact, name="contact"),
 
    #nouvel application pour le cube
-    path('cube/', include('cube_prep.urls')),  # 👈 new line
+    path('cube_prep/', include('cube_prep.urls')),  # 👈 new line
 
 
 ]

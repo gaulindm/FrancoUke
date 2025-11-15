@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cube Mosaic Editor</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .controls { margin-bottom: 15px; }
+        .controls label { margin-right: 10px; }
+        #mosaic-container { display: flex; flex-direction: column; }
+        .cube-row { display: flex; }
+        .cube-div { display: grid; grid-template-columns: repeat(3, 30px); grid-gap: 2px; margin: 5px; }
+        .cube-cell { width: 30px; height: 30px; border: 1px solid #000; cursor: pointer; }
+        #mosaic-json { white-space: pre; background: #f0f0f0; padding: 10px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Cube Mosaic Editor</h1>
+
+    <div class="controls">
+        <label for="color-select">Select color:</label>
+        <select id="color-select">
+            <option value="R" style="background:red;color:white;">Red</option>
+            <option value="B" style="background:blue;color:white;">Blue</option>
+            <option value="Y" style="background:yellow;color:black;">Yellow</option>
+            <option value="G" style="background:green;color:white;">Green</option>
+            <option value="O" style="background:orange;color:white;">Orange</option>
+            <option value="W" style="background:white;color:black;">White</option>
+        </select>
+
+        <label for="cubes-per-side">Cubes per side:</label>
+        <select id="cubes-per-side">
+            <option value="1">1×1</option>
+            <option value="2">2×2</option>
+            <option value="3" selected>3×3</option>
+            <option value="4">4×4</option>
+            <option value="5">5×5</option>
+            <option value="6">6×6</option>
+        </select>
+
+        <label for="mosaic-name">Mosaic Name:</label>
+        <input id="mosaic-name" type="text" value="My Mosaic" />
+
+        <button id="save-btn">Save Mosaic</button>
+    </div>
+
+    <!-- Mosaic grid -->
+    <div id="mosaic-container"></div>
+
+    <!-- JSON output -->
+    <h3>Mosaic JSON (one cube per line):</h3>
+    <pre id="mosaic-json"></pre>
+
+    <script>
+        const container = document.getElementById("mosaic-container");
+        const jsonOutput = document.getElementById("mosaic-json");
+        const colorSelect = document.getElementById("color-select");
+        const cubesSelect = document.getElementById("cubes-per-side");
+        const mosaicNameInput = document.getElementById("mosaic-name"); // optional input for name
+        const saveBtn = document.getElementById("save-btn");
+        
+        let cubesPerSide = parseInt(cubesSelect.value) || 2; // default 2x2 mosaic
+        let mosaic = []; // array of cubes, each cube is 3x3 squares
+        
+        // Map letters to actual colors
+        const colorMap = {
+            "R": "red",
+            "B": "blue",
+            "Y": "yellow",
+            "G": "green",
+            "O": "orange",
+            "W": "white"
+        };
+        
+        // Initialize the mosaic grid
+        function initMosaic() {
+            mosaic = [];
+            container.innerHTML = "";
+        
+            for (let cy = 0; cy < cubesPerSide; cy++) {
+                const rowDiv = document.createElement("div");
+                rowDiv.style.display = "flex";
+        
+                for (let cx = 0; cx < cubesPerSide; cx++) {
+                    let cube = [];
+                    const cubeDiv = document.createElement("div");
+                    cubeDiv.style.display = "grid";
+                    cubeDiv.style.gridTemplateColumns = "repeat(3, 30px)";
+                    cubeDiv.style.gridGap = "2px";
+                    cubeDiv.style.margin = "5px";
+        
+                    for (let i = 0; i < 3; i++) {
+                        cube[i] = [];
+                        for (let j = 0; j < 3; j++) {
+                            const cell = document.createElement("div");
+                            cell.style.width = "30px";
+                            cell.style.height = "30px";
+                            cell.style.border = "1px solid #000";
+                            cell.style.background = colorMap["W"]; // default white
+                            cell.dataset.i = i;
+                            cell.dataset.j = j;
+        
+                            // click to change color
+                            cell.addEventListener("click", () => {
+                                const colorLetter = colorSelect.value;
+                                cell.style.background = colorMap[colorLetter];
+                                cube[i][j] = colorLetter;
+                                updateJSON();
+                            });
+        
+                            cube[i][j] = "W"; // default color
+                            cubeDiv.appendChild(cell);
+                        }
+                    }
+        
+                    mosaic.push(cube);
+                    rowDiv.appendChild(cubeDiv);
+                }
+        
+                container.appendChild(rowDiv);
+            }
+        
+            updateJSON();
+        }
+        
+        // Update the JSON display: one cube per line
+        function updateJSON() {
+            const lines = mosaic.map(cube => JSON.stringify(cube));
+            jsonOutput.textContent = lines.join("\n");
+        
+            // Log JSON for debugging
+            console.log("Current mosaic JSON:", JSON.stringify(mosaic));
+        }
+        
+        // Change mosaic size
+        cubesSelect.addEventListener("change", () => {
+            cubesPerSide = parseInt(cubesSelect.value);
+            initMosaic();
+        });
+        
+// Save mosaic to backend
+saveBtn.addEventListener("click", () => {
+    const mosaicName = mosaicNameInput ? mosaicNameInput.value.trim() : "My Mosaic";
+
+    console.log("Sending mosaic JSON:", mosaic);  // Debugging
+
+    fetch("/cube_prep/save-mosaic/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: new URLSearchParams({
+            mosaic_json: JSON.stringify(mosaic),
+            cubes_per_side: cubesPerSide,
+            mosaic_name: mosaicName
+        })
+    })
+    .then(async (res) => {
+        // Check for HTML error pages (prevents Unexpected '<' errors)
+        const text = await res.text();
+
+        try {
+            return JSON.parse(text);  // Try to parse JSON
+        } catch (err) {
+            console.error("❌ Server returned non-JSON response:", text);
+            alert("Server error — see console for details.");
+            throw err;
+        }
+    })
+    .then(data => {
+        console.log("Server JSON:", data);
+
+        if (data.success) {
+            alert(`Mosaic saved successfully! ID: ${data.mosaic_id}`);
+        } else {
+            alert("Error saving mosaic: " + data.error);
+        }
+    })
+    .catch(err => console.error("Fetch error:", err));
+});
+
+        // CSRF utility
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let c of cookies) {
+                    const cookie = c.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Initialize mosaic on load
+        initMosaic();
+        </script>
+        
+                
+
+</body>
+</html>
