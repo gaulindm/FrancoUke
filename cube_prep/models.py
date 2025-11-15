@@ -5,6 +5,8 @@ class Cube(models.Model):
     Represents a single 3x3 cube with colors on its front face.
     """
     name = models.CharField(max_length=50, blank=True)
+    moves = models.JSONField(blank=True, null=True)  # store moves to recreate face
+
     colors = models.JSONField()  # 3x3 list, e.g. [["R","R","R"], ["R","B","B"], ...]
 
     def __str__(self):
