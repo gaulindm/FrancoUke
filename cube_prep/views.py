@@ -22,6 +22,14 @@ from .cube_utils import generate_face_moves
 
 from reportlab.lib import colors
 
+
+#from .settings import MOVE_ICONS_DIR, CUBE_COLOR_MAP
+
+
+
+
+
+
 CUBE_COLOR_MAP = {
     "W": rl_colors.white,
     "R": rl_colors.red,
@@ -203,38 +211,53 @@ def cube_face_moves_view(request):
 
     return JsonResponse({"success": False, "error": "POST request required"})
 
+
+
 def generate_three_copies_pdf(request):
+    """
+    Render a PDF. 
+    - If ?mode=preview → displays inline inside iframe
+    - If ?mode=download → forces file download
+    """
     cube_id = request.GET.get("cube_id")
+    mode = request.GET.get("mode", "preview")  # default behavior = preview (inline)
+
     if not cube_id:
         return HttpResponse("Cube ID missing", status=400)
 
+    # Load cube
     try:
         cube = Cube.objects.get(id=cube_id)
     except Cube.DoesNotExist:
         return HttpResponse("Cube not found", status=404)
 
-    # --- Load moves dict ---
-    moves_data = cube.moves if cube.moves else {}
-    if isinstance(moves_data, dict):
-        moves = {
-            "up": moves_data.get("up", "W"),
-            "front": moves_data.get("front", "R"),
-            "sequence": moves_data.get("sequence", [])
-        }
-    else:
-        moves = {"up": "W", "front": "R", "sequence": []}
+    # Normalize moves dict
+    moves_data = cube.moves or {}
+    moves = {
+        "up": moves_data.get("up", "W"),
+        "front": moves_data.get("front", "R"),
+        "sequence": moves_data.get("sequence", []),
+    }
 
-    # --- Precompute icon filenames ---
+    # Convert moves → filenames
     icon_moves = []
     for m in moves["sequence"]:
-        if "'" in m:
-            icon_moves.append(m.replace("'", "_prime"))
+        if m.endswith("'"):
+            icon_moves.append(m[0] + "_prime")
+        elif m.endswith("2"):
+            icon_moves.append(m[0] + "2")
         else:
             icon_moves.append(m)
 
-    # --- PDF setup ---
+    # ----------------------------------------------------
+    # PDF RESPONSE
+    # ----------------------------------------------------
     response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="three_copies_cube.pdf"'
+
+    if mode == "download":
+        response["Content-Disposition"] = 'attachment; filename="three_copies_cube.pdf"'
+    else:
+        response["Content-Disposition"] = 'inline; filename="cube_preview.pdf"'
 
     c = canvas.Canvas(response, pagesize=letter)
     page_width, page_height = letter
@@ -246,36 +269,41 @@ def generate_three_copies_pdf(request):
     card_positions = [
         page_height - margin - card_height,
         page_height - 2 * margin - 2 * card_height,
-        margin
+        margin,
     ]
 
+    # ----------------------------------------------------
+    # DRAW THREE CARDS
+    # ----------------------------------------------------
     for y_offset in card_positions:
-        # --- CubeFlowable with sanitized colors ---
+
+        # --- Draw Small Cube ---
         cube_flow = CubeFlowable(
             size=cube_size,
-            front_color=CUBE_COLOR_MAP.get(moves["front"], colors.white),
-            top_color=CUBE_COLOR_MAP.get(moves["up"], colors.white),
-            right_color=colors.HexColor("#CCCCCC")
+            front_color=CUBE_COLOR_MAP.get(moves["front"], "white"),
+            top_color=CUBE_COLOR_MAP.get(moves["up"], "white"),
+            right_color="#CCCCCC",
         )
+
         c.saveState()
         c.translate(margin, y_offset + 0.1 * card_height)
         cube_flow.canv = c
         cube_flow.draw()
         c.restoreState()
 
-        # --- Draw move icons ---
+        # --- Draw Move Icons ---
         icon_x = margin + cube_size + 140
         icon_y = y_offset + cube_size * 4
+
         for move_file in icon_moves:
             icon_path = os.path.join(MOVE_ICONS_DIR, move_file + ".png")
-            try:
-                c.drawImage(icon_path, icon_x, icon_y, width=icon_size, height=icon_size, preserveAspectRatio=True)
-            except:
-                pass
+            if os.path.exists(icon_path):
+                c.drawImage(icon_path, icon_x, icon_y,
+                            width=icon_size, height=icon_size,
+                            preserveAspectRatio=True)
             icon_x += icon_size + 5
 
-        # --- Horizontal line under card ---
-        c.setStrokeColor(colors.black)
+        # Draw separator line
         c.setLineWidth(1)
         c.line(margin, y_offset - 5, page_width - margin, y_offset - 5)
 
@@ -283,46 +311,49 @@ def generate_three_copies_pdf(request):
     c.save()
     return response
 
-def pdf_generator_view(request):
-    cube_id = request.GET.get("cube_id")
-    cube = None
-    moves = {}
-    icon_moves = []
 
+
+def pdf_generator_view(request):
+    """
+    Renders PDF generator page. Uses first cube as default if none selected.
+    """
+    cubes = Cube.objects.all().order_by("name")
+    selected_cube = None
+
+    # Try to get cube by GET param
+    cube_id = request.GET.get("cube_id")
     if cube_id:
         try:
-            cube = Cube.objects.get(id=cube_id)
-
-            # Cube.moves is ALREADY A DICT — do NOT json.loads()
-            moves_data = cube.moves if cube.moves else {}
-
-            # Normalize
-            if isinstance(moves_data, dict):
-                moves = {
-                    "up": moves_data.get("up", "W"),
-                    "front": moves_data.get("front", "R"),
-                    "sequence": moves_data.get("sequence", [])
-                }
-            else:
-                moves = {"up": "W", "front": "R", "sequence": []}
-
-            # Pre-compute icon file names
-            for move in moves["sequence"]:
-                if "'" in move:
-                    icon_moves.append(move.replace("'", "_prime"))
-                else:
-                    icon_moves.append(move)
-
+            selected_cube = Cube.objects.get(id=cube_id)
         except Cube.DoesNotExist:
-            cube = None
-            moves = {}
-            icon_moves = []
+            selected_cube = None
 
-    cubes = Cube.objects.all().order_by("name")
+    # Fallback: use first cube
+    if not selected_cube and cubes.exists():
+        selected_cube = cubes.first()
+
+    # Prepare moves dict for template (default if missing)
+    moves = {"up": "W", "front": "R", "sequence": []}
+    icon_moves = []
+    if selected_cube and isinstance(selected_cube.moves, dict):
+        moves_data = selected_cube.moves
+        moves["up"] = moves_data.get("up", "W")
+        moves["front"] = moves_data.get("front", "R")
+        moves["sequence"] = moves_data.get("sequence", [])
+
+        # Precompute icon filenames (optional)
+        for m in moves["sequence"]:
+            if m.endswith("'"):
+                filename = m[0] + "_prime.png"
+            elif m.endswith("2"):
+                filename = m[0] + "2.png"
+            else:
+                filename = m + ".png"
+            icon_moves.append(filename)
 
     return render(request, "cube_prep/pdf_generator.html", {
         "cubes": cubes,
-        "selected_cube": cube,
+        "selected_cube": selected_cube,
         "moves": moves,
         "icon_moves": icon_moves,
     })

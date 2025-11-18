@@ -1,0 +1,71 @@
+{% load static %}
+
+<script src="{% static 'cube_prep/cube_preview.js' %}"></script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cube PDF Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .cube-preview { border: 1px solid #333; padding: 10px; margin-bottom: 20px; display: inline-block; }
+        .moves { margin-top: 10px; }
+        .move-icon { width: 30px; height: 30px; margin-right: 5px; vertical-align: middle; }
+        .card-container { display: flex; justify-content: space-between; margin-bottom: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Cube PDF Generator</h1>
+
+    <form method="get">
+        <label for="cube">Select a Cube:</label>
+        <select name="cube_id" id="cube" onchange="this.form.submit()">
+            <option value="">-- Choose Cube --</option>
+            {% for cube in cubes %}
+                <option value="{{ cube.id }}" {% if selected_cube and cube.id == selected_cube.id %}selected{% endif %}>
+                    {{ cube.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if selected_cube %}
+        <h2>Preview 3 Cards for "{{ selected_cube.name }}"</h2>
+        <div class="card-container">
+            {% for i in "123" %}
+                <div class="cube-preview">
+                    <canvas id="cubeCanvas{{ forloop.counter }}" width="150" height="150"></canvas>
+                    <div class="moves">
+                        {% for move in moves.sequence %}
+                        <img src="{% static 'cube_prep/moves/' %}{{ move }}.png" class="move-icon" />
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <form method="get" action="{% url 'generate_three_copies_pdf' %}">
+            <input type="hidden" name="cube_id" value="{{ selected_cube.id }}" />
+            <button type="submit">Download PDF (3 Copies)</button>
+        </form>
+    {% endif %}
+
+    <script src="{% static 'cube_prep/cube_preview.js' %}"></script>
+    <script>
+        {% if selected_cube %}
+        // Initialize 3 CubeFlowable previews
+        const topColor = "{{ moves.up }}";
+        const frontColor = "{{ moves.front }}";
+
+        for (let i = 1; i <= 3; i++) {
+            const canvas = document.getElementById(`cubeCanvas${i}`);
+            const ctx = canvas.getContext("2d");
+
+            // Assuming cube_preview.js exposes drawCubeFlowable(canvas, topColor, frontColor)
+            drawCubeFlowable(canvas, topColor, frontColor);
+        }
+        {% endif %}
+    </script>
+</body>
+</html>

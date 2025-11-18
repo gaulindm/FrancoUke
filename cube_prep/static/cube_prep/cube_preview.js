@@ -1,10 +1,12 @@
 /**
  * Draw a simple isometric cube preview on a canvas
+ * and render the move icons (normal, double, and prime).
  * @param {HTMLCanvasElement} canvas 
  * @param {string} topColor - color of the Up face (W/R/B/G/O/Y)
  * @param {string} frontColor - color of the Front face
+ * @param {Array<string>} moveSeq - array of moves like ["U", "R'", "D2"]
  */
-function drawCubeFlowable(canvas, topColor, frontColor) {
+function drawCubeFlowable(canvas, topColor, frontColor, moveSeq) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const width = canvas.width;
@@ -32,7 +34,7 @@ function drawCubeFlowable(canvas, topColor, frontColor) {
     const offsetY = (height - size - skew) / 2;
 
     // --------------------
-    // Draw FRONT FACE (vertical squares)
+    // Draw FRONT FACE (vertical square)
     // --------------------
     ctx.beginPath();
     ctx.moveTo(offsetX, offsetY + skew);
@@ -69,4 +71,28 @@ function drawCubeFlowable(canvas, topColor, frontColor) {
     ctx.fillStyle = top;
     ctx.fill();
     ctx.stroke();
+
+    // --------------------
+    // Draw move icons
+    // --------------------
+    const ICONS_DIR = "/static/cube_prep/moves/"; // adjust to your static folder
+    const ICON_SIZE = 32; // pixel size
+    const startX = offsetX + size + skew + 10; // right of cube
+    let startY = offsetY;
+
+    moveSeq.forEach((move, i) => {
+        // Determine filename
+        let filename;
+        if (move.endsWith("'")) filename = move[0] + "_prime.png";
+        else if (move.endsWith("2")) filename = move[0] + "2.png";
+        else filename = move + ".png";
+
+        console.log(`Move: ${move} -> ${filename}`); // debug
+
+        const img = new Image();
+        img.src = ICONS_DIR + filename;
+        img.onload = () => {
+            ctx.drawImage(img, startX, startY + i * (ICON_SIZE + 5), ICON_SIZE, ICON_SIZE);
+        };
+    });
 }
