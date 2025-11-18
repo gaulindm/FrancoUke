@@ -199,7 +199,80 @@ saveBtn.addEventListener("click", () => {
         // Initialize mosaic on load
         initMosaic();
         </script>
+    <script>
+        /* ===========================================================
+           STANDARD MOVE GENERATOR FOR EACH CUBE (simple patterns)
+           =========================================================== */
         
+        /* Pattern helpers */
+        function isRowUniform(face, row) {
+            return face[row][0] === face[row][1] && face[row][1] === face[row][2];
+        }
+        function isColUniform(face, col) {
+            return face[0][col] === face[1][col] && face[1][col] === face[2][col];
+        }
+        function isSolid(face) {
+            const c = face[1][1];
+            for (let i=0;i<3;i++) for (let j=0;j<3;j++) if (face[i][j] !== c) return false;
+            return true;
+        }
+        function isChecker(face) {
+            const mid = face[1][1];
+            const corners = [face[0][0],face[0][2],face[2][0],face[2][2]];
+            const edges   = [face[0][1],face[1][0],face[1][2],face[2][1]];
+            return corners.every(c=>c===mid) && edges.every(e=>e!==mid);
+        }
+        
+        /* Convert one 3×3 cube face → simple standard Rubik's moves */
+        function computeMovesForFace(face) {
+            if (isSolid(face)) return "";   // nothing needed
+        
+            const moves = [];
+        
+            // uniform rows
+            if (isRowUniform(face,0)) moves.push("U");
+            if (isRowUniform(face,1)) moves.push("E");
+            if (isRowUniform(face,2)) moves.push("D");
+        
+            // uniform columns
+            if (isColUniform(face,0)) moves.push("L");
+            if (isColUniform(face,1)) moves.push("M");
+            if (isColUniform(face,2)) moves.push("R");
+        
+            // fun kid-friendly checker
+            if (moves.length === 0 && isChecker(face)) return "F2 M2";
+        
+            return moves.join(" ");
+        }
+        
+        /* Generate moves for all cubes in the mosaic */
+        function generateMovesForMosaic() {
+            const allMoves = mosaic.map((cube, idx) => computeMovesForFace(cube));
+        
+            // SHOW in JSON box (one cube's moves per line)
+            const out = allMoves.map(m => JSON.stringify(m)).join("\n");
+            jsonOutput.textContent = out;
+        
+            // Also log for debugging
+            console.log("Moves per cube:", allMoves);
+        }
+        
+        /* ---- Add button to UI ---- */
+        (function addMoveButton() {
+            const btn = document.createElement("button");
+            btn.textContent = "Generate Standard Moves";
+            btn.style.marginLeft = "10px";
+            btn.style.background = "#ccc";
+            btn.style.padding = "6px 12px";
+            btn.style.fontWeight = "bold";
+            btn.style.borderRadius = "5px";
+        
+            btn.onclick = generateMovesForMosaic;
+        
+            document.querySelector(".controls").appendChild(btn);
+        })();
+        </script>
+            
                 
 
 </body>
