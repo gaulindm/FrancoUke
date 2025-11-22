@@ -32,6 +32,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from songbook.chord_loader import load_all_chords, save_all_chords
+
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 )
@@ -45,6 +47,7 @@ from .models import Song, SongFormatting
 from .parsers import parse_song_data
 from songbook.utils.pdf_generator import generate_songs_pdf, load_chords
 from songbook.utils.transposer import extract_chords, transpose_lyrics
+from songbook.utils.chord_utils import render_chord_svg
 from users.models import UserPreference
 
 logger = logging.getLogger(__name__)
@@ -263,12 +266,12 @@ def get_chord_definition(request, chord_name):
     return JsonResponse({"success": False, "error": f"Chord '{chord_name}' not found."})
 
 
-def chord_dictionary(request):
+#def chord_dictionary(request):
     """
     Render a human-facing chord dictionary page (uses site_context).
     """
-    context_data = site_context(request)
-    return render(request, "songbook/chord_dictionary.html", context_data)
+ #   context_data = site_context(request)
+ #   return render(request, "chords/chord_dictionary.html", context_data)
 
 
 # ---------------------------------------------------------------------
@@ -305,10 +308,10 @@ class LandingView(TemplateView):
         context_data = site_context(self.request)
         site_name = context_data.get("site_name")
         if site_name == "StrumSphere":
-            return ["songbook/home_strumsphere.html"]
+            return ["sites/home_strumsphere.html"]
         if site_name == "Uke4ia":
-            return ["songbook/home_uke4ia.html"]
-        return ["songbook/home_francouke.html"]
+            return ["sites/home_uke4ia.html"]
+        return ["sites/home_francouke.html"]
 
 
 class UserSongListView(ListView):
@@ -488,3 +491,215 @@ def about(request):
 
 def whats_new(request):
     return render(request, "songbook/whats_new.html", site_context(request))
+
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .chords_service import load_chords, save_chords
+
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from songbook.chord_loader import load_all_chords, save_all_chords
+
+def chord_editor(request):
+    return render(request, "chords/editor.html", {
+        "chords_json": json.dumps(load_all_chords())
+    })
+
+# ---- Chord Editor SAVE API ----
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from songbook.chord_loader import save_all_chords
+
+@csrf_exempt
+def chord_editor_save(request):
+    """
+    Saves all chords back into individual JSON files.
+    Expects JSON body: { "ukulele": [...], "guitar": [...], ... }
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        save_all_chords(data)
+        return JsonResponse({"status": "ok", "saved": list(data.keys())})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+
+def chord_editor(request):
+    return render(request, "chords/chord_editor.html")
+
+# ---- Chord Editor API ----
+from django.http import JsonResponse
+from songbook.chord_loader import load_all_chords
+
+# views.py
+import io
+from django.shortcuts import render
+from django.http import HttpResponse
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.graphics import renderPM
+
+from songbook.utils.chord_utils import load_chords, normalize_variation, draw_chord_diagram
+
+
+def render_chord_png(chord_name, variation, instrument="ukulele"):
+    """
+    Render a single chord diagram to PNG using ReportLab.
+    Returns a bytes object.
+    """
+    buffer = io.BytesIO()
+    canvas = Canvas(buffer, pagesize=(120, 180))
+
+    draw_chord_diagram(canvas, 20, 20, variation, chord_name, instrument=instrument)
+    canvas.showPage()
+    canvas.save()
+
+    # Convert PDF → PNG
+    buffer.seek(0)
+    img = renderPM.drawToString(renderPM.readPDF(buffer), fmt="PNG")
+
+    return img
+
+import re
+from django.shortcuts import render
+from songbook.utils.chord_utils import load_chords, render_chord_svg
+
+ROOTS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"]
+TYPES = ["", "m", "7", "m7", "maj7", "dim", "aug", "sus2", "sus4", "5", "6", "m6", "m9", "maj9", "11", "maj13"]
+
+def chord_dictionary(request):
+    instrument = request.GET.get("instrument", "ukulele")
+    site_name = request.resolver_match.namespace
+
+    chords = load_chords(instrument)
+
+    grouped = {}  # grouped[root][type] = { name, svg }
+
+    INSTRUMENTS = [
+        "ukulele", "guitalele", "guitar",
+        "banjo", "mandolin", "baritone_ukulele"
+    ]
+
+
+
+
+    for chord in chords:
+        name = chord["name"]
+        variations = chord.get("variations", [])
+        if not variations:
+            continue
+
+        # Match root + type (C, Cm, Cm7, etc)
+        m = re.match(r"([A-G][b#]?)(.*)", name)
+        if not m:
+            print("FAILED REGEX:", name)
+            continue
+
+        root = m.group(1)
+        ctype = m.group(2) or ""
+
+        if root not in grouped:
+            grouped[root] = {}
+
+        # Use first variation for dictionary
+        variation = variations[0]
+
+        svg = render_chord_svg(name, variation, instrument)
+
+        grouped[root][ctype] = {
+            "name": name,
+            "svg": svg,
+        }
+
+    # 🔥 FLATTEN THE STRUCTURE FOR THE TEMPLATE
+    rows = []
+    for t in TYPES:
+        row = {"type": t, "cells": []}
+        for r in ROOTS:
+            cell = grouped.get(r, {}).get(t)
+            row["cells"].append(cell)
+        rows.append(row)
+
+
+
+
+    context = {
+        "site_name": site_name,
+        "instrument": instrument,
+        "roots": ROOTS,
+        "types": TYPES,
+        "rows": rows,
+
+        "grouped": grouped,
+        "instruments": INSTRUMENTS,
+    }
+
+    return render(request, "chords/chord_dictionary.html", context)
+
+
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .chords_service import load_chords, save_chords
+
+
+@csrf_exempt
+def api_update_chords(request, instrument):
+    """Replace full chord list with posted data."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        new_data = json.loads(request.body.decode("utf-8"))
+        save_chords(instrument, new_data)
+        return JsonResponse({"status": "ok"})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+
+    #new code
+    # at top of views.py (existing imports + these)
+import json
+from django.shortcuts import render
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+from .chord_loader import load_all_chords, save_all_chords
+
+# --- Page view that renders the editor HTML (no heavy JS data embedded) ---
+def chord_editor_page(request):
+    """
+    Serve the editor HTML. The JS will call the API endpoints to load/save data.
+    """
+    return render(request, "chords/editor.html")
+
+
+# --- API endpoint to GET all chords (read-only) ---
+def api_get_chords(request):
+    chords = load_all_chords()
+    return JsonResponse(chords, safe=False)
+
+
+# --- API endpoint to SAVE all chords (POST JSON) ---
+@csrf_exempt  # we use CSRF header in JS; if you prefer, remove and use CSRF cookie check
+def api_save_chords(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST required")
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+        # Basic validation: must be a dict
+        if not isinstance(payload, dict):
+            return HttpResponseBadRequest("Payload must be a dictionary of instruments")
+        save_all_chords(payload)
+        return JsonResponse({"status": "ok", "saved": list(payload.keys())})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

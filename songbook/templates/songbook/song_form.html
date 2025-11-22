@@ -122,6 +122,10 @@
                             <td>{timeSignature:}</td>
                             <td><i>Optionnel</i></td>
                         </tr>
+                        <tr>
+                            <td>{count_in:}</td>
+                            <td><i>Optionnel</i></td>
+                        </tr>
                     </table>
                     
                             <!-- Copy button -->
@@ -214,6 +218,22 @@
                 <td>{timeSignature:}</td>
                 <td><i>Optional</i></td>
             </tr>
+            <tr>
+                <td>{count_in:}</td>
+                <td><i>Optional</i></td>
+            </tr>
+            <tr>
+                <td>{short_instruction_1:}</td>
+                <td><i>Optional - Below (/=one strum)</i></td>
+            </tr>
+            <tr>
+                <td>{short_instruction_2:}</td>
+                <td><i>Optional - Below short_instruction_1</i></td>
+            </tr>
+            <tr>
+                <td>{instruction:}</td>
+                <td><i>Optional - Special instruction below structure section</i></td>
+            </tr>
         </table>
 
         <!-- Copy button -->
@@ -230,7 +250,8 @@
                 "{capo:}",
                 "{year:}",
                 "{1stnote:}",
-                "{timeSignature:}"
+                "{timeSignature:}",
+                "{count_in:}",
             ].join("\n"); // Ensures proper newlines without spaces
 
             // Copy to clipboard
@@ -245,6 +266,7 @@
             <li>{sob}Bridge {eob}</li>
             <li>{sod}Interlude {eod}</li>
             <li>{soo}Outro {eoo}</li>
+            <li>{sos}Center (without heading) {eos}</li>
         </ul>
         <p>Please acknowledge the source of your songs in the "acknowledgement" field.</p>
         <p>For comments or suggestions, please contact gaulindm@gmail.com.</p>

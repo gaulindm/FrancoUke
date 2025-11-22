@@ -7,7 +7,9 @@ from .views import (
     UserSongListView,
     ScoreView,
     ArtistListView,
+    api_get_chords, api_update_chords,
     edit_song_formatting,
+    chord_editor,
     chord_dictionary,
     generate_single_song_pdf,
     generate_multi_song_pdf,
@@ -37,7 +39,7 @@ urlpatterns = [
     path("artists/letter/<str:letter>/", views.ArtistListView.as_view(), name="artist_by_letter"),
 
     # 🔹 Chords 
-    path("chords/", views.chord_dictionary, name="chord_dictionary"),
+    #path("chords/", views.chord_dictionary, name="chord_dictionary"),
 
     # 🔹 Tags (Optional)
     path("tags/<str:tag_name>/", views.SongListView.as_view(), name="songs_by_tag"),
@@ -67,4 +69,13 @@ urlpatterns = [
     # 🔹 Static / Informational Views
     #path('about/', views.about, name='songbook-about'),
     path('whats-new/', whats_new, name='whats_new'),
+
+    #path("api/chords/<str:instrument>/", api_get_chords, name="api-get-chords"),
+    path("api/chords/<str:instrument>/update/", api_update_chords, name="api-update-chords"),
+    path("chords/editor/", chord_editor, name="chord_editor"),
+    path("chords/", views.chord_dictionary, name="chord_dictionary"),
+
+    path("chords/editor/", views.chord_editor_page, name="chord_editor_page"),
+    path("api/chords/", views.api_get_chords, name="api_get_chords"),
+    path("api/chords/save/", views.api_save_chords, name="api_save_chords"),
 ]

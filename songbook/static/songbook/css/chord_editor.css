@@ -1,0 +1,4 @@
+/* static/css/chord_editor.css */
+body { font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+#chord-list .chord-row:hover { background: #f8f9fa; }
+button { padding: 6px 10px; margin-right: 6px; }

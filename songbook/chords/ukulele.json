@@ -159,7 +159,7 @@
 {"name":"Aaug","variations":[{"positions":[3,2,2,1],"baseFret":1,"barre":{"fromString":2,"toString":3,"fret":2}},{"positions":[0,0,1,1],"baseFret":1,"barre":{"fromString":3,"toString":4,"fret":1}}]},
 {"name":"A5","variations":[{"positions":[2,2,0,0],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":2}},{"positions":[0,2,0,0],"baseFret":1}]},
 {"name":"A6","variations":[{"positions":[0,0,1,0],"baseFret":1},{"positions":[2,2,1,1],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":2}}]},
-{"name":"A7","variations":[{"positions":[0,0,1,0],"baseFret":1},{"positions":[2,0,0,1],"baseFret":1}]},
+{"name":"A7","variations":[{"positions":[0,1,0,0],"baseFret":1},{"positions":[2,0,0,1],"baseFret":1}]},
 {"name":"AM9","variations":[{"positions":[2,4,2,4],"baseFret":1},{"positions":[0,4,2,4],"baseFret":1}]},
 {"name":"AM13","variations":[{"positions":[2,4,2,2],"baseFret":1,"barre":{"fromString":3,"toString":4,"fret":2}},{"positions":[0,4,2,2],"baseFret":1,"barre":{"fromString":3,"toString":4,"fret":2}}]},
 {"name":"A11","variations":[{"positions":[2,2,3,0],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":2}},{"positions":[0,0,3,0],"baseFret":1}]},

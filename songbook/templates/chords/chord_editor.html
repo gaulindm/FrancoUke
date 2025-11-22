@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Chord Editor</title>
+  <link rel="stylesheet" href="{% static 'css/chord_editor.css' %}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+  <script src="{% static 'js/raphael.adaptivechord.js' %}"></script>
+</head>
+<body>
+  <header>
+    {% include "partials/_navbar.html" %}
+    <h1>Chord Editor</h1>
+  </header>
+
+  <main style="display:flex; gap:24px; padding:18px;">
+    <aside style="width:280px;">
+      <label><strong>Instrument</strong></label>
+      <select id="instrument-select"></select>
+      <hr>
+      <div>
+        <strong>Chords</strong>
+        <div id="chord-list" style="margin-top:8px;"></div>
+        <button id="add-chord-btn" style="margin-top:8px;">+ Add chord</button>
+      </div>
+    </aside>
+
+    <section style="flex:1;">
+      <div id="chord-meta">
+        <h2 id="chord-name">Select a chord</h2>
+        <div id="variation-list"></div>
+        <button id="add-variation-btn" style="display:none;">+ Add variation</button>
+      </div>
+
+      <hr>
+
+      <div id="editor-panel" style="display:none;">
+        <h3>Edit variation</h3>
+        <div id="fret-editor-container"></div>
+
+        <h3>Preview</h3>
+        <div id="preview" style="width:160px;height:200px"></div>
+
+        <div style="margin-top:12px;">
+          <button id="save-btn">Save all</button>
+          <button id="delete-variation-btn">Delete variation</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- API endpoints and CSRF token (JS will read data- attributes) -->
+  <script>
+    const API_GET = "{% url 'songbook:api_get_chords' %}";
+    const API_SAVE = "{% url 'songbook:api_save_chords' %}";
+  </script>
+
+  <script src="{% static 'js/chord_editor_app.js' %}"></script>
+</body>
+</html>

@@ -342,3 +342,97 @@ def draw_chord_diagram(c, x, y, variation, chord_name="", instrument="ukulele"):
             elif fret == -1:
                 c.setFont("Helvetica", 11)
                 c.drawCentredString(x_dot, y + fret_count * fret_spacing + 4, "X")
+
+from reportlab.graphics import renderSVG
+
+from reportlab.graphics import renderSVG
+
+def render_chord_svg(chord_name, variation, instrument="ukulele", scale=1.0):
+    drawing = build_chord_drawing(
+        chord_name,
+        variation,
+        scale=scale,
+        instrument=instrument
+    )
+    svg = renderSVG.drawToString(drawing)
+    return svg  # already a string
+
+
+from reportlab.graphics.shapes import Drawing, Line, String, Rect, Circle
+from reportlab.lib import colors
+
+def build_chord_drawing(chord_name, variation, scale=1.0, instrument="ukulele"):
+    """
+    Build a lightweight SVG-capable chord diagram using ReportLab shapes.
+    """
+
+    positions = variation.get("positions", [])
+    base_fret = variation.get("baseFret", 1)
+    fret_count = 5
+    string_count = len(positions)
+
+    # Basic layout numbers (scaled)
+    string_spacing = 15 * scale
+    fret_spacing = 15 * scale
+    radius = 4 * scale
+
+    width = (string_count - 1) * string_spacing
+    height = fret_count * fret_spacing + 30 * scale  # space for chord name
+
+    drawing = Drawing(width + 40*scale, height + 20*scale)
+
+    # === Chord Name ===
+    drawing.add(
+        String(
+            (width / 2) + 20*scale,
+            height - 5*scale,
+            chord_name,
+            fontSize=18 * scale
+        )
+    )
+
+    # === Base fret label ===
+    if base_fret > 1:
+        drawing.add(
+            String(
+                0,
+                height - 25*scale,
+                f"{base_fret}fr",
+                fontSize=12 * scale
+            )
+        )
+
+    # === Strings ===
+    for i in range(string_count):
+        x = 20*scale + i * string_spacing
+        drawing.add(
+            Line(x, 10*scale, x, height - 40*scale, strokeColor=colors.black, strokeWidth=2*scale)
+        )
+
+    # === Frets ===
+    for f in range(fret_count + 1):
+        y = 10*scale + f * fret_spacing
+        drawing.add(
+            Line(
+                20*scale,
+                y,
+                20*scale + width,
+                y,
+                strokeColor=colors.black,
+                strokeWidth=3*scale if (f == 0 and base_fret == 1) else 1.5*scale
+            )
+        )
+
+    # === Dots ===
+    for i, fret in enumerate(positions):
+        if fret <= 0:
+            continue
+
+        adjusted = fret - (base_fret - 1)
+        if 1 <= adjusted <= fret_count:
+            x = 20*scale + i * string_spacing
+            y = 10*scale + (fret_count - adjusted) * fret_spacing + (fret_spacing / 2)
+            drawing.add(Circle(x, y, radius, fillColor=colors.black))
+
+    return drawing
+
