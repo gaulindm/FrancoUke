@@ -50,28 +50,39 @@ from django.shortcuts import render, redirect
 from .models import UserPreference
 from .forms import UserPreferenceForm
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
 @login_required
 def user_preferences_view(request):
-    """Allow users to set their instrument preferences, preserving site_name."""
-    site_name = request.GET.get("site", "FrancoUke")  # Default to FrancoUke
-    user_pref, created = UserPreference.objects.get_or_create(user=request.user)
+
+    site_name = request.GET.get("site", "FrancoUke")
+    user_pref, _ = UserPreference.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
         form = UserPreferenceForm(request.POST, instance=user_pref)
         if form.is_valid():
             form.save()
             messages.success(request, "Preferences updated successfully ✔️")
-            # Redirect back to same preferences page (with site preserved)
             return redirect("users:user_preferences")
     else:
         form = UserPreferenceForm(instance=user_pref)
 
+    # ✔️ Detect HTMX
+    if request.headers.get("HX-Request") == "true":
+        return render(
+            request,
+            "partials/user_preferences_modal.html",
+            {"form": form, "site_name": site_name},
+        )
+
+    # ✔️ Normal request → render full page template
     return render(
         request,
-        "partials/user_preferences_modal.html",
+        "users/user_preference_form.html",
         {"form": form, "site_name": site_name},
     )
-
 
 @login_required
 def profile(request):

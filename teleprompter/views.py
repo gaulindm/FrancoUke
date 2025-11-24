@@ -43,20 +43,30 @@ def clean_chord_name(chord: str) -> str:
 
 
 # -----------------------------
-# 🎵 Main Teleprompter View
+# 🎵 Main Teleprompter View (CLEAN FIXED VERSION)
 # -----------------------------
 def teleprompter_view(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
 
-    # Determine instrument
-    instrument = request.GET.get("instrument")
-    if not instrument and request.user.is_authenticated:
-        instrument = getattr(request.user.userpreference, "primary_instrument", "ukulele")
-    instrument = instrument or "ukulele"
+    # -----------------------------
+    # 👤 User preference (get first!)
+    # -----------------------------
+    user_pref = getattr(request.user, "userpreference", None)
 
+    # -----------------------------
+    # 🎸 Determine instrument
+    # -----------------------------
+    instrument = request.GET.get("instrument")
+
+    if not instrument and user_pref:
+        instrument = getattr(user_pref, "primary_instrument", "ukulele")
+
+    instrument = instrument or "ukulele"
     chord_library = load_chord_dict(instrument)
 
-    # Convert lyrics_with_chords JSON into raw text
+    # -----------------------------
+    # 📝 Convert lyrics_with_chords JSON to raw lyric-text with [chords]
+    # -----------------------------
     raw_lines = []
     for block in song.lyrics_with_chords:
         if isinstance(block, list):
@@ -66,26 +76,24 @@ def teleprompter_view(request, song_id):
                 if "lyric" in item:
                     raw_lines.append(item["lyric"])
             raw_lines.append("\n")
+
     raw_lyrics = "".join(raw_lines)
 
     # -----------------------------
-    # 🎸 Extract chords from raw lyrics
+    # 🎸 Extract chords
     # -----------------------------
     chord_pattern = re.compile(
         r"\[([A-G][#b]?(?:m|min|maj7|maj9|maj|sus2|sus4|dim|aug|\d)*(?:/[A-G#b]*)*/*)\]"
     )
     found_chords = chord_pattern.findall(raw_lyrics)
 
-    # 🧹 Normalize chords *before* deduplication
+    # Normalize BEFORE deduplication
     normalized_map = {raw: clean_chord_name(raw) for raw in found_chords}
     normalized_unique = sorted(set(normalized_map.values()))
 
-    print("\n🎶 Found chords:")
-    for raw, norm in normalized_map.items():
-        print(f"   {raw:<10} → {norm}")
-    print(f"✅ Total unique (normalized): {len(normalized_unique)}\n")
-
-    # 🎸 Match to chord library
+    # -----------------------------
+    # 📚 Match chords to chord dictionary
+    # -----------------------------
     relevant_chords = []
     for name in normalized_unique:
         if name in chord_library:
@@ -93,27 +101,46 @@ def teleprompter_view(request, song_id):
                 "name": name,
                 "variations": chord_library[name]["variations"],
             })
-        else:
-            print(f"⚠️ Missing chord in library: {name}")
 
+    # -----------------------------
+    # 🎯 Known-chord filtering
+    # -----------------------------
+    if user_pref and getattr(user_pref, "use_known_chord_filter", False):
+        known_chords = getattr(user_pref, "known_chords", []) or []
+        known_clean = set(clean_chord_name(ch).lower() for ch in known_chords)
 
-    # Site context
+        relevant_chords = [
+            chord for chord in relevant_chords
+            if clean_chord_name(chord["name"]).lower() not in known_clean
+        ]
+
+    # -----------------------------
+    # 🌐 Site context
+    # -----------------------------
     context_data = site_context(request)
     site_name = context_data["site_name"]
 
-    # Render lyrics with chords HTML
-    lyrics_html, metadata = render_lyrics_with_chords_html(song.lyrics_with_chords, site_name)
+    # -----------------------------
+    # 🧾 Render lyrics HTML
+    # -----------------------------
+    lyrics_html, metadata = render_lyrics_with_chords_html(
+        song.lyrics_with_chords,
+        site_name
+    )
 
-    # User preferences
-    user_pref = getattr(request.user, "userpreference", None)
+    # -----------------------------
+    # 🛠 User prefs (sent to JS)
+    # -----------------------------
     user_preferences = {
-        "instrument": getattr(user_pref, "primary_instrument", "ukulele"),
+        "instrument": instrument,
         "isLefty": getattr(user_pref, "is_lefty", False),
         "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
+        "useKnownChordFilter": getattr(user_pref, "use_known_chord_filter", False),
+        "knownChords": getattr(user_pref, "known_chords", []),
     }
 
     # -----------------------------
-    # 🧩 Final context for JS + template
+    # 🧩 Final context
     # -----------------------------
     context = {
         "song": song,

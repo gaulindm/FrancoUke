@@ -8,6 +8,15 @@ class UserPreferenceInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = 'User Preferences'
     fk_name = 'user'
+    fields = (
+        'primary_instrument',
+        'secondary_instrument',
+        'is_lefty',
+        'is_printing_alternate_chord',
+        'known_chords',  # 👈 add this
+        'use_known_chord_filter',  # 👈 New toggle
+
+    )
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):

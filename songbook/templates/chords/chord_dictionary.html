@@ -20,7 +20,13 @@
                 </option>
             {% endfor %}
         </select>
-        
+            <!-- NEW: Lefty toggle -->
+    <label class="form-check-label">
+        <input type="checkbox" name="lefty" value="1"
+               class="form-check-input"
+               {% if lefty %}checked{% endif %}>
+        Left-handed
+    </label>
         <button class="btn btn-primary">Update</button>
     </form>
 
@@ -42,9 +48,7 @@
                         <div class="svg-container">
                             {{ cell.svg|safe }}
                         </div>
-                        <div class="mt-1">
-                            {{ cell.name }}
-                        </div>
+
                     {% endif %}
                 </td>
             {% endfor %}

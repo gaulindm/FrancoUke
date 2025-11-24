@@ -47,9 +47,11 @@
           <a class="nav-item nav-link" href="{% url 'songbook:artist_list' %}">
             {% if site_name == "FrancoUke" %} Artistes {% else %} Artists {% endif %}
           </a>
-          <a class="nav-item nav-link" href="{% url 'songbook:chord_dictionary' %}">
-            {% if site_name == "FrancoUke" %} Dictionnaire d'accord {% else %} Chord Dictionary {% endif %}
-          </a>
+          <a class="nav-item nav-link"
+          href="#"
+          onclick="window.open('{% url 'songbook:chord_dictionary' %}', 'ChordDict', 'width=1200,height=900'); return false;">
+           {% if site_name == "FrancoUke" %} Dictionnaire d'accord {% else %} Chord Dictionary {% endif %}
+       </a>
         {% endif %}
 
         {# 🔹 Uke4ia volunteer links #}

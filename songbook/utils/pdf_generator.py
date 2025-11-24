@@ -26,8 +26,10 @@ def get_user_preferences(user):
     default_prefs = {
         "primary_instrument": "ukulele",
         "secondary_instrument": None,
-        "is_left_handed": False,
+        "is_lefty": False,
         "show_alternate_chords": False,
+        "use_known_chord_filter": False,
+        "known_chords": [],
     }
 
     if not user or not user.is_authenticated:
@@ -36,20 +38,36 @@ def get_user_preferences(user):
     try:
         prefs, _ = UserPreference.objects.get_or_create(
             user=user,
-            defaults=default_prefs,
+            defaults={
+                # attempt to map older field names if your model differs
+                "primary_instrument": getattr(user, "primary_instrument", "ukulele"),
+            },
         )
+
+        # Allow either attribute name on the model: is_lefty or is_left_handed
+        lefty_val = None
+        if hasattr(prefs, "is_lefty"):
+            lefty_val = getattr(prefs, "is_lefty", False)
+        elif hasattr(prefs, "is_left_handed"):
+            lefty_val = getattr(prefs, "is_left_handed", False)
+        else:
+            lefty_val = False
+
+
+
+
         return {
             "primary_instrument": prefs.primary_instrument,
             "secondary_instrument": getattr(prefs, "secondary_instrument", None),
-            "is_left_handed": getattr(prefs, "is_left_handed", False),
+            "is_lefty": lefty_val,
             "show_alternate_chords": getattr(prefs, "show_alternate_chords", False),
+            "use_known_chord_filter": getattr(prefs, "use_known_chord_filter", False),
+            "known_chords": getattr(prefs, "known_chords", []),
         }
     except Exception:
         return default_prefs
 
-# =======================
-# CHORD COMPARISON
-# =======================
+
 # =======================
 # CHORD COMPARISON (enharmonic-aware)
 # =======================
@@ -605,13 +623,23 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
 
     user_prefs = get_user_preferences(user)
     relevant_chords = load_relevant_chords(songs, user_prefs, transpose_value)
+    # Apply known-chord filter if enabled
+    if user_prefs.get("use_known_chord_filter", False):
+        known_set = set([normalize_chord(ch).lower() for ch in user_prefs.get("known_chords", [])])
+        filtered_chords = []
+        for chord_def in relevant_chords:
+            chord_name_normalized = normalize_chord(chord_def["name"]).lower()
+            if chord_name_normalized not in known_set:
+                filtered_chords.append(chord_def)
+        relevant_chords = filtered_chords
+
 
     doc.relevant_chords = relevant_chords
     doc.instrument = user_prefs["primary_instrument"]
     doc.secondary_instrument = user_prefs["secondary_instrument"]
-    doc.chord_spacing = 45 if user_prefs["primary_instrument"] == "ukulele" else 60
+    doc.chord_spacing = 40 if user_prefs["primary_instrument"] == "ukulele" else 45
     doc.row_spacing = 70
-    doc.is_lefty = user_prefs["is_left_handed"]
+    doc.is_lefty = user_prefs.get("is_lefty", False)
     doc.is_printing_alternate_chord = user_prefs["show_alternate_chords"]
     doc.acknowledgement = getattr(songs[0], "acknowledgement", "")
 

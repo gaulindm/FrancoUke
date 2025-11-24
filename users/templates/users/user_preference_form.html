@@ -2,32 +2,75 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2>User Preferences</h2>
 
-  <form method="post" class="mt-3">
-    {% csrf_token %}
+  <!-- Page Title -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="mb-0">User Preferences</h2>
 
-    <div class="mb-3">
-      <label for="id_primary_instrument" class="form-label">Primary Instrument:</label>
-      {{ form.primary_instrument }}
+      <a href="{% url 'songbook:song_list' %}" class="btn btn-outline-secondary">
+          ← Back to Songs
+      </a>
+  </div>
+
+  <p class="text-muted mb-4">
+      Update your instrument settings and layout preferences.  
+      These settings personalize your songbook experience.
+  </p>
+
+  <!-- Preferences Card -->
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Primary Instrument -->
+        <div class="mb-3">
+          <label for="id_primary_instrument" class="form-label fw-semibold">
+            Primary Instrument
+          </label>
+          {{ form.primary_instrument }}
+        </div>
+
+        <!-- Secondary Instrument -->
+        <div class="mb-3">
+          <label for="id_secondary_instrument" class="form-label fw-semibold">
+            Secondary Instrument (Optional)
+          </label>
+          {{ form.secondary_instrument }}
+        </div>
+
+        <!-- Left-Handed -->
+        <div class="form-check mb-3">
+          {{ form.is_lefty }}
+          <label for="id_is_lefty" class="form-check-label ms-1">
+              Are you left-handed?
+          </label>
+        </div>
+
+        <!-- Show Alternate Chords -->
+        <div class="form-check mb-4">
+          {{ form.is_printing_alternate_chord }}
+          <label for="id_is_printing_alternate_chord" class="form-check-label ms-1">
+              Show alternate chords?
+          </label>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'songbook:song_list' %}" class="btn btn-outline-secondary">
+            ← Back to Songs
+          </a>
+
+          <button type="submit" class="btn btn-success">
+            Save Preferences ✔️
+          </button>
+        </div>
+
+      </form>
+
     </div>
+  </div>
 
-    <div class="mb-3">
-      <label for="id_secondary_instrument" class="form-label">Secondary Instrument (Optional):</label>
-      {{ form.secondary_instrument }}
-    </div>
-
-    <div class="form-check mb-2">
-      {{ form.is_lefty }}
-      <label for="id_is_lefty" class="form-check-label">Are you left-handed?</label>
-    </div>
-
-    <div class="form-check mb-3">
-      {{ form.is_printing_alternate_chord }}
-      <label for="id_is_printing_alternate_chord" class="form-check-label">Show Alternate Chords?</label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save Preferences</button>
-  </form>
 </div>
 {% endblock %}

@@ -1,38 +1,68 @@
-<div class="modal fade show d-block" id="userPreferencesModal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">User Preferences</h5>
-          <button type="button" class="btn-close" onclick="closeModal()"></button>
-        </div>
-        <div class="modal-body">
-          <form method="post" hx-post="{% url 'users:user_preferences' %}" 
-                hx-target="#modal-container"
-                hx-swap="outerHTML">
-            {% csrf_token %}
-  
-            <label for="id_primary_instrument">Primary Instrument:</label>
+<div class="modal fade show d-block" id="userPreferencesModal" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title">User Preferences</h5>
+        <button type="button" class="btn-close" aria-label="Close" onclick="closeModal()"></button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <form method="post"
+              hx-post="{% url 'users:user_preferences' %}"
+              hx-target="#modal-container"
+              hx-swap="outerHTML">
+
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="id_primary_instrument" class="form-label">Primary Instrument:</label>
             {{ form.primary_instrument }}
-  
-            <label for="id_secondary_instrument">Secondary Instrument (Optional):</label>
+          </div>
+
+          <div class="mb-3">
+            <label for="id_secondary_instrument" class="form-label">Secondary Instrument (Optional):</label>
             {{ form.secondary_instrument }}
-  
-            <label for="id_is_lefty">Are you left-handed?</label>
+          </div>
+
+          <div class="mb-3 form-check">
             {{ form.is_lefty }}
-  
-            <label for="id_is_printing_alternate_chord">Show Alternate Chords?</label>
+            <label for="id_is_lefty" class="form-check-label">Are you left-handed?</label>
+          </div>
+
+          <div class="mb-3 form-check">
             {{ form.is_printing_alternate_chord }}
-  
-            <button type="submit" class="btn btn-success">Save Preferences</button>
-          </form>
-        </div>
+            <label for="id_is_printing_alternate_chord" class="form-check-label">Show Alternate Chords?</label>
+          </div>
+
+          <!-- FOOTER -->
+          <div class="modal-footer d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+
+            <a href="{% url 'songbook:song_list' %}" class="btn btn-outline-secondary">
+              ← Back to Songs
+            </a>
+
+            <button type="submit" class="btn btn-success">
+              Save Preferences
+            </button>
+          </div>
+
+        </form>
+
       </div>
     </div>
   </div>
-  
-  <script>
-  function closeModal() {
-      document.getElementById("userPreferencesModal").remove();
-  }
-  </script>
-  
+</div>
+
+<script>
+function closeModal() {
+    const modal = document.getElementById("userPreferencesModal");
+    if (modal) {
+        modal.remove();
+    }
+}
+</script>

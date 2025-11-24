@@ -65,6 +65,10 @@ class UserPreference(models.Model):
     )
     is_lefty = models.BooleanField(default=False)
     is_printing_alternate_chord = models.BooleanField(default=False)
+    known_chords = models.JSONField(default=list, blank=True)
+    use_known_chord_filter = models.BooleanField(default=False)
+
+
 
 
 
