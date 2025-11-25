@@ -436,15 +436,7 @@ def build_chord_drawing(
     fret_count = 5
     string_count = len(positions)
 
-    # adjust for lefty
-    if is_lefty:
-        positions = list(reversed(positions))
-        if barre:
-            barre = {
-                "fromString": (string_count + 1) - barre["toString"],
-                "toString": (string_count + 1) - barre["fromString"],
-                "fret": barre["fret"],
-            }
+
 
     string_spacing = 15 * scale
     fret_spacing = 15 * scale

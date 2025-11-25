@@ -505,7 +505,7 @@ def whats_new(request):
 
 
 
-ROOTS = ["C", "C#","D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"]
+ROOTS = ["C", "C#","D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 TYPES = ["", "m", "7", "m7", "M7", "dim", "aug", "sus2", "sus4", "5", "6", "m6", "m9", "M9", "11", "M13"]
 
 def chord_dictionary(request):
