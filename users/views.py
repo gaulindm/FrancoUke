@@ -54,9 +54,15 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import UserPreferenceForm
+from .models import UserPreference
+
 @login_required
 def user_preferences_view(request):
-
     site_name = request.GET.get("site", "FrancoUke")
     user_pref, _ = UserPreference.objects.get_or_create(user=request.user)
 
@@ -69,7 +75,7 @@ def user_preferences_view(request):
     else:
         form = UserPreferenceForm(instance=user_pref)
 
-    # ✔️ Detect HTMX
+    # HTMX request → modal partial
     if request.headers.get("HX-Request") == "true":
         return render(
             request,
@@ -77,12 +83,13 @@ def user_preferences_view(request):
             {"form": form, "site_name": site_name},
         )
 
-    # ✔️ Normal request → render full page template
+    # Full-page request
     return render(
         request,
         "users/user_preference_form.html",
         {"form": form, "site_name": site_name},
     )
+
 
 @login_required
 def profile(request):

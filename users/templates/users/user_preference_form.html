@@ -13,7 +13,7 @@
   </div>
 
   <p class="text-muted mb-4">
-      Update your instrument settings and layout preferences.  
+      Update your instrument settings, layout preferences, and known chords.
       These settings personalize your songbook experience.
   </p>
 
@@ -56,8 +56,32 @@
           </label>
         </div>
 
+        <!-- Known Chord Filter Switch -->
+        <hr class="my-4">
+
+        <h5 class="fw-semibold">Known Chord Filter</h5>
+
+        <div class="form-check mb-3">
+          {{ form.use_known_chord_filter }}
+          <label for="id_use_known_chord_filter" class="form-check-label ms-1">
+            Hide diagrams for chords I already know
+          </label>
+        </div>
+
+        <!-- Known Chords -->
+        <div class="mb-3">
+          <label for="{{ form.known_chords_text.id_for_label }}" class="form-label fw-semibold">
+            Known Chords
+          </label>
+          {{ form.known_chords_text }}
+          <div class="form-text">
+            Type your known chords separated by commas (e.g., C, F, G, G7)
+          </div>
+        </div>
+
+
         <!-- Buttons -->
-        <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-between mt-4">
           <a href="{% url 'songbook:song_list' %}" class="btn btn-outline-secondary">
             ← Back to Songs
           </a>
