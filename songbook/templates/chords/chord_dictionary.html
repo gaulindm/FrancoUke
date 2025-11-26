@@ -4,6 +4,60 @@
 <head>
     <title>Chord Dictionary</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Remove padding inside table cells */
+        .chord-cell {
+            padding: 4px !important;
+            vertical-align: top;
+            min-width: 110px;
+        }
+        
+        /* Chord name spacing */
+        .chord-title {
+            margin: 0;
+            padding: 0;
+            line-height: 1.0;
+            font-size: 0.80rem;
+        }
+        
+        /* Remove block spacing around main diagram */
+        .main-chord {
+            margin: 0;
+            padding: 0;
+            line-height: 0;
+        }
+        
+        /* Remove spacing inside SVG wrapper */
+        .main-chord svg,
+        .small-chord svg {
+            display: block;      /* Removes inline space */
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Size adjustments */
+        .main-chord svg {
+            width: 90px;
+        }
+        
+        .small-chord svg {
+            width: 55px;
+        }
+        
+        /* Layout of small variations */
+        .small-chords {
+            margin-top: 2px;
+            gap: 4px !important;   /* tighter spacing */
+        }
+        
+        /* Very important: remove default Bootstrap cell spacing */
+        .table td, .table th {
+            padding: 4px !important;
+        }
+        </style>
+        
+               
+        
 </head>
 
 <body>
@@ -43,14 +97,32 @@
             <td><strong>{{ row.type }}</strong></td>
     
             {% for cell in row.cells %}
-                <td>
-                    {% if cell %}
-                        <div class="svg-container">
-                            {{ cell.svg|safe }}
-                        </div>
+            <td class="chord-cell text-center">
 
+                {% if cell %}
+                    <div class="chord-title fw-bold">{{ cell.name }}</div>
+            
+                    <div class="main-chord">
+                        {% if cell.main_svg %}
+                            {{ cell.main_svg|safe }}
+                        {% endif %}
+                    </div>
+            
+                    {% if cell.small_svgs %}
+                        <div class="small-chords d-flex justify-content-center">
+                            {% for svg in cell.small_svgs %}
+                                <div class="small-chord">
+                                    {{ svg|safe }}
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% endif %}
-                </td>
+                {% endif %}
+            
+            </td>
+            
+            
+            
             {% endfor %}
         </tr>
         {% endfor %}

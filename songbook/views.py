@@ -506,7 +506,7 @@ def whats_new(request):
 
 
 ROOTS = ["C", "C#","D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
-TYPES = ["", "m", "7", "m7", "M7", "dim", "aug", "sus2", "sus4", "5", "6", "m6", "m9", "M9", "11", "M13"]
+TYPES = ["", "m", "7", "m7", "M7", "dim", "aug", "sus2", "sus4", "5", "6", "m6", "9","m9", "M9", "11", "M13"]
 
 def chord_dictionary(request):
     instrument = request.GET.get("instrument", "ukulele")
@@ -543,15 +543,33 @@ def chord_dictionary(request):
         if root not in grouped:
             grouped[root] = {}
 
-        # Use first variation for dictionary
-        variation = variations[0]
+        # Generate main variation (full size)
+        if len(variations) >= 1:
+            main_svg = render_chord_svg(
+                name, variations[0], instrument,
+                is_lefty=lefty,
+                scale=1.0
+            )
+        else:
+            main_svg = None
 
-        svg = render_chord_svg(name, variation, instrument, is_lefty=lefty)
+        # Generate small variations (only 2)
+        small_svgs = []
+        for v in variations[1:3]:  # only 2 small variations max
+            svg_small = render_chord_svg(
+                name, v, instrument,
+                is_lefty=lefty,
+                scale=0.5,
+            )
+            small_svgs.append(svg_small)
 
         grouped[root][ctype] = {
             "name": name,
-            "svg": svg,
+            "main_svg": main_svg,
+            "small_svgs": small_svgs,
         }
+
+ 
 
     # 🔥 FLATTEN THE STRUCTURE FOR THE TEMPLATE
     rows = []

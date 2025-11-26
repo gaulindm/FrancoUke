@@ -251,48 +251,80 @@ def get_paragraph_styles(formatting):
 # LOAD RELEVANT CHORDS
 # =======================
 def load_relevant_chords(songs, user_prefs, transpose_value):
-    chords_primary = load_chords(user_prefs["primary_instrument"])
-    chords_secondary = (
-        load_chords(user_prefs["secondary_instrument"])
-        if user_prefs["secondary_instrument"] else []
-    )
+    """
+    Instrument-aware: try matching transposed chords first against PRIMARY
+    instrument chord set, then SECONDARY. Preserve requested_name and
+    ensure instrument is set on each returned chord_def copy.
+    """
+    primary_inst = user_prefs.get("primary_instrument")
+    secondary_inst = user_prefs.get("secondary_instrument")
 
-    for chord in chords_primary:
-        chord["instrument"] = user_prefs["primary_instrument"]
-    for chord in chords_secondary:
-        chord["instrument"] = user_prefs["secondary_instrument"]
+    chords_primary = load_chords(primary_inst or "ukulele")
+    chords_secondary = load_chords(secondary_inst) if secondary_inst else []
+
+    # mark instrument on each loaded chord (safe copy)
+    for c in chords_primary:
+        c["instrument"] = primary_inst
+    for c in chords_secondary:
+        c["instrument"] = secondary_inst
 
     all_chords = chords_primary + chords_secondary
 
-    # ✅ Clean before normalization and transposition
-    used_chords = [
-        normalize_chord(clean_chord(chord)).strip()
-        for chord in extract_used_chords(songs[0].lyrics_with_chords)
-    ]
-
-    # ✅ Transpose cleaned chords only
+    # extract used chords (from first song as before)
+    raw_used = extract_used_chords(songs[0].lyrics_with_chords)
+    # normalize & transpose
+    used_cleaned = [normalize_chord(clean_chord(ch)).strip() for ch in raw_used]
     transposed_chords = {
-        transpose_chord(clean_chord(chord).strip(), transpose_value).strip()
-        for chord in used_chords
+        transpose_chord(clean_chord(ch).strip(), transpose_value).strip()
+        for ch in used_cleaned
     }
 
-    # 🔹 Match chords in the library with transposed chords
     relevant_chords = []
-    added_names = set()  # ✅ Track which names were already added
+    added_keys = set()  # track (canonical_name, instrument) to avoid dup per instrument
 
     for t_chord in transposed_chords:
-        for chord_def in all_chords:
-            if chord_equivalent(chord_def["name"], t_chord):
-                canonical_name = chord_def["name"].lower()
-                if canonical_name not in added_names:
-                    chord_copy = dict(chord_def)
-                    chord_copy["requested_name"] = t_chord  # 💡 Keep the user spelling (e.g. D#dim)
-                    relevant_chords.append(chord_copy)
-                    added_names.add(canonical_name)
-                break
+        if not t_chord:
+            continue
+
+        matched = False
+
+        # 1) Try primary instrument only
+        for chord_def in chords_primary:
+            try:
+                if chord_equivalent(chord_def.get("name", ""), t_chord):
+                    key = (chord_def.get("name", "").lower(), primary_inst)
+                    if key not in added_keys:
+                        chord_copy = dict(chord_def)
+                        chord_copy["requested_name"] = t_chord
+                        chord_copy["instrument"] = primary_inst
+                        relevant_chords.append(chord_copy)
+                        added_keys.add(key)
+                    matched = True
+                    break
+            except Exception:
+                # don't let one bad chord definition stop the loop
+                continue
+
+        if matched:
+            continue
+
+        # 2) Try secondary instrument only
+        if secondary_inst:
+            for chord_def in chords_secondary:
+                try:
+                    if chord_equivalent(chord_def.get("name", ""), t_chord):
+                        key = (chord_def.get("name", "").lower(), secondary_inst)
+                        if key not in added_keys:
+                            chord_copy = dict(chord_def)
+                            chord_copy["requested_name"] = t_chord
+                            chord_copy["instrument"] = secondary_inst
+                            relevant_chords.append(chord_copy)
+                            added_keys.add(key)
+                        break
+                except Exception:
+                    continue
 
     return relevant_chords
-
 
 
 # =======================
@@ -634,18 +666,55 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
         relevant_chords = filtered_chords
 
 
+    # attach relevant chords and user prefs to doc for footer drawing
     doc.relevant_chords = relevant_chords
     doc.instrument = user_prefs["primary_instrument"]
     doc.secondary_instrument = user_prefs["secondary_instrument"]
-    doc.chord_spacing = 40 if user_prefs["primary_instrument"] == "ukulele" else 45
     doc.row_spacing = 70
     doc.is_lefty = user_prefs.get("is_lefty", False)
-    doc.is_printing_alternate_chord = user_prefs["show_alternate_chords"]
+    doc.is_printing_alternate_chord = user_prefs.get("show_alternate_chords", False)
     doc.acknowledgement = getattr(songs[0], "acknowledgement", "")
 
-    diagram_rows = calculate_diagram_rows(relevant_chords)
-    diagram_height = diagram_rows * doc.row_spacing
-    doc.bottomMargin = max(80, diagram_height + 20)
+    # --- split relevant chords by instrument (exactly as draw_footer expects) ---
+    primary_chords = [c for c in relevant_chords if c.get("instrument") == user_prefs["primary_instrument"]]
+    secondary_chords = [c for c in relevant_chords if user_prefs["secondary_instrument"] and c.get("instrument") == user_prefs["secondary_instrument"]]
+
+    # Decide how many diagrams per row: single-instrument allows more per row
+    max_per_row = 12 if not user_prefs["secondary_instrument"] else 6
+
+    def rows_needed(group):
+        return 0 if not group else (len(group) + max_per_row - 1) // max_per_row
+
+    primary_rows = rows_needed(primary_chords)
+    secondary_rows = rows_needed(secondary_chords)
+    rows = max(primary_rows, secondary_rows)
+
+    # Auto-tighten chord_spacing based on how many diagrams we need per column:
+    # - If many diagrams per column, tighten spacing; otherwise keep roomy spacing.
+    if user_prefs["secondary_instrument"]:
+        # two columns: decide based on the larger of the two columns
+        largest_col_count = max(len(primary_chords), len(secondary_chords))
+    else:
+        largest_col_count = len(primary_chords)
+
+    if largest_col_count <= 8:
+        doc.chord_spacing = 60
+    elif largest_col_count <= 10:
+        doc.chord_spacing = 50
+    else:
+        # tight spacing needed to avoid clipping when there are many chords
+        doc.chord_spacing = 44
+
+    # ensure doc has minimum sensible values
+    doc.chord_spacing = int(doc.chord_spacing)
+    doc.row_spacing = int(doc.row_spacing or 70)
+
+    # compute diagram area height and ensure bottom margin allows diagrams to render
+    diagram_height = rows * doc.row_spacing
+    # keep a minimum extra padding so footer doesn't collide with content
+    doc.bottomMargin = max(80, 20 + diagram_height)
+
+
 
     formatting = formatting or SongFormatting.objects.filter(user=user, song=songs[0]).first()
     if not formatting:

@@ -419,106 +419,69 @@ def draw_chord_diagram(
                     c.setFont("Helvetica", 11)
                     c.drawCentredString(x_dot, y + fret_count * fret_spacing + 4, "X")
 
-
-def build_chord_drawing(
-    chord_name: str,
-    variation: Dict[str, Any],
-    scale: float = 1.0,
-    instrument: str = "ukulele",
-    is_lefty: bool = False,
-) -> Drawing:
-    """
-    Build a lightweight reportlab.graphics Drawing for SVG output.
-    """
-    positions = variation.get("positions", []) if isinstance(variation, dict) else []
-    base_fret = variation.get("baseFret", 1) if isinstance(variation, dict) else compute_base_fret(positions)
-    barre = variation.get("barre") if isinstance(variation, dict) else detect_barre(positions)
+def build_chord_drawing(chord_name, variation, scale=1.0, instrument="ukulele", is_lefty=False):
+    positions = variation.get("positions", [])
+    base_fret = variation.get("baseFret", 1)
     fret_count = 5
     string_count = len(positions)
 
-
-
+    # Basic layout numbers (scaled)
     string_spacing = 15 * scale
     fret_spacing = 15 * scale
     radius = 4 * scale
 
-    width = (max(1, string_count) - 1) * string_spacing
-    height = fret_count * fret_spacing + 30 * scale
+    width = (string_count - 1) * string_spacing
+    height = fret_count * fret_spacing  # <-- NO extra space for title
 
-    drawing = Drawing(width + 40 * scale, height + 20 * scale)
-    top_margin = 30 * scale
-    nut_y = height - top_margin
-    bottom_y = nut_y - fret_count * fret_spacing
+    drawing = Drawing(width + 40*scale, height + 10*scale)  # reduce total height
 
-    # --- TEXT (NOT mirrored) ---
-    drawing.add(
-        String(
-            (width / 2)-15 + 20*scale,
-            height - 5*scale,
-            chord_name,
-            fontSize=18 * scale
-        )
-    )
+    y0 = 0  # <-- start diagrams from very top
+    x0 = 20 * scale
 
-   
-
-    # Base fret label
+    # === Base fret label ===
     if base_fret > 1:
         drawing.add(
             String(
                 0,
-                nut_y + 5 * scale,
+                height - 10 * scale,
                 f"{base_fret}fr",
-                fontSize=12 * scale
+                fontSize=max(12, 16 * scale),  # ← stays readable even in small diagrams
+                fillColor=colors.black
             )
         )
-    
-     # --- SHAPE GROUP (mirrored if lefty) ---
-    shapes = Group()
 
 
-    # Strings
-    for i in range(max(1, string_count)):
-        x = 20 * scale + i * string_spacing
-        shapes.add(Line(x, bottom_y, x, nut_y, strokeColor=colors.black, strokeWidth=2 * scale))
+    # === Strings ===
+    for i in range(string_count):
+        x = x0 + i * string_spacing
+        drawing.add(
+            Line(x, y0, x, y0 + height, strokeColor=colors.black, strokeWidth=2*scale)
+        )
 
-    # Frets
+    # === Frets ===
     for f in range(fret_count + 1):
-        y = nut_y - f * fret_spacing
-        stroke = 3 * scale if (f == 0 and base_fret == 1) else 1.5 * scale
-        shapes.add(Line(20 * scale, y, 20 * scale + width, y, strokeColor=colors.black, strokeWidth=stroke))
-
-    # Barre
-    if barre:
-        adj_fret = barre["fret"] - (base_fret - 1)
-        if 1 <= adj_fret <= fret_count:
-            start_string = barre["fromString"] - 1
-            end_string = barre["toString"] - 1
-            y_bar = nut_y - ((adj_fret - 1) * fret_spacing) - (fret_spacing / 2)
-            x_start = 20 * scale + start_string * string_spacing - radius
-            width_bar = (end_string - start_string) * string_spacing + 2 * radius
-            height_bar = radius * 2
-            shapes.add(
-                Rect(x_start, y_bar - radius, width_bar, height_bar, rx=radius, ry=radius, fillColor=colors.black, strokeColor=None)
+        y = y0 + f * fret_spacing
+        drawing.add(
+            Line(
+                x0,
+                y,
+                x0 + width,
+                y,
+                strokeColor=colors.black,
+                strokeWidth=3*scale if (f == 0 and base_fret == 1) else 1.5*scale
             )
+        )
 
-    # Dots
+    # === Dots ===
     for i, fret in enumerate(positions):
-        if not isinstance(fret, int) or fret <= 0:
+        if fret <= 0:
             continue
+
         adjusted = fret - (base_fret - 1)
         if 1 <= adjusted <= fret_count:
-            x = 20 * scale + i * string_spacing
-            y = nut_y - ((adjusted - 1) * fret_spacing) - (fret_spacing / 2)
-            shapes.add(Circle(x, y, radius, fillColor=colors.black))
-
-    # Mirror for left-hand drawing if needed
-    if is_lefty:
-        # flip horizontally across center of drawing
-        shapes.scale(-1, 1)
-        shapes.translate(-(width + 40 * scale), 0)
-
-    drawing.add(shapes)
+            x = x0 + i * string_spacing
+            y = y0 + (fret_count - adjusted) * fret_spacing + (fret_spacing / 2)
+            drawing.add(Circle(x, y, radius, fillColor=colors.black))
 
     return drawing
 
