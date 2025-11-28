@@ -13,6 +13,12 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas as pdf_canvas
 
+from typing import Any, Dict, List
+from reportlab.graphics.shapes import (
+    Drawing, String, Line, Circle, Rect, Group
+)
+from reportlab.graphics import renderSVG
+from reportlab.lib import colors
 from songbook.utils.transposer import clean_chord
 
 logger = logging.getLogger(__name__)
@@ -139,35 +145,71 @@ def draw_footer(
 ):
     """
     Draw footer chord diagrams for primary (and optional secondary) instruments.
-    `relevant_chords` is expected to be a list of chord-definition dicts (as returned by load_chords).
     """
+    print("\n" + "="*80)
+    print("DRAW_FOOTER CALLED")
+    print("is_printing_alternate_chord =", is_printing_alternate_chord)
+    print("instrument =", instrument)
+    print("secondary_instrument =", secondary_instrument)
+    print("TOTAL relevant chords =", len(relevant_chords))
+    print("="*80 + "\n")
+
     page_width, _ = doc.pagesize
     max_per_row = 12 if not secondary_instrument else 6
 
-    def prepare_chords(chords: List[Dict[str, Any]]):
+    # -----------------------------------------------------
+    # PREPARE CHORDS (first + optional second variation)
+    # -----------------------------------------------------
+    def prepare_chords(chords, is_printing_alternate_chord):
+        print("ALT?", is_printing_alternate_chord, "VARIATIONS:", len(chords))
+
         diagrams = []
         for chord in chords:
             display_name = chord.get("requested_name") or chord.get("name") or "?"
-            # Safely get variations
-            variations = chord.get("variations") or chord.get("variation") or []
-            if not isinstance(variations, list):
-                variations = [variations]
-            # Normalize and add first (and optionally second) variations
-            if variations:
-                first = normalize_variation(variations[0])
-                diagrams.append({"name": display_name, "variation": first})
-                if is_printing_alternate_chord and len(variations) > 1:
-                    second = normalize_variation(variations[1])
-                    diagrams.append({"name": display_name, "variation": second})
+
+            raw = chord.get("variations") or chord.get("variation") or []
+
+            if isinstance(raw, dict):
+                variations = [raw]
+            elif isinstance(raw, list):
+                variations = raw
+            else:
+                variations = []
+
+            # Always draw first variation
+            if len(variations) >= 1:
+                diagrams.append({
+                    "name": display_name,
+                    "variation": normalize_variation(variations[0])
+                })
+
+            # Draw alternate if enabled
+            if is_printing_alternate_chord and len(variations) >= 2:
+                diagrams.append({
+                    "name": display_name,
+                    "variation": normalize_variation(variations[1])
+                })
+
         return diagrams
 
+
+    # -----------------------------------------------------
+    # SORT CHORDS BY INSTRUMENT
+    # -----------------------------------------------------
     primary_diagrams = prepare_chords(
-        [ch for ch in relevant_chords if ch.get("instrument") == instrument]
+        [ch for ch in relevant_chords if ch.get("instrument") == instrument],
+        is_printing_alternate_chord
     )
+
     secondary_diagrams = prepare_chords(
-        [ch for ch in relevant_chords if secondary_instrument and ch.get("instrument") == secondary_instrument]
+        [ch for ch in relevant_chords if secondary_instrument and ch.get("instrument") == secondary_instrument],
+        is_printing_alternate_chord
     ) if secondary_instrument else []
 
+
+    # -----------------------------------------------------
+    # CALCULATE ROWS NEEDED
+    # -----------------------------------------------------
     if secondary_instrument:
         primary_rows = (len(primary_diagrams) + max_per_row - 1) // max_per_row
         secondary_rows = (len(secondary_diagrams) + max_per_row - 1) // max_per_row
@@ -175,45 +217,60 @@ def draw_footer(
     else:
         rows_needed = (len(primary_diagrams) + max_per_row - 1) // max_per_row if primary_diagrams else 0
 
+    # -----------------------------------------------------
+    # DRAWING UTILITY
+    # -----------------------------------------------------
     def draw_diagrams(diagrams: List[Dict[str, Any]], start_x: float, start_y: float, inst: str):
         rows = [diagrams[i:i + max_per_row] for i in range(0, len(diagrams), max_per_row)]
         first_row_y = start_y
+
         y_offset = start_y - (len(rows) - 1) * row_spacing if rows else start_y
 
         for row in rows:
-            # center the row on the provided quarter (start_x is quarter center)
+            # center diagrams inside quarter width
             x_offset = start_x + (page_width / 4 - len(row) * chord_spacing / 2)
+
             for chord in row:
-                # Use clean_chord for display and stripping bass slashes etc.
                 display_name = clean_chord(chord.get("name", ""))
                 diagram_var = chord.get("variation", {})
+
                 diag = ChordDiagram(display_name, diagram_var, scale=0.5, is_lefty=is_lefty, instrument=inst)
                 diag.canv = canvas
+
                 canvas.saveState()
                 canvas.translate(x_offset, y_offset)
                 diag.draw()
                 canvas.restoreState()
+
                 x_offset += chord_spacing
+
             y_offset -= row_spacing
 
         return first_row_y
 
-    # base Y position depends on how many rows we plan to display
+    # -----------------------------------------------------
+    # INITIAL Y POSITION
+    # -----------------------------------------------------
     start_y = 34 if rows_needed <= 1 else 172
+
+    # -----------------------------------------------------
+    # DRAW PRIMARY AND SECONDARY DIAGRAMS
+    # -----------------------------------------------------
     if not secondary_instrument:
-        label_y = draw_diagrams(primary_diagrams, page_width / 4, start_y, instrument)
+        draw_diagrams(primary_diagrams, page_width / 4, start_y, instrument)
     else:
-        label_y = draw_diagrams(primary_diagrams, page_width / 4 - 140, start_y, instrument)
+        draw_diagrams(primary_diagrams, page_width / 4 - 140, start_y, instrument)
         draw_diagrams(secondary_diagrams, 3 * page_width / 4 - 140, start_y, secondary_instrument)
 
-    # Draw instrument labels if secondary present
-    if secondary_instrument:
+        # Labels
         label_y = 96 if rows_needed == 1 else 165
         canvas.setFont("Helvetica-Bold", 10)
         canvas.drawCentredString(page_width / 4, label_y, instrument.title())
         canvas.drawCentredString(3 * page_width / 4, label_y, secondary_instrument.title())
 
-    # Acknowledgement / credits line at bottom (if provided)
+    # -----------------------------------------------------
+    # Acknowledgement line
+    # -----------------------------------------------------
     if acknowledgement:
         canvas.setFont("Helvetica-Oblique", 10)
         canvas.drawCentredString(
@@ -268,22 +325,6 @@ def detect_barre(positions: List[Any]) -> Optional[Dict[str, int]]:
     return None
 
 
-def normalize_variation(variation: Any) -> Dict[str, Any]:
-    """
-    Convert either old-style list [pos,...] or new-style dict into:
-    { "positions": [...], "baseFret": int, "barre": { ... } | None }
-    """
-    if isinstance(variation, dict):
-        # Ensure keys exist and compute missing ones
-        positions = variation.get("positions", [])
-        base = variation.get("baseFret", compute_base_fret(positions))
-        barre = variation.get("barre") or detect_barre(positions)
-        return {"positions": positions, "baseFret": base, "barre": barre}
-    # assume iterable positions (old style)
-    positions = list(variation) if isinstance(variation, (list, tuple)) else []
-    base = compute_base_fret(positions)
-    barre = detect_barre(positions)
-    return {"positions": positions, "baseFret": base, "barre": barre}
 
 
 def draw_chord_diagram(
@@ -419,73 +460,228 @@ def draw_chord_diagram(
                     c.setFont("Helvetica", 11)
                     c.drawCentredString(x_dot, y + fret_count * fret_spacing + 4, "X")
 
-def build_chord_drawing(chord_name, variation, scale=1.0, instrument="ukulele", is_lefty=False):
+from typing import Any, Dict, List
+from reportlab.graphics.shapes import (
+    Drawing, String, Line, Circle, Rect, Group
+)
+from reportlab.graphics import renderSVG
+from reportlab.lib import colors
+
+
+# ------------------------------------------------------
+# NORMALIZE VARIATION INPUT
+# ------------------------------------------------------
+def normalize_variation_svg(variation: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Ensures variation keys are always consistent:
+    - positions: list of ints per string
+    - baseFret: int
+    - barre: {fret, fromString, toString} or None
+    """
+    return {
+        "positions": variation.get("positions", []),
+        "baseFret": variation.get("baseFret", 1),
+        "barre": variation.get("barre"),
+    }
+
+
+def normalize_variation(variation: Any) -> Dict[str, Any]:
+    """
+    Convert either old-style list [pos,...] or new-style dict into:
+    { "positions": [...], "baseFret": int, "barre": { ... } | None }
+    """
+    if isinstance(variation, dict):
+        # Ensure keys exist and compute missing ones
+        positions = variation.get("positions", [])
+        base = variation.get("baseFret", compute_base_fret(positions))
+        barre = variation.get("barre") or detect_barre(positions)
+        return {"positions": positions, "baseFret": base, "barre": barre}
+    # assume iterable positions (old style)
+    positions = list(variation) if isinstance(variation, (list, tuple)) else []
+    base = compute_base_fret(positions)
+    barre = detect_barre(positions)
+    return {"positions": positions, "baseFret": base, "barre": barre}
+
+
+# ------------------------------------------------------
+# BUILD CHORD DRAWING
+# ------------------------------------------------------
+def build_chord_drawing(
+    chord_name: str,
+    variation: Dict[str, Any],
+    scale: float = 1.0,
+    instrument: str = "ukulele",
+    is_lefty: bool = False
+):
     positions = variation.get("positions", [])
     base_fret = variation.get("baseFret", 1)
+    barre = variation.get("barre")
+
     fret_count = 5
     string_count = len(positions)
 
-    # Basic layout numbers (scaled)
+    # Spacing
     string_spacing = 15 * scale
-    fret_spacing = 15 * scale
-    radius = 4 * scale
+    fret_spacing   = 15 * scale
+    radius         = 4 * scale
 
-    width = (string_count - 1) * string_spacing
-    height = fret_count * fret_spacing  # <-- NO extra space for title
+    # Padding
+    LEFT_PAD = 25 * scale
+    RIGHT_PAD = 25 * scale
+    TOP_PAD = 10 * scale
+    BOTTOM_PAD = 15 * scale
 
-    drawing = Drawing(width + 40*scale, height + 10*scale)  # reduce total height
+    width  = (string_count - 1) * string_spacing
+    height = fret_count * fret_spacing
 
-    y0 = 0  # <-- start diagrams from very top
-    x0 = 20 * scale
+    drawing_width  = LEFT_PAD + width + RIGHT_PAD
+    drawing_height = TOP_PAD + height + BOTTOM_PAD
 
-    # === Base fret label ===
+    drawing = Drawing(drawing_width, drawing_height)
+
+    # ------------------------------------------------------
+    # BASE FRET TEXT
+    # ------------------------------------------------------
     if base_fret > 1:
         drawing.add(
             String(
-                0,
-                height - 10 * scale,
+                LEFT_PAD - 25 * scale,
+                drawing_height - (TOP_PAD + 15 * scale),
                 f"{base_fret}fr",
-                fontSize=max(12, 16 * scale),  # ← stays readable even in small diagrams
-                fillColor=colors.black
+                fontSize=16 * scale,
             )
         )
 
+    # ------------------------------------------------------
+    # SHAPES GROUP (TO BE MIRRORED FOR LEFTY MODE)
+    # ------------------------------------------------------
+    shapes = Group()
 
-    # === Strings ===
+    # --- Strings ---
     for i in range(string_count):
-        x = x0 + i * string_spacing
-        drawing.add(
-            Line(x, y0, x, y0 + height, strokeColor=colors.black, strokeWidth=2*scale)
+        x = LEFT_PAD + i * string_spacing
+        shapes.add(
+            Line(
+                x,
+                TOP_PAD,
+                x,
+                TOP_PAD + height,
+                strokeColor=colors.black,
+                strokeWidth=2 * scale,
+            )
         )
 
-    # === Frets ===
+    # --- Frets ---
     for f in range(fret_count + 1):
-        y = y0 + f * fret_spacing
-        drawing.add(
+        y = TOP_PAD + f * fret_spacing
+
+        # Nut only if base fret == 1
+        is_nut = (f == fret_count and base_fret == 1)
+        stroke = 5 * scale if is_nut else 2 * scale
+
+        shapes.add(
             Line(
-                x0,
+                LEFT_PAD,
                 y,
-                x0 + width,
+                LEFT_PAD + width,
                 y,
                 strokeColor=colors.black,
-                strokeWidth=3*scale if (f == 0 and base_fret == 1) else 1.5*scale
+                strokeWidth=stroke,
             )
         )
 
-    # === Dots ===
+    # --- Finger Dots ---
     for i, fret in enumerate(positions):
         if fret <= 0:
             continue
 
         adjusted = fret - (base_fret - 1)
         if 1 <= adjusted <= fret_count:
-            x = x0 + i * string_spacing
-            y = y0 + (fret_count - adjusted) * fret_spacing + (fret_spacing / 2)
-            drawing.add(Circle(x, y, radius, fillColor=colors.black))
+            x = LEFT_PAD + i * string_spacing
+            y = TOP_PAD + (fret_count - adjusted) * fret_spacing + (fret_spacing / 2)
+            shapes.add(Circle(x, y, radius, fillColor=colors.black))
 
+    # --- Barre ---
+    if barre and all(k in barre for k in ("fret", "fromString", "toString")):
+        adjusted = barre["fret"] - (base_fret - 1)
+        if 1 <= adjusted <= fret_count:
+
+            y_bar = TOP_PAD + (fret_count - adjusted) * fret_spacing + fret_spacing / 2
+            x_start = LEFT_PAD + (barre["fromString"] - 1) * string_spacing - radius
+            x_end   = LEFT_PAD + (barre["toString"] - 1) * string_spacing + radius
+
+            shapes.add(
+                Rect(
+                    x_start,
+                    y_bar - radius,
+                    x_end - x_start,
+                    2 * radius,
+                    fillColor=colors.black,
+                    strokeColor=None,
+                )
+            )
+
+    # ------------------------------------------------------
+    # OPEN (O) / MUTED (X) MARKERS — NOT MIRRORED
+    # ------------------------------------------------------
+    nut_offset = 8 * scale
+    label_y = drawing_height - TOP_PAD + nut_offset - 8
+
+    for i, fret in enumerate(positions):
+        x = LEFT_PAD + i * string_spacing
+
+        if fret == 0:
+            drawing.add(
+                String(
+                    x,
+                    label_y,
+                    "O",
+                    fontSize=12 * scale,
+                    textAnchor="middle",
+                )
+            )
+
+        elif fret < 0:
+            drawing.add(
+                String(
+                    x,
+                    label_y,
+                    "X",
+                    fontSize=12 * scale,
+                    textAnchor="middle",
+                )
+            )
+
+    # ------------------------------------------------------
+    # LEFT-HANDED MIRRORING
+    # ------------------------------------------------------
+    if is_lefty:
+        shapes.scale(-1, 1)
+
+        # Proper horizontal correction:
+        # We want LEFT_PAD to become RIGHT_PAD after reflecting
+        shapes.translate(-drawing_width + 2 * LEFT_PAD, 0)
+
+    drawing.add(shapes)
     return drawing
 
 
-def render_chord_svg(chord_name: str, variation: Dict[str, Any], instrument: str = "ukulele", scale: float = 1.0, is_lefty: bool = False) -> str:
-    drawing = build_chord_drawing(chord_name, normalize_variation(variation), scale=scale, instrument=instrument, is_lefty=is_lefty)
+# ------------------------------------------------------
+# RENDER TO SVG
+# ------------------------------------------------------
+def render_chord_svg(
+    chord_name: str,
+    variation: Dict[str, Any],
+    instrument: str = "ukulele",
+    scale: float = 1.0,
+    is_lefty: bool = False
+) -> str:
+    drawing = build_chord_drawing(
+        chord_name,
+        normalize_variation_svg(variation),
+        scale=scale,
+        instrument=instrument,
+        is_lefty=is_lefty,
+    )
     return renderSVG.drawToString(drawing)
+

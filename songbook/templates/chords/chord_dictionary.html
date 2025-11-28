@@ -66,7 +66,9 @@
 <div class="container mt-4">
     <h2>{{ instrument|title }} Chord Dictionary</h2>
 
-    <form method="get" class="mb-3">
+    <form method="get" class="mb-3 d-flex gap-3 align-items-center">
+
+        <!-- Instrument dropdown -->
         <select name="instrument" class="form-select d-inline-block w-auto">
             {% for instr in instruments %}
                 <option value="{{ instr }}" {% if instr == instrument %}selected{% endif %}>
@@ -74,15 +76,34 @@
                 </option>
             {% endfor %}
         </select>
-            <!-- NEW: Lefty toggle -->
-    <label class="form-check-label">
-        <input type="checkbox" name="lefty" value="1"
-               class="form-check-input"
-               {% if lefty %}checked{% endif %}>
-        Left-handed
-    </label>
+    
+        <!-- Lefty toggle -->
+        <label class="form-check-label">
+            <input type="checkbox" name="lefty" value="1"
+                   class="form-check-input"
+                   {% if lefty %}checked{% endif %}>
+            Left-handed
+        </label>
+    
+        <label class="form-check-label ms-3">
+            <input type="checkbox" name="show_alt" value="1"
+                   class="form-check-input"
+                   {% if show_alt %}checked{% endif %}>
+            Show Alternate Fingerings
+        </label>
+    
         <button class="btn btn-primary">Update</button>
     </form>
+    <ul class="nav nav-tabs mb-3">
+        {% for key, type_list in CHORD_TABS.items %}
+            <li class="nav-item">
+                <a class="nav-link {% if key == tab %}active{% endif %}"
+                   href="?instrument={{ instrument }}&lefty={{ lefty|yesno:'1,0' }}&tab={{ key }}">
+                    {{ key|title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>    
 
     <table class="table table-bordered">
         <tr>
@@ -108,15 +129,16 @@
                         {% endif %}
                     </div>
             
-                    {% if cell.small_svgs %}
-                        <div class="small-chords d-flex justify-content-center">
-                            {% for svg in cell.small_svgs %}
-                                <div class="small-chord">
-                                    {{ svg|safe }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    {% if show_alt and cell.small_svgs %}
+                    <div class="small-chords d-flex justify-content-center gap-2">
+                        {% for svg in cell.small_svgs %}
+                            <div class="small-chord">
+                                {{ svg|safe }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
                 {% endif %}
             
             </td>

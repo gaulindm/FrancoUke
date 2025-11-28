@@ -43,6 +43,7 @@ def get_user_preferences(user):
                 "primary_instrument": getattr(user, "primary_instrument", "ukulele"),
             },
         )
+        print("PREF OBJECT:", prefs.__dict__)
 
         # Allow either attribute name on the model: is_lefty or is_left_handed
         lefty_val = None
@@ -60,7 +61,7 @@ def get_user_preferences(user):
             "primary_instrument": prefs.primary_instrument,
             "secondary_instrument": getattr(prefs, "secondary_instrument", None),
             "is_lefty": lefty_val,
-            "show_alternate_chords": getattr(prefs, "show_alternate_chords", False),
+            "show_alternate_chords": getattr(prefs, "is_printing_alternate_chord", False),
             "use_known_chord_filter": getattr(prefs, "use_known_chord_filter", False),
             "known_chords": getattr(prefs, "known_chords", []),
         }
@@ -655,6 +656,8 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
 
     user_prefs = get_user_preferences(user)
     relevant_chords = load_relevant_chords(songs, user_prefs, transpose_value)
+    print("RELEVANT CHORDS BEFORE FILTER:", relevant_chords)
+
     # Apply known-chord filter if enabled
     if user_prefs.get("use_known_chord_filter", False):
         known_set = set([normalize_chord(ch).lower() for ch in user_prefs.get("known_chords", [])])
@@ -664,6 +667,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             if chord_name_normalized not in known_set:
                 filtered_chords.append(chord_def)
         relevant_chords = filtered_chords
+        print("RELEVANT CHORDS AFTER FILTER:", relevant_chords)
 
 
     # attach relevant chords and user prefs to doc for footer drawing
@@ -672,7 +676,6 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     doc.secondary_instrument = user_prefs["secondary_instrument"]
     doc.row_spacing = 70
     doc.is_lefty = user_prefs.get("is_lefty", False)
-    doc.is_printing_alternate_chord = user_prefs.get("show_alternate_chords", False)
     doc.acknowledgement = getattr(songs[0], "acknowledgement", "")
 
     # --- split relevant chords by instrument (exactly as draw_footer expects) ---
@@ -680,7 +683,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     secondary_chords = [c for c in relevant_chords if user_prefs["secondary_instrument"] and c.get("instrument") == user_prefs["secondary_instrument"]]
 
     # Decide how many diagrams per row: single-instrument allows more per row
-    max_per_row = 12 if not user_prefs["secondary_instrument"] else 6
+    max_per_row = 14 if not user_prefs["secondary_instrument"] else 6
 
     def rows_needed(group):
         return 0 if not group else (len(group) + max_per_row - 1) // max_per_row
@@ -697,13 +700,15 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     else:
         largest_col_count = len(primary_chords)
 
-    if largest_col_count <= 8:
+    if largest_col_count <= 6:
         doc.chord_spacing = 60
     elif largest_col_count <= 10:
-        doc.chord_spacing = 50
+        doc.chord_spacing = 48
+    elif largest_col_count <= 14:
+        doc.chord_spacing = 42
     else:
-        # tight spacing needed to avoid clipping when there are many chords
-        doc.chord_spacing = 44
+        doc.chord_spacing = 6
+
 
     # ensure doc has minimum sensible values
     doc.chord_spacing = int(doc.chord_spacing)
@@ -726,8 +731,35 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
         elements.extend(build_song_elements(song, styles, styles_dict, site_name))
         elements.append(PageBreak())
 
+
+    print("USER:", user)
+    print("AUTHENTICATED:", user.is_authenticated)
+    print("PDF USER PREFS:", user_prefs)
+
+
     doc.build(
-        elements,
-        onFirstPage=lambda c, d: draw_footer_with_doc(c, d),
-        onLaterPages=lambda c, d: draw_footer_with_doc(c, d)
+    elements,
+    onFirstPage=lambda c, d: draw_footer(
+        c, d,
+        relevant_chords,
+        chord_spacing=doc.chord_spacing,
+        row_spacing=doc.row_spacing,
+        is_lefty=doc.is_lefty,
+        instrument=doc.instrument,
+        secondary_instrument=doc.secondary_instrument,
+        is_printing_alternate_chord=bool(user_prefs["show_alternate_chords"]),
+        acknowledgement=doc.acknowledgement
+    ),
+
+    onLaterPages=lambda c, d: draw_footer(
+        c, d,
+        relevant_chords,
+        chord_spacing=doc.chord_spacing,
+        row_spacing=doc.row_spacing,
+        is_lefty=doc.is_lefty,
+        instrument=doc.instrument,
+        secondary_instrument=doc.secondary_instrument,
+        is_printing_alternate_chord=bool(user_prefs["show_alternate_chords"]),
+        acknowledgement=doc.acknowledgement
     )
+)

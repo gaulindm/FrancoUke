@@ -506,7 +506,20 @@ def whats_new(request):
 
 
 ROOTS = ["C", "C#","D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
-TYPES = ["", "m", "7", "m7", "M7", "dim", "aug", "sus2", "sus4", "5", "6", "m6", "9","m9", "M9", "11", "M13"]
+TYPES = ["", "m", "aug", "dim", "7", "m7", "M7","aug7" ,"dim7" , "m7b5","mMaj7",
+         "sus2", "sus4", "7sus2","7sus4","9","m9","M9","11","m11","13","m13","5", "6", "m6", "add9", "madd9"]
+ADVANCED_TYPES = [
+    "aug", "dim", "aug7", "m7b5", "mMaj7",
+    "9", "m9", "M9", "11", "m11", "13", "m13",
+    "5", "add9", "madd9"
+]
+CHORD_TABS = {
+    "triads": ["", "m", "aug", "dim"],
+    "sevenths": ["7", "m7", "M7", "aug7", "dim7", "m7b5", "mMaj7"],
+    "suspended": ["sus2", "sus4", "7sus2", "7sus4"],
+    "extended": ["9", "m9", "M9", "11", "m11", "13", "m13"],
+    "added": ["5", "6", "m6", "add9", "madd9"],
+}
 
 def chord_dictionary(request):
     instrument = request.GET.get("instrument", "ukulele")
@@ -514,27 +527,23 @@ def chord_dictionary(request):
 
     chords = load_chords(instrument)
     lefty = request.GET.get("lefty") in ["1", "true", "on"]
+    show_alt = request.GET.get("show_alt") in ["1", "true", "on"]
 
-    grouped = {}  # grouped[root][type] = { name, svg }
+    # Which tab is active?
+    tab = request.GET.get("tab", "triads")
+    allowed_types = CHORD_TABS.get(tab, CHORD_TABS["triads"])
 
-    INSTRUMENTS = [
-        "ukulele", "guitalele", "guitar",
-        "banjo", "mandolin", "baritone_ukulele"
-    ]
-
-
-
+    grouped = {}  # grouped[root][type] = list of variations
 
     for chord in chords:
         name = chord["name"]
-        variations = chord.get("variations", [])
-        if not variations:
+        variations_raw = chord.get("variations", [])
+        if not variations_raw:
             continue
 
-        # Match root + type (C, Cm, Cm7, etc)
+        # Split root & type (C#, Cm, Cmaj7, etc.)
         m = re.match(r"([A-G][b#]?)(.*)", name)
         if not m:
-            print("FAILED REGEX:", name)
             continue
 
         root = m.group(1)
@@ -543,57 +552,75 @@ def chord_dictionary(request):
         if root not in grouped:
             grouped[root] = {}
 
-        # Generate main variation (full size)
-        if len(variations) >= 1:
+        # Build SVGs for all variations
+        variations = []
+        for v in variations_raw:
+
             main_svg = render_chord_svg(
-                name, variations[0], instrument,
+                name,
+                v,
+                instrument,
                 is_lefty=lefty,
                 scale=1.0
             )
-        else:
-            main_svg = None
 
-        # Generate small variations (only 2)
-        small_svgs = []
-        for v in variations[1:3]:  # only 2 small variations max
-            svg_small = render_chord_svg(
-                name, v, instrument,
+            small_svg = render_chord_svg(
+                name,
+                v,
+                instrument,
                 is_lefty=lefty,
-                scale=0.5,
+                scale=0.5
             )
-            small_svgs.append(svg_small)
 
-        grouped[root][ctype] = {
-            "name": name,
-            "main_svg": main_svg,
-            "small_svgs": small_svgs,
-        }
+            variations.append({
+                "name": name,
+                "main_svg": main_svg,
+                "small_svg": small_svg,
+            })
 
- 
+        grouped[root][ctype] = variations
 
-    # 🔥 FLATTEN THE STRUCTURE FOR THE TEMPLATE
+    # Build final table (one row per type)
     rows = []
-    for t in TYPES:
+    for t in allowed_types:
         row = {"type": t, "cells": []}
         for r in ROOTS:
-            cell = grouped.get(r, {}).get(t)
-            row["cells"].append(cell)
+            cell_variations = grouped.get(r, {}).get(t)
+
+            if not cell_variations:
+                row["cells"].append(None)
+                continue
+
+            # Always: main variation = the first
+            main = cell_variations[0] 
+
+            # Small variations – only if show_alt is ON
+            if show_alt:
+                smalls = [v["small_svg"] for v in cell_variations[1:3]]  # max 2
+            else:
+                smalls = []
+
+            row["cells"].append({
+                "name": main["name"],
+                "main_svg": main["main_svg"],
+                "small_svgs": smalls,
+            })
+
         rows.append(row)
-
-
-
 
     context = {
         "site_name": site_name,
         "instrument": instrument,
         "lefty": lefty,
+        "show_alt": show_alt,
+        "tab": tab,
         "roots": ROOTS,
-        "types": TYPES,
         "rows": rows,
-        "base_template": "base.html",   # ← THIS FIXES IT
-
-        "grouped": grouped,
-        "instruments": INSTRUMENTS,
+        "instruments": [
+            "ukulele", "guitalele", "guitar",
+            "banjo", "mandolin", "baritone_ukulele"
+        ],
+        "CHORD_TABS": CHORD_TABS,
     }
 
     return render(request, "chords/chord_dictionary.html", context)
