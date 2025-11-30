@@ -21,5 +21,11 @@ def landing_page(request):
             "icon": "bi-people-fill",
             "url": "public_board",  # 👈 Goes to new grid dashboard
         },
+                {
+            "name": "FrancontCube",
+            "desc": "Apprends à résoudre le Rubik’s Cube — version franco-ontarienne",
+            "icon": "bi-cube",
+            "url": "francontcube:home",   # Assuming you will make this namespace
+        },
     ]
     return render(request, "core/landing.html", {"brands": brands})

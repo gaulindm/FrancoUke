@@ -36,8 +36,11 @@ urlpatterns = [
     path("public-board/", public_views.public_board, name="public_board"),
     path("contact/", public_views.contact, name="contact"),
 
-   #nouvel application pour le cube
+   #nouvel application pour le cube mosaic
     path('cube_prep/', include('cube_prep.urls')),  # 👈 new line
+
+    #nouvel application pour le site francontcube
+    path("francontcube/", include("francontcube.urls")),
 
 
 ]
