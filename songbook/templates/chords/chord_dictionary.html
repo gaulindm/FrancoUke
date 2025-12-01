@@ -66,9 +66,11 @@
 <div class="container mt-4">
     <h2>{{ instrument|title }} Chord Dictionary</h2>
 
-    <form method="get" class="mb-3 d-flex gap-3 align-items-center">
+    <form method="get" class="mb-3">
 
-        <!-- Instrument dropdown -->
+        <!-- Preserve active tab -->
+        <input type="hidden" name="tab" value="{{ tab }}">
+    
         <select name="instrument" class="form-select d-inline-block w-auto">
             {% for instr in instruments %}
                 <option value="{{ instr }}" {% if instr == instrument %}selected{% endif %}>

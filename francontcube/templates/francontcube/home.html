@@ -1,97 +1,106 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Vidéos - FrancontCube</title>
+    <title>FrancontCube | Learn the Rubik’s Cube</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <style>
         body {
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #0f8c46 0%, #ffffff 100%) no-repeat fixed;
+            background-size: cover;
         }
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin: auto;
+
+        .cube-card {
+            border-radius: 15px;
+            transition: transform .3s, box-shadow .3s;
+            background-color: #ffffff;
         }
-        .video-fallback {
-            display: none;
-            margin-top: 1rem;
+        .cube-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .hero-title {
+            font-weight: 700;
+            color: #0f8c46;
+        }
+        .brand-green {
+            color: #0f8c46 !important;
+
         }
     </style>
+    
 </head>
 
 <body>
 <div class="container py-5">
 
-    <h1 class="mb-4 text-center">Vidéos FrancontCube</h1>
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            <span style="color: #000000;">Bienvenue à</span>
+            <span style="color: #ffffff;"> Francont</span>
+            <span style="color: #0f8c46;">Cube</span>
+        </h1>
+        <p class="lead text-muted">
+            Apprends à résoudre le Rubik’s Cube — à la franco-ontarienne! 💚🤍
+        </p>
+    
+        <!-- Icône temporaire ou logo -->
+        <i class="bi bi-cube brand-green" style="font-size: 4rem;"></i>
+    </div>
+    <!-- Content Cards -->
+<div class="row g-4">
 
-    <!-- 🌟 VIDEO PRINCIPALE AVEC FALLBACK -->
-    <div class="video-wrapper mb-5">
-        <iframe id="mainVideo"
-                width="560" height="315"
-                src="https://www.youtube.com/embed/HU_JTjMhMnE?rel=0"
-                title="YouTube video player"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-        </iframe>
-
-        <!-- Fallback si l’intégration échoue -->
-        <div id="videoFallback" class="video-fallback alert alert-warning text-center">
-            Impossible d’afficher la vidéo.  
-            <br>
-            <a href="https://www.youtube.com/watch?v=HU_JTjMhMnE" class="btn btn-primary mt-2" target="_blank">
-                Ouvrir sur YouTube
+    <!-- Google Slides -->
+    <div class="col-md-4">
+        <div class="card cube-card p-4 text-center">
+            <i class="bi bi-easel2" style="font-size: 3rem; color: #0d6efd;"></i>
+            <h4 class="mt-3">Google Slides</h4>
+            <p class="text-muted">Les présentations interactive pour apprendre les étapes.</p>
+            <a href="{% url 'francontcube:slides' %}"
+               class="btn btn-outline-primary">
+                Ouvrir
             </a>
         </div>
     </div>
 
-    <!-- 📺 LISTE DE VIDÉOS -->
-    <h3 class="mb-3">Autres vidéos utiles</h3>
-    <ul class="list-group">
-        <li class="list-group-item">
-            <a href="https://www.youtube.com/watch?v=HU_JTjMhMnE" target="_blank">
-                🔗 Résoudre le cube – Partie 1
+    <!-- PDF Booklet -->
+    <div class="col-md-4">
+        <div class="card cube-card p-4 text-center">
+            <i class="bi bi-file-earmark-pdf" style="font-size: 3rem; color: #dc3545;"></i>
+            <h4 class="mt-3">Cahiers PDF</h4>
+            <p class="text-muted">Guide imprimable étape par étape.</p>
+            <a href="{% url 'francontcube:pdfs' %}"
+               class="btn btn-outline-danger">
+                Ouvrir
             </a>
-        </li>
-        <li class="list-group-item">
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
-                🔗 Résoudre le cube – Partie 2
+        </div>
+    </div>
+
+    <!-- YouTube Channel -->
+    <div class="col-md-4">
+        <div class="card cube-card p-4 text-center">
+            <i class="bi bi-youtube" style="font-size: 3rem; color: red;"></i>
+            <h4 class="mt-3">Vidéos</h4>
+            <p class="text-muted">Regarde des tutoriels vidéo pour t’améliorer.</p>
+            <a href="{% url 'francontcube:videos' %}"
+               class="btn btn-outline-danger">
+                Ouvrir
             </a>
-        </li>
-        <li class="list-group-item">
-            <a href="https://www.youtube.com/watch?v=V-_O7nl0Ii0" target="_blank">
-                🔗 Astuces et conseils
-            </a>
-        </li>
-    </ul>
+        </div>
+    </div>
+
 </div>
 
-<!-- Script pour détecter erreur iframe -->
-<script>
-    const iframe = document.getElementById("mainVideo");
-    const fallback = document.getElementById("videoFallback");
+    
 
-    // Teste si YouTube bloque l'intégration
-    iframe.onerror = () => {
-        iframe.style.display = "none";
-        fallback.style.display = "block";
-    };
-
-    // Sécurité : si rien n’a chargé après 3 sec → fallback
-    setTimeout(() => {
-        const noData = !iframe.contentWindow || iframe.contentWindow.length === 0;
-        if (noData) {
-            iframe.style.display = "none";
-            fallback.style.display = "block";
-        }
-    }, 3000);
-</script>
-
+    <!-- Content Cards -->
+    
+</div>
 </body>
 </html>

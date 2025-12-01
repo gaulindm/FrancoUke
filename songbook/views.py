@@ -168,23 +168,17 @@ class ArtistListView(SiteContextMixin, ListView):
 # ---------------------------------------------------------------------
 # PDF helpers and endpoints
 # ---------------------------------------------------------------------
+from django.contrib.auth.models import AnonymousUser
+
 def generate_pdf_response(filename, songs, user=None, transpose_value=0, formatting=None, site_name=None, inline=False):
-    """
-    Generic PDF response generator that delegates to generate_songs_pdf.
-    - filename: base filename (no extension)
-    - songs: iterable of Song objects
-    - user: the requesting user (or None)
-    - transpose_value: integer semitone shift (0 for none)
-    - formatting: optional formatting object or None
-    - site_name: optional site name passed to generate_songs_pdf
-    - inline: if True, Content-Disposition is inline, otherwise attachment
-    """
     content_type = "application/pdf"
     response = HttpResponse(content_type=content_type)
     disposition_type = "inline" if inline else "attachment"
     response["Content-Disposition"] = f'{disposition_type}; filename="{filename}.pdf"'
+
     generate_songs_pdf(response, songs, user, transpose_value, formatting, site_name=site_name)
     return response
+
 
 
 def generate_multi_song_pdf(request):
@@ -337,22 +331,28 @@ class UserSongListView(ListView):
         site_name = self.kwargs.get("site_name")
         return Song.objects.filter(contributor=user, site_name=site_name).order_by("songTitle")
 
+from types import SimpleNamespace
 
-class ScoreView(LoginRequiredMixin, DetailView):
-    """
-    Detail view for a single song, requiring login.
-    Provides user preferences to the template.
-    """
+class ScoreView(DetailView):
     model = Song
     template_name = "songbook/song_simplescore.html"
     context_object_name = "score"
-    login_url = "/users/login/"
-    redirect_field_name = "next"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["song"] = self.get_object()  # alias for templates
-        preferences, _ = UserPreference.objects.get_or_create(user=self.request.user)
+        context["song"] = self.get_object()
+
+        if self.request.user.is_authenticated:
+            preferences, _ = UserPreference.objects.get_or_create(user=self.request.user)
+        else:
+            # Anonymous default preferences
+            preferences = SimpleNamespace(
+                font_size=18,
+                theme="light",
+                auto_scroll=False,
+                scroll_speed=20,
+            )
+
         context["preferences"] = preferences
         return context
 
@@ -364,12 +364,7 @@ class SongListView(SiteContextMixin, ListView):
     ordering = ["songTitle"]
     paginate_by = 25
 
-    def dispatch(self, request, *args, **kwargs):
-        # If not logged in, show a modal to prompt auth (legacy UX). If you want anonymous browsing,
-        # remove this and let anonymous users see the list.
-        if not request.user.is_authenticated:
-            return render(request, "users/auth_modal.html", {"next_url": request.path})
-        return super().dispatch(request, *args, **kwargs)
+
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -503,45 +498,45 @@ def about(request):
 def whats_new(request):
     return render(request, "songbook/whats_new.html", site_context(request))
 
-
-
 ROOTS = ["C", "C#","D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
-TYPES = ["", "m", "aug", "dim", "7", "m7", "M7","aug7" ,"dim7" , "m7b5","mMaj7",
-         "sus2", "sus4", "7sus2","7sus4","9","m9","M9","11","m11","13","m13","5", "6", "m6", "add9", "madd9"]
-ADVANCED_TYPES = [
-    "aug", "dim", "aug7", "m7b5", "mMaj7",
-    "9", "m9", "M9", "11", "m11", "13", "m13",
-    "5", "add9", "madd9"
-]
+
 CHORD_TABS = {
-    "triads": ["", "m", "aug", "dim"],
-    "sevenths": ["7", "m7", "M7", "aug7", "dim7", "m7b5", "mMaj7"],
-    "suspended": ["sus2", "sus4", "7sus2", "7sus4"],
-    "extended": ["9", "m9", "M9", "11", "m11", "13", "m13"],
-    "added": ["5", "6", "m6", "add9", "madd9"],
+    "triads":     ["", "m", "aug", "dim"],
+    "sevenths":   ["7", "m7", "M7", "aug7", "dim7", "m7b5", "mMaj7"],
+    "suspended":  ["sus2", "sus4", "7sus2", "7sus4"],
+    "extended":   ["9", "m9", "M9", "11", "m11", "13", "m13"],
+    "added":      ["5", "6", "m6", "add9", "madd9"],
 }
+
+INSTRUMENTS = [
+    "ukulele", "guitalele", "guitar",
+    "banjo", "mandolin", "baritone_ukulele"
+]
+
 
 def chord_dictionary(request):
     instrument = request.GET.get("instrument", "ukulele")
     site_name = request.resolver_match.namespace
-
-    chords = load_chords(instrument)
     lefty = request.GET.get("lefty") in ["1", "true", "on"]
     show_alt = request.GET.get("show_alt") in ["1", "true", "on"]
 
-    # Which tab is active?
+    # Selected tab (triads default)
     tab = request.GET.get("tab", "triads")
     allowed_types = CHORD_TABS.get(tab, CHORD_TABS["triads"])
 
-    grouped = {}  # grouped[root][type] = list of variations
+    # Load chord JSON
+    chords = load_chords(instrument)
+
+    # grouped[root][ctype] = list of variations
+    grouped = {r: {} for r in ROOTS}
 
     for chord in chords:
-        name = chord["name"]
+        name = chord.get("name")
         variations_raw = chord.get("variations", [])
-        if not variations_raw:
+        if not name or not variations_raw:
             continue
 
-        # Split root & type (C#, Cm, Cmaj7, etc.)
+        # Extract root + type
         m = re.match(r"([A-G][b#]?)(.*)", name)
         if not m:
             continue
@@ -549,10 +544,11 @@ def chord_dictionary(request):
         root = m.group(1)
         ctype = m.group(2) or ""
 
-        if root not in grouped:
-            grouped[root] = {}
+        # Skip types not in the current tab
+        if ctype not in allowed_types:
+            continue
 
-        # Build SVGs for all variations
+        # Build variation objects
         variations = []
         for v in variations_raw:
 
@@ -580,25 +576,23 @@ def chord_dictionary(request):
 
         grouped[root][ctype] = variations
 
-    # Build final table (one row per type)
+    # Build rows (one row per type)
     rows = []
-    for t in allowed_types:
-        row = {"type": t, "cells": []}
-        for r in ROOTS:
-            cell_variations = grouped.get(r, {}).get(t)
+    for ctype in allowed_types:
+        row = {"type": ctype, "cells": []}
 
-            if not cell_variations:
+        for root in ROOTS:
+            variations = grouped.get(root, {}).get(ctype)
+
+            if not variations:
                 row["cells"].append(None)
                 continue
 
-            # Always: main variation = the first
-            main = cell_variations[0] 
+            # Main = always first variation
+            main = variations[0]
 
-            # Small variations – only if show_alt is ON
-            if show_alt:
-                smalls = [v["small_svg"] for v in cell_variations[1:3]]  # max 2
-            else:
-                smalls = []
+            # Alternate variations (only if show_alt ON)
+            smalls = [v["small_svg"] for v in variations[1:3]] if show_alt else []
 
             row["cells"].append({
                 "name": main["name"],
@@ -615,11 +609,9 @@ def chord_dictionary(request):
         "show_alt": show_alt,
         "tab": tab,
         "roots": ROOTS,
+
         "rows": rows,
-        "instruments": [
-            "ukulele", "guitalele", "guitar",
-            "banjo", "mandolin", "baritone_ukulele"
-        ],
+        "instruments": INSTRUMENTS,
         "CHORD_TABS": CHORD_TABS,
     }
 

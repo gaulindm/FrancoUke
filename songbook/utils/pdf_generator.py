@@ -733,7 +733,11 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
 
 
     print("USER:", user)
-    print("AUTHENTICATED:", user.is_authenticated)
+    is_auth = bool(user and getattr(user, "is_authenticated", False))
+    print("AUTHENTICATED:", is_auth)
+
+
+
     print("PDF USER PREFS:", user_prefs)
 
 
