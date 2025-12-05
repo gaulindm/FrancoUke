@@ -17,7 +17,7 @@ class ChordDiagram(Flowable):
         self,
         chord_name: str,
         variation: Dict[str, Any],
-        scale: float = 0.5,
+        scale: float = 0.2,
         is_lefty: bool = False,
         instrument: str = "ukulele",
         variation_index: Optional[int] = None,
@@ -95,7 +95,7 @@ class ChordDiagram(Flowable):
             x_dot = i * 15
             if isinstance(fret, int) and fret > 0:
                 y_dot = (fret_count - fret) * 15 + 15 / 2
-                c.setFillColor(colors.green)
+                c.setFillColor(colors.black)
                 c.circle(x_dot, y_dot, dot_radius, stroke=0, fill=1)
             elif fret == 0:
                 c.setFont("Helvetica", 10)

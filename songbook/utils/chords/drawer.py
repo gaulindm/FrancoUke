@@ -8,6 +8,9 @@ from songbook.utils.transposer import clean_chord
 from songbook.utils.chords.variation_rules import parse_requested_variation, select_variations
 from songbook.utils.chords.normalize import normalize_variation
 
+from typing import List, Dict, Any, Optional
+#from songbook.utils.chords.diagrams import prepare_chords, draw_diagrams, MAX_CHORDS_PER_ROW
+
 
 MAX_CHORDS_PER_ROW = 14
 
@@ -100,14 +103,6 @@ def draw_diagrams(
             canvas.saveState()
             canvas.translate(x_offset, y_offset)
 
-            # --- DEBUG RECTANGLE ---
-            canvas.setStrokeColor(colors.red)
-            canvas.setLineWidth(1)
-            rect_width = 60  # approx width of diagram
-            rect_height = 80  # approx height of diagram
-            canvas.rect(0, 0, rect_width, rect_height, stroke=1, fill=0)
-            print(f"[DEBUG] Drawing debug rect at X={x_offset}, Y={y_offset}")
-
             diag.draw()
             canvas.restoreState()
 
@@ -115,10 +110,11 @@ def draw_diagrams(
         y_offset -= row_spacing
 
 
+
 def draw_footer(
     canvas,
     doc,
-    relevant_chords: List[Dict[str, Any]],
+    relevant_chords: list,
     chord_spacing: int = 50,
     row_spacing: int = 70,
     is_lefty: bool = False,
@@ -128,34 +124,79 @@ def draw_footer(
     acknowledgement: str = "",
 ):
     """
-    Draw footer chord diagrams for primary instrument only.
+    Draw footer chord diagrams, dynamically adjusting number per row and vertical position.
     """
-    print("\n" + "="*80)
-    print("DRAW_FOOTER CALLED")
-    print("is_printing_alternate_chord =", is_printing_alternate_chord)
-    print("instrument =", instrument)
-    print("TOTAL relevant chords =", len(relevant_chords))
-    print("="*80 + "\n")
-
-
-
 
     primary_chords = [ch for ch in relevant_chords if ch.get("instrument") == instrument]
     primary_diagrams = prepare_chords(primary_chords, is_printing_alternate_chord)
 
-    # DEBUG OUTPUT
-    print("Prepared diagrams count =", len(primary_diagrams))
-    for d in primary_diagrams:
-        print("   ->", d.get("name"), d.get("variation"))
+    if not primary_diagrams:
+        return
 
-    rows_needed = (len(primary_diagrams) + MAX_CHORDS_PER_ROW - 1) // MAX_CHORDS_PER_ROW
-    start_y = 172 if rows_needed > 1 else 150
+    page_width, page_height = canvas._pagesize
+    ack_height = 20
+    bottom_margin = 10 + ack_height
+
+    # -------------------------
+    # Determine max chords per row dynamically
+    # -------------------------
+    max_possible_per_row = len(primary_diagrams)
+    while (max_possible_per_row - 1) * chord_spacing > page_width * 0.9 and max_possible_per_row > 1:
+        max_possible_per_row -= 1
+
+    MAX_CHORDS_PER_ROW = max_possible_per_row
+
+    # -------------------------
+    # Rows and scaling
+    # -------------------------
+    rows = [primary_diagrams[i:i + MAX_CHORDS_PER_ROW] for i in range(0, len(primary_diagrams), MAX_CHORDS_PER_ROW)]
+    rows_needed = len(rows)
+
+    # Define a safe margin above the bottom (for acknowledgement)
+    ack_height = 20  # height reserved for acknowledgement line
+    bottom_margin_safe = bottom_margin + ack_height
+
+    # Compute total height occupied by rows
+    total_rows_height = rows_needed * row_spacing
+
+    # Start drawing the top row just above bottom safe margin
+    start_y = bottom_margin_safe + total_rows_height - row_spacing  - 10 # top of first row
 
 
-    draw_diagrams(canvas, primary_diagrams, 0, start_y, chord_spacing, row_spacing, is_lefty, instrument)
+    # -------------------------
+    # Draw diagrams
+    # -------------------------
+    y_offset = start_y
+    for row in rows:
+        row_width = (len(row) - 1) * chord_spacing
+        x_offset = (page_width - row_width) / 2  # center row
 
+        for chord in row:
+            display_name = clean_chord(chord.get("name", ""))
+            diagram_var = chord.get("variation", {})
 
+            diag = ChordDiagram(
+                display_name,
+                diagram_var,
+                scale=0.5,  # base scale, adjust if needed
+                is_lefty=is_lefty,
+                instrument=instrument
+            )
+            diag.canv = canvas
 
+            canvas.saveState()
+            canvas.translate(x_offset, y_offset)
+            diag.draw()
+            canvas.restoreState()
+
+            x_offset += chord_spacing
+
+        y_offset -= row_spacing
+
+    # -------------------------
+    # Draw acknowledgement
+    # -------------------------
     if acknowledgement:
         canvas.setFont("Helvetica-Oblique", 10)
-        canvas.drawCentredString(doc.pagesize[0] / 2, 0.2 * inch, f"Acknowledgement: {acknowledgement}")
+        canvas.setFillColor(colors.black)
+        canvas.drawCentredString(page_width / 2, bottom_margin - ack_height / 2, f"Acknowledgement: {acknowledgement}")
