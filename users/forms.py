@@ -3,6 +3,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from .models import UserPreference
 from songbook.utils.chord_library import load_chord_dict
+from songbook.utils.chord_library import load_chord_dict
+from teleprompter.views import clean_chord_name
+# users/forms.py
+from songbook.utils.chords.loader import load_chords  # <- ensure this import exists
+# keep BootstrapFormMixin import as-is
+
 
 User = get_user_model()
 
@@ -41,23 +47,6 @@ class UserRegisterForm(UserCreationForm, BootstrapFormMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.apply_bootstrap_classes()
-
-from songbook.utils.chord_library import load_chord_dict
-from teleprompter.views import clean_chord_name
-
-
-# users/forms.py
-from django import forms
-from .models import UserPreference
-from songbook.utils.chord_utils import load_chords  # <- ensure this import exists
-# keep BootstrapFormMixin import as-is
-
-# users/forms.py
-from django import forms
-from .models import UserPreference
-
-from django import forms
-from .models import UserPreference
 
 class UserPreferenceForm(forms.ModelForm):
     # Text field for comma-separated known chords

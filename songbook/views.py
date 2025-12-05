@@ -43,13 +43,14 @@ from .forms import SongFormattingForm
 from .mixins import SiteContextMixin
 from .models import Song, SongFormatting
 from .parsers import parse_song_data
-from songbook.utils.pdf_generator import generate_songs_pdf, load_chords
+from songbook.utils.pdf_generator import generate_songs_pdf
 from songbook.utils.transposer import extract_chords, transpose_lyrics
 from users.models import UserPreference
 
 import re
 from django.shortcuts import render
-from songbook.utils.chord_utils import load_chords, render_chord_svg
+from songbook.utils.chords.loader import load_chords
+from songbook.utils.chords.diagrams import render_chord_svg
 import io
 from django.http import HttpResponse
 from reportlab.pdfgen.canvas import Canvas

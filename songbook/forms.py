@@ -1,6 +1,9 @@
 # forms.py
 from django import forms
 from taggit.models import Tag
+from .models import SongFormatting
+import json
+
 
 class TagFilterForm(forms.Form):
     tag = forms.ModelChoiceField(
@@ -28,11 +31,7 @@ class SongForm(forms.Form):
         label="Content"
     )
 
-from .models import SongFormatting
 
-from django import forms
-import json
-from .models import SongFormatting
 
 class SongFormattingForm(forms.ModelForm):
     class Meta:
