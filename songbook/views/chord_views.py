@@ -8,7 +8,8 @@ from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
 from songbook.utils.chords.loader import load_chords
-from songbook.utils.chords.diagrams import render_chord_svg
+from songbook.utils.chord_diagram_svg import render_chord_svg
+
 
 # ---------------------------------------------------------------------
 # Constants (moved from main views.py)
@@ -18,7 +19,7 @@ ROOTS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 
 CHORD_TABS = {
     "triads": ["", "m", "aug", "dim"],
-    "sevenths": ["7", "m7", "M7", "aug7", "dim7", "m7b5", "mMaj7"],
+    "sevenths": ["7", "m7", "M7", "aug7", "m7b5", "mMaj7"],
     "suspended": ["sus2", "sus4", "7sus2", "7sus4"],
     "extended": ["9", "m9", "M9", "11", "m11", "13", "m13"],
     "added": ["5", "6", "m6", "add9", "madd9"],
@@ -74,6 +75,18 @@ def chord_dictionary(request):
     allowed_types = CHORD_TABS.get(tab, CHORD_TABS["triads"])
 
     chords = load_chords(instrument)
+
+    # DEBUG
+    print("=== DEBUG chord_dictionary ===")
+    print("Instrument:", instrument)
+    print("Loaded chords:", len(chords))
+    if chords:
+        print("First chord:", chords[0])
+    else:
+        print("NO chords loaded!")
+
+
+
     grouped = {root: {} for root in ROOTS}
 
     for chord in chords:

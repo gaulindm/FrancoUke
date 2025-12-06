@@ -103,7 +103,7 @@ def extract_used_chords(lyrics_with_chords: Any) -> list[str]:
 # =======================
 # LOAD RELEVANT CHORDS
 # =======================
-def load_relevant_chords(songs, user_prefs, transpose_value):
+def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate=None):
     """
     Load chords for the primary instrument ONLY, including requested alternates
     from chordpro syntax such as [C(1)], and optionally showing default alternates
@@ -112,11 +112,18 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
     Rules:
     - Always include primary variation (v0).
     - If chordpro requests a variation N via [C(N)], ALWAYS include it.
+    - If suggested_alternate is specified, ALWAYS include that variation.
     - If user preference for alternates is ON, include v1 unless overridden.
-    - If chordpro requests (0), then DO NOT auto-include alternates.
     """
 
     import re
+
+    # 🐛 DEBUG
+    print("=" * 60)
+    print("LOAD_RELEVANT_CHORDS DEBUG:")
+    print(f"  suggested_alternate input: {suggested_alternate}")
+    print(f"  show_alternate_chords pref: {user_prefs.get('show_alternate_chords', False)}")
+    print("=" * 60)
 
     # ------------------------------------------------------------
     # Helper: parse chordpro forced variation, e.g. "C(1)" -> ("C", 1)
@@ -143,16 +150,29 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
 
         forced = requested_dict.get(base_name, None)
 
-        # SONG FORCES A VARIATION
+        # 🐛 DEBUG
+        print(f"  select_variations for '{base_name}':")
+        print(f"    - total variations available: {len(all_variations)}")
+        print(f"    - forced variation from requested_dict: {forced}")
+        print(f"    - user_pref_show_alt: {user_pref_show_alt}")
+
+        # SONG FORCES A VARIATION (from suggested_alternate OR inline [C(1)])
         if forced is not None:
+            print(f"    - FORCED variation detected: {forced}")
             if forced < len(all_variations) and forced != 0:
                 result.append(all_variations[forced])
+                print(f"    - Added variation {forced}")
+            else:
+                print(f"    - Forced variation {forced} is invalid or is 0")
+            print(f"    - Final variations: {len(result)} variations")
             return result
 
         # USER PREF: INCLUDE DEFAULT ALTERNATE v1
         if user_pref_show_alt and len(all_variations) > 1:
             result.append(all_variations[1])
+            print(f"    - Added v1 due to user preference")
 
+        print(f"    - Final variations: {len(result)} variations")
         return result
 
     # ------------------------------------------------------------
@@ -170,16 +190,36 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
     # Extract raw chords from the song
     # ------------------------------------------------------------
     raw_used = extract_used_chords(songs[0].lyrics_with_chords)
+    
+    # 🐛 DEBUG
+    print(f"Raw chords extracted: {raw_used}")
 
     # MAP: {base_name -> forced_variation_index}
     requested_variations = {}
 
-    # Build request map FIRST so transposed chords keep correct overrides
+    # 🆕 Process suggested_alternate from metadata FIRST (global override)
+    if suggested_alternate:
+        print(f"Processing suggested_alternate: '{suggested_alternate}'")
+        match = re.match(r"^([A-G][#b]?m?(?:add\d+)?)(?:\((\d+)\))?$", suggested_alternate.strip())
+        if match:
+            base = match.group(1)
+            forced = match.group(2)
+            print(f"  Parsed: base='{base}', forced='{forced}'")
+            if forced is not None:
+                requested_variations[base] = int(forced)
+                print(f"  Added to requested_variations: {base} -> {int(forced)}")
+        else:
+            print(f"  FAILED to parse suggested_alternate: '{suggested_alternate}'")
+
+    # Build request map from inline chords (can override suggested_alternate)
     for ch in raw_used:
         cleaned = normalize_chord(clean_chord(ch))
         base, forced = parse_requested_variation(cleaned)
         if forced is not None:
             requested_variations[base] = forced
+
+    # 🐛 DEBUG
+    print(f"Final requested_variations map: {requested_variations}")
 
     # ------------------------------------------------------------
     # Normalize + transpose the chords
@@ -189,6 +229,9 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
         transpose_chord(clean_chord(ch).strip(), transpose_value).strip()
         for ch in used_cleaned
     }
+
+    # 🐛 DEBUG
+    print(f"Transposed chords: {transposed_chords}")
 
     # ------------------------------------------------------------
     # Build final relevant chord list
@@ -227,5 +270,6 @@ def load_relevant_chords(songs, user_prefs, transpose_value):
                 added_keys.add(key)
                 break
 
+    print(f"Final relevant_chords count: {len(relevant_chords)}")
+    print("=" * 60)
     return relevant_chords
-

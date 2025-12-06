@@ -67,6 +67,9 @@ class ChordDiagram(Flowable):
         c.setLineWidth(1)
         c.rect(0, 0, (string_count - 1) * 15, fret_count * 15)
 
+
+
+
         # Draw strings
         c.setStrokeColor(colors.black)
         for i in range(string_count):
@@ -74,7 +77,8 @@ class ChordDiagram(Flowable):
 
         # Draw frets
         for j in range(fret_count + 1):
-            width = 2
+            # Only draw thick nut bar when baseFret is 1 (no offset)
+            width = 4 if (j == fret_count and base_fret == 1) else 1
             c.setLineWidth(width)
             c.line(0, j * 15, (string_count - 1) * 15, j * 15)
 
@@ -108,8 +112,16 @@ class ChordDiagram(Flowable):
         label_name = self.chord_name
         if self.variation_index is not None:
             label_name += f"[{self.variation_index}]"
-        c.setFont("Helvetica-Bold", 12)
+        c.setFont("Helvetica-Bold", 18)
         c.drawCentredString((string_count - 1) * 15 / 2, fret_count * 15 + 18, label_name)
+
+        # 🆕 Draw base fret number if > 1 (at the TOP of the diagram)
+        if base_fret > 1:
+            c.setFont("Helvetica", 14)
+            # Position it to the left of the TOP fret line
+            c.drawRightString(-5, fret_count * 15 - 12, f"{base_fret}fr")
+
+
 
         c.restoreState()
 
@@ -132,7 +144,3 @@ def draw_chord_diagram(c, x: float, y: float, variation: Dict[str, Any], chord_n
 def build_chord_drawing(chord_name: str, variation: Dict[str, Any], scale: float = 1.0, instrument: str = "ukulele", is_lefty: bool = False):
     drawing = Drawing(100, 100)  # placeholder; copy previous full implementation
     return drawing
-
-def render_chord_svg(chord_name: str, variation: Dict[str, Any], instrument: str = "ukulele", scale: float = 1.0, is_lefty: bool = False) -> str:
-    drawing = build_chord_drawing(chord_name, normalize_variation(variation), scale, instrument, is_lefty)
-    return renderSVG.drawToString(drawing)

@@ -439,8 +439,19 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     elements = []
 
     # Load user preferences and chords
+    # Load user preferences and chords
     user_prefs = get_user_preferences(user)
-    relevant_chords = load_relevant_chords(songs, user_prefs, transpose_value)
+
+    # Get suggested_alternate from first song's metadata
+    suggested_alternate = None
+    if songs and songs[0].metadata:
+        suggested_alternate = songs[0].metadata.get('suggested_alternate')
+        print(f"[PDF_GENERATOR] suggested_alternate from metadata: {suggested_alternate}")
+
+    relevant_chords = load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate)
+
+
+
     print("RELEVANT CHORDS BEFORE FILTER:", relevant_chords)
 
     # Apply known-chord filter if enabled
