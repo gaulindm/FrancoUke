@@ -72,6 +72,12 @@ class Song(models.Model):
         else:
             self.metadata = {}
             self.lyrics_with_chords = []
+        if self.lyrics_with_chords and self.metadata.get("suggested_alternate"):
+            suggested = self.metadata["suggested_alternate"]
+            for chord_dict in self.lyrics_with_chords:
+                if isinstance(chord_dict, dict):
+                    chord_dict["suggested_alternate"] = suggested
+
 
         super().save(*args, **kwargs)
 
@@ -89,11 +95,14 @@ class Song(models.Model):
             "tempo": re.search(r'{tempo:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
             "timeSignature": re.search(r'{timeSignature:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
             "youtube": re.search(r'{youtube:\s*(https?://[^\s\}]+)}', self.songChordPro, re.IGNORECASE),
-
             # 🆕 NEW TAGS for header short notes
             "count_in": re.search(r'{count_in:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             "short_instruction_1": re.search(r'{short_instruction_1:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             "short_instruction_2": re.search(r'{short_instruction_2:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
+            # NEW TAG  for alternate chord
+            "suggested_alternate": re.search(r'{suggested_alternate:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE
+),
+
         }
         metadata = {tag: match.group(1) if match else None for tag, match in tags.items()}
         title = metadata.pop("title", "Untitled Song")
