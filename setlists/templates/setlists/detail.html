@@ -1,4 +1,4 @@
-{% extends base_template %}
+{% extends 'base_uke4ia.html' %}
 
 {% block content %}
 <div class="container mt-4">
@@ -105,7 +105,7 @@
                     </small>
                   </div>
                   <div class="card-body">
-                    {{ note.note|linebreaks }}
+                    {{ note.notes|safe }}
                   </div>
                 </div>
               {% endfor %}
