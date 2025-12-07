@@ -452,9 +452,22 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     # Apply known-chord filter if enabled
     if user_prefs.get("use_known_chord_filter", False):
         known_set = {normalize_chord(ch).lower() for ch in user_prefs.get("known_chords", [])}
+        
+        # Parse which chords have explicitly requested variations
+        explicitly_requested = set()
+        if suggested_alternate:
+            import re
+            alternates = [alt.strip() for alt in suggested_alternate.split(',')]
+            for alt in alternates:
+                match = re.match(r"^([A-G][#b]?m?(?:add\d+)?)(?:\((\d+)\))?$", alt)
+                if match:
+                    explicitly_requested.add(normalize_chord(match.group(1)).lower())
+        
+        # Filter out known chords UNLESS they were explicitly requested
         relevant_chords = [
             chord for chord in relevant_chords
-            if normalize_chord(chord["name"]).lower() not in known_set
+            if (normalize_chord(chord["name"]).lower() not in known_set or
+                normalize_chord(chord["name"]).lower() in explicitly_requested)
         ]
         print("RELEVANT CHORDS AFTER FILTER:", relevant_chords)
 
