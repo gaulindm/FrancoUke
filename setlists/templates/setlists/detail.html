@@ -46,17 +46,21 @@
 
           {% with item.song.rehearsal_notes.count as note_count %}
             {% if note_count > 0 %}
-              <a href="{% url 'board:song_rehearsal_history' item.song.id %}" 
-                 class="btn btn-sm btn-outline-secondary ms-2"
-                 title="View rehearsal notes for {{ item.song.songTitle }}">
+              <button type="button" 
+                      class="btn btn-sm btn-outline-secondary ms-2"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#notesModal{{ item.song.id }}"
+                      title="View rehearsal notes for {{ item.song.songTitle }}">
                 📝 {{ note_count }} note{{ note_count|pluralize }}
-              </a>
+              </button>
             {% endif %}
           {% endwith %}
         </div>
 
         <a href="{% url 'songbook:score_view' item.song.pk %}" 
-           class="btn btn-sm btn-outline-primary">
+           class="btn btn-sm btn-outline-primary"
+           target="_blank"
+           rel="noopener noreferrer">
           🎼 View
         </a>
       </li>
@@ -74,6 +78,52 @@
     </div>
   {% endif %}
 </div>
+
+<!-- 📝 REHEARSAL NOTES MODALS -->
+{% for item in songs %}
+  {% with item.song.rehearsal_notes.all as notes %}
+    {% if notes %}
+      <div class="modal fade" id="notesModal{{ item.song.id }}" tabindex="-1" 
+           aria-labelledby="notesModalLabel{{ item.song.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="notesModalLabel{{ item.song.id }}">
+                📝 Rehearsal Notes: {{ item.song.songTitle }}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              {% for note in notes %}
+                <div class="card mb-3">
+                  <div class="card-header bg-light">
+                    <small class="text-muted">
+                      {{ note.date|date:"D, M d, Y" }}
+                      {% if note.event %}
+                        • {{ note.event.title }}
+                      {% endif %}
+                    </small>
+                  </div>
+                  <div class="card-body">
+                    {{ note.note|linebreaks }}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="modal-footer">
+              <a href="{% url 'board:song_rehearsal_history' item.song.id %}" 
+                 class="btn btn-sm btn-outline-primary"
+                 target="_blank">
+                View Full History
+              </a>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endwith %}
+{% endfor %}
 
 <style>
   .list-group-item {

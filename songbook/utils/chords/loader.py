@@ -178,9 +178,11 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
             return result
 
         # USER PREF: INCLUDE DEFAULT ALTERNATE v1
-        if user_pref_show_alt and len(all_variations) > 1:
-            result.append(all_variations[1])
-            print(f"    - Added v1 due to user preference")
+        if user_pref_show_alt:
+            for idx in range(1, len(all_variations)):
+                if all_variations[idx] not in result:
+                    result.append(all_variations[idx])
+                    print(f"    - Added v{idx} due to user preference")
 
         print(f"    - Final variations: {len(result)} variations")
         return result
