@@ -6,16 +6,11 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from django.conf import settings
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
-#from .chord_utils import load_chords, extract_used_chords, draw_footer, ChordDiagram
 from songbook.models import SongFormatting
 from songbook.utils.transposer import transpose_chord, normalize_chord
 from users.models import UserPreference
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-#from songbook.utils.transposer import clean_chord
-#from songbook.utils.chords.normalize import normalize_variation, detect_barre, compute_base_fret
-#from songbook.utils.chords.variation_rules import parse_requested_variation, select_variations
-#from songbook.utils.chords.diagrams import ChordDiagram, build_chord_drawing, render_chord_svg, draw_chord_diagram
 from songbook.utils.chords.loader import extract_used_chords, load_relevant_chords
 from songbook.utils.chords.drawer import draw_footer
 

@@ -148,22 +148,32 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
         if len(all_variations) > 0:
             result.append(all_variations[0])
 
-        forced = requested_dict.get(base_name, None)
+        forced_list = requested_dict.get(base_name, None)
 
         # 🐛 DEBUG
         print(f"  select_variations for '{base_name}':")
         print(f"    - total variations available: {len(all_variations)}")
-        print(f"    - forced variation from requested_dict: {forced}")
+        print(f"    - forced variations from requested_dict: {forced_list}")
         print(f"    - user_pref_show_alt: {user_pref_show_alt}")
 
-        # SONG FORCES A VARIATION (from suggested_alternate OR inline [C(1)])
-        if forced is not None:
-            print(f"    - FORCED variation detected: {forced}")
-            if forced < len(all_variations) and forced != 0:
-                result.append(all_variations[forced])
-                print(f"    - Added variation {forced}")
-            else:
-                print(f"    - Forced variation {forced} is invalid or is 0")
+        # SONG FORCES VARIATION(S) (from suggested_alternate OR inline [C(1)])
+        if forced_list is not None:
+            print(f"    - FORCED variations detected: {forced_list}")
+            for forced in forced_list:
+                if forced < len(all_variations) and forced != 0:
+                    if all_variations[forced] not in result:
+                        result.append(all_variations[forced])
+                        print(f"    - Added variation {forced}")
+                    else:
+                        print(f"    - Variation {forced} already in result (skipped)")
+                else:
+                    print(f"    - Forced variation {forced} is invalid or is 0")
+            
+            # 🐛 NEW DEBUG: Show what's actually in result
+            print(f"    - Result list has {len(result)} items:")
+            for idx, var in enumerate(result):
+                print(f"      [{idx}] = {var}")
+            
             print(f"    - Final variations: {len(result)} variations")
             return result
 
@@ -174,7 +184,6 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
 
         print(f"    - Final variations: {len(result)} variations")
         return result
-
     # ------------------------------------------------------------
     # Load primary instrument dictionary
     # ------------------------------------------------------------
@@ -194,29 +203,39 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
     # 🐛 DEBUG
     print(f"Raw chords extracted: {raw_used}")
 
-    # MAP: {base_name -> forced_variation_index}
+    # MAP: {base_name -> LIST of forced_variation_indices}
     requested_variations = {}
 
     # 🆕 Process suggested_alternate from metadata FIRST (global override)
     if suggested_alternate:
         print(f"Processing suggested_alternate: '{suggested_alternate}'")
-        match = re.match(r"^([A-G][#b]?m?(?:add\d+)?)(?:\((\d+)\))?$", suggested_alternate.strip())
-        if match:
-            base = match.group(1)
-            forced = match.group(2)
-            print(f"  Parsed: base='{base}', forced='{forced}'")
-            if forced is not None:
-                requested_variations[base] = int(forced)
-                print(f"  Added to requested_variations: {base} -> {int(forced)}")
-        else:
-            print(f"  FAILED to parse suggested_alternate: '{suggested_alternate}'")
+        # Split by comma to support multiple alternates
+        alternates = [alt.strip() for alt in suggested_alternate.split(',')]
+        
+        for alt in alternates:
+            match = re.match(r"^([A-G][#b]?m?(?:add\d+)?)(?:\((\d+)\))?$", alt)
+            if match:
+                base = match.group(1)
+                forced = match.group(2)
+                print(f"  Parsed: base='{base}', forced='{forced}'")
+                if forced is not None:
+                    # Store as a list to allow multiple variations per chord
+                    if base not in requested_variations:
+                        requested_variations[base] = []
+                    requested_variations[base].append(int(forced))
+                    print(f"  Added to requested_variations: {base} -> {requested_variations[base]}")
+            else:
+                print(f"  FAILED to parse alternate: '{alt}'")
 
     # Build request map from inline chords (can override suggested_alternate)
     for ch in raw_used:
         cleaned = normalize_chord(clean_chord(ch))
         base, forced = parse_requested_variation(cleaned)
         if forced is not None:
-            requested_variations[base] = forced
+            if base not in requested_variations:
+                requested_variations[base] = []
+            if forced not in requested_variations[base]:
+                requested_variations[base].append(forced)
 
     # 🐛 DEBUG
     print(f"Final requested_variations map: {requested_variations}")

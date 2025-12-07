@@ -18,39 +18,40 @@ def parse_requested_variation(chord_name: str) -> Tuple[str, Optional[int]]:
 
 
 from typing import List, Dict, Any, Optional
+'''
+def select_variations(base_name, all_variations, user_pref_show_alt, requested_dict):
+    result = []
 
-def select_variations(
-    base_name: str,
-    all_variations: List[Dict[str, Any]],
-    user_pref_show_alternates: bool,
-    requested_variations: Dict[str, int]
-) -> List[Dict[str, Any]]:
-    """
-    Determine which variations to include for a chord.
-
-    Rules:
-    - Always include variation 0 (first variation)
-    - If song forces variation N (via [C(N)]), include it even if user disables alternates
-    - If user preference enables alternates, include variation 1
-    - If forced variation is 0, this suppresses automatic alternates
-    """
-    result: List[Dict[str, Any]] = []
-
-    # Always include variation 0 if present
+    # Always include v0
     if len(all_variations) > 0:
         result.append(all_variations[0])
 
-    forced: Optional[int] = requested_variations.get(base_name, None)
+    forced_list = requested_dict.get(base_name, None)
 
-    # If song forces variation N
-    if forced is not None and forced < len(all_variations):
-        if forced != 0:
-            result.append(all_variations[forced])
+    # 🐛 DEBUG
+    print(f"  select_variations for '{base_name}':")
+    print(f"    - total variations available: {len(all_variations)}")
+    print(f"    - forced variations from requested_dict: {forced_list}")
+    print(f"    - user_pref_show_alt: {user_pref_show_alt}")
+
+    # SONG FORCES VARIATION(S) (from suggested_alternate OR inline [C(1)])
+    if forced_list is not None:
+        print(f"    - FORCED variations detected: {forced_list}")
+        for forced in forced_list:
+            if forced < len(all_variations) and forced != 0:
+                if all_variations[forced] not in result:
+                    result.append(all_variations[forced])
+                    print(f"    - Added variation {forced}")
+            else:
+                print(f"    - Forced variation {forced} is invalid or is 0")
+        print(f"    - Final variations: {len(result)} variations")
         return result
 
-    # No forced variation -> check user preference
-    if user_pref_show_alternates and len(all_variations) > 1:
+    # USER PREF: INCLUDE DEFAULT ALTERNATE v1
+    if user_pref_show_alt and len(all_variations) > 1:
         result.append(all_variations[1])
+        print(f"    - Added v1 due to user preference")
 
+    print(f"    - Final variations: {len(result)} variations")
     return result
-
+'''

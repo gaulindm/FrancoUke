@@ -5,7 +5,7 @@ from reportlab.lib import colors
 #from songbook.utils.chord_utils import ChordDiagram, normalize_variation, clean_chord
 from songbook.utils.chords.diagrams import ChordDiagram
 from songbook.utils.transposer import clean_chord
-from songbook.utils.chords.variation_rules import parse_requested_variation, select_variations
+from songbook.utils.chords.variation_rules import parse_requested_variation
 from songbook.utils.chords.normalize import normalize_variation
 
 from typing import List, Dict, Any, Optional
@@ -17,22 +17,14 @@ MAX_CHORDS_PER_ROW = 14
 
 def prepare_chords(chords: List[Dict[str, Any]], is_printing_alternate_chord: bool):
     """
-    Goal:
-    ALWAYS show:
-        - variation 0
-        - variation 1 (if exists)
-
-    If the song requests a specific variation (e.g. [C(2)]),
-    then use that instead for the FIRST slot but still show
-    variation 1 as the alternate.
+    Prepare chord diagrams from the variations already selected in load_relevant_chords.
+    Simply iterate through all variations and create a diagram for each.
     """
 
     diagrams = []
 
     for chord in chords:
-        requested_name = chord.get("requested_name") or chord.get("name") or "?"
-        base, forced_index = parse_requested_variation(requested_name)
-
+        chord_name = chord.get("name") or "?"
         raw = chord.get("variations") or chord.get("variation") or []
 
         # Normalize to list
@@ -44,28 +36,13 @@ def prepare_chords(chords: List[Dict[str, Any]], is_printing_alternate_chord: bo
         if not variations:
             continue
 
-        # --- 1) SELECTED (PRIMARY) VARIATION ---
-        if forced_index is not None and forced_index < len(variations):
-            main_idx = forced_index
-        else:
-            main_idx = 0  # default
-
-        main_var = normalize_variation(variations[main_idx])
-        diagrams.append({
-            "name": base,
-            "variation": main_var,
-            "variation_index": main_idx,
-        })
-
-        # --- 2) ALTERNATE (SECOND) VARIATION ---
-        if len(variations) > 1:
-            alt_idx = 1  # always use variation 1 as alternate
-            alt_var = normalize_variation(variations[alt_idx])
-
+        # Add ALL variations that were selected by load_relevant_chords
+        for idx, var in enumerate(variations):
+            normalized_var = normalize_variation(var)
             diagrams.append({
-                "name": base,
-                "variation": alt_var,
-                "variation_index": alt_idx,
+                "name": chord_name,
+                "variation": normalized_var,
+                "variation_index": idx,
             })
 
     print("[DEBUG] Prepared diagrams count =", len(diagrams))
@@ -73,7 +50,6 @@ def prepare_chords(chords: List[Dict[str, Any]], is_printing_alternate_chord: bo
         print("   ->", d["name"], "v", d["variation_index"], d["variation"])
 
     return diagrams
-
 
 
 def draw_diagrams(
