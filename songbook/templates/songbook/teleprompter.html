@@ -88,5 +88,65 @@
     });
   </script>
     <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
-</body>
+    </script>
+    <script>
+      // 🎸 iRig BlueTurn Support with visual feedback
+      document.addEventListener("DOMContentLoaded", () => {
+        const lyricsContainer = document.querySelector(".lyrics-container");
+        const scrollAmount = 150;
+        
+        // Create a visual indicator
+        const indicator = document.createElement("div");
+        indicator.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0,0,0,0.8);
+          color: white;
+          padding: 20px 40px;
+          border-radius: 10px;
+          font-size: 24px;
+          z-index: 9999;
+          display: none;
+          pointer-events: none;
+        `;
+        document.body.appendChild(indicator);
+        
+        function showIndicator(text) {
+          indicator.textContent = text;
+          indicator.style.display = "block";
+          setTimeout(() => indicator.style.display = "none", 500);
+        }
+        
+        document.addEventListener("keydown", (e) => {
+          console.log("🎹 Key detected:", e.key, e.code); // Debug log
+          
+          if (["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(e.key)) {
+            e.preventDefault();
+          }
+    
+          if (!lyricsContainer) return;
+    
+          switch(e.key) {
+            case "ArrowLeft":
+            case "PageUp":
+              lyricsContainer.scrollTop -= scrollAmount;
+              showIndicator("⬆️");
+              console.log("⬆️ BlueTurn: Scrolled up", scrollAmount, "px");
+              break;
+              
+            case "ArrowRight":
+            case "PageDown":
+              lyricsContainer.scrollTop += scrollAmount;
+              showIndicator("⬇️");
+              console.log("⬇️ BlueTurn: Scrolled down", scrollAmount, "px");
+              break;
+          }
+        });
+    
+        console.log("🎸 iRig BlueTurn enabled with visual feedback");
+      });
+    </script>
+  </body>
 </html>
