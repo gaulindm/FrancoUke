@@ -90,7 +90,7 @@ body {
   right: 0;
   z-index: 1000;
   
-  /* don’t let it block scroll gestures */
+  /* don't let it block scroll gestures */
   pointer-events: none;
 }
 
@@ -165,6 +165,77 @@ body {
   font-size: 54px;
   line-height: 1.05;
   white-space: pre-wrap;
+}
+
+/* ===== COLOR MARKUP SUPPORT ===== */
+/* Enhanced visibility for colored text in lyrics */
+.lyrics span[style*="color"],
+.token .lyric span[style*="color"] {
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Highlighted text with background colors */
+.lyrics span[style*="background-color"],
+.token .lyric span[style*="background-color"] {
+  padding: 3px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure bold, italic, underline work well with colored text */
+.lyrics b span,
+.lyrics span b,
+.token .lyric b span,
+.token .lyric span b {
+  font-weight: 700;
+}
+
+.lyrics i span,
+.lyrics span i,
+.token .lyric i span,
+.token .lyric span i {
+  font-style: italic;
+}
+
+.lyrics u span,
+.lyrics span u,
+.token .lyric u span,
+.token .lyric span u {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Specific color enhancements for better visibility on dark background */
+.lyrics span[style*="color:red"],
+.token .lyric span[style*="color:red"] {
+  color: #ff6b6b !important;
+}
+
+.lyrics span[style*="color:gold"],
+.token .lyric span[style*="color:gold"] {
+  color: #ffd43b !important;
+}
+
+.lyrics span[style*="color:green"],
+.token .lyric span[style*="color:green"] {
+  color: #51cf66 !important;
+}
+
+.lyrics span[style*="color:hotpink"],
+.token .lyric span[style*="color:hotpink"] {
+  color: #ff6bcd !important;
+}
+
+.lyrics span[style*="color:blue"],
+.token .lyric span[style*="color:blue"] {
+  color: #74c0fc !important;
+}
+
+.lyrics span[style*="background-color:yellow"],
+.token .lyric span[style*="background-color:yellow"] {
+  background-color: #ffd43b !important;
+  color: #000 !important;
 }
 
 /* ===== METADATA ===== */
@@ -242,7 +313,7 @@ body {
   display: block;
   transform: scale(0.7);       /* slightly bigger */
   transform-origin: top center;
-  border: 1px solid rgb(0, 68, 255);  /* 🔵 debug border */
+  /*border: 1px solid rgb(0, 68, 255);   🔵 debug border */
   margin: 2;   
   padding:2;
 }
@@ -327,4 +398,11 @@ body {
   .lyrics-container { padding: 12px; }
   .token .lyric { font-size: 40px; }
   .line { margin: 10px 0; }
+  
+  /* Adjust color markup for mobile */
+  .lyrics span[style*="background-color"],
+  .token .lyric span[style*="background-color"] {
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
 }

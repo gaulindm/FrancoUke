@@ -214,7 +214,75 @@
       });
     });
     </script>
+    <script>
+      // 🎸 iRig BlueTurn Support - Synced with auto-scroll
+      document.addEventListener("DOMContentLoaded", () => {
+        const lyricsContainer = document.querySelector(".lyrics-container");
+        const scrollAmount = 150;
+        
+        const indicator = document.createElement("div");
+        indicator.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0,0,0,0.8);
+          color: white;
+          padding: 20px 40px;
+          border-radius: 10px;
+          font-size: 24px;
+          z-index: 9999;
+          display: none;
+          pointer-events: none;
+        `;
+        document.body.appendChild(indicator);
+        
+        function showIndicator(text) {
+          indicator.textContent = text;
+          indicator.style.display = "block";
+          setTimeout(() => indicator.style.display = "none", 500);
+        }
+        
+        document.addEventListener("keydown", (e) => {
+          if (["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(e.key)) {
+            e.preventDefault();
+          }
     
+          if (!lyricsContainer) return;
+    
+          switch(e.key) {
+            case "ArrowLeft":
+            case "PageUp":
+              // Update both the DOM and internal scroll position
+              if (typeof window.scrollPos !== 'undefined') {
+                window.scrollPos = Math.max(0, window.scrollPos - scrollAmount);
+                lyricsContainer.scrollTop = window.scrollPos;
+              } else {
+                lyricsContainer.scrollTop -= scrollAmount;
+              }
+              showIndicator("⬆️");
+              console.log("⬆️ BlueTurn: Scrolled up");
+              break;
+              
+            case "ArrowRight":
+            case "PageDown":
+              // Update both the DOM and internal scroll position
+              if (typeof window.scrollPos !== 'undefined') {
+                const maxScroll = lyricsContainer.scrollHeight - lyricsContainer.clientHeight;
+                window.scrollPos = Math.min(maxScroll, window.scrollPos + scrollAmount);
+                lyricsContainer.scrollTop = window.scrollPos;
+              } else {
+                lyricsContainer.scrollTop += scrollAmount;
+              }
+              showIndicator("⬇️");
+              console.log("⬇️ BlueTurn: Scrolled down");
+              break;
+          }
+        });
+    
+        console.log("🎸 iRig BlueTurn enabled (synced with auto-scroll)");
+      });
+    </script>
 
       
 </body>

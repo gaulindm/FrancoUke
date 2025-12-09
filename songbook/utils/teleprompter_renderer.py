@@ -2,6 +2,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
     """
     Render parsed lyrics_with_chords (list of groups) into HTML,
     while extracting metadata directives (title, artist, year, etc.).
+    Preserves color markup tags like <r>, <g>, <y>, <b>, <i>, <u>, etc.
     """
 
     directive_map = {
@@ -77,7 +78,9 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
 
             elif "lyric" in item:
                 chord = item.get("chord", "")
-                lyric = item["lyric"]
+                lyric = item["lyric"]  # This contains color markup tags
+                
+                # 🎨 Preserve color markup tags - don't escape them
                 if chord:
                     current_buffer.append(f"<b>[{chord}]</b>{lyric}")
                 else:
@@ -91,4 +94,11 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
                     html.append('<div class="para-break"></div>')
 
     flush_buffer()
-    return "".join(html), metadata
+    
+    # 🐛 DEBUG: Print a sample to verify tags are present
+    result = "".join(html)
+    print("🎨 RENDERER OUTPUT (first 300 chars):")
+    print(result[:300])
+    print("=" * 80)
+    
+    return result, metadata

@@ -20,7 +20,7 @@
   let isAutoScrolling = false;
   let rafId = null;
   let lastRafTime = null;
-  let scrollPos = 0;
+  window.scrollPos = 0;
 
   const SLOWER_SCALE = 0.5;
   window.userPreferences = {};
@@ -72,13 +72,13 @@
     }
 
     const actualSpeed = Math.max(0.1, scrollSpeed) * 6 * SLOWER_SCALE;
-    scrollPos += actualSpeed * dt;
+    window.scrollPos += actualSpeed * dt;
 
     const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
-    if (scrollPos > maxTop) scrollPos = maxTop;
+    if (window.scrollPos > maxTop) window.scrollPos = maxTop;
 
-    c.scrollTop = scrollPos;
-    if (scrollPos >= maxTop - 0.5) {
+    c.scrollTop = window.scrollPos;
+    if (window.scrollPos >= maxTop - 0.5) {
       stopScroll();
       return;
     }

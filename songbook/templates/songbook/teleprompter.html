@@ -90,12 +90,11 @@
     <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
     </script>
     <script>
-      // 🎸 iRig BlueTurn Support with visual feedback
+      // 🎸 iRig BlueTurn Support - Synced with auto-scroll
       document.addEventListener("DOMContentLoaded", () => {
         const lyricsContainer = document.querySelector(".lyrics-container");
         const scrollAmount = 150;
         
-        // Create a visual indicator
         const indicator = document.createElement("div");
         indicator.style.cssText = `
           position: fixed;
@@ -120,8 +119,6 @@
         }
         
         document.addEventListener("keydown", (e) => {
-          console.log("🎹 Key detected:", e.key, e.code); // Debug log
-          
           if (["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(e.key)) {
             e.preventDefault();
           }
@@ -131,21 +128,34 @@
           switch(e.key) {
             case "ArrowLeft":
             case "PageUp":
-              lyricsContainer.scrollTop -= scrollAmount;
+              // Update both the DOM and internal scroll position
+              if (typeof window.scrollPos !== 'undefined') {
+                window.scrollPos = Math.max(0, window.scrollPos - scrollAmount);
+                lyricsContainer.scrollTop = window.scrollPos;
+              } else {
+                lyricsContainer.scrollTop -= scrollAmount;
+              }
               showIndicator("⬆️");
-              console.log("⬆️ BlueTurn: Scrolled up", scrollAmount, "px");
+              console.log("⬆️ BlueTurn: Scrolled up");
               break;
               
             case "ArrowRight":
             case "PageDown":
-              lyricsContainer.scrollTop += scrollAmount;
+              // Update both the DOM and internal scroll position
+              if (typeof window.scrollPos !== 'undefined') {
+                const maxScroll = lyricsContainer.scrollHeight - lyricsContainer.clientHeight;
+                window.scrollPos = Math.min(maxScroll, window.scrollPos + scrollAmount);
+                lyricsContainer.scrollTop = window.scrollPos;
+              } else {
+                lyricsContainer.scrollTop += scrollAmount;
+              }
               showIndicator("⬇️");
-              console.log("⬇️ BlueTurn: Scrolled down", scrollAmount, "px");
+              console.log("⬇️ BlueTurn: Scrolled down");
               break;
           }
         });
     
-        console.log("🎸 iRig BlueTurn enabled with visual feedback");
+        console.log("🎸 iRig BlueTurn enabled (synced with auto-scroll)");
       });
     </script>
   </body>
