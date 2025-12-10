@@ -217,25 +217,17 @@
     const cont = $("#chord-diagrams");
     if (!cont) return;
     cont.innerHTML = "";
-    const prefs = window.userPreferences || {};
-    const showAlternate = !!prefs.showAlternate;
-
+  
     chords.forEach((chord) => {
-      const match = findChord(chord.name);
-      if (!match) {
-        console.warn(`⚠️ No matching chord found for "${chord.name}" → "${cleanChordName(chord.name)}"`);
-        return;
-      }
-
-      const vars = showAlternate
-        ? match.variations
-        : [match.variations[0]];
-
-      vars.forEach((v) => {
+      // The variations are already correctly selected by the backend
+      const variations = chord.variations || [];
+      
+      // Render ALL variations that were sent from the backend
+      variations.forEach((v, idx) => {
         const wrap = document.createElement("div");
         wrap.className = "chord-wrapper";
         if (typeof drawChordDiagram === "function")
-          drawChordDiagram(wrap, { name: chord.name, ...v });
+          drawChordDiagram(wrap, { name: chord.name, ...v, variation_index: idx });
         cont.appendChild(wrap);
       });
     });

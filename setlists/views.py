@@ -92,7 +92,6 @@ def setlist_detail(request, pk):
     )
 
 
-
 # ----------------------------
 # 🎤 Teleprompter for a setlist song (WITH COLOR MARKUP)
 # ----------------------------
@@ -117,8 +116,35 @@ def setlist_teleprompter(request, setlist_id, order):
         instrument = getattr(request.user.userpreference, "primary_instrument", "ukulele")
     instrument = instrument or "ukulele"
 
-    # --- Extract relevant chords ---
-    relevant_chords = extract_relevant_chords(current.song.lyrics_with_chords, instrument)
+    # --- 🆕 Get user preferences for chord loading ---
+    user_pref = getattr(request.user, "userpreference", None)
+    user_prefs = {
+        "primary_instrument": instrument,
+        "is_lefty": getattr(user_pref, "is_lefty", False),
+        "show_alternate_chords": getattr(user_pref, "is_printing_alternate_chord", False),
+        "use_known_chord_filter": False,  # Don't filter in teleprompter
+        "known_chords": [],
+    }
+
+    # --- 🆕 Get suggested_alternate from song metadata ---
+    suggested_alternate = None
+    if current.song.metadata:
+        suggested_alternate = current.song.metadata.get('suggested_alternate')
+        print(f"[TELEPROMPTER] suggested_alternate from metadata: {suggested_alternate}")
+
+    # --- 🆕 Use load_relevant_chords (same as PDF) ---
+    from songbook.utils.chords.loader import load_relevant_chords
+    relevant_chords = load_relevant_chords(
+        [current.song], 
+        user_prefs, 
+        transpose_value=0,
+        suggested_alternate=suggested_alternate
+    )
+
+    # 🐛 DEBUG: Check what chords were loaded
+    print(f"[TELEPROMPTER] Loaded {len(relevant_chords)} chord definitions")
+    for chord in relevant_chords:
+        print(f"  - {chord['name']}: {len(chord.get('variations', []))} variations")
 
     # --- Site context ---
     context_data = site_context(request)
@@ -134,12 +160,11 @@ def setlist_teleprompter(request, setlist_id, order):
     # ----------------------------
     lyrics_html = apply_html_color_markup(lyrics_html)
 
-    # --- User preferences ---
-    user_pref = getattr(request.user, "userpreference", None)
+    # --- User preferences for JS ---
     user_preferences = {
-        "instrument": getattr(user_pref, "primary_instrument", "ukulele"),
-        "isLefty": getattr(user_pref, "is_lefty", False),
-        "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
+        "instrument": instrument,
+        "isLefty": user_prefs["is_lefty"],
+        "showAlternate": user_prefs["show_alternate_chords"],
     }
 
     # ----------------------------
@@ -152,6 +177,7 @@ def setlist_teleprompter(request, setlist_id, order):
     print(f"Song.scroll_speed from DB: {getattr(current.song, 'scroll_speed', '❌ MISSING')}")
     print(f"Metadata scroll_speed (if any): {current.song.metadata.get('scroll_speed') if current.song.metadata else 'None'}")
     print(f"User: {request.user if request.user.is_authenticated else 'Anonymous'}")
+    print(f"Relevant chords count: {len(relevant_chords)}")
     
     # 🎨 Check for color markup
     has_color_spans = '<span style=' in lyrics_html
