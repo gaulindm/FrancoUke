@@ -326,7 +326,8 @@ body {
 }
 
 /* Special sections (chorus, intro, outro, bridge, interlude) */
-.section {
+.section,
+.centered {
   text-align: center;
   margin: 30px 0;
 }

@@ -9,14 +9,18 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
         "FrancoUke": {
             "{soi}": "Intro", "{soc}": "Refrain", "{sov}": "Couplet",
             "{sob}": "Pont", "{soo}": "Outro", "{sod}": "Interlude",
+            "{sos}": "",
             "{eoi}": None, "{eoc}": None, "{eov}": None,
-            "{eob}": None, "{eoo}": None, "{eod}": None
+            "{eob}": None, "{eoo}": None, "{eod}": None,
+            "{eos}": None  # 🆕 Add this
         },
         "StrumSphere": {
             "{soi}": "Intro", "{soc}": "Chorus", "{sov}": "Verse",
             "{sob}": "Bridge", "{soo}": "Outro", "{sod}": "Interlude",
+            "{sos}": "",
             "{eoi}": None, "{eoc}": None, "{eov}": None,
-            "{eob}": None, "{eoo}": None, "{eod}": None
+            "{eob}": None, "{eoo}": None, "{eod}": None,
+            "{eos}": None  # 🆕 Add this
         }
     }
     selected_map = directive_map.get(site_name, directive_map["StrumSphere"])
@@ -38,7 +42,10 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
         nonlocal current_buffer, section_type
         if current_buffer:
             text = "".join(current_buffer)
-            if section_type and section_type.lower() != "verse":
+            # 🆕 Check for empty section_type (centered sections with no label)
+            if section_type == "":
+                html.append(f'<div class="centered">{text}</div>')
+            elif section_type and section_type.lower() != "verse":
                 html.append(
                     f'<div class="section">'
                     f'<div class="section-name">{section_type}</div>'
