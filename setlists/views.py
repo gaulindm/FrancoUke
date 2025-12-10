@@ -12,6 +12,51 @@ from songbook.context_processors import site_context
 
 
 # ----------------------------
+# 🎨 Color Markup Helper
+# ----------------------------
+def apply_html_color_markup(text):
+    """
+    Convert custom color tags to HTML for web display.
+    Similar to PDF apply_color_markup but outputs span tags.
+    """
+    if not text:
+        return text
+    
+    color_map = {
+        'red': 'red',
+        'blue': 'blue',
+        'green': 'green',
+        'yellow': 'gold',
+        'orange': 'orange',
+        'pink': 'hotpink',
+        'purple': 'purple',
+    }
+    
+    # Full color names: <red>text</red> → <span style='color:red'>text</span>
+    for tag, color in color_map.items():
+        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
+        text = pattern.sub(lambda m: f"<span style='color:{color}'>{m.group(1)}</span>", text)
+    
+    # Short color codes: <r>text</r> → <span style='color:red'>text</span>
+    short_map = {'r': 'red', 'g': 'green', 'y': 'gold'}
+    for tag, color in short_map.items():
+        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
+        text = pattern.sub(lambda m: f"<span style='color:{color}'>{m.group(1)}</span>", text)
+    
+    # Custom highlight: <highlight color="blue">text</highlight>
+    pattern = re.compile(r'<highlight\s+color="(.*?)">(.*?)</highlight>', re.IGNORECASE | re.DOTALL)
+    text = pattern.sub(lambda m: f"<span style='background-color:{m.group(1)}'>{m.group(2)}</span>", text)
+    
+    # Simple highlight: <h>text</h> → yellow background
+    text = re.sub(r'<h>(.*?)</h>', r"<span style='background-color:yellow'>\1</span>", text, flags=re.IGNORECASE | re.DOTALL)
+    
+    # Clean up any nested closing tags
+    text = re.sub(r'</span>\s*</span>', '</span>', text)
+    
+    return text
+
+
+# ----------------------------
 # 📋 List of all setlists
 # ----------------------------
 def setlist_list(request):
@@ -49,7 +94,7 @@ def setlist_detail(request, pk):
 
 
 # ----------------------------
-# 🎤 Teleprompter for a setlist song
+# 🎤 Teleprompter for a setlist song (WITH COLOR MARKUP)
 # ----------------------------
 def setlist_teleprompter(request, setlist_id, order):
     """Teleprompter view for a song within a setlist."""
@@ -84,6 +129,11 @@ def setlist_teleprompter(request, setlist_id, order):
         current.song.lyrics_with_chords, site_name
     )
 
+    # ----------------------------
+    # 🎨 Apply color markup transformations
+    # ----------------------------
+    lyrics_html = apply_html_color_markup(lyrics_html)
+
     # --- User preferences ---
     user_pref = getattr(request.user, "userpreference", None)
     user_preferences = {
@@ -102,12 +152,21 @@ def setlist_teleprompter(request, setlist_id, order):
     print(f"Song.scroll_speed from DB: {getattr(current.song, 'scroll_speed', '❌ MISSING')}")
     print(f"Metadata scroll_speed (if any): {current.song.metadata.get('scroll_speed') if current.song.metadata else 'None'}")
     print(f"User: {request.user if request.user.is_authenticated else 'Anonymous'}")
+    
+    # 🎨 Check for color markup
+    has_color_spans = '<span style=' in lyrics_html
+    print(f"🎨 Color markup applied? {has_color_spans}")
+    if has_color_spans:
+        print("✅ Color spans detected in lyrics_html")
+    else:
+        print("⚠️ No color spans found - check if song has color tags")
+    
     print("==================================\n")
 
     # --- Use scroll speed from the Song model ---
     initial_scroll_speed = getattr(current.song, "scroll_speed", 40) or 40
 
-    # 🐛 Confirm what we’re actually passing to the template
+    # 🐛 Confirm what we're actually passing to the template
     print(f"✅ Passing scroll speed to template: {initial_scroll_speed}\n")
 
     # --- Render template ---

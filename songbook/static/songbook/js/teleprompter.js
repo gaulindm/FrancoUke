@@ -285,7 +285,6 @@
 
     // Bind buttons
     const decBtn = $("#speed-down"), incBtn = $("#speed-up");
-    const saveBtn = $("#speed-save") || $("#save-speed");
     const toggleBtn = $("#scroll-toggle");
     const resetBtn = $("#scroll-reset");
     const toggleChordsBtn = $("#toggle-chords");
@@ -301,25 +300,6 @@
       updateSpeedDisplay();
     });
 
-    saveBtn?.addEventListener("click", async () => {
-      if (!window.SONG?.id) return alert("No song loaded.");
-      try {
-        const res = await fetch(`/songs/${window.SONG.id}/set-scroll-speed/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
-          body: JSON.stringify({ scroll_speed: Math.round(scrollSpeed) }),
-        });
-        if (!res.ok) throw new Error(res.statusText);
-        saveBtn.textContent = "✅ Saved";
-        setTimeout(() => (saveBtn.textContent = "💾 Save"), 1500);
-      } catch (err) {
-        console.error("Save failed", err);
-        alert("Error saving scroll speed.");
-      }
-    });
 
     toggleBtn?.addEventListener("click", () =>
       isAutoScrolling ? stopScroll() : startScroll()

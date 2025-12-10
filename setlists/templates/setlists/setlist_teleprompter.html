@@ -18,17 +18,6 @@
 
 <!-- Diagram renderer -->
   <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
-<!--
-  <script>
-    window.SONG = {
-      id: {{ song.id }},
-      setlist_id: {{ setlist.id }},
-      next_order: {% if next_song %}{{ next_song.order }}{% else %}null{% endif %},
-      previous_order: {% if prev_song %}{{ prev_song.order }}{% else %}null{% endif %}
-    };
-  </script>
-  -->
-  
 
   <!-- Teleprompter engine -->
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
@@ -108,7 +97,7 @@
         <button id="speed-down">-</button>
         <span id="scroll-speed-display">{{ song.scroll_speed|default:40 }} px/s</span>
         <button id="speed-up">+</button>
-        <button id="speed-save">💾 Save</button>
+        
       </div>
       
 
@@ -158,6 +147,7 @@
           {% endif %}
         </div>
 
+        <!-- ✅ Color markup is now processed in the view and safe to render -->
         {{ lyrics_with_chords|safe }}
       </div>
     </div>
@@ -165,7 +155,7 @@
 
 
 
-  Touch zones for mobile nav (keep or remove if using swipe gestures only)
+  <!-- Touch zones for mobile nav (keep or remove if using swipe gestures only) -->
   {% if prev_song %}
   <div class="touch-zone touch-left"
        onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'"></div>
