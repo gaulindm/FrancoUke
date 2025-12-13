@@ -5,6 +5,67 @@
   --muted: #9aa6b2;
 }
 
+/* Light theme variables */
+body.light-theme {
+  --bg: #f5f5f5;
+  --fg: #1a1a1a;
+  --accent: #ff8c00;
+  --muted: #666666;
+}
+
+body.light-theme .controls {
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+body.light-theme .controls button {
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+body.light-theme #chord-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 2px solid #ccc;
+}
+
+body.light-theme .token .chord {
+  color: var(--accent);
+  text-shadow: 0 0 2px rgba(255,140,0,0.3);
+}
+
+/* Enhanced visibility for light theme colored text */
+body.light-theme .lyrics span[style*="color:red"],
+body.light-theme .token .lyric span[style*="color:red"] {
+  color: #c92a2a !important;
+}
+
+body.light-theme .lyrics span[style*="color:gold"],
+body.light-theme .token .lyric span[style*="color:gold"] {
+  color: #e67700 !important;
+}
+
+body.light-theme .lyrics span[style*="color:green"],
+body.light-theme .token .lyric span[style*="color:green"] {
+  color: #2b8a3e !important;
+}
+
+body.light-theme .lyrics span[style*="color:hotpink"],
+body.light-theme .token .lyric span[style*="color:hotpink"] {
+  color: #d6336c !important;
+}
+
+body.light-theme .lyrics span[style*="color:blue"],
+body.light-theme .token .lyric span[style*="color:blue"] {
+  color: #1864ab !important;
+}
+
+body.light-theme .metadata-table tr:nth-child(2) td:nth-child(2) {
+  color: #444;
+}
+
+body.light-theme .metadata-table tr:nth-child(3) td:nth-child(2) {
+  color: #666;
+}
+
 /* ===== RESET & BASE ===== */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -80,7 +141,7 @@ body {
 .lyrics-container {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
-  padding: 120px 28px 250px 28px;
+  padding: 120px 28px 250px 28px; /* ✅ Increased bottom padding from 80px to 250px */
 }
 
 #chord-section {
@@ -311,7 +372,7 @@ body {
 /* Inner wrapper holding the scaled SVG */
 .chord-wrapper {
   display: block;
-  transform: scale(1);       /* slightly bigger */
+  transform: scale(0.9);       /* slightly bigger */
   transform-origin: top center;
   /*border: 1px solid rgb(0, 68, 255);   🔵 debug border */
   margin: 2;   
@@ -396,7 +457,9 @@ body {
     gap: 6px;
     flex-wrap: wrap;
   }
-  .lyrics-container { padding: 12px; }
+  .lyrics-container { 
+    padding: 12px 12px 250px 12px; /* ✅ Also updated mobile bottom padding */
+  }
   .token .lyric { font-size: 40px; }
   .line { margin: 10px 0; }
   

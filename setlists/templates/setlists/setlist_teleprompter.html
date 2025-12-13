@@ -81,14 +81,14 @@
   max-width: 100%;
   margin: 0 auto 30px auto;
   border-collapse: collapse;
-  border: 2px solid #ff6b6b;
+  border: 2px solid #ff6b6b; /* 🔴 DEBUG: Red outer border */
 }
 
 .metadata-table td {
   padding: 8px 10px;
   vertical-align: middle;
   text-align: center;
-  border: 1px solid #74C0fc;
+  border: 1px solid #74c0fc; /* 🔵 DEBUG: Blue cell borders */
 }
 
 /* Left column (time signature, 1st note, count in) */
@@ -176,17 +176,21 @@
         <button id="speed-down">-</button>
         <span id="scroll-speed-display">{{ song.scroll_speed|default:40 }} px/s</span>
         <button id="speed-up">+</button>
-        
       </div>
       
-
-
+      <div class="control-inline">
+        <button id="font-down">A-</button>
+        <span id="font-size-display">100%</span>
+        <button id="font-up">A+</button>
+      </div>
 
       <button id="scroll-reset">⏹ Reset</button>
     </div>
 
     <!-- Right -->
     <div class="right">
+      <button id="theme-toggle" title="Toggle light/dark theme">🌙</button>
+      
       {% if prev_song %}
         <button id="prev-song-btn" class="nav-btn"
                 onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'">
@@ -301,7 +305,79 @@
         if (diff > 50 && prevBtn && !prevBtn.disabled) prevBtn.click();  // Swipe right → previous
         else if (diff < -50 && nextBtn && !nextBtn.disabled) nextBtn.click(); // Swipe left → next
       });
-    });
+          });
+    </script>
+    <script>
+      // 🌓 Theme Toggle
+      document.addEventListener("DOMContentLoaded", () => {
+        const themeToggle = document.getElementById("theme-toggle");
+        const body = document.body;
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem("teleprompter-theme");
+        if (savedTheme === "light") {
+          body.classList.add("light-theme");
+          themeToggle.textContent = "☀️";
+        }
+        
+        themeToggle.addEventListener("click", () => {
+          body.classList.toggle("light-theme");
+          
+          if (body.classList.contains("light-theme")) {
+            themeToggle.textContent = "☀️";
+            localStorage.setItem("teleprompter-theme", "light");
+          } else {
+            themeToggle.textContent = "🌙";
+            localStorage.setItem("teleprompter-theme", "dark");
+          }
+        });
+        
+        console.log("🌓 Theme toggle initialized");
+      });
+    </script>
+    <script>
+      // 🔤 Font Size Controls
+      document.addEventListener("DOMContentLoaded", () => {
+        const lyricsContainer = document.querySelector(".lyrics");
+        const fontUpBtn = document.getElementById("font-up");
+        const fontDownBtn = document.getElementById("font-down");
+        const fontDisplay = document.getElementById("font-size-display");
+        
+        // Get initial font size from CSS (default is 2em on body, which is 32px at browser default 16px)
+        let currentFontSize = 100; // percentage
+        const minFontSize = 50;
+        const maxFontSize = 200;
+        const step = 10;
+        
+        // Load saved font size from localStorage
+        const savedFontSize = localStorage.getItem("teleprompter-font-size");
+        if (savedFontSize) {
+          currentFontSize = parseInt(savedFontSize);
+          applyFontSize(currentFontSize);
+        }
+        
+        function applyFontSize(size) {
+          lyricsContainer.style.fontSize = `${size}%`;
+          fontDisplay.textContent = `${size}%`;
+          localStorage.setItem("teleprompter-font-size", size);
+        }
+        
+        fontUpBtn.addEventListener("click", () => {
+          if (currentFontSize < maxFontSize) {
+            currentFontSize += step;
+            applyFontSize(currentFontSize);
+          }
+        });
+        
+        fontDownBtn.addEventListener("click", () => {
+          if (currentFontSize > minFontSize) {
+            currentFontSize -= step;
+            applyFontSize(currentFontSize);
+          }
+        });
+        
+        console.log("🔤 Font size controls initialized");
+      });
     </script>
     <script>
       // 🎸 iRig BlueTurn Support - Synced with auto-scroll
