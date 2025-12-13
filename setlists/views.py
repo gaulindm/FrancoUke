@@ -155,6 +155,14 @@ def setlist_teleprompter(request, setlist_id, order):
         current.song.lyrics_with_chords, site_name
     )
 
+    # ✅ OVERRIDE with complete metadata from Song model
+    # This ensures all metadata fields are available in the template
+    if current.song.metadata:
+        metadata = current.song.metadata
+    
+    # ✅ Check for slash chords in lyrics for the instruction message
+    has_slash_chord = '/' in str(current.song.songChordPro)
+
     # ----------------------------
     # 🎨 Apply color markup transformations
     # ----------------------------
@@ -187,6 +195,12 @@ def setlist_teleprompter(request, setlist_id, order):
     else:
         print("⚠️ No color spans found - check if song has color tags")
     
+    # ✅ Print metadata fields for debugging
+    print(f"\n📋 Metadata fields available:")
+    if metadata:
+        for key, value in metadata.items():
+            if value:
+                print(f"  - {key}: {value}")
     print("==================================\n")
 
     # --- Use scroll speed from the Song model ---
@@ -207,14 +221,14 @@ def setlist_teleprompter(request, setlist_id, order):
             "prev_song": prev_song,
             "next_song": next_song,
             "lyrics_with_chords": lyrics_html,
-            "metadata": metadata,
+            "metadata": metadata,  # ✅ Now contains ALL fields from Song.metadata
+            "has_slash_chord": has_slash_chord,  # ✅ New variable for template
             "relevant_chords_json": json.dumps(relevant_chords),
             "user_preferences_json": json.dumps(user_preferences),
             "initial_scroll_speed": initial_scroll_speed,
             **context_data,
         },
     )
-
 
 # ----------------------------
 # 📦 Export / Import Setlists
