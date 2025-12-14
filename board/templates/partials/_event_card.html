@@ -2,13 +2,11 @@
 {% load group_tags %}
 {% load user_tags %}
 
-
-
 <div class="card position-relative mb-3 p-2 rounded cursor-pointer"
      data-bs-toggle="modal" data-bs-target="#eventModal{{ event.id }}">
 
   <!-- 📸 Photo count badge -->
-  {% if event.non_cover_images_count %}
+  {% if event.non_cover_images_count > 0 %}
     <span class="badge rounded-pill bg-dark position-absolute top-0 end-0 m-2">
       📸 {{ event.non_cover_images_count }}
     </span>
@@ -91,41 +89,88 @@
       <!-- Body -->
       <div class="modal-body">
         {% include "board/_event_detail.html" with event=event %}
-        {% if event.event_type != "rehearsal" %}
-        <!-- 📅 Availability Form -->
-        <form method="post" action="{% url 'board:set_event_availability' event.id %}" class="mt-3">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="availability{{ event.id }}" class="form-label">
-              <strong>Your Availability:</strong>
-            </label>
-            <select id="availability{{ event.id }}" name="status" class="form-select">
-              <option value="">-- Select --</option>
-              <option value="yes" {% if event.my_availability == "yes" %}selected{% endif %}>✅ Yes</option>
-              <option value="maybe" {% if event.my_availability == "maybe" %}selected{% endif %}>🤔 Maybe</option>
-              <option value="no" {% if event.my_availability == "no" %}selected{% endif %}>❌ No</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-      
-        <!-- 👥 Group Availability Summary -->
-        {% if event.avail_summary %}
-          <div class="mt-3">
-            <strong>Group Availability:</strong><br>
-            ✅ Yes: {{ event.avail_summary.yes }} |
-            ❌ No: {{ event.avail_summary.no }} |
-            🤔 Maybe: {{ event.avail_summary.maybe }}
+
+        <!-- 📸 PHOTO GALLERY SECTION -->
+        {% if event.non_cover_images_count > 0 %}
+          <hr class="my-4">
+          <div class="photo-gallery-section">
+            <h6 class="mb-3">📸 Event Photos ({{ event.non_cover_images_count }})</h6>
+            
+            <div class="row g-2">
+              <!-- Gallery Assets (from Asset model) -->
+              {% for asset in event.non_cover_gallery_assets %}
+                <div class="col-6 col-md-4 col-lg-3">
+                  <a href="{{ asset.file.url }}" 
+                     class="glightbox" 
+                     data-gallery="event-gallery-{{ event.id }}"
+                     data-glightbox="title: {{ asset.title|default:event.title }}; description: {{ asset.caption|default:'' }}">
+                    {% if asset.thumbnail %}
+                      <img src="{{ asset.thumbnail.url }}" 
+                           class="img-fluid rounded shadow-sm" 
+                           alt="{{ asset.alt_text|default:asset.title }}"
+                           style="aspect-ratio: 1; object-fit: cover; cursor: pointer;">
+                    {% else %}
+                      <img src="{{ asset.file.url }}" 
+                           class="img-fluid rounded shadow-sm" 
+                           alt="{{ asset.alt_text|default:asset.title }}"
+                           style="aspect-ratio: 1; object-fit: cover; cursor: pointer;">
+                    {% endif %}
+                  </a>
+                </div>
+              {% endfor %}
+
+              <!-- Legacy Photos (EventPhoto model) -->
+              {% for photo in event.non_cover_photos %}
+                <div class="col-6 col-md-4 col-lg-3">
+                  <a href="{{ photo.image.url }}" 
+                     class="glightbox" 
+                     data-gallery="event-gallery-{{ event.id }}"
+                     data-glightbox="title: {{ event.title }}">
+                    <img src="{{ photo.image.url }}" 
+                         class="img-fluid rounded shadow-sm" 
+                         alt="Photo for {{ event.title }}"
+                         style="aspect-ratio: 1; object-fit: cover; cursor: pointer;">
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
           </div>
         {% endif %}
-      {% else %}
-        {% comment %}
-          👇 Availability intentionally hidden for rehearsals
-          This makes sense because rehearsals are often scheduled
-          after the fact, or attendance is assumed.
-          To re-enable it, remove the surrounding condition.
-        {% endcomment %}
-      {% endif %}
+
+        {% if event.event_type != "rehearsal" %}
+          <hr class="my-3">
+          
+          <!-- 📅 Availability Form -->
+          <form method="post" action="{% url 'board:set_event_availability' event.id %}" class="mt-3">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="availability{{ event.id }}" class="form-label">
+                <strong>Your Availability:</strong>
+              </label>
+              <select id="availability{{ event.id }}" name="status" class="form-select">
+                <option value="">-- Select --</option>
+                <option value="yes" {% if event.my_availability == "yes" %}selected{% endif %}>✅ Yes</option>
+                <option value="maybe" {% if event.my_availability == "maybe" %}selected{% endif %}>🤔 Maybe</option>
+                <option value="no" {% if event.my_availability == "no" %}selected{% endif %}>❌ No</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </form>
+      
+          <!-- 👥 Group Availability Summary -->
+          {% if event.avail_summary %}
+            <div class="mt-3">
+              <strong>Group Availability:</strong><br>
+              ✅ Yes: {{ event.avail_summary.yes }} |
+              ❌ No: {{ event.avail_summary.no }} |
+              🤔 Maybe: {{ event.avail_summary.maybe }}
+            </div>
+          {% endif %}
+        {% else %}
+          {% comment %}
+            👇 Availability intentionally hidden for rehearsals
+          {% endcomment %}
+        {% endif %}
       
         <hr>
 
@@ -159,7 +204,7 @@
         {% endif %}
 
         {# 🧾 REHEARSAL-ONLY SECTION ------------------------------- #}
-          {% if event.event_type == "rehearsal" %}
+        {% if event.event_type == "rehearsal" %}
           <div class="accordion mt-4" id="accordionRehearsal{{ event.id }}">
         
             <!-- 📝 Rehearsal Details -->
@@ -178,13 +223,12 @@
                 <div class="accordion-body">
         
                   {% if event.rehearsal_details %}
-                  <div class="mb-2 rehearsal-notes">
-                    {{ event.rehearsal_details.notes|safe }}
-                  </div>
-                {% else %}
-                  <p class="text-muted fst-italic">No rehearsal notes yet.</p>
-                {% endif %}
-                
+                    <div class="mb-2 rehearsal-notes">
+                      {{ event.rehearsal_details.notes|safe }}
+                    </div>
+                  {% else %}
+                    <p class="text-muted fst-italic">No rehearsal notes yet.</p>
+                  {% endif %}
         
                   {% if request.user|has_group:"Leaders" %}
                     <div class="text-end mt-2">
@@ -245,15 +289,28 @@
               </div>
             </div>
           </div>
-          {% endif %} {# end rehearsal-only section #}
+        {% endif %}
 
-        </div> <!-- /.modal-body -->
-      </div> <!-- /.modal-content -->
-    </div> <!-- /.modal-dialog -->
-  </div> <!-- /.modal -->
-  
+      </div> <!-- /.modal-body -->
+    </div> <!-- /.modal-content -->
+  </div> <!-- /.modal-dialog -->
+</div> <!-- /.modal -->
+
+<style>
+/* GLightbox custom styles */
+.photo-gallery-section img {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.photo-gallery-section img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+</style>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Description toggle functionality
   document.querySelectorAll(".description-preview").forEach(container => {
     const shortText = container.querySelector(".short-text");
     const fullText = container.querySelector(".full-text");
@@ -278,5 +335,18 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   });
+
+  // Initialize GLightbox for this event's gallery
+  const eventId = "{{ event.id }}";
+  const galleryLinks = document.querySelectorAll(`a.glightbox[data-gallery="event-gallery-${eventId}"]`);
+  
+  if (galleryLinks.length > 0 && typeof GLightbox !== 'undefined') {
+    GLightbox({
+      selector: `a.glightbox[data-gallery="event-gallery-${eventId}"]`,
+      touchNavigation: true,
+      loop: true,
+      autoplayVideos: true
+    });
+  }
 });
 </script>
