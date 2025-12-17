@@ -1,0 +1,31 @@
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 86"
+     preserveAspectRatio="xMidYMid meet">
+
+    <text x="32.0" y="11.0"
+          font-size="14" text-anchor="middle" dominant-baseline="middle">
+        F2
+    </text>
+
+    <rect x="1" y="22" width="62" height="62"
+          rx="5" ry="5"
+          fill="white" stroke="black" stroke-width="2"/>
+
+    <!-- Grid -->
+    <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="85" stroke="lightgray" stroke-width=".1" />
+    <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="85" stroke="lightgray" stroke-width=".1" />
+    <line x1="2" y1="43.33333333333333" x2="62" y2="43.33333333333333" stroke="lightgray" stroke-width=".1" />
+    <line x1="2" y1="64.66666666666666" x2="62" y2="64.66666666666666" stroke="lightgray" stroke-width=".1" />
+
+    
+    
+
+    
+        <path d="M 32.0 71.92
+                 A 17.92 17.92 0 1 1 49.92 54.0"
+              stroke="black" stroke-width="3" fill="none" />
+    
+<polygon points="49.0,58.0 43.0,48.0 55.0,48.0" fill="black" />
+<polygon points="49.0,64.0 43.0,54.0 55.0,54.0" fill="black" />
+</svg>

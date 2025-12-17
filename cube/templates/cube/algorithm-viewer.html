@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rubik’s Algorithm Viewer</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    .algo-block { margin-bottom: 2rem; }
+    .algo-name { font-weight: bold; font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .row svg { margin-right: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Rubik’s Cube Algorithm Viewer</h1>
+
+  <object type="image/svg+xml" data="icons.svg" style="display:none;"></object>
+
+  <!-- Sexy Move -->
+  <div class="algo-block">
+    <div class="algo-name">Sexy Move — R U R' U'</div>
+    <div class="row">
+      <svg width="150" height="150"><use href="#icon-R"></use></svg>
+      <svg width="150" height="150"><use href="#icon-U"></use></svg>
+      <svg width="150" height="150"><use href="#icon-R-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-U-prime"></use></svg>
+    </div>
+  </div>
+
+  <!-- Sledgehammer -->
+  <div class="algo-block">
+    <div class="algo-name">Sledgehammer — R' F R F'</div>
+    <div class="row">
+      <svg width="150" height="150"><use href="#icon-R-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-F"></use></svg>
+      <svg width="150" height="150"><use href="#icon-R"></use></svg>
+      <svg width="150" height="150"><use href="#icon-F-prime"></use></svg>
+    </div>
+  </div>
+
+  <!-- Corner Insert -->
+  <div class="algo-block">
+    <div class="algo-name">Corner Insert — R' D' R D</div>
+    <div class="row">
+      <svg width="150" height="150"><use href="#icon-R-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-D-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-R"></use></svg>
+      <svg width="150" height="150"><use href="#icon-D"></use></svg>
+    </div>
+  </div>
+
+  <!-- Edge Insert -->
+  <div class="algo-block">
+    <div class="algo-name">Edge Insert — R U R' U' F' U' F</div>
+    <div class="row">
+      <svg width="150" height="150"><use href="#icon-R"></use></svg>
+      <svg width="150" height="150"><use href="#icon-U"></use></svg>
+      <svg width="150" height="150"><use href="#icon-R-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-U-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-F-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-U-prime"></use></svg>
+      <svg width="150" height="150"><use href="#icon-F"></use></svg>
+    </div>
+  </div>
+
+</body>
+</html>

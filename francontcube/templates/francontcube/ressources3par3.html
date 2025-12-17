@@ -1,0 +1,73 @@
+
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+{% block title %}Ressources 3×3 | FrancontCube{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center mb-4">Ressources 3×3</h1>
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            <span style="color: #000000;">Bienvenue à</span>
+            <span style="color: #ffffff;"> Francont</span>
+            <span style="color: #0f8c46;">Cube</span>
+        </h1>
+        <p class="lead text-muted">
+            Apprends à résoudre le Rubik’s Cube — à la franco-ontarienne! 💚🤍
+        </p>
+    
+        <!-- Icône temporaire ou logo -->
+        <i class="bi bi-cube brand-green" style="font-size: 4rem;"></i>
+    </div>
+    <!-- Content Cards -->
+<div class="row g-4">
+
+    <!-- Google Slides -->
+    <div class="col-md-4">
+        <div class="card cube-card p-4 text-center">
+            <i class="bi bi-easel2" style="font-size: 3rem; color: #0d6efd;"></i>
+            <h4 class="mt-3">Google Slides</h4>
+            <p class="text-muted">Les présentations interactive pour apprendre les étapes.</p>
+            <a href="{% url 'francontcube:slides' %}"
+               class="btn btn-outline-primary">
+                Ouvrir
+            </a>
+        </div>
+    </div>
+
+    <!-- PDF Booklet -->
+    <div class="col-md-4">
+        <div class="card cube-card p-4 text-center">
+            <i class="bi bi-file-earmark-pdf" style="font-size: 3rem; color: #dc3545;"></i>
+            <h4 class="mt-3">Cahiers PDF</h4>
+            <p class="text-muted">Guide imprimable étape par étape.</p>
+            <a href="{% url 'francontcube:pdfs' %}"
+               class="btn btn-outline-danger">
+                Ouvrir
+            </a>
+        </div>
+    </div>
+
+    <!-- YouTube Channel -->
+    <div class="col-md-4">
+        <div class="card cube-card p-4 text-center">
+            <i class="bi bi-youtube" style="font-size: 3rem; color: red;"></i>
+            <h4 class="mt-3">Vidéos</h4>
+            <p class="text-muted">Regarde des tutoriels vidéo pour t’améliorer.</p>
+            <a href="{% url 'francontcube:videos' %}"
+               class="btn btn-outline-danger">
+                Ouvrir
+            </a>
+        </div>
+    </div>
+
+</div>
+
+
+    <!-- Content Cards -->
+    
+{% endblock %}
+

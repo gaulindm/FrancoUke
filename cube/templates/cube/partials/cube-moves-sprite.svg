@@ -1,0 +1,249 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- R Move -->
+    <symbol id="R" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">R</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="32.0" y1="32.5" x2="32.0" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="52.0" y1="32.5" x2="52.0" y2="73.5" stroke="black" stroke-width="3" />
+      <polygon points="52.0,28 46.0,38 58.0,38" fill="black" />
+    </symbol>
+
+    <!-- R' Move -->
+    <symbol id="R-prime" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">R'</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="32.0" y1="32.5" x2="32.0" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="52.0" y1="32.5" x2="52.0" y2="73.5" stroke="black" stroke-width="3" />
+      <polygon points="52.0,76 46.0,66 58.0,66" fill="black" />
+    </symbol>
+
+    <!-- R2 Move -->
+    <symbol id="R2" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">R2</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="32.0" y1="32.5" x2="32.0" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="52.0" y1="32.5" x2="52.0" y2="73.5" stroke="black" stroke-width="3" />
+      <polygon points="52.0,28 46.0,38 58.0,38" fill="black" />
+      <polygon points="52.0,34 46.0,44 58.0,44" fill="black" />
+    </symbol>
+
+    <!-- L Move -->
+    <symbol id="L" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">L</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="32.0" y1="32.5" x2="32.0" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="52.0" y1="32.5" x2="52.0" y2="73.5" stroke="black" stroke-width="3" />
+      <polygon points="12,76 6,66 18,66" fill="black" />
+    </symbol>
+
+    <!-- L' Move -->
+    <symbol id="L-prime" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">L'</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="32.0" y1="32.5" x2="32.0" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="52.0" y1="32.5" x2="52.0" y2="73.5" stroke="black" stroke-width="3" />
+      <polygon points="12,28 6,38 18,38" fill="black" />
+    </symbol>
+
+    <!-- L2 Move -->
+    <symbol id="L2" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">L2</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="32.0" y1="32.5" x2="32.0" y2="73.5" stroke="black" stroke-width="3" />
+      <line x1="52.0" y1="32.5" x2="52.0" y2="73.5" stroke="black" stroke-width="3" />
+      <polygon points="12,28 6,38 18,38" fill="black" />
+      <polygon points="12,34 6,44 18,44" fill="black" />
+    </symbol>
+
+    <!-- U Move - CORRIGÉ (flèche à gauche) -->
+    <symbol id="U" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">U</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="53.0" x2="53.5" y2="53.0" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="72.0" x2="53.5" y2="72.0" stroke="black" stroke-width="3" />
+      <polygon points="8,34 18,28 18,40" fill="black" />
+    </symbol>
+
+    <!-- U' Move - CORRIGÉ (flèche à droite) -->
+    <symbol id="U-prime" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">U'</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="53.0" x2="53.5" y2="53.0" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="72.0" x2="53.5" y2="72.0" stroke="black" stroke-width="3" />
+      <polygon points="56,34 46,28 46,40" fill="black" />
+    </symbol>
+
+    <!-- U2 Move - CORRIGÉ (flèches à gauche) -->
+    <symbol id="U2" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">U2</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="53.0" x2="53.5" y2="53.0" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="72.0" x2="53.5" y2="72.0" stroke="black" stroke-width="3" />
+      <polygon points="8,34 18,28 18,40" fill="black" />
+      <polygon points="0,34 10,28 10,40" fill="black" />
+    </symbol>
+
+    <!-- D Move -->
+    <symbol id="D" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">D</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="53.0" x2="53.5" y2="53.0" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="72.0" x2="53.5" y2="72.0" stroke="black" stroke-width="3" />
+      <polygon points="56,72.0 46,66.0 46,78.0" fill="black" />
+    </symbol>
+
+    <!-- D' Move -->
+    <symbol id="D-prime" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">D'</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="53.0" x2="53.5" y2="53.0" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="72.0" x2="53.5" y2="72.0" stroke="black" stroke-width="3" />
+      <polygon points="8,72.0 18,66.0 18,78.0" fill="black" />
+    </symbol>
+
+    <!-- D2 Move -->
+    <symbol id="D2" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">D2</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="53.0" x2="53.5" y2="53.0" stroke="black" stroke-width="3" />
+      <line x1="10.5" y1="72.0" x2="53.5" y2="72.0" stroke="black" stroke-width="3" />
+      <polygon points="56,72.0 46,66.0 46,78.0" fill="black" />
+      <polygon points="64,72.0 54,66.0 54,78.0" fill="black" />
+    </symbol>
+
+    <!-- F Move -->
+    <symbol id="F" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">F</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <path d="M 32.0 70.92 A 17.92 17.92 0 1 1 49.92 53.0" stroke="black" stroke-width="3" fill="none" />
+      <polygon points="49.0,63 43.0,53 55.0,53" fill="black" />
+    </symbol>
+
+    <!-- F' Move -->
+    <symbol id="F-prime" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">F'</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <path d="M 32.0 70.92 A 17.92 17.92 0 1 0 14.08 53.0" stroke="black" stroke-width="3" fill="none" />
+      <polygon points="15.0,63 9.0,53 21.0,53" fill="black" />
+    </symbol>
+
+    <!-- F2 Move -->
+    <symbol id="F2" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">F2</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <path d="M 32.0 70.92 A 17.92 17.92 0 1 1 49.92 53.0" stroke="black" stroke-width="3" fill="none" />
+      <polygon points="49.0,57 43.0,47 55.0,47" fill="black" />
+      <polygon points="49.0,51 43.0,41 55.0,41" fill="black" />
+    </symbol>
+
+    <!-- B Move - NOUVEAU ! (arc horaire, flèche à droite) -->
+    <symbol id="B" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">B</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-dasharray="4,3"stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <path d="M 32.0 70.92 A 17.92 17.92 0 1 0 14.08 53.0" stroke="black" stroke-width="3" fill="none" />
+      <polygon points="15.0,63 9.0,53 21.0,53" fill="black" />
+    </symbol>
+
+    <!-- B' Move - NOUVEAU ! (arc antihoraire, flèche à gauche) -->
+    <symbol id="B-prime" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">B'</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-dasharray="4,3"stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <path d="M 32.0 70.92 A 17.92 17.92 0 1 1 49.92 53.0" stroke="black" stroke-width="3" fill="none" />
+      <polygon points="49.0,63 43.0,53 55.0,53" fill="black" />
+    </symbol>
+
+    <!-- B2 Move - NOUVEAU ! (arc horaire + 2 flèches à gauche) -->
+    <symbol id="B2" viewBox="0 0 64 86">
+      <text x="32" y="11" font-size="14" text-anchor="middle" dominant-baseline="middle">B2</text>
+      <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-dasharray="4,3"stroke-width="2"/>
+      <line x1="21.333333333333332" y1="23" x2="21.333333333333332" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="42.666666666666664" y1="23" x2="42.666666666666664" y2="83" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="43.333333333333336" x2="62" y2="43.333333333333336" stroke="lightgray" stroke-width=".1" />
+      <line x1="2" y1="64.66666666666667" x2="62" y2="64.66666666666667" stroke="lightgray" stroke-width=".1" />
+      <path d="M 32.0 70.92 A 17.92 17.92 0 1 0 14.08 53.0" stroke="black" stroke-width="3" fill="none" />
+      <polygon points="15.0,57 9.0,47 21.0,47" fill="black" />
+      <polygon points="15.0,51 9.0,41 21.0,41" fill="black" />
+    </symbol>
+  </defs>
+</svg>

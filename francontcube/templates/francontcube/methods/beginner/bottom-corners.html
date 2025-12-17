@@ -1,0 +1,344 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Les coins blancs — Francontcube{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 2 : <span class="brand-green">Les coins blancs</span>
+        </h1>
+        <p class="lead text-muted">
+            Compléter la première couche en plaçant les 4 coins blancs au bon endroit.
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states (only shown if any are missing) -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+        <p>
+            Placer les 4 coins blancs pour <strong>compléter toute la face blanche du bas</strong>. 
+            Chaque coin doit avoir ses 3 couleurs qui correspondent aux 3 centres voisins.
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-6 text-center mb-3">
+                <h5>Avant : Croix blanche</h5>
+                <div id="cube-before" class="cube-small"></div>
+                <p><small class="text-muted">4 arêtes blanches en place</small></p>
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <h5>Après : Première couche complète</h5>
+                <div id="cube-goal" class="cube-small"></div>
+                <p><small class="text-muted">4 coins blancs + 4 arêtes = couche complète!</small></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Trouver le coin -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔍 Étape 1 : Trouve le bon coin</h3>
+        <p>
+            Il y a <strong>4 coins blancs</strong> sur ton cube. Chaque coin a 3 couleurs (blanc + 2 autres).
+        </p>
+        
+        <div class="alert alert-info">
+            <strong>💡 Comment trouver le bon coin :</strong>
+            <ol class="mb-0 mt-2">
+                <li>Regarde ton cube - quelle face est devant toi? (exemple: vert)</li>
+                <li>Regarde le centre de droite - quelle couleur? (exemple: orange)</li>
+                <li>Cherche le coin qui a <strong>blanc + vert + orange</strong></li>
+                <li>Ce coin va dans le coin <strong>en bas à droite</strong> devant toi!</li>
+            </ol>
+        </div>
+
+        <p class="mt-3">
+            <strong>Astuce :</strong> Les coins sont soit dans la couche du haut (où tu vas les chercher), 
+            soit déjà dans la couche du bas (mais peut-être mal orientés).
+        </p>
+    </div>
+
+    <!-- Section Algorithmes -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 Étape 2 : Insère le coin avec l'algorithme</h3>
+        <p>Une fois le coin trouvé et positionné dans la couche du haut, utilise l'algorithme approprié.</p>
+
+        <!-- Cas 1: Blanc à droite -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-success">✅ Cas 1 : Le blanc est sur la face de DROITE</h5>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-1"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+
+                    <!-- Algorithm: R U R' U' -->
+                    <div class="text-center p-3 bg-white rounded border border-success border-2">
+                        <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                            <svg class="move-icon"><use href="#R"/></svg>
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#R-prime"/></svg>
+                            <svg class="move-icon"><use href="#U-prime"/></svg>
+                        </div>
+                        
+                        <p class="mt-2 mb-0"><small>Répète 1, 2 ou 3 fois jusqu'à ce que le coin soit bien placé</small></p>
+                    </div>
+
+                    <div class="mt-3">
+                        <strong>Décomposition :</strong>
+                        <ul class="mt-2">
+                            <li><code>R</code> = Tourne la face droite (90° sens horaire)</li>
+                            <li><code>U</code> = Tourne le haut (90° sens horaire)</li>
+                            <li><code>R'</code> = Tourne la face droite dans l'autre sens</li>
+                            <li><code>U'</code> = Tourne le haut dans l'autre sens</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cas 2: Blanc devant -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-primary">✅ Cas 2 : Le blanc est sur la face de DEVANT</h5>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-2"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+                    <div class="text-center p-3 bg-white rounded border border-primary border-2">
+                        <h3 class="mb-0">
+                            <code class="text-primary">F' U' F</code>
+                        </h3>
+                        <p class="mt-2 mb-0"><small>Répète 1, 2 ou 3 fois jusqu'à ce que le coin soit bien placé</small></p>
+                    </div>
+                    <div class="mt-3">
+                        <strong>Décomposition :</strong>
+                        <ul class="mt-2">
+                            <li><code>F'</code> = Tourne la face avant dans le sens anti-horaire</li>
+                            <li><code>U'</code> = Tourne le haut dans le sens anti-horaire</li>
+                            <li><code>F</code> = Tourne la face avant (sens horaire)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cas 3: Blanc en haut -->
+        <div class="border rounded p-3 bg-light">
+            <h5 class="text-warning">⚠️ Cas 3 : Le blanc est sur la face du HAUT</h5>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-3"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+                    <p>
+                        <strong>Le coin est mal orienté!</strong> Il faut d'abord le mettre sur le côté.
+                    </p>
+                    <div class="text-center p-3 bg-white rounded border border-warning border-2">
+                        <h4 class="mb-2">Méthode simple :</h4>
+                        <p class="mb-2">1. Fais <code>R U R' U'</code> pour sortir le coin</p>
+                        <p class="mb-0">2. Maintenant le blanc est sur le côté - utilise Cas 1 ou Cas 2 !</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Technique -->
+    <div class="card p-4 mb-4 border-success">
+        <h3 class="brand-green">✋ Technique de prise (IMPORTANT!)</h3>
+        <div class="alert alert-success">
+            <strong>Pour l'algorithme R U R' U' :</strong>
+            <ul class="mb-0 mt-2">
+                <li>Tiens le cube <strong>fermement avec ta main gauche</strong></li>
+                <li>Ta main droite fait <strong>tous les mouvements</strong> (R, U, R', U')</li>
+                <li>Ton pouce droit fait R et R'</li>
+                <li>Ton index droit fait U et U'</li>
+                <li><strong>Pratique lentement d'abord, puis accélère!</strong></li>
+            </ul>
+        </div>
+        
+        <div class="alert alert-info mb-0">
+            <strong>Pour l'algorithme F' U' F :</strong>
+            <ul class="mb-0 mt-2">
+                <li>Main gauche : tiens le cube</li>
+                <li>Index gauche : fait F' et F</li>
+                <li>Index droit : fait U'</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section Processus complet -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📋 Processus complet pour chaque coin</h3>
+        <ol>
+            <li class="mb-2">
+                <strong>Identifie le coin</strong> : Regarde les 2 centres devant et à droite, 
+                trouve le coin avec ces couleurs + blanc
+            </li>
+            <li class="mb-2">
+                <strong>Amène-le dans la couche du haut</strong> : Si le coin est déjà en bas mais mal placé, 
+                fais <code>R U R' U'</code> pour le sortir
+            </li>
+            <li class="mb-2">
+                <strong>Positionne-le au bon endroit</strong> : Tourne U jusqu'à ce que le coin soit 
+                au-dessus de sa place (coin en haut à droite devant toi)
+            </li>
+            <li class="mb-2">
+                <strong>Oriente le coin</strong> : Tourne U pour mettre le blanc soit à droite, soit devant
+            </li>
+            <li class="mb-2">
+                <strong>Insère le coin</strong> : Utilise <code>R U R' U'</code> ou <code>F' U' F</code> 
+                (répète 1 à 3 fois)
+            </li>
+            <li class="mb-2">
+                <strong>Tourne tout le cube</strong> : Place la prochaine face devant toi et répète!
+            </li>
+        </ol>
+    </div>
+
+    <!-- Section Conseils -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">💡 Conseils utiles</h3>
+        <ul class="mt-3">
+            <li>
+                <strong>Ne panique pas si tu défais la croix blanche!</strong> C'est normal. 
+                Les algorithmes vont la remettre en place automatiquement.
+            </li>
+            <li>
+                <strong>Répète l'algorithme plusieurs fois.</strong> Souvent il faut faire 
+                <code>R U R' U'</code> deux ou trois fois de suite.
+            </li>
+            <li>
+                <strong>Pratique R U R' U' jusqu'à ce que ce soit automatique.</strong> 
+                C'est l'algorithme le plus important du cube!
+            </li>
+            <li>
+                <strong>Tourne le cube entier</strong> pour avoir chaque coin à travailler en position 
+                "devant-droite". Ne change pas l'orientation du blanc (toujours en bas).
+            </li>
+            <li>
+                Une fois les 4 coins placés, <strong>toute la face blanche est complète</strong> - 
+                félicitations, c'est le tiers du cube! 🎉
+            </li>
+        </ul>
+    </div>
+
+    <!-- Bouton de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:white_cross' %}" class="btn btn-outline-primary">
+            ← Retour : La croix blanche
+        </a>
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
+            Vue d'ensemble
+        </a>
+        <a href="{% url 'francontcube:second_layer' %}" class="btn btn-success ms-2">
+            Étape suivante : La deuxième couche →
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS pour les cubes -->
+<style>
+.cube-small svg { 
+    max-width: 275px; 
+    height: auto; 
+}
+
+#cube-case-1 svg, 
+#cube-case-2 svg, 
+#cube-case-3 svg { 
+    max-width: 200px; 
+    height: auto; 
+}
+
+.move-icon { 
+    width: 64px; 
+    height: 86px; 
+}
+
+@media (max-width: 768px) {
+    .cube-small svg { 
+        max-width: 200px; 
+    }
+    
+    #cube-case-1 svg, 
+    #cube-case-2 svg, 
+    #cube-case-3 svg { 
+        max-width: 150px; 
+    }
+    
+    .move-icon { 
+        width: 48px; 
+        height: 64px; 
+    }
+}
+</style>
+
+<!-- Script d'initialisation de la page -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
+    
+    // If state is missing, show a placeholder
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+          <small class="text-muted">Create the CubeState in your admin tool</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mount all cubes
+    mountCube("cube-before", {{ before_state|safe }});
+    mountCube("cube-goal", {{ goal_state|safe }});
+    
+    // The 3 algorithm cases
+    mountCube("cube-case-1", {{ case_1_state|safe }});
+    mountCube("cube-case-2", {{ case_2_state|safe }});
+    mountCube("cube-case-3", {{ case_3_state|safe }});
+  });
+</script>
+
+{% endblock %}

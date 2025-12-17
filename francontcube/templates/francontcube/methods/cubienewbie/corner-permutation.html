@@ -1,0 +1,261 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Permuter les coins jaunes — Francontcube{% endblock %}
+
+{% block content %}
+
+
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 6 : <span class="brand-green">Permuter les coins jaunes</span>
+        </h1>
+        <p class="lead text-muted">
+            Placer les 4 coins jaunes à leur position finale (sans se préoccuper de leur orientation).
+        </p>
+        <div class="row mt-3">
+            <div class="col-md-6 text-center mb-3">
+                <h5>Avant : Face jaune complète</h5>
+                <div id="cube-container-before" class="cube-small"></div>
+                <p><small class="text-muted">La face jaune est orientée, mais les coins peuvent être mal placés</small></p>
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <h5>Après : Coins bien placés</h5>
+                <div id="cube-container-goal" class="cube-small"></div>
+                <p><small class="text-muted">Chaque coin a ses 3 couleurs qui correspondent aux centres voisins</small></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+        <p>
+            À cette étape, la face jaune est complète mais <strong>les coins ne sont pas forcément à leur bon emplacement</strong>.
+        </p>
+        <p>
+            Un coin est "bien placé" quand ses 3 couleurs correspondent aux 3 centres autour de lui, 
+            <strong>même si le coin n'est pas bien orienté</strong>. Par exemple, un coin jaune-rouge-vert doit se trouver 
+            à l'intersection des faces jaune, rouge et verte.
+        </p>
+        <div class="alert alert-info mt-3">
+            <strong>💡 Astuce :</strong> Ne t'inquiète pas si les coins semblent mal tournés ! 
+            On s'occupera de l'orientation à l'étape 7. Pour l'instant, on veut juste les mettre au bon endroit.
+        </div>
+    </div>
+
+    <!-- Section Identification -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔍 Étape 1 : Identifier les coins bien placés</h3>
+        <p>Regarde ton cube et compte combien de coins sont déjà au bon endroit :</p>
+
+        <div class="row mt-3">
+            <div class="col-md-4 mb-3">
+                <div class="border rounded p-3 text-center bg-light">
+                    <h5 class="text-success">✅ 4 coins bien placés</h5>
+                    <p class="mb-2"><strong>Bravo ! Passe à l'étape 7</strong></p>
+                    <p class="small text-muted">Si tous les coins sont au bon endroit, tu peux passer directement à l'orientation des coins.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="border rounded p-3 text-center bg-light">
+                    <h5 class="text-primary">1 coin bien placé</h5>
+                    <p class="mb-2"><strong>C'est le cas le plus courant</strong></p>
+                    <p class="small text-muted">Place le coin bien positionné en arrière-gauche et applique l'algorithme.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="border rounded p-3 text-center bg-light">
+                    <h5 class="text-warning">0 coin bien placé</h5>
+                    <p class="mb-2"><strong>Applique l'algorithme une fois</strong></p>
+                    <p class="small text-muted">Après une application, au moins un coin sera bien placé. Repositionne et recommence.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-3">
+            <strong>⚠️ Important :</strong> Ipermutation_aretes.htmll est impossible d'avoir exactement 2 ou 3 coins bien placés. 
+            Si tu penses être dans ce cas, c'est que tu as fait une erreur lors d'une étape précédente, 
+            ou qu'une pièce du cube a été démontée et mal remontée.
+        </div>
+    </div>
+
+    <!-- Section Algorithme -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 Étape 2 : Appliquer l'algorithme de permutation</h3>
+
+        <div class="border rounded p-4 bg-light">
+            <h5 class="text-center mb-3">Algorithme de permutation des coins</h5>
+            
+            <!-- Algorithm visualization -->
+            <div class="text-center p-4 bg-white rounded border border-success border-2 mb-3">
+                <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                    <svg class="move-icon"><use href="#U"/></svg>
+                    <svg class="move-icon"><use href="#R"/></svg>
+                    <svg class="move-icon"><use href="#U-prime"/></svg>
+                    <svg class="move-icon"><use href="#L-prime"/></svg>
+                    <svg class="move-icon"><use href="#U"/></svg>
+                    <svg class="move-icon"><use href="#R-prime"/></svg>
+                    <svg class="move-icon"><use href="#U-prime"/></svg>
+                    <svg class="move-icon"><use href="#L"/></svg>
+                    <svg class="move-icon"><use href="#B"/></svg>
+                    
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>📋 Décomposition :</h6>
+                    <ul>
+                        <li><code>U</code> = Tourne le haut (sens horaire)</li>
+                        <li><code>R</code> = Tourne la droite (sens horaire)</li>
+                        <li><code>U'</code> = Tourne le haut (sens anti-horaire)</li>
+                        <li><code>L'</code> = Tourne la gauche (sens anti-horaire)</li>
+                        <li><code>U</code> = Tourne le haut (sens horaire)</li>
+                        <li><code>R'</code> = Tourne la droite (sens anti-horaire)</li>
+                        <li><code>U'</code> = Tourne le haut (sens anti-horaire)</li>
+                        <li><code>L</code> = Tourne la gauche (sens horaire)</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <div id="cube-algo-demo" class="text-center"></div>
+                    <p class="text-center mt-2"><small>Cet algorithme fait tourner 3 coins dans le sens horaire</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Méthode pas à pas -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📝 Méthode pas à pas</h3>
+
+        <!-- Cas 1: Un coin bien placé -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-primary">Cas 1 : Tu as UN coin bien placé</h5>
+            <ol>
+                <li class="mb-2">
+                    <strong>Positionne le cube :</strong> Tourne le cube entier (pas seulement une face !) 
+                    pour que le coin bien placé soit en <strong>arrière-gauche</strong> (en haut).
+                </li>
+                <li class="mb-2">
+                    <strong>Applique l'algorithme :</strong> Fais <code>U R U' L' U R' U' L</code> une seule fois.
+                </li>
+                <li class="mb-2">
+                    <strong>Vérifie :</strong> Les 4 coins devraient maintenant être bien placés. 
+                    Si ce n'est pas le cas, c'est qu'il y a eu une erreur dans les étapes précédentes.
+                </li>
+            </ol>
+        </div>
+
+        <!-- Cas 2: Aucun coin bien placé -->
+        <div class="border rounded p-3 bg-light">
+            <h5 class="text-warning">Cas 2 : Tu as AUCUN coin bien placé</h5>
+            <ol>
+                <li class="mb-2">
+                    <strong>Applique l'algorithme :</strong> Peu importe l'orientation du cube, 
+                    fais <code>U R U' L' U R' U' L</code> une fois.
+                </li>
+                <li class="mb-2">
+                    <strong>Cherche le coin bien placé :</strong> Maintenant, au moins un coin sera au bon endroit. 
+                    Trouve-le en tournant le cube.
+                </li>
+                <li class="mb-2">
+                    <strong>Repositionne et recommence :</strong> Mets le coin bien placé en arrière-gauche 
+                    et applique l'algorithme une nouvelle fois.
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Section Conseils -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">💡 Conseils</h3>
+        <ul>
+            <li class="mb-2">
+                <strong>Comment savoir si un coin est bien placé ?</strong> 
+                Regarde les 3 couleurs du coin et vérifie qu'elles correspondent aux 3 centres autour. 
+                L'orientation du coin n'a pas d'importance !
+            </li>
+            <li class="mb-2">
+                <strong>Arrière-gauche, c'est où ?</strong> 
+                Tiens le cube avec la face jaune vers le haut. Le coin "arrière-gauche" est celui 
+                qui est le plus éloigné de toi, sur ta gauche.
+            </li>
+            <li class="mb-2">
+                <strong>L'algorithme ne marche pas :</strong> 
+                Assure-toi d'avoir bien complété l'étape 5 (orienter la face jaune) avant de faire cette étape.
+            </li>
+        </ul>
+    </div>
+
+    
+    <!-- Bouton de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:yellow_cross' %}" class="btn btn-outline-primary">
+            ← Retour : Permuter la croix jaune
+        </a>
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
+            Vue d'ensemble
+        </a>
+        <a href="#" class="btn btn-success ms-2">
+            Étape suivante : Positionner les coins →
+        </a>
+    </div>
+</div>
+
+<script src="{% static 'cube/js/cube.js' %}"></script>
+
+<style>
+.cube-small svg { 
+    max-width: 275px; 
+    height: auto; 
+}
+
+#cube-algo-demo svg { 
+    max-width: 200px; 
+    height: auto; 
+}
+
+.move-icon { 
+    width: 64px; 
+    height: 86px; 
+}
+
+@media (max-width: 768px) {
+    .cube-small svg { 
+        max-width: 200px; 
+    }
+    
+    #cube-algo-demo svg { 
+        max-width: 150px; 
+    }
+    
+    .move-icon { 
+        width: 48px; 
+        height: 64px; 
+    }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Insérer les cubes avec des IDs uniques et les colorier
+    insertCubeInContainer('cube-container-before', step6before, 'before');
+    //insertCubeInContainer('cube-container-goal', setYellowFaceHighlighted, 'goal');
+    
+    // Les 4 cas possibles
+    //insertCubeInContainer('cube-case-zero', setYellowFaceNoCorners, 'zero');
+    //insertCubeInContainer('cube-case-fish', setYellowFaceFish, 'fish');
+    //insertCubeInContainer('cube-case-sune', setYellowFaceSune, 'sune');
+    //insertCubeInContainer('cube-case-antisune', setYellowFaceAntisune, 'antisune');
+});
+</script>
+
+{% endblock %}

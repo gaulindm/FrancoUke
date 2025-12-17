@@ -1,0 +1,80 @@
+<!-- training/templates/training/leaderboard.html -->
+{% extends 'francontcube/partials/base.html' %}
+{% load static %}
+
+{% block title %}Classement - {{ algorithm.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'training:hub' %}">Entraînement</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'training:trainer' algorithm.slug %}">{{ algorithm.name }}</a></li>
+            <li class="breadcrumb-item active">Classement</li>
+        </ol>
+    </nav>
+    
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">🏆 Classement</h1>
+        <h2 class="h4 text-muted">{{ algorithm.name }}</h2>
+        <p class="text-muted">{{ algorithm.notation }}</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Top 20 Temps</h3>
+                    
+                    {% if recent_times %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="60">#</th>
+                                    <th>Temps</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in recent_times %}
+                                <tr>
+                                    <td class="text-center">
+                                        {% if forloop.counter == 1 %}
+                                            <span style="font-size: 24px;">🥇</span>
+                                        {% elif forloop.counter == 2 %}
+                                            <span style="font-size: 24px;">🥈</span>
+                                        {% elif forloop.counter == 3 %}
+                                            <span style="font-size: 24px;">🥉</span>
+                                        {% else %}
+                                            {{ forloop.counter }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong class="text-primary">{{ session.time_formatted }}</strong>
+                                    </td>
+                                    <td class="text-muted">
+                                        {{ session.created_at|date:"d/m/Y H:i" }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-info-circle"></i> Aucun temps enregistré encore. Sois le premier !
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'training:trainer' algorithm.slug %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Retour à l'entraînement
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

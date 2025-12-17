@@ -1,0 +1,8 @@
+{% comment %}
+Reusable wrapper for displaying move icons.
+Usage:
+    {% include "icon.html" with svg=move_svg_html %}
+{% endcomment %}
+<div class="move-icon">
+    {{ svg|safe }}
+</div>

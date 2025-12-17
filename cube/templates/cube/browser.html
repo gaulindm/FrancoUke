@@ -1,0 +1,45 @@
+{% load static %}
+
+<h1>Algorithm Browser</h1>
+
+<div>
+  <label for="algoSelect">Select Algorithm:</label>
+  <select id="algoSelect">
+    {% for name, steps in algorithms.items %}
+      <option value="{{ name }}">{{ name }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<hr>
+
+<div id="algoDisplay"></div>
+
+<script>
+const algorithms = {{ algorithms|safe }};
+const display = document.getElementById('algoDisplay');
+const select = document.getElementById('algoSelect');
+
+function renderAlgo(name) {
+    const steps = algorithms[name];
+    let html = "";
+
+    steps.forEach(step => {
+        html += `
+        <div style="display:inline-block; margin:10px; text-align:center;">
+            <img src="/static/cube/icons/${step}.svg" style="width:50px;">
+            <div>${step}</div>
+        </div>
+        `;
+    });
+
+    display.innerHTML = html;
+}
+
+select.addEventListener("change", e => {
+    renderAlgo(e.target.value);
+});
+
+// Initial render
+renderAlgo(select.value);
+</script>

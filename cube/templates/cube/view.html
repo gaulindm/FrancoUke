@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Cube Viewer (Isometric)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 18px;}
+    #cube-wrapper { width: 420px; }
+  </style>
+</head>
+<body>
+  <h1>Cube Viewer</h1>
+
+  <div id="cube-wrapper">
+    {# Include the SVG inline - you can also {% include "cube/_cube_isometric.svg" %} #}
+    {% include "cube/_cube_isometric.svg" %}
+  </div>
+
+  <script>
+    // The server passed the color map JSON
+    const svgColorMap = JSON.parse('{{ svg_color_map_json|escapejs }}');
+
+    // Apply colors to SVG elements
+    Object.entries(svgColorMap).forEach(([id, color]) => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('fill', color);
+      // if an element doesn't exist (shouldn't happen), skip silently
+    });
+
+    // OPTIONAL: make stickers clickable to cycle colors (useful for testing)
+    document.querySelectorAll('.sticker').forEach(el=>{
+      el.addEventListener('click', () => {
+        const current = el.getAttribute('fill') || '#ffffff';
+        const vals = Object.values({
+          U: '#FFFFFF', R: '#D32F2F', F: '#2E7D32', D: '#FFEB3B', L: '#F57C00', B: '#1565C0'
+        });
+        const next = vals[(vals.indexOf(current) + 1) % vals.length] || vals[0];
+        el.setAttribute('fill', next);
+      });
+    });
+  </script>
+</body>
+</html>

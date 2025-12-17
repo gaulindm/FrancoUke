@@ -1,0 +1,49 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+    <title>Backend SVG Cube Demo</title>
+    <script type="module" src="{% static 'cube/js/cube_renderer.js' %}"></script>
+    <style>
+        .cube-wrapper {
+            width: 550px;
+            margin: 20px auto;
+        }            
+        .sticker {
+            stroke: black;
+            stroke-width: 1;
+            stroke-linejoin: round;
+        }
+        
+        
+    </style>
+</head>
+<body>
+
+<h1>Backend-Rendered Isometric Cube</h1>
+
+<!-- Include SVG partial so JS can clone it -->
+{% include "cube/partials/_cube_svg.html" %}
+
+<div id="cube-mount"></div>
+
+<script type="module">
+import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+// Clone the SVG template into the page
+const tpl = document.getElementById("cube-template");
+const clone = tpl.content.cloneNode(true);
+document.getElementById("cube-mount").appendChild(clone);
+
+// Now target the cloned SVG
+const svg = document.getElementById("cube-svg");
+
+// Backend cube JSON from Django
+const cubeState = {{ cube_json|safe }};
+
+// Render it
+renderCube(svg, cubeState);
+</script>
+
+</body>
+</html>

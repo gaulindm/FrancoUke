@@ -1,0 +1,28 @@
+{% load static %}
+
+<h1>Daisy Demo Page</h1>
+
+<!-- Load SVG template -->
+{% include "cube/partials/_cube_svg.html" %}
+
+<div id="cube-container"></div>
+
+<script type="module">
+    import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Clone template into the page
+        const template = document.getElementById("cube-template");
+        const clone = template.content.cloneNode(true);
+        document.getElementById("cube-container").appendChild(clone);
+
+        // Get SVG element
+        const svg = document.getElementById("cube-svg");
+
+        // Load JSON from backend
+        const state = {{ json_state|safe }};
+
+        // Render!
+        renderCube(svg, state);
+    });
+</script>

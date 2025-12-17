@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Pour les iPads -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FrancontCube">
+    
+    {% include "francontcube/partials/_head.html" %}
+    <style>
+        /* Remove default body margin */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Hide SVG sprite - it's only for reference, shouldn't take space */
+        body > svg {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        /* Ensure navbar is at top with no gaps */
+        nav.navbar {
+            margin-bottom: 0;
+        }
+
+        /* Cube styling */
+        #cube-before svg,
+        #cube-after svg {
+            width: 180px;
+            height: auto;
+            transform: scale(0.8);
+            transform-origin: center top;
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    {# Sprite SVG chargé UNE SEULE FOIS pour tout le site - hidden, for reference only #}
+    {% include "cube/partials/cube-moves-sprite.svg" %}
+
+    {# Navigation bar - at the very top #}
+    {% include "francontcube/partials/_navbar.html" %}
+
+    {# Breadcrumb navigation #}
+    {% include "francontcube/partials/breadcrumb.html" %}
+
+    {# Main content #}
+    <main class="container py-4">
+        {% block content %}
+        <!-- Le contenu par page -->
+        {% endblock %}
+    </main>
+
+    {# Footer #}
+    {% include "francontcube/partials/_footer.html" %}
+</body>
+
+</html>

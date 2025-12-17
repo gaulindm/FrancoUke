@@ -1,0 +1,12 @@
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const initialState = "{{ initial_state|default:'' }}";
+    if (initialState) {
+      initCubeState(initialState);
+    } else {
+      setDaisy(); // fallback for demonstration
+    }
+    // optional: make stickers clickable to cycle colors
+    enableStickerClickCycle();
+  });
+</script>

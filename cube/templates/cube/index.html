@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3D Rubik's Cube - Three.js</title>
+<style>
+  body { margin: 0; overflow: hidden; background: #111; }
+</style>
+</head>
+<body>
+
+<script type="module">
+import * as THREE from "https://unpkg.com/three@0.159.0/build/three.module.js";
+import { OrbitControls } from "https://unpkg.com/three@0.159.0/examples/jsm/controls/OrbitControls.js";
+
+// ------------------------------------------------
+// Scene, Camera
+// ------------------------------------------------
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x111111);
+
+const camera = new THREE.PerspectiveCamera(
+  45, window.innerWidth / window.innerHeight, 0.1, 1000
+);
+camera.position.set(5, 5, 7);
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// ------------------------------------------------
+// Build Rubik’s Cube
+// ------------------------------------------------
+const rubiks = new THREE.Group();
+scene.add(rubiks);
+
+const stickerColors = {
+  U: 0xffffff,
+  D: 0xffff00,
+  F: 0x00ff00,
+  B: 0x0000ff,
+  R: 0xff0000,
+  L: 0xff8000
+};
+
+function createSticker(color) {
+  const geo = new THREE.PlaneGeometry(0.9, 0.9);
+  const mat = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+  return new THREE.Mesh(geo, mat);
+}
+
+function createCubie(x, y, z) {
+  const cubie = new THREE.Group();
+
+  // Stickers (U, D, F, B, R, L)
+  if (y === 1) {
+    const s = createSticker(stickerColors.U);
+    s.position.y = 0.51;
+    s.rotation.x = -Math.PI/2;
+    cubie.add(s);
+  }
+  if (y === -1) {
+    const s = createSticker(stickerColors.D);
+    s.position.y = -0.51;
+    s.rotation.x = Math.PI/2;
+    cubie.add(s);
+  }
+  if (z === 1) {
+    const s = createSticker(stickerColors.F);
+    s.position.z = 0.51;
+    cubie.add(s);
+  }
+  if (z === -1) {
+    const s = createSticker(stickerColors.B);
+    s.position.z = -0.51;
+    s.rotation.y = Math.PI;
+    cubie.add(s);
+  }
+  if (x === 1) {
+    const s = createSticker(stickerColors.R);
+    s.position.x = 0.51;
+    s.rotation.y = -Math.PI/2;
+    cubie.add(s);
+  }
+  if (x === -1) {
+    const s = createSticker(stickerColors.L);
+    s.position.x = -0.51;
+    s.rotation.y = Math.PI/2;
+    cubie.add(s);
+  }
+
+  cubie.position.set(x, y, z);
+  return cubie;
+}
+
+// Create all 27 cubies
+for (let x = -1; x <= 1; x++) {
+  for (let y = -1; y <= 1; y++) {
+    for (let z = -1; z <= 1; z++) {
+      rubiks.add(createCubie(x, y, z));
+    }
+  }
+}
+
+// ------------------------------------------------
+// Animation Loop
+// ------------------------------------------------
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// Resize
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+</body>
+</html>

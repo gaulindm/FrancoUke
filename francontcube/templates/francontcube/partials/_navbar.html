@@ -1,0 +1,24 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+
+        <a class="navbar-brand fw-bold" href="{% url 'francontcube:home' %}">
+            <img src="{% static 'francontcube/img/francontcube_logo.png' %}" alt="logo" height="40"
+                 class="me-2">
+            FrancontCube
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'francontcube:ressources3par3' %}">3×3 Ressources</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'francontcube:method_cubienewbie' %}">Méthode Débutante</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'cube_prep:color_matrix' %}">4×4 & Mosaic</a></li>
+            </ul>
+        </div>
+
+    </div>
+</nav>

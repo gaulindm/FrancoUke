@@ -1,0 +1,224 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Isometric Cube — Left-hand Teaching Orientation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 18px; }
+    #cube-wrapper { width: 480px; max-width: 95vw; margin: 18px 0; }
+    .sticker { stroke: #000000; stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Isometric Cube — Left-hand Teaching Orientation</h1>
+  <p>Front is dominant, right is narrower, top is visible. Click a sticker to cycle test colors.</p>
+<button onclick="setDaisy()">Daisy</button>
+
+  <div id="cube-wrapper">
+    <!-- SVG (isometric, front-dominant, left-hand orientation) -->
+    <svg id="cube-svg" width="550" height="460" viewBox="0 0 550 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rubik's cube isometric view">
+      <style>.sticker { stroke-linejoin: round; }</style>
+
+
+
+        <g id="cube" transform="rotate(0 0 0)">
+
+        <!-- ===================== -->
+        <!--  R (Right) Face       -->
+        <!-- ===================== -->
+        <g id="face-R">
+
+            <!-- Row 0 -->
+            <polygon id="sticker-R-0-0" class="sticker" points="287.7,133.8 310.633,108.167 313.456,164.644 291.700,191.167" />
+            <polygon id="sticker-R-0-1" class="sticker" points="310.633,108.167 333.567,82.533 335.211,138.122 313.456,164.644" />
+            <polygon id="sticker-R-0-2" class="sticker" points="333.567,82.533 356.5,56.9 356.967,111.600 335.211,138.122" />
+
+            <!-- Row 1 -->
+            <polygon id="sticker-R-1-0" class="sticker" points="291.700,191.167 313.456,164.644 316.278,221.122 295.700,248.533" />
+            <polygon id="sticker-R-1-1" class="sticker" points="313.456,164.644 335.211,138.122 336.856,193.711 316.278,221.122" />
+            <polygon id="sticker-R-1-2" class="sticker" points="335.211,138.122 356.967,111.600 357.433,166.300 336.856,193.711" />
+
+            <!-- Row 2 -->
+            <polygon id="sticker-R-2-0" class="sticker" points="295.700,248.533 316.278,221.122 319.100,277.600 299.700,305.900" />
+            <polygon id="sticker-R-2-1" class="sticker" points="316.278,221.122 336.856,193.711 338.500,249.300 319.100,277.600" />
+            <polygon id="sticker-R-2-2" class="sticker" points="336.856,193.711 357.433,166.300 357.900,221.000 338.500,249.300" />
+
+        </g>
+
+            
+        <!-- ===================== -->
+        <!--  F (Front) Face       -->
+        <!-- ===================== -->
+        <g id="face-F">
+
+            <!-- Row 0 -->
+            <polygon id="sticker-F-0-0" class="sticker" points="124.100,112.000 178.633,119.267 184.856,173.878 131.433,165.233" />
+            <polygon id="sticker-F-0-1" class="sticker" points="178.633,119.267 233.167,126.533 238.278,182.522 184.856,173.878" />
+            <polygon id="sticker-F-0-2" class="sticker" points="233.167,126.533 287.700,133.800 291.700,191.167 238.278,182.522" />
+
+            <!-- Row 1 -->
+            <polygon id="sticker-F-1-0" class="sticker" points="131.433,165.233 184.856,173.878 191.078,228.489 138.767,218.467" />
+            <polygon id="sticker-F-1-1" class="sticker" points="184.856,173.878 238.278,182.522 243.389,238.511 191.078,228.489" />
+            <polygon id="sticker-F-1-2" class="sticker" points="238.278,182.522 291.700,191.167 295.700,248.533 243.389,238.511" />
+
+            <!-- Row 2 -->
+            <polygon id="sticker-F-2-0" class="sticker" points="138.767,218.467 191.078,228.489 197.300,283.100 146.100,271.700" />
+            <polygon id="sticker-F-2-1" class="sticker" points="191.078,228.489 243.389,238.511 248.500,294.500 197.300,283.100" />
+            <polygon id="sticker-F-2-2" class="sticker" points="243.389,238.511 295.700,248.533 299.700,305.900 248.500,294.500" />
+
+        </g>
+
+
+        <!-- ===================== -->
+        <!--  U (Top) Face         -->
+        <!-- ===================== -->
+        <g id="face-U">
+
+            <!-- Row 0 -->
+            <polygon id="sticker-U-0-0" class="sticker" points="209.148,42.905 258.265,47.594 231.732,71.5 180.808,65.951" />
+            <polygon id="sticker-U-0-1" class="sticker" points="258.265,47.594 307.382,52.284 282.655,77.048 231.732,71.5" />
+            <polygon id="sticker-U-0-2" class="sticker" points="307.382,52.284 356.499,56.973 333.578,82.597 282.655,77.048" />
+
+            <!-- Row 1 -->
+            <polygon id="sticker-U-1-0" class="sticker" points="180.808,65.951 231.732,71.5 205.198,95.405 152.469,88.998" />
+            <polygon id="sticker-U-1-1" class="sticker" points="231.732,71.5 282.655,77.048 257.928,101.813 205.198,95.405" />
+            <polygon id="sticker-U-1-2" class="sticker" points="282.655,77.048 333.578,82.597 310.657,108.22 257.928,101.813" />
+
+            <!-- Row 2 -->
+            <polygon id="sticker-U-2-0" class="sticker" points="152.469,88.998 205.198,95.405 178.665,119.311 124.129,112.044" />
+            <polygon id="sticker-U-2-1" class="sticker" points="205.198,95.405 257.928,101.813 233.2,126.577 178.665,119.311" />
+            <polygon id="sticker-U-2-2" class="sticker" points="257.928,101.813 310.657,108.22 287.736,133.844 233.2,126.577" />
+
+        </g>
+ -->            
+
+            <!-- ========= NEW L FACE (visible) =========
+            <!-- These coordinates are an initial pass: positioned left of F, matching isometric angle. Needs fine-tuning. -->
+            <g id="face-L">
+            <polygon id="sticker-L-0-0" class="sticker" points="37.7,103.8 60.633,78.167 63.456,134.644 41.7,161.167"  /> 
+            <polygon id="sticker-L-0-1" class="sticker" points="60.633,78.167 83.567,52.533 85.211,108.122 63.456,134.644" />
+            <polygon id="sticker-L-0-2" class="sticker" points="83.567,52.533 106.5,26.9 106.967,81.6 85.211,108.122" />  
+
+
+            <polygon id="sticker-L-1-0" class="sticker" points="41.7,161.167 63.456,134.644 66.278,191.122 45.7,218.533" />
+            <polygon id="sticker-L-1-1" class="sticker" points="63.4555555555556,134.644444444444 85.2111111111111,108.122222222222 86.8555555555556,163.711111111111 66.2777777777778,191.122222222222" />
+            <polygon id="sticker-L-1-2" class="sticker" points="85.2111111111111,108.122222222222 106.966666666667,81.6 107.433333333333,136.3 86.8555555555556,163.711111111111" />
+
+
+            <polygon id="sticker-L-2-0" class="sticker" points="45.7,218.533333333333 66.2777777777778,191.122222222222 69.1,247.6 49.7,275.9" />
+            <polygon id="sticker-L-2-1" class="sticker" points="66.2777777777778,191.122222222222 86.8555555555556,163.711111111111 88.5,219.3 69.1,247.6" />
+            <polygon id="sticker-L-2-2" class="sticker" points="86.8555555555556,163.711111111111 107.433333333333,136.3 107.9,191 88.5,219.3" />-->
+            </g>
+        </g>
+
+   
+            <!-- ========= NEW D FACE (visible) =========
+            <!-- These coordinates are an initial pass: positioned below F, matching isometric angle. Needs fine-tuning. -->
+            <g id="face-L">
+            <polygon id="sticker-D-0-0" class="sticker" points="209.148,321.905 258.265,323.594333333333 231.731555555556,345.499777777778 180.808333333333,341.951333333333"  /> 
+            <polygon id="sticker-D-0-1" class="sticker" points="258.265,323.594333333333 307.382,325.283666666667 282.654777777778,349.048222222222 231.731555555556,345.499777777778"/>
+            <polygon id="sticker-D-0-2" class="sticker" points="307.382,325.283666666667 356.499,326.973 333.578,352.596666666667 282.654777777778,349.048222222222" />  
+
+
+            <polygon id="sticker-D-1-0" class="sticker" points="180.808333333333,341.951333333333 231.731555555556,345.499777777778 205.198111111111,367.405222222222 152.468666666667,361.997666666667" />
+            <polygon id="sticker-D-1-1" class="sticker" points="231.731555555556,345.499777777778 282.654777777778,349.048222222222 257.927555555556,372.812777777778 205.198111111111,367.405222222222" />
+            <polygon id="sticker-D-1-2" class="sticker" points="282.654777777778,349.048222222222 333.578,352.596666666667 310.657,378.220333333333 257.927555555556,372.812777777778" />
+
+
+            <polygon id="sticker-D-2-0" class="sticker" points="152.468666666667,361.997666666667 205.198111111111,367.405222222222 178.664666666667,389.310666666667 124.129,382.044" />
+            <polygon id="sticker-D-2-1" class="sticker" points="205.198111111111,367.405222222222 257.927555555556,372.812777777778 233.200333333333,396.577333333333 178.664666666667,389.310666666667" />
+            <polygon id="sticker-D-2-2" class="sticker" points="257.927555555556,372.812777777778 310.657,378.220333333333 287.736,403.844 233.200333333333,396.577333333333" />-->
+            </g>
+        </g>
+
+<polygon points="364.100,62.000 527.700,83.800 539.700,255.900 386.100,221.700 " style="fill:lime;stroke:purple;stroke-width:3" />   
+            <!-- ========= NEW B FACE (visible) =========
+            <!-- These coordinates are an initial pass: positioned below F, matching isometric angle. Needs fine-tuning. -->
+            <g id="face-L">
+            <polygon id="sticker-B-0-0" class="sticker" points="473.166666666667,76.5333333333333 527.7,83.8 531.7,141.166666666667 478.277777777778,132.522222222222"  /> 
+            <polygon id="sticker-B-0-1" class="sticker" points="418.633333333333,69.2666666666667 473.166666666667,76.5333333333333 478.277777777778,132.522222222222 424.855555555556,123.877777777778"/>
+            <polygon id="sticker-B-0-2" class="sticker" points="364.1,62 418.633333333333,69.2666666666667 424.855555555556,123.877777777778 371.433333333333,115.233333333333" />  
+
+
+            <polygon id="sticker-B-1-0" class="sticker" points="478.277777777778,132.522222222222 531.7,141.166666666667 535.7,198.533333333333 483.388888888889,188.511111111111" />
+            <polygon id="sticker-B-1-1" class="sticker" points="424.855555555556,123.877777777778 478.277777777778,132.522222222222 483.388888888889,188.511111111111 431.077777777778,178.488888888889" />
+            <polygon id="sticker-B-1-2" class="sticker" points="371.433333333333,115.233333333333 424.855555555556,123.877777777778 431.077777777778,178.488888888889 378.766666666667,168.466666666667" />
+
+            <polygon id="sticker-B-2-0" class="sticker" points="483.388888888889,188.511111111111 535.7,198.533333333333 539.7,255.9 488.5,244.5" />
+            <polygon id="sticker-B-2-1" class="sticker" points="431.077777777778,178.488888888889 483.388888888889,188.511111111111 488.5,244.5 437.3,233.1" />
+            <polygon id="sticker-B-2-2" class="sticker" points="378.766666666667,168.466666666667 431.077777777778,178.488888888889 437.3,233.1 386.1,221.7" />-->
+            </g>
+        </g>
+
+
+
+    </svg>
+  </div>
+
+  <script>
+    // sample palette (standard)
+    const PALETTE = { U:'#FFFFFF', R:'#D32F2F', F:'#2E7D32', D:'#FFEB3B', L:'#F57C00', B:'#1565C0',X: "grey" };
+
+    // sample solved 54-char facelet string (U,R,F,D,L,B)
+    const solved = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
+
+    // Build mapping index->svg id same order we used earlier: U(0..8), R(9..17), F(18..26), D(27..35), L(36..44), B(45..53)
+    const FACES = [['U',0],['R',9],['F',18],['D',27],['L',36],['B',45]];
+    const faceletToId = {};
+    for (const [face, start] of FACES) {
+      for (let i=0;i<9;i++){
+        const idx = start + i;
+        const r = Math.floor(i/3), c = i%3;
+        faceletToId[idx] = `sticker-${face}-${r}-${c}`;
+      }
+    }
+
+    // Build svg color map from a facelet string
+    function svgColorMapFromState(state) {
+      const map = {};
+      for (let i=0;i<54;i++) {
+        const facelet = state[i];
+        const id = faceletToId[i];
+        map[id] = PALETTE[facelet] || '#CCCCCC';
+      }
+      return map;
+    }
+
+    // Apply colors to the SVG
+    function applyColorMap(map) {
+      Object.entries(map).forEach(([id, color])=>{
+        const el = document.getElementById(id);
+        if (el) el.setAttribute('fill', color);
+      });
+    }
+
+    // initial render using solved state
+    applyColorMap(svgColorMapFromState(solved));
+
+    // clicking any visible sticker cycles through face colors (handy for testing)
+    document.querySelectorAll('.sticker').forEach(el=>{
+      el.addEventListener('click', () => {
+        const colors = Object.values(PALETTE);
+        const cur = el.getAttribute('fill') || colors[0];
+        const next = colors[(colors.indexOf(cur) + 1) % colors.length] || colors[0];
+        el.setAttribute('fill', next);
+      });
+    });
+
+    // Expose helpers to window for easier testing in console
+    // URFDLB
+    window.svgColorMapFromState = svgColorMapFromState;
+    window.applyColorMap = applyColorMap;
+    window.PALETTE = PALETTE;
+  </script>
+  <script>
+  function setDaisy() {
+    const daisy =
+      "XUXUDUXUXXXXXRXXXXXXXXFXXXXXXXXUXXXXXXXXLXXXXXXXXBXXXXXXXX";
+    applyColorMap(svgColorMapFromState(daisy));
+  }
+</script>
+
+</body>
+</html>

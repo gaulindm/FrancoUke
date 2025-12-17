@@ -1,0 +1,476 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Permuter les coins jaunes — Francontcube{% endblock %}
+
+{% block content %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        
+        .intro {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .intro h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .notation-guide {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .notation-guide h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .moves-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .move-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 3px solid #e0e0e0;
+        }
+        
+        .move-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .move-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .move-name {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .move-full-name {
+            font-size: 1.1em;
+            color: #666;
+        }
+        
+        .move-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .move-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .move-icon {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .move-icon svg {
+            display: block;
+        }
+        
+        .color-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Guide des Mouvements du Rubik's Cube</h1>
+        <p class="subtitle">Pour les débutants - Apprenez la notation Singmaster</p>
+        
+        <div class="intro">
+            <h2>Bienvenue, Cubie Newbie ! 👋</h2>
+            <p>Le Rubik's Cube utilise un système de notation universel appelé <strong>notation Singmaster</strong>. Chaque face du cube est représentée par une lettre, et chaque mouvement décrit comment tourner cette face.</p>
+        </div>
+        
+        <div class="color-legend">
+            <h3 style="width: 100%; text-align: center; margin-bottom: 10px;">Couleurs Standard du Cube</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fff;"></div>
+                <span><strong>U</strong> - Blanc (Haut)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffd700;"></div>
+                <span><strong>D</strong> - Jaune (Bas)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff0000;"></div>
+                <span><strong>R</strong> - Rouge (Droite)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff6600;"></div>
+                <span><strong>L</strong> - Orange (Gauche)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #00ff00;"></div>
+                <span><strong>F</strong> - Vert (Face)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #0000ff;"></div>
+                <span><strong>B</strong> - Bleu (Arrière)</span>
+            </div>
+        </div>
+        
+        <div class="notation-guide">
+            <h3>📖 Comprendre la Notation</h3>
+            <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                <li><strong>Lettre seule (ex: R)</strong> = rotation de 90° dans le sens horaire</li>
+                <li><strong>Lettre + apostrophe (ex: R')</strong> = rotation de 90° dans le sens antihoraire (inverse)</li>
+                <li><strong>Lettre + 2 (ex: R2)</strong> = rotation de 180° (deux quarts de tour)</li>
+            </ul>
+        </div>
+        
+        <h2 style="margin-top: 50px; margin-bottom: 20px; color: #667eea; text-align: center;">Les 6 Mouvements de Base</h2>
+        
+        <div class="moves-grid" id="movesGrid"></div>
+        
+        <div class="intro" style="margin-top: 50px;">
+            <h2>💡 Conseils pour Apprendre</h2>
+            <ul style="margin-left: 20px; margin-top: 15px; line-height: 1.8;">
+                <li>Pratiquez chaque mouvement lentement jusqu'à ce qu'il devienne naturel</li>
+                <li>Tenez toujours le cube avec la même orientation pour chaque mouvement</li>
+                <li>Les mouvements "prime" (') sont simplement l'inverse du mouvement normal</li>
+                <li>Les mouvements "2" sont équivalents à faire le même mouvement deux fois</li>
+                <li>Avec ces 18 mouvements (6 × 3 variantes), vous pouvez résoudre n'importe quel Rubik's Cube !</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; color: #999;">
+            <p>Bonne chance dans votre aventure cubique ! 🎲✨</p>
+        </div>
+    </div>
+
+    <script>
+        // SVG icon generation functions (converted from Python)
+        function verticalArrow(x, y, direction = 1) {
+            let pts;
+            if (direction === 1) {
+                pts = `${x},${y-2} ${x-6},${y+8} ${x+6},${y+8}`;
+            } else {
+                pts = `${x},${y+12} ${x-6},${y+2} ${x+6},${y+2}`;
+            }
+            return `<polygon points="${pts}" fill="black" />`;
+        }
+
+        function horizontalArrow(x, y, direction = 1) {
+            let pts;
+            if (direction === 1) {
+                pts = `${x+24},${y} ${x+14},${y-6} ${x+14},${y+6}`;
+            } else {
+                pts = `${x-24},${y} ${x-14},${y-6} ${x-14},${y+6}`;
+            }
+            return `<polygon points="${pts}" fill="black" />`;
+        }
+
+        function circularArc(cx, cy, r, startDeg, endDeg, direction = 1) {
+            const s = startDeg * Math.PI / 180;
+            const e = endDeg * Math.PI / 180;
+
+            const x1 = cx + r * Math.cos(s);
+            const y1 = cy + r * Math.sin(s);
+            const x2 = cx + r * Math.cos(e);
+            const y2 = cy + r * Math.sin(e);
+
+            const largeArc = 1;
+            const sweep = direction === 1 ? 1 : 0;
+
+            return `<path d="M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} ${sweep} ${x2} ${y2}" 
+                    stroke="black" stroke-width="3" fill="none" />`;
+        }
+
+        function generateSVGIcon(move, boxWidth = 64, boxHeight = 64, radius = 5) {
+            move = move.trim();
+            const axis = move[0];
+            const modifier = move.substring(1);
+            const isPrime = modifier === "'";
+            const isDouble = modifier === "2";
+
+            const labelHeight = 22;
+            const totalHeight = labelHeight + boxHeight;
+
+            const Lx = boxWidth * 0.1875;
+            const Mx = boxWidth * 0.50;
+            const Rx = boxWidth * 0.8125;
+
+            const Uy = labelHeight + boxHeight * 0.1875;
+            const My = labelHeight + boxHeight * 0.50;
+            const Dy = labelHeight + boxHeight * 0.8125;
+
+            let arrows = [];
+            let verticalLines = "";
+            let horizontalLines = "";
+
+            // R / L MOVES
+            if (axis === "R" || axis === "L") {
+                const sliceX = axis === "R" ? Rx : Lx;
+                const direction = ((axis === "R" && !isPrime) || (axis === "L" && isPrime)) ? 1 : -1;
+
+                const topLineY = labelHeight + 10;
+                const bottomLineY = labelHeight + boxHeight - 20;
+
+                if (isDouble) {
+                    arrows.push(verticalArrow(sliceX, topLineY - 2, 1));
+                    arrows.push(verticalArrow(sliceX, topLineY + 6, 1));
+                } else {
+                    if (direction === 1) {
+                        arrows.push(verticalArrow(sliceX, topLineY - 2, 1));
+                    } else {
+                        arrows.push(verticalArrow(sliceX, bottomLineY, -1));
+                    }
+                }
+
+                verticalLines = `
+                    <line x1="${Lx}" y1="${labelHeight+10.5}" x2="${Lx}" y2="${labelHeight+boxHeight-10.5}" stroke="black" stroke-width="3" />
+                    <line x1="${Mx}" y1="${labelHeight+10.5}" x2="${Mx}" y2="${labelHeight+boxHeight-10.5}" stroke="black" stroke-width="3" />
+                    <line x1="${Rx}" y1="${labelHeight+10.5}" x2="${Rx}" y2="${labelHeight+boxHeight-10.5}" stroke="black" stroke-width="3" />
+                `;
+            }
+
+            // U / D MOVES
+            if (axis === "U" || axis === "D") {
+                const sliceY = axis === "U" ? Uy : Dy;
+                let direction, doubleDirection;
+
+                if (axis === "U") {
+                    direction = isPrime ? 1 : -1;
+                    doubleDirection = -1;
+                } else {
+                    direction = isPrime ? -1 : 1;
+                    doubleDirection = 1;
+                }
+
+                const arrowX = boxWidth / 2;
+
+                if (isDouble) {
+                    arrows.push(horizontalArrow(arrowX, sliceY, doubleDirection));
+                    arrows.push(horizontalArrow(arrowX + 8, sliceY, doubleDirection));
+                } else {
+                    arrows.push(horizontalArrow(arrowX, sliceY, direction));
+                }
+
+                horizontalLines = `
+                    <line x1="10.5" y1="${Uy}" x2="${boxWidth-10.5}" y2="${Uy}" stroke="black" stroke-width="3" />
+                    <line x1="10.5" y1="${My}" x2="${boxWidth-10.5}" y2="${My}" stroke="black" stroke-width="3" />
+                    <line x1="10.5" y1="${Dy}" x2="${boxWidth-10.5}" y2="${Dy}" stroke="black" stroke-width="3" />
+                `;
+            }
+
+            // F MOVES
+            if (axis === "F") {
+                const cx = Mx;
+                const cy = My;
+                const r = boxWidth * 0.28;
+
+                const direction = isPrime ? -1 : 1;
+                const start = 90;
+                const end = direction === 1 ? 0 : 180;
+
+                if (isDouble) {
+                    arrows.push(circularArc(cx, cy, r, 90, 0, 1));
+                    const arrowX = cx + 17;
+                    const arrowY = cy - 2;
+                    arrows.push(verticalArrow(arrowX, arrowY - 6, -1));
+                    arrows.push(verticalArrow(arrowX, arrowY, -1));
+                } else {
+                    arrows.push(circularArc(cx, cy, r, start, end, direction));
+                    const arrowX = direction === 1 ? cx + 17 : cx - 17;
+                    const arrowY = cy - 2;
+                    arrows.push(verticalArrow(arrowX, arrowY, -1));
+                }
+            }
+
+            // B MOVES
+            if (axis === "B") {
+                const cx = Mx;
+                const cy = My;
+                const r = boxWidth * 0.28;
+
+                const direction = isPrime ? 1 : -1;
+                const start = 90;
+                const end = direction === 1 ? 0 : 180;
+
+                if (isDouble) {
+                    arrows.push(circularArc(cx, cy, r, 90, 0, 1));
+                    const arrowX = cx - 17;
+                    const arrowY = cy - 2;
+                    arrows.push(verticalArrow(arrowX, arrowY - 6, -1));
+                    arrows.push(verticalArrow(arrowX, arrowY, -1));
+                } else {
+                    arrows.push(circularArc(cx, cy, r, start, end, direction));
+                    const arrowX = direction === 1 ? cx + 17 : cx - 17;
+                    const arrowY = cy - 2;
+                    arrows.push(verticalArrow(arrowX, arrowY, -1));
+                }
+            }
+
+            const arrowsSVG = arrows.join('\n');
+
+            return `
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 ${boxWidth} ${totalHeight}"
+     preserveAspectRatio="xMidYMid meet"
+     width="80" height="108">
+
+    <text x="${boxWidth/2}" y="${labelHeight/2}"
+          font-size="14" text-anchor="middle" dominant-baseline="middle" font-weight="bold">
+        ${move}
+    </text>
+
+    <rect x="1" y="${labelHeight}" width="${boxWidth-2}" height="${boxHeight-2}"
+          rx="${radius}" ry="${radius}"
+          fill="white" stroke="black" stroke-width="2"/>
+
+    <line x1="${boxWidth/3}" y1="${labelHeight+1}" x2="${boxWidth/3}" y2="${labelHeight+boxHeight-1}" stroke="lightgray" stroke-width="1" />
+    <line x1="${2*boxWidth/3}" y1="${labelHeight+1}" x2="${2*boxWidth/3}" y2="${labelHeight+boxHeight-1}" stroke="lightgray" stroke-width="1" />
+    <line x1="2" y1="${labelHeight+boxHeight/3}" x2="${boxWidth-2}" y2="${labelHeight+boxHeight/3}" stroke="lightgray" stroke-width="1" />
+    <line x1="2" y1="${labelHeight+2*boxHeight/3}" x2="${boxWidth-2}" y2="${labelHeight+2*boxHeight/3}" stroke="lightgray" stroke-width="1" />
+
+    ${verticalLines}
+    ${horizontalLines}
+
+    ${arrowsSVG}
+</svg>`;
+        }
+
+        // Move definitions
+        const moves = [
+            {
+                letter: 'U',
+                name: 'Up (Haut)',
+                description: 'Tournez la face supérieure de 90° dans le sens horaire (comme les aiguilles d\'une montre vue de dessus).',
+                variants: ['U', "U'", 'U2']
+            },
+            {
+                letter: 'R',
+                name: 'Right (Droite)',
+                description: 'Tournez la face droite de 90° dans le sens horaire (vue de droite).',
+                variants: ['R', "R'", 'R2']
+            },
+            {
+                letter: 'F',
+                name: 'Front (Face)',
+                description: 'Tournez la face avant de 90° dans le sens horaire (la face qui vous fait face).',
+                variants: ['F', "F'", 'F2']
+            },
+            {
+                letter: 'D',
+                name: 'Down (Bas)',
+                description: 'Tournez la face inférieure de 90° dans le sens horaire (vue de dessous).',
+                variants: ['D', "D'", 'D2']
+            },
+            {
+                letter: 'L',
+                name: 'Left (Gauche)',
+                description: 'Tournez la face gauche de 90° dans le sens horaire (vue de gauche).',
+                variants: ['L', "L'", 'L2']
+            },
+            {
+                letter: 'B',
+                name: 'Back (Arrière)',
+                description: 'Tournez la face arrière de 90° dans le sens horaire (vue de derrière).',
+                variants: ['B', "B'", 'B2']
+            }
+        ];
+
+        // Generate move cards
+        const grid = document.getElementById('movesGrid');
+        moves.forEach(move => {
+            const card = document.createElement('div');
+            card.className = 'move-card';
+            
+            const iconsHTML = move.variants.map(v => 
+                `<div class="move-icon">${generateSVGIcon(v)}</div>`
+            ).join('');
+            
+            card.innerHTML = `
+                <div class="move-header">
+                    <div>
+                        <div class="move-name">${move.letter}</div>
+                        <div class="move-full-name">${move.name}</div>
+                    </div>
+                </div>
+                <p class="move-description">${move.description}</p>
+                <div class="move-icons">
+                    ${iconsHTML}
+                </div>
+            `;
+            
+            grid.appendChild(card);
+        });
+    </script>
+{% endblock %}

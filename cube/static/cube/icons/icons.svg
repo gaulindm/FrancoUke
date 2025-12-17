@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute">
+  <!-- BASE CUBE DRAWING (used by all icons) -->
+  <g id="base" stroke="black" fill="none" stroke-width="2">
+    <rect x="10" y="10" width="60" height="60" />
+    <polygon points="70,10 110,30 110,90 70,70" />
+    <polygon points="10,10 50,-10 110,30 70,10" />
+  </g>
+
+  <!-- U -->
+  <g id="U"><use href="#base"/><text x="40" y="45" font-size="40">U</text></g>
+
+  <!-- U' -->
+  <g id="Up"><use href="#base"/><text x="40" y="45" font-size="40">U'</text></g>
+
+  <!-- U2 -->
+  <g id="U2"><use href="#base"/><text x="35" y="45" font-size="40">U²</text></g>
+
+  <!-- D (180° rotation) -->
+  <g id="D" transform="rotate(180 60 40)">
+    <use href="#base"/><text x="40" y="45" font-size="40">D</text>
+  </g>
+
+  <g id="Dp" transform="rotate(180 60 40)">
+    <use href="#base"/><text x="40" y="45" font-size="40">D'</text>
+  </g>
+
+  <g id="D2" transform="rotate(180 60 40)">
+    <use href="#base"/><text x="35" y="45" font-size="40">D²</text>
+  </g>
+
+  <!-- R (90° rotation) -->
+  <g id="R" transform="rotate(90 60 40)">
+    <use href="#base"/><text x="40" y="45" font-size="40">R</text>
+  </g>
+
+  <g id="Rp" transform="rotate(90 60 40)">
+    <use href="#base"/><text x="40" y="45" font-size="40">R'</text>
+  </g>
+
+  <g id="R2" transform="rotate(90 60 40)">
+    <use href="#base"/><text x="35" y="45" font-size="40">R²</text>
+  </g>
+
+  <!-- L (-90° rotation) -->
+  <g id="L" transform="rotate(-90 60 40)">
+    <use href="#base"/><text x="40" y="45" font-size="40">L</text>
+  </g>
+
+  <g id="Lp" transform="rotate(-90 60 40)">
+    <use href="#base"/><text x="40" y="45" font-size="40">L'</text>
+  </g>
+
+  <g id="L2" transform="rotate(-90 60 40)">
+    <use href="#base"/><text x="35" y="45" font-size="40">L²</text>
+  </g>
+
+  <!-- F -->
+  <g id="F"><use href="#base"/><text x="40" y="45" font-size="40">F</text></g>
+  <g id="Fp"><use href="#base"/><text x="40" y="45" font-size="40">F'</text></g>
+  <g id="F2"><use href="#base"/><text x="35" y="45" font-size="40">F²</text></g>
+
+  <!-- B (mirrored) -->
+  <g id="B" transform="scale(-1 1) translate(-120 0)">
+    <use href="#base"/><text x="40" y="45" font-size="40">B</text>
+  </g>
+
+  <g id="Bp" transform="scale(-1 1) translate(-120 0)">
+    <use href="#base"/><text x="40" y="45" font-size="40">B'</text>
+  </g>
+
+  <g id="B2" transform="scale(-1 1) translate(-120 0)">
+    <use href="#base"/><text x="35" y="45" font-size="40">B²</text>
+  </g>
+
+</svg>

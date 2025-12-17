@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rubik Test</title>
+</head>
+<body>
+
+  <!-- load sprite -->
+  <object type="image/svg+xml"
+          data="{% static 'cube/icons.svg' %}"
+          style="display:none;"></object>
+
+  <h1>Rubik Icon Test</h1>
+
+  <svg width="150" height="150"><use href="#icon-R"></use></svg>
+  <svg width="150" height="150"><use href="#icon-U"></use></svg>
+  <svg width="150" height="150"><use href="#icon-F-prime"></use></svg>
+
+</body>
+</html>

@@ -1,0 +1,336 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}La face jaune — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 5 : <span class="brand-green">La face jaune complète</span>
+        </h1>
+        <p class="lead text-muted">
+            Orienter tous les coins pour avoir une face jaune complète sur le dessus.
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+        <p>
+            Avoir <strong>toute la face du haut jaune</strong> - les 4 arêtes ET les 4 coins. 
+            Chaque sticker de la face supérieure doit être jaune.
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-6 text-center mb-3">
+                <h5>Avant : Croix jaune</h5>
+                <div id="cube-container-before" class="cube-small"></div>
+                <p><small class="text-muted">4 arêtes jaunes, coins pas encore orientés</small></p>
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <h5>Après : Face jaune complète</h5>
+                <div id="cube-container-goal" class="cube-small"></div>
+                <p><small class="text-muted">Toute la face du haut est jaune!</small></p>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <strong>📝 Note importante :</strong> Les coins peuvent avoir leurs stickers jaunes 
+            sur le côté (face avant ou droite) plutôt que sur le dessus. On va les "retourner" 
+            pour que le jaune soit en haut!
+        </div>
+    </div>
+
+    <!-- Section Identifier le cas -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔍 Identifie ton cas</h3>
+        <p>
+            Regarde combien de coins ont déjà leur sticker <strong>jaune sur le dessus</strong>. 
+            Il y a 4 cas possibles.
+        </p>
+
+        <div class="row mt-3">
+            <!-- Cas 1: 0 coins -->
+            <div class="col-md-6 mb-3">
+                <div class="border rounded p-3 text-center">
+                    <div id="cube-case-zero" class="cube-case"></div>
+                    <h6 class="mt-2 fw-bold">0 coin correct</h6>
+                    <p class="small mb-0">Fais l'algo, tu auras ensuite 1 ou 2 coins corrects</p>
+                </div>
+            </div>
+
+            <!-- Cas 2: 1 coin (Poisson) -->
+            <div class="col-md-6 mb-3">
+                <div class="border rounded p-3 text-center bg-success bg-opacity-10">
+                    <div id="cube-case-fish" class="cube-case"></div>
+                    <h6 class="mt-2 fw-bold text-success">1 coin correct (Poisson) ⭐</h6>
+                    <p class="small mb-0">C'est le cas le plus important à apprendre!</p>
+                </div>
+            </div>
+
+            <!-- Cas 3: 2 coins adjacents (Sune) -->
+            <div class="col-md-6 mb-3">
+                <div class="border rounded p-3 text-center">
+                    <div id="cube-case-sune" class="cube-case"></div>
+                    <h6 class="mt-2 fw-bold">2 coins adjacents (Sune)</h6>
+                    <p class="small mb-0">Deux coins jaunes côte à côte (au fond)</p>
+                </div>
+            </div>
+
+            <!-- Cas 4: 2 coins diagonaux (Antisune) -->
+            <div class="col-md-6 mb-3">
+                <div class="border rounded p-3 text-center">
+                    <div id="cube-case-antisune" class="cube-case"></div>
+                    <h6 class="mt-2 fw-bold">2 coins diagonaux (Antisune)</h6>
+                    <p class="small mb-0">Deux coins jaunes en diagonale</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section L'algorithme principal -->
+    <div class="card p-4 mb-4 border-success">
+        <h3 class="brand-green">🔄 L'algorithme du poisson (le plus important!)</h3>
+        <p>
+            C'est l'algorithme le plus utilisé pour cette étape. Apprends-le bien!
+        </p>
+
+        <div class="text-center p-4 bg-light rounded border border-success border-3 mt-3">
+            <h2 class="mb-0">
+                <code class="fs-1 text-success">R U R' U R U2 R'</code>
+            </h2>
+            <p class="mt-3 mb-0"><small>(Sune - prononcé "sou-né")</small></p>
+        </div>
+
+        <div class="alert alert-success mt-3">
+            <strong>💡 Comment positionner pour le poisson :</strong>
+            <ol class="mb-0 mt-2">
+                <li>Trouve le <strong>seul coin</strong> qui a déjà son jaune en haut</li>
+                <li>Place ce coin en <strong>arrière-gauche</strong> (coin du fond à gauche)</li>
+                <li>Fais l'algorithme <code>R U R' U R U2 R'</code></li>
+                <li>Terminé! Toute la face est jaune! 🎉</li>
+            </ol>
+        </div>
+
+        <div class="alert alert-warning mt-3 mb-0">
+            <strong>⚠️ Si tu as 0 coins corrects :</strong>
+            <p class="mb-0">Fais l'algorithme n'importe comment. Après, tu auras 1 ou 2 coins corrects - 
+            utilise alors les instructions appropriées ci-dessous.</p>
+        </div>
+    </div>
+
+    <!-- Section Instructions détaillées -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📋 Instructions complètes par cas</h3>
+
+        <div class="accordion" id="casesAccordion">
+            <!-- Cas Poisson (1 coin) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#caseFish">
+                        <strong>⭐ Cas 1 : Poisson (1 coin correct) - LE PLUS IMPORTANT</strong>
+                    </button>
+                </h2>
+                <div id="caseFish" class="accordion-collapse collapse show" data-bs-parent="#casesAccordion">
+                    <div class="accordion-body">
+                        <h5>Position :</h5>
+                        <p>Place le coin jaune correct en <strong>arrière-gauche</strong> (fond à gauche).</p>
+                        
+                        <h5>Algorithme :</h5>
+                        <div class="bg-light p-3 rounded border border-success mb-3">
+                            <code class="fs-4 text-success">R U R' U R U2 R'</code>
+                        </div>
+                        
+                        <h5>Décomposition :</h5>
+                        <ul>
+                            <li><code>R U R' U</code> = Double sexy move</li>
+                            <li><code>R U2 R'</code> = Mouvement R avec double U</li>
+                        </ul>
+                        
+                        <p class="mb-0 text-success fw-bold">✅ Après l'algorithme : Face jaune complète!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cas Sune (2 adjacents) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#caseSune">
+                        <strong>Cas 2 : Sune (2 coins adjacents)</strong>
+                    </button>
+                </h2>
+                <div id="caseSune" class="accordion-collapse collapse" data-bs-parent="#casesAccordion">
+                    <div class="accordion-body">
+                        <h5>Position :</h5>
+                        <p>Place les deux coins jaunes <strong>au fond</strong> (arrière-gauche et arrière-droit).</p>
+                        
+                        <h5>Algorithme :</h5>
+                        <div class="bg-light p-3 rounded border border-primary mb-3">
+                            <code class="fs-4 text-primary">R U R' U R U2 R'</code>
+                        </div>
+                        
+                        <p class="mb-0"><em>C'est le même algorithme que le poisson!</em></p>
+                        <p class="mb-0 text-success fw-bold">✅ Après l'algorithme : Face jaune complète!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cas Antisune (2 diagonaux) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#caseAntisune">
+                        <strong>Cas 3 : Antisune (2 coins diagonaux)</strong>
+                    </button>
+                </h2>
+                <div id="caseAntisune" class="accordion-collapse collapse" data-bs-parent="#casesAccordion">
+                    <div class="accordion-body">
+                        <h5>Position :</h5>
+                        <p>Place un coin jaune en <strong>arrière-gauche</strong> et l'autre en <strong>avant-droit</strong>.</p>
+                        
+                        <h5>Algorithme (Antisune) :</h5>
+                        <div class="bg-light p-3 rounded border border-warning mb-3">
+                            <code class="fs-4 text-warning">R U2 R' U' R U' R'</code>
+                        </div>
+                        
+                        <h5>Décomposition :</h5>
+                        <ul>
+                            <li><code>R U2 R'</code> = Mouvement R avec double U</li>
+                            <li><code>U' R U' R'</code> = Mouvements inverses</li>
+                        </ul>
+                        
+                        <p class="mb-0"><strong>Astuce :</strong> Si tu oublies l'Antisune, fais juste la Sune - 
+                        tu obtiendras le cas Poisson, puis refais la Sune!</p>
+                        <p class="mb-0 text-success fw-bold">✅ Après l'algorithme : Face jaune complète!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cas 0 coins -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#caseZero">
+                        <strong>Cas 4 : Aucun coin correct</strong>
+                    </button>
+                </h2>
+                <div id="caseZero" class="accordion-collapse collapse" data-bs-parent="#casesAccordion">
+                    <div class="accordion-body">
+                        <h5>Solution simple :</h5>
+                        <ol>
+                            <li>Fais l'algorithme Sune <code>R U R' U R U2 R'</code> n'importe comment</li>
+                            <li>Tu obtiendras maintenant soit 1 coin correct (poisson) soit 2 coins corrects</li>
+                            <li>Utilise les instructions appropriées pour terminer!</li>
+                        </ol>
+                        
+                        <p class="mb-0 text-info"><strong>Note :</strong> Ce cas est rare et nécessite toujours 
+                        au moins 2 applications de l'algorithme.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Technique -->
+    <div class="card p-4 mb-4 border-success">
+        <h3 class="brand-green">✋ Technique de prise</h3>
+        <div class="alert alert-success mb-0">
+            <strong>Pour R U R' U R U2 R' (Sune) :</strong>
+            <ul class="mb-0 mt-2">
+                <li>Main gauche : Tiens le cube fermement</li>
+                <li>Main droite : Fait <strong>tous</strong> les mouvements</li>
+                <li>Pouce droit : Fait les mouvements R et R'</li>
+                <li>Index droit : Fait les mouvements U et U2</li>
+                <li><strong>Rythme :</strong> R-U, R-U, R-U-U, R (comme une petite chanson!)</li>
+                <li>Pratique jusqu'à ce que ce soit fluide et rapide</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section Conseils -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">💡 Conseils utiles</h3>
+        <ul class="mt-3">
+            <li>
+                <strong>L'algorithme Sune est un des plus importants du Rubik's Cube.</strong> 
+                Les speedcubers l'utilisent constamment. Mémorise-le bien!
+            </li>
+            <li>
+                <strong>Trouve ton rythme.</strong> Beaucoup de gens pensent à la Sune comme 
+                "ta-ta, ta-ta, ta-ta-ta, ta" - trouve ta propre mélodie!
+            </li>
+            <li>
+                <strong>Si tu oublies l'Antisune,</strong> ce n'est pas grave - fais juste la Sune 
+                deux fois (ça te donnera le poisson, puis la solution).
+            </li>
+            <li>
+                <strong>Vérifie toujours l'orientation avant de faire l'algorithme.</strong> 
+                Le coin correct doit être au bon endroit!
+            </li>
+            <li>
+                <strong>Une fois la face jaune complète,</strong> tu as complété 85% du cube! 
+                Plus que 2 étapes! 🎉
+            </li>
+        </ul>
+    </div>
+
+    <!-- Bouton de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:yellow_cross' %}" class="btn btn-outline-primary">
+            ← Retour : La croix jaune
+        </a>
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
+            Vue d'ensemble
+        </a>
+        <a href="#" class="btn btn-success ms-2">
+            Étape suivante : Positionner les coins →
+        </a>
+    </div>
+</div>
+
+<!-- Charger la logique JavaScript -->
+<script src="{% static 'cube/js/cube.js' %}"></script>
+
+<!-- Styles CSS pour les cubes -->
+<style>
+.cube-small svg {
+    max-width: 275px;
+    height: auto;
+}
+
+.cube-case svg {
+    max-width: 200px;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    .cube-small svg {
+        max-width: 200px;
+    }
+    
+    .cube-case svg {
+        max-width: 160px;
+    }
+}
+</style>
+
+<!-- Script d'initialisation de la page -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Insérer les cubes avec des IDs uniques et les colorier
+    insertCubeInContainer('cube-container-before', setYellowCrossComplete, 'before');
+    insertCubeInContainer('cube-container-goal', setYellowFaceHighlighted, 'goal');
+    
+    // Les 4 cas possibles
+    insertCubeInContainer('cube-case-zero', setYellowFaceNoCorners, 'zero');
+    insertCubeInContainer('cube-case-fish', setYellowFaceFish, 'fish');
+    insertCubeInContainer('cube-case-sune', setYellowFaceSune, 'sune');
+    insertCubeInContainer('cube-case-antisune', setYellowFaceAntisune, 'antisune');
+});
+</script>
+
+{% endblock %}

@@ -1,106 +1,67 @@
+{% extends "francontcube/partials/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FrancontCube | Learn the Rubik’s Cube</title>
+{% block title %}Ressources 3×3 | FrancontCube{% endblock %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+{% block content %}
 
-    <style>
-        body {
-            background: linear-gradient(135deg, #0f8c46 0%, #ffffff 100%) no-repeat fixed;
-            background-size: cover;
-        }
+<div class="container py-5 text-center">
 
-        .cube-card {
-            border-radius: 15px;
-            transition: transform .3s, box-shadow .3s;
-            background-color: #ffffff;
-        }
-        .cube-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        .hero-title {
-            font-weight: 700;
-            color: #0f8c46;
-        }
-        .brand-green {
-            color: #0f8c46 !important;
+    <h1 class="mb-4">Bienvenue chez Francontcube</h1>
+    <p class="lead mb-5">Une collection de ressources pour apprendre à résoudre les cubes Rubik.</p>
+    <img src="{% static 'francontcube/img/francontcube_logo.png' %}" alt="Logo Francontcube">
 
-        }
-    </style>
-    
-</head>
+    <div class="row g-4">
 
-<body>
-<div class="container py-5">
+        {% for item in menu %}
+        <div class="col-md-4">
+            <div class="card brand-card h-100 p-4 {% if not item.available %}opacity-75{% endif %}">
 
-    <!-- Header -->
-    <div class="text-center mb-5">
-        <h1 class="hero-title">
-            <span style="color: #000000;">Bienvenue à</span>
-            <span style="color: #ffffff;"> Francont</span>
-            <span style="color: #0f8c46;">Cube</span>
-        </h1>
-        <p class="lead text-muted">
-            Apprends à résoudre le Rubik’s Cube — à la franco-ontarienne! 💚🤍
-        </p>
-    
-        <!-- Icône temporaire ou logo -->
-        <i class="bi bi-cube brand-green" style="font-size: 4rem;"></i>
-    </div>
-    <!-- Content Cards -->
-<div class="row g-4">
+                <div class="mb-3 position-relative">
+                    {% if item.logo %}
+                        <img src="{% static item.logo %}" class="brand-logo {% if not item.available %}filter-grayscale{% endif %}">
+                    {% else %}
+                        <i class="bi {{ item.icon }} brand-icon {% if not item.available %}text-muted{% endif %}"></i>
+                    {% endif %}
+                    
+                    {% if not item.available %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                            Bientôt
+                        </span>
+                    {% endif %}
+                </div>
 
-    <!-- Google Slides -->
-    <div class="col-md-4">
-        <div class="card cube-card p-4 text-center">
-            <i class="bi bi-easel2" style="font-size: 3rem; color: #0d6efd;"></i>
-            <h4 class="mt-3">Google Slides</h4>
-            <p class="text-muted">Les présentations interactive pour apprendre les étapes.</p>
-            <a href="{% url 'francontcube:slides' %}"
-               class="btn btn-outline-primary">
-                Ouvrir
-            </a>
+                <h4 {% if not item.available %}class="text-muted"{% endif %}>{{ item.name }}</h4>
+                <p class="text-muted">{{ item.desc }}</p>
+                
+                {% if item.available %}
+                    <a href="{{ item.url }}" class="btn btn-outline-primary mt-auto">
+                        Ouvrir
+                    </a>
+                {% else %}
+                    <button class="btn btn-outline-secondary mt-auto" disabled>
+                        Bientôt disponible
+                    </button>
+                {% endif %}
+
+            </div>
         </div>
+        {% endfor %}
     </div>
-
-    <!-- PDF Booklet -->
-    <div class="col-md-4">
-        <div class="card cube-card p-4 text-center">
-            <i class="bi bi-file-earmark-pdf" style="font-size: 3rem; color: #dc3545;"></i>
-            <h4 class="mt-3">Cahiers PDF</h4>
-            <p class="text-muted">Guide imprimable étape par étape.</p>
-            <a href="{% url 'francontcube:pdfs' %}"
-               class="btn btn-outline-danger">
-                Ouvrir
-            </a>
-        </div>
-    </div>
-
-    <!-- YouTube Channel -->
-    <div class="col-md-4">
-        <div class="card cube-card p-4 text-center">
-            <i class="bi bi-youtube" style="font-size: 3rem; color: red;"></i>
-            <h4 class="mt-3">Vidéos</h4>
-            <p class="text-muted">Regarde des tutoriels vidéo pour t’améliorer.</p>
-            <a href="{% url 'francontcube:videos' %}"
-               class="btn btn-outline-danger">
-                Ouvrir
-            </a>
-        </div>
-    </div>
-
 </div>
 
+<style>
+    .filter-grayscale {
+        filter: grayscale(100%);
+    }
     
+    .card.opacity-75 {
+        opacity: 0.75;
+    }
+    
+    .card:not(.opacity-75):hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+    }
+</style>
 
-    <!-- Content Cards -->
-    
-</div>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% load static %}
+{% include "cube/partials/_cube_svg.html" %}
+
+<div id="cube-container"></div>
+
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  document.addEventListener("DOMContentLoaded", () => {
+      const template = document.getElementById("cube-template");
+      const clone = template.content.cloneNode(true);
+      document.getElementById("cube-container").appendChild(clone);
+
+      const svg = document.getElementById("cube-svg");
+      const state = JSON.parse('{{ json_state|escapejs }}');
+
+      renderCube(svg, state);
+  });
+</script>

@@ -1,0 +1,20 @@
+from django.urls import path
+from . import views
+
+app_name = "cube"
+
+urlpatterns = [
+    path("", views.index, name="cube-index"),
+    path("icons/", views.all_icons, name="cube-all-icons"),
+    path("algorithms/", views.algorithm_viewer, name="cube-algorithm-viewer"),
+    path("browser/", views.browser, name="cube-browser"),
+    path("view/", views.view_cube, name="view_cube"),
+    path("sequence/", views.browser, name="sequence"),
+    path("demo-backend-cube/", views.demo_backend_cube, name="demo_backend_cube"),
+    path("demo-backend-svg/", views.demo_backend_svg, name="demo_backend_svg"),  # NEW
+
+    path("demo-daisy/", views.demo_daisy, name="demo_daisy"),
+
+
+
+]

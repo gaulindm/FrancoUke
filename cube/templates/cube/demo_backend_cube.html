@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend Cube Demo</title>
+    <script type="module" src="{% static 'cube/js/cube_renderer.js' %}"></script>
+</head>
+<body>
+
+<h1>Backend-rendered 3×3 Cube</h1>
+
+<!-- Your SVG -->
+<svg id="backend-cube" width="200" height="200" viewBox="0 0 120 120"
+     xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Up face -->
+    {% for r in "012" %}
+        {% for c in "012" %}
+            <rect id="U{{ r }}{{ c }}"
+                  x="{{ c|add:0|add:0|add:40 }}"  <!-- 40×40 grid -->
+                  y="{{ r|add:0|add:0|add:0 }}"
+                  width="40" height="40"
+                  stroke="black" fill="white" />
+        {% endfor %}
+    {% endfor %}
+
+    <!-- You will repeat blocks for F, R, etc. later -->
+
+</svg>
+
+<script type="module">
+import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+const svg = document.getElementById("backend-cube");
+const cubeState = {{ cube_json|safe }};
+
+renderCube(svg, cubeState);
+</script>
+
+</body>
+</html>

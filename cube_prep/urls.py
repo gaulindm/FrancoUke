@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = "cube_prep"
+
 urlpatterns = [
     path('', views.generator_home, name='cube_prep'),
     path('generate_three_cards/', views.generate_three_cards_view, name='generate_three_cards'),

@@ -1,0 +1,61 @@
+{% if breadcrumbs %}
+<nav aria-label="breadcrumb" class="bg-light py-2 mb-4">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <!-- Always show home -->
+            <li class="breadcrumb-item">
+                <a href="{% url 'francontcube:home' %}">
+                    <i class="bi bi-house-door"></i>
+                    <span class="d-none d-md-inline">Accueil</span>
+                </a>
+            </li>
+            
+            <!-- Dynamic breadcrumb items -->
+            {% for crumb in breadcrumbs %}
+                {% if forloop.last %}
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {% if crumb.icon %}<i class="bi bi-{{ crumb.icon }}"></i>{% endif %}
+                        {{ crumb.name }}
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ crumb.url }}">
+                            {% if crumb.icon %}<i class="bi bi-{{ crumb.icon }}"></i>{% endif %}
+                            {{ crumb.name }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </div>
+</nav>
+
+<style>
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: #6c757d;
+    }
+    
+    .breadcrumb-item a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+    
+    .breadcrumb-item i {
+        margin-right: 0.25rem;
+    }
+</style>
+{% endif %}
