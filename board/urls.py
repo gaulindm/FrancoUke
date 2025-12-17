@@ -1,15 +1,9 @@
 # board/urls.py
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from board import views
-from .views import *  # Safe here because __init__.py controls exports
-
+from .views import *
 
 app_name = "board"
-
-router = DefaultRouter()
-router.register(r"items", BoardItemViewSet, basename="boarditem")
-router.register(r"events", EventViewSet, basename="event")
 
 urlpatterns = [
     path("", full_board_view, name="full_board"),
@@ -22,12 +16,7 @@ urlpatterns = [
     path("rehearsal/<int:pk>/", rehearsal_detail_view, name="rehearsal_detail"),
     path("event/<int:event_id>/rehearsal/edit/", edit_rehearsal_details, name="edit_rehearsal_details"),
     path("event/<int:event_id>/song-notes/edit/", edit_song_rehearsal_notes, name="edit_song_rehearsal_notes"),
-    path(
-    "songs/<int:song_id>/rehearsal-notes/",
-    views.song_rehearsal_history,
-    name="song_rehearsal_history",
-),
-
+    path("songs/<int:song_id>/rehearsal-notes/", views.song_rehearsal_history, name="song_rehearsal_history"),  # 👈 Added views.
 
     # Performers
     path("performances/", performer_event_list, name="performer_event_list"),
@@ -41,7 +30,4 @@ urlpatterns = [
 
     # Messages
     path("column/<int:column_id>/messages/new/", create_board_message, name="create_board_message"),
-
-    # API
-    path("api/", include(router.urls)),
 ]

@@ -1,4 +1,6 @@
 {% load static %}
+<link rel="manifest" href="{% static 'songbook/manifest.json' %}">
+
 {% load site_urls %}
 {% load user_extras %}
 
@@ -7,7 +9,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Strumsphere">
+  
+  <link rel="apple-touch-icon"
+        href="{% static 'strumsphere/icons/icon-180.png' %}">
+  
   <title>StrumSphere 🎵</title>
 
   {# ✅ Bootstrap CSS via CDN #}
@@ -51,6 +59,12 @@
   {% if user.is_authenticated %}
   {% with user_pref=user.userpreference %}
     {% if user_pref %}
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("{% static 'strumsphere/sw.js' %}");
+      }
+      </script>
+      
       <script>
         window.userPreferences = {
           instrument: "{{ user_pref.primary_instrument }}",

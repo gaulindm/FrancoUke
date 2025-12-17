@@ -51,19 +51,17 @@
             {% include "partials/_event_card.html" with event=event %}
           {% endfor %}
     
-          {% for message in column.messages.all %}
-            {% include "partials/_board_message_card.html" with message=message %}
-          {% endfor %}
+          {#        {% for message in column.messages.all %} #}
+          {#   {% include "partials/_board_message_card.html" with message=message %} #}
+          {#  {% endfor %} #}
         {% else %}
           <p class="text-muted">No updates yet.</p>
         {% endif %}
     
         {# 🔗 Add Message button (only for logged in users) #}
-        {% if user|has_group:"Leaders" %}
-        <a href="{% url 'board:create_board_message' column.id %}" class="btn btn-sm btn-primary">
-          ➕ Add Message
-        </a>
-      {% endif %}
+        {# {% if user|has_group:"Leaders" %}   #}
+        {# <a href="{% url 'board:create_board_message' column.id %}" class="btn btn-sm btn-primary"> ➕ Add Message</a>   #}
+        {# {% endif %}   #}
       </div>
     
     

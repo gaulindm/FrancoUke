@@ -15,7 +15,6 @@ from .models import (
     BoardItemPhoto,
     BoardMessage,
     Event,
-    EventPhoto,
     EventAvailability,
     Venue,
 )
@@ -37,13 +36,6 @@ from . import admin_rehearsal  # ✅ This ensures Django registers RehearsalDeta
 
 class BoardItemPhotoInline(admin.TabularInline):
     model = BoardItemPhoto
-    extra = 1
-    fields = ("image", "is_cover", "uploaded_at")
-    readonly_fields = ("uploaded_at",)
-
-
-class EventPhotoInline(admin.TabularInline):
-    model = EventPhoto
     extra = 1
     fields = ("image", "is_cover", "uploaded_at")
     readonly_fields = ("uploaded_at",)
@@ -132,7 +124,7 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ("title", "rich_description", "location")
     ordering = ("event_date", "start_time")
     readonly_fields = ("created_at", "updated_at","rehearsal_link")
-    inlines = [EventAvailabilityInline, EventPhotoInline]
+    inlines = [EventAvailabilityInline]
     actions = ["duplicate_events"]
 
     fieldsets = (
@@ -200,28 +192,5 @@ class EventAdmin(admin.ModelAdmin):
 class VenueAdmin(admin.ModelAdmin):
     list_display = ("name", "address", "position")
     list_editable = ("position",)
+    search_fields = ("name", "address")  # 👈 Added search_fields for autocomplete
     ordering = ("position",)
-
-
-# ------------------------------------------------------------
-# 🧾 REHEARSAL ADMIN
-# ------------------------------------------------------------
-'''
-@admin.register(RehearsalSection)
-class RehearsalSectionAdmin(admin.ModelAdmin):
-    list_display = ("title", "rehearsal", "order", "created_by")
-    list_filter = ("rehearsal__event__event_date",)
-    search_fields = ("title", "body")
-
-
-@admin.register(SongRehearsalNote)
-class SongRehearsalNoteAdmin(admin.ModelAdmin):
-    list_display = ("song", "section", "created_by", "created_at")
-    list_filter = ("section__rehearsal__event__event_date", "created_by")
-    search_fields = ("song__title", "notes")
-
-@admin.register(RehearsalDetails)
-class RehearsalDetailsAdmin(admin.ModelAdmin):
-    list_display = ("event", "created_at")
-    search_fields = ("event__title",)
-'''

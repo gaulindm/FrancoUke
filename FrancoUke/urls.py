@@ -25,8 +25,6 @@ urlpatterns = [
 
 #    path("assets/", include("assets.urls", namespace="asset_repo")),  # ✅ add this line
 
-
-
     # Songbooks
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
     path("strumsphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
