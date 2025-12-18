@@ -12,201 +12,155 @@
             Étape 4 : <span class="brand-green">La croix jaune</span>
         </h1>
         <p class="lead text-muted">
-            Orienter les arêtes du haut pour former une croix jaune sur la face supérieure.
+            Former une croix jaune sur la face du haut en orientant les arêtes.
         </p>
     </div>
 
     <!-- Charger le template SVG (caché) -->
     {% include "cube/partials/_cube_svg.html" %}
 
+    <!-- Warning for missing cube states (only shown if any are missing) -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
     <!-- Section Objectif -->
     <div class="card p-4 mb-4">
         <h3 class="brand-green">🎯 Objectif</h3>
         <p>
-            Former une <strong>croix jaune</strong> sur la face du haut. Les 4 arêtes autour du centre jaune 
-            doivent avoir leur face jaune qui regarde vers le haut.
+            Former une <strong>croix jaune</strong> sur la face du haut. 
+            <strong>Important :</strong> Pour l'instant, on s'occupe seulement de la face jaune - 
+            pas des couleurs sur les côtés!
         </p>
 
         <div class="row mt-3">
             <div class="col-md-6 text-center mb-3">
                 <h5>Avant : Deux couches complètes</h5>
-                <div id="cube-container-before" class="cube-small"></div>
-                <p><small class="text-muted">F2L terminé</small></p>
+                <div id="cube-before" class="cube-small"></div>
+                <p><small class="text-muted">Les deux premières couches sont terminées</small></p>
             </div>
             <div class="col-md-6 text-center mb-3">
                 <h5>Après : Croix jaune</h5>
-                <div id="cube-container-goal" class="cube-small"></div>
-                <p><small class="text-muted">4 arêtes jaunes forment une croix</small></p>
+                <div id="cube-goal" class="cube-small"></div>
+                <p><small class="text-muted">Croix jaune formée sur le dessus</small></p>
             </div>
-        </div>
-
-        <div class="alert alert-info mt-3">
-            <strong>📝 Note importante :</strong> À cette étape, ne t'inquiète <strong>pas</strong> 
-            des couleurs sur les côtés des arêtes. On veut juste que les faces jaunes regardent vers le haut. 
-            Les couleurs des côtés seront arrangées à l'étape suivante!
         </div>
     </div>
 
-    <!-- Section Les 4 cas -->
+    <!-- Section Les 3 patterns -->
     <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔍 Les 4 cas possibles</h3>
+        <h3 class="brand-green">🔍 Étape 1 : Identifie le pattern sur la face jaune</h3>
         <p>
-            Regarde ta face jaune du haut. Tu auras l'un de ces 4 motifs. Utilise <strong>un seul algorithme</strong> 
-            pour tous les cas!
+            Regarde la face du haut. Tu verras un des 3 patterns suivants (ou déjà une croix!).
         </p>
 
         <div class="row mt-3">
-            <!-- Cas 1: Point -->
-            <div class="col-md-6 col-lg-3 mb-3">
-                <div class="text-center">
+            <!-- Pattern Point -->
+            <div class="col-md-4 text-center mb-3">
+                <div class="border rounded p-3 bg-light">
+                    <h5>Pattern 1: Point</h5>
                     <div id="cube-pattern-dot" class="cube-case"></div>
-                    <h6 class="mt-2 fw-bold">1. Point</h6>
-                    <p class="small">Aucune arête jaune<br>Fais l'algo 3 fois</p>
+                    <p class="mt-2"><small>Juste le centre jaune</small></p>
                 </div>
             </div>
 
-            <!-- Cas 2: L -->
-            <div class="col-md-6 col-lg-3 mb-3">
-                <div class="text-center">
+            <!-- Pattern L -->
+            <div class="col-md-4 text-center mb-3">
+                <div class="border rounded p-3 bg-light">
+                    <h5>Pattern 2: L</h5>
                     <div id="cube-pattern-l" class="cube-case"></div>
-                    <h6 class="mt-2 fw-bold">2. Forme L</h6>
-                    <p class="small">2 arêtes adjacentes<br>Fais l'algo 2 fois</p>
+                    <p class="mt-2"><small>Centre + 2 arêtes en L</small></p>
                 </div>
             </div>
 
-            <!-- Cas 3: Ligne -->
-            <div class="col-md-6 col-lg-3 mb-3">
-                <div class="text-center">
+            <!-- Pattern Ligne -->
+            <div class="col-md-4 text-center mb-3">
+                <div class="border rounded p-3 bg-light">
+                    <h5>Pattern 3: Ligne</h5>
                     <div id="cube-pattern-line" class="cube-case"></div>
-                    <h6 class="mt-2 fw-bold">3. Ligne</h6>
-                    <p class="small">2 arêtes opposées<br>Fais l'algo 1 fois</p>
+                    <p class="mt-2"><small>Centre + ligne horizontale</small></p>
                 </div>
             </div>
+        </div>
 
-            <!-- Cas 4: Croix -->
-            <div class="col-md-6 col-lg-3 mb-3">
-                <div class="text-center">
-                    <div id="cube-pattern-cross" class="cube-case"></div>
-                    <h6 class="mt-2 fw-bold">4. Croix</h6>
-                    <p class="small">Déjà fait!<br>Passe à l'étape suivante</p>
-                </div>
-            </div>
+        <div class="alert alert-success mt-3">
+            <strong>✅ Si tu as déjà une croix jaune :</strong> Super! Passe directement à l'étape suivante!
         </div>
     </div>
 
     <!-- Section L'algorithme -->
-    <div class="card p-4 mb-4 border-success">
-        <h3 class="brand-green">🔄 L'algorithme magique</h3>
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 Étape 2 : Applique l'algorithme</h3>
         <p>
-            <strong>Un seul algorithme pour tous les cas!</strong> Répète-le simplement 1, 2 ou 3 fois 
-            selon ton motif de départ.
+            Un seul algorithme pour tous les cas! Il faut juste bien <strong>orienter le cube</strong> 
+            avant de commencer.
         </p>
 
-        <div class="text-center p-4 bg-light rounded border border-success border-3 mt-3">
-            <h2 class="mb-0">
+        <div class="text-center p-4 bg-light rounded border border-success border-3 mb-3">
+            <h2 class="mb-2">
                 <code class="fs-1 text-success">F R U R' U' F'</code>
             </h2>
-            <p class="mt-3 mb-0"><small>(Sexy move avec F au début et à la fin)</small></p>
+            <p class="mb-0"><small>L'algorithme de la croix jaune</small></p>
         </div>
 
-        <div class="alert alert-success mt-3">
-            <strong>Décomposition :</strong>
+        <div class="alert alert-info">
+            <strong>💡 Décomposition :</strong>
             <ul class="mb-0 mt-2">
-                <li><code>F</code> = Tourne la face avant (90° horaire)</li>
-                <li><code>R U R' U'</code> = Le fameux "sexy move" que tu connais bien!</li>
-                <li><code>F'</code> = Défais le premier F (90° anti-horaire)</li>
+                <li><code>F</code> = Face avant (sens horaire)</li>
+                <li><code>R</code> = Face droite (sens horaire)</li>
+                <li><code>U</code> = Face du haut (sens horaire)</li>
+                <li><code>R'</code> = Face droite (sens anti-horaire)</li>
+                <li><code>U'</code> = Face du haut (sens anti-horaire)</li>
+                <li><code>F'</code> = Face avant (sens anti-horaire)</li>
             </ul>
         </div>
     </div>
 
-    <!-- Section Instructions détaillées -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📋 Instructions selon ton cas</h3>
+    <!-- Section Comment orienter -->
+    <div class="card p-4 mb-4 border-warning">
+        <h3 class="brand-green">⚠️ Comment orienter le cube (TRÈS IMPORTANT!)</h3>
 
-        <div class="accordion" id="casesAccordion">
-            <!-- Cas Point -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#caseDot">
-                        <strong>Cas 1 : Point (aucune arête jaune)</strong>
-                    </button>
-                </h2>
-                <div id="caseDot" class="accordion-collapse collapse show" data-bs-parent="#casesAccordion">
-                    <div class="accordion-body">
-                        <ol>
-                            <li>Fais <code>F R U R' U' F'</code></li>
-                            <li>Tu obtiens maintenant un <strong>L</strong></li>
-                            <li>Continue avec les instructions du cas L...</li>
-                        </ol>
-                        <p class="mb-0 text-muted">
-                            <em>Total : Tu feras l'algorithme 3 fois (Point → L → Ligne → Croix)</em>
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-danger">Pattern 1: Point (juste le centre)</h5>
+            <p>
+                <strong>Orientation :</strong> Peu importe! Tu peux faire l'algorithme dans n'importe quelle direction.
+            </p>
+            <p class="mb-0">
+                <strong>Résultat :</strong> Tu obtiendras le pattern L
+            </p>
+        </div>
 
-            <!-- Cas L -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#caseL">
-                        <strong>Cas 2 : Forme L (2 arêtes adjacentes)</strong>
-                    </button>
-                </h2>
-                <div id="caseL" class="accordion-collapse collapse" data-bs-parent="#casesAccordion">
-                    <div class="accordion-body">
-                        <ol>
-                            <li><strong>Positionne le L :</strong> Les 2 arêtes jaunes doivent être à <strong>gauche et en bas</strong> 
-                                (forme un L qui "regarde" vers le haut-droite)</li>
-                            <li>Fais <code>F R U R' U' F'</code></li>
-                            <li>Tu obtiens maintenant une <strong>Ligne horizontale</strong></li>
-                            <li>Continue avec les instructions de la ligne...</li>
-                        </ol>
-                        <p class="mb-0 text-muted">
-                            <em>Total : Tu feras l'algorithme 2 fois (L → Ligne → Croix)</em>
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-warning">Pattern 2: L</h5>
+            <p>
+                <strong>Orientation :</strong> Place le L en <strong>bas à gauche</strong> (les deux arêtes jaunes 
+                pointent vers le bas et vers la gauche).
+            </p>
+            <p class="mb-0">
+                <strong>Résultat :</strong> Tu obtiendras une ligne
+            </p>
+        </div>
 
-            <!-- Cas Ligne -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#caseLine">
-                        <strong>Cas 3 : Ligne (2 arêtes opposées)</strong>
-                    </button>
-                </h2>
-                <div id="caseLine" class="accordion-collapse collapse" data-bs-parent="#casesAccordion">
-                    <div class="accordion-body">
-                        <ol>
-                            <li><strong>Positionne la ligne :</strong> La ligne doit être <strong>horizontale</strong> 
-                                (de gauche à droite, parallèle à toi)</li>
-                            <li>Fais <code>F R U R' U' F'</code></li>
-                            <li><strong>Terminé!</strong> Tu as maintenant la croix jaune! 🎉</li>
-                        </ol>
-                        <p class="mb-0 text-muted">
-                            <em>Total : Tu fais l'algorithme 1 seule fois (Ligne → Croix)</em>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cas Croix -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#caseCross">
-                        <strong>Cas 4 : Croix (déjà complète)</strong>
-                    </button>
-                </h2>
-                <div id="caseCross" class="accordion-collapse collapse" data-bs-parent="#casesAccordion">
-                    <div class="accordion-body">
-                        <p><strong>Félicitations!</strong> Tu as déjà la croix jaune. Passe directement à l'étape suivante!</p>
-                        <p class="mb-0">
-                            Note : C'est rare d'avoir la croix dès le début, mais ça peut arriver. 
-                            Profite de ta chance! 🍀
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <div class="border rounded p-3 bg-light">
+            <h5 class="text-primary">Pattern 3: Ligne</h5>
+            <p>
+                <strong>Orientation :</strong> Place la ligne <strong>horizontale</strong> 
+                (de gauche à droite, pas de haut en bas).
+            </p>
+            <p class="mb-0">
+                <strong>Résultat :</strong> Tu obtiendras la croix jaune! ✓
+            </p>
         </div>
     </div>
 
@@ -216,10 +170,47 @@
         <div class="alert alert-success mb-0">
             <strong>Pour F R U R' U' F' :</strong>
             <ul class="mb-0 mt-2">
-                <li>Main gauche : Tiens le cube et fait <code>F</code> et <code>F'</code> avec l'index</li>
-                <li>Main droite : Fait <code>R U R' U'</code> (le sexy move que tu connais bien!)</li>
-                <li><strong>C'est essentiellement le sexy move avec un F au début et à la fin</strong></li>
-                <li>Pratique jusqu'à ce que ce soit fluide - c'est un algorithme que tu utiliseras souvent!</li>
+                <li>Main gauche : tiens le cube et fait les mouvements F et F'</li>
+                <li>Main droite : fait les mouvements R, U, R', U'</li>
+                <li><strong>C'est très similaire à R U R' U'</strong> que tu connais déjà!</li>
+                <li>Pratique lentement jusqu'à ce que ce soit fluide</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section Processus complet -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📋 Processus complet</h3>
+        <ol>
+            <li class="mb-2">
+                <strong>Regarde la face du haut</strong> : Identifie quel pattern tu as (Point, L ou Ligne)
+            </li>
+            <li class="mb-2">
+                <strong>Oriente le cube correctement</strong> :
+                <ul>
+                    <li>Point → Peu importe</li>
+                    <li>L → En bas à gauche</li>
+                    <li>Ligne → Horizontale (gauche-droite)</li>
+                </ul>
+            </li>
+            <li class="mb-2">
+                <strong>Fais l'algorithme</strong> : <code>F R U R' U' F'</code>
+            </li>
+            <li class="mb-2">
+                <strong>Vérifie le résultat</strong> : 
+                <ul>
+                    <li>Si tu n'as pas encore la croix, répète le processus</li>
+                    <li>Si tu as la croix, félicitations! Passe à l'étape suivante</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="alert alert-info mt-3 mb-0">
+            <strong>💡 Combien de fois ?</strong>
+            <ul class="mb-0">
+                <li>Point → L (1 fois) → Ligne (2 fois) → Croix (3 fois)</li>
+                <li>L → Ligne (1 fois) → Croix (2 fois)</li>
+                <li>Ligne → Croix (1 fois)</li>
             </ul>
         </div>
     </div>
@@ -229,24 +220,24 @@
         <h3 class="brand-green">💡 Conseils utiles</h3>
         <ul class="mt-3">
             <li>
-                <strong>L'orientation du motif est importante!</strong> Pour le L, assure-toi qu'il est 
-                en bas-gauche. Pour la ligne, assure-toi qu'elle est horizontale.
+                <strong>Ne t'inquiète pas si les deux premières couches se défont!</strong> 
+                C'est normal - on ne regarde que la face jaune pour l'instant.
             </li>
             <li>
-                <strong>Si tu fais l'algorithme et que rien ne se passe comme prévu,</strong> 
-                vérifie l'orientation de ton motif et réessaie.
+                <strong>L'orientation est cruciale.</strong> Si tu ne mets pas le cube dans la bonne 
+                position avant de faire l'algorithme, ça ne marchera pas!
             </li>
             <li>
-                <strong>Mémorise cet algorithme!</strong> <code>F R U R' U' F'</code> - 
-                tu vas l'utiliser aussi pour d'autres étapes avancées.
+                <strong>Pratique F R U R' U' F' jusqu'à ce que ce soit automatique.</strong> 
+                C'est un algorithme que tu utiliseras souvent.
             </li>
             <li>
-                <strong>Ne t'inquiète pas si les couleurs des côtés ne correspondent pas.</strong> 
-                C'est normal! On va les arranger à l'étape suivante.
+                <strong>Maximum 3 répétitions.</strong> Si tu as fait l'algorithme 3 fois et que 
+                tu n'as toujours pas la croix, vérifie ton orientation!
             </li>
             <li>
-                <strong>Une fois la croix jaune faite,</strong> tu as complété 75% du cube! 
-                Plus que 3 étapes! 🚀
+                Une fois la croix formée, <strong>ne te préoccupe pas encore des couleurs sur les côtés</strong> - 
+                on s'occupera de ça à l'étape suivante! 🎉
             </li>
         </ul>
     </div>
@@ -259,14 +250,11 @@
         <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
             Vue d'ensemble
         </a>
-        <a href="#" class="btn btn-success ms-2">
+        <a href="{% url 'francontcube:yellow_face' %}" class="btn btn-success ms-2">
             Étape suivante : La face jaune →
         </a>
     </div>
 </div>
-
-<!-- Charger la logique JavaScript -->
-<script src="{% static 'cube/js/cube.js' %}"></script>
 
 <!-- Styles CSS pour les cubes -->
 <style>
@@ -276,7 +264,7 @@
 }
 
 .cube-case svg {
-    max-width: 180px;
+    max-width: 200px;
     height: auto;
 }
 
@@ -292,18 +280,43 @@
 </style>
 
 <!-- Script d'initialisation de la page -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    // Insérer les cubes avec des IDs uniques et les colorier
-    insertCubeInContainer('cube-container-before', setF2LComplete, 'before');
-    insertCubeInContainer('cube-container-goal', setYellowCrossHighlighted, 'goal');
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
     
-    // Les 4 motifs possibles
-    insertCubeInContainer('cube-pattern-dot', setYellowCrossDot, 'dot');
-    insertCubeInContainer('cube-pattern-l', setYellowCrossLShape, 'lshape');
-    insertCubeInContainer('cube-pattern-line', setYellowCrossLine, 'line');
-    insertCubeInContainer('cube-pattern-cross', setYellowCross, 'cross');
-});
+    // If state is missing, show a placeholder
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+          <small class="text-muted">Create the CubeState in your admin tool</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mount all cubes
+    mountCube("cube-before", {{ before_state|safe }});
+    mountCube("cube-goal", {{ goal_state|safe }});
+    
+    // Pattern states
+    mountCube("cube-pattern-dot", {{ pattern_dot_state|safe }});
+    mountCube("cube-pattern-l", {{ pattern_l_state|safe }});
+    mountCube("cube-pattern-line", {{ pattern_line_state|safe }});
+  });
 </script>
 
 {% endblock %}

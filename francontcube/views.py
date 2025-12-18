@@ -395,9 +395,6 @@ def second_layer(request):
 
 
 
-
-
-
 def yellow_cross(request):
     """Step 4: Yellow cross on top"""
     breadcrumbs = [
@@ -405,7 +402,48 @@ def yellow_cross(request):
         {'name': 'Apprenti Cubi', 'url': '/francontcube/methods/cubienewbie/', 'icon': 'star-fill'},
         {'name': 'Croix Jaune', 'url': '', 'icon': 'plus-circle'},
     ]
-    return render(request, 'francontcube/methods/cubienewbie/yellow-cross.html', {'breadcrumbs': breadcrumbs})
+    
+    # Helper function to safely get cube state
+    def get_cube_state_safe(slug):
+        try:
+            return CubeState.objects.get(slug=slug)
+        except CubeState.DoesNotExist:
+            return None
+    
+    # Load all cube states needed for this page
+    before = get_cube_state_safe("yellow-cross-before")
+    goal = get_cube_state_safe("yellow-cross-goal")
+    
+    # The different patterns on top face
+    pattern_dot = get_cube_state_safe("yellow-cross-pattern-dot")
+    pattern_l = get_cube_state_safe("yellow-cross-pattern-l")
+    pattern_line = get_cube_state_safe("yellow-cross-pattern-line")
+    
+    # Collect missing slugs for helpful error messages
+    missing_slugs = []
+    state_map = {
+        'yellow-cross-before': before,
+        'yellow-cross-goal': goal,
+        'yellow-cross-pattern-dot': pattern_dot,
+        'yellow-cross-pattern-l': pattern_l,
+        'yellow-cross-pattern-line': pattern_line,
+    }
+    
+    for slug, state in state_map.items():
+        if state is None:
+            missing_slugs.append(slug)
+    
+    return render(request, 'francontcube/methods/cubienewbie/yellow-cross.html', {
+        'breadcrumbs': breadcrumbs,
+        'before_state': before.json_state if before else None,
+        'goal_state': goal.json_state if goal else None,
+        'pattern_dot_state': pattern_dot.json_state if pattern_dot else None,
+        'pattern_l_state': pattern_l.json_state if pattern_l else None,
+        'pattern_line_state': pattern_line.json_state if pattern_line else None,
+        'missing_slugs': missing_slugs,
+    })
+
+
 
 
 def yellow_face(request):
@@ -415,8 +453,54 @@ def yellow_face(request):
         {'name': 'Apprenti Cubi', 'url': '/francontcube/methods/cubienewbie/', 'icon': 'star-fill'},
         {'name': 'Face Jaune', 'url': '', 'icon': 'brightness-high'},
     ]
-    return render(request, 'francontcube/methods/cubienewbie/yellow-face.html', {'breadcrumbs': breadcrumbs})
-
+    
+    # Helper function to safely get cube state
+    def get_cube_state_safe(slug):
+        try:
+            return CubeState.objects.get(slug=slug)
+        except CubeState.DoesNotExist:
+            return None
+    
+    # Load all cube states needed for this page
+    before = get_cube_state_safe("yellow-face-before")
+    goal = get_cube_state_safe("yellow-face-goal")
+    
+    # Different corner patterns
+    pattern_no_corners = get_cube_state_safe("yellow-face-pattern-no-corners")
+    pattern_one_corner = get_cube_state_safe("yellow-face-pattern-one-corner")
+    pattern_two_corners = get_cube_state_safe("yellow-face-pattern-two-corners")
+    
+    # Fish patterns (left and right)
+    fish_left = get_cube_state_safe("yellow-face-fish-left")
+    fish_right = get_cube_state_safe("yellow-face-fish-right")
+    
+    # Collect missing slugs for helpful error messages
+    missing_slugs = []
+    state_map = {
+        'yellow-face-before': before,
+        'yellow-face-goal': goal,
+        'yellow-face-pattern-no-corners': pattern_no_corners,
+        'yellow-face-pattern-one-corner': pattern_one_corner,
+        'yellow-face-pattern-two-corners': pattern_two_corners,
+        'yellow-face-fish-left': fish_left,
+        'yellow-face-fish-right': fish_right,
+    }
+    
+    for slug, state in state_map.items():
+        if state is None:
+            missing_slugs.append(slug)
+    
+    return render(request, 'francontcube/methods/cubienewbie/yellow-face.html', {
+        'breadcrumbs': breadcrumbs,
+        'before_state': before.json_state if before else None,
+        'goal_state': goal.json_state if goal else None,
+        'pattern_no_corners_state': pattern_no_corners.json_state if pattern_no_corners else None,
+        'pattern_one_corner_state': pattern_one_corner.json_state if pattern_one_corner else None,
+        'pattern_two_corners_state': pattern_two_corners.json_state if pattern_two_corners else None,
+        'fish_left_state': fish_left.json_state if fish_left else None,
+        'fish_right_state': fish_right.json_state if fish_right else None,
+        'missing_slugs': missing_slugs,
+    })
 
 def corner_permutation(request):
     """Step 6: Permute yellow corners"""
@@ -425,8 +509,49 @@ def corner_permutation(request):
         {'name': 'Apprenti Cubi', 'url': '/francontcube/methods/cubienewbie/', 'icon': 'star-fill'},
         {'name': 'Permutation Coins', 'url': '', 'icon': 'arrow-repeat'},
     ]
-    return render(request, 'francontcube/methods/cubienewbie/corner-permutation.html', {'breadcrumbs': breadcrumbs})
-
+    
+    # Helper function to safely get cube state
+    def get_cube_state_safe(slug):
+        try:
+            return CubeState.objects.get(slug=slug)
+        except CubeState.DoesNotExist:
+            return None
+    
+    # Load all cube states needed for this page
+    before = get_cube_state_safe("corner-perm-before")
+    goal = get_cube_state_safe("corner-perm-goal")
+    
+    # Different cases
+    one_correct = get_cube_state_safe("corner-perm-one-correct")
+    no_correct = get_cube_state_safe("corner-perm-no-correct")
+    headlights_left = get_cube_state_safe("corner-perm-headlights-left")
+    headlights_right = get_cube_state_safe("corner-perm-headlights-right")
+    
+    # Collect missing slugs for helpful error messages
+    missing_slugs = []
+    state_map = {
+        'corner-perm-before': before,
+        'corner-perm-goal': goal,
+        'corner-perm-one-correct': one_correct,
+        'corner-perm-no-correct': no_correct,
+        'corner-perm-headlights-left': headlights_left,
+        'corner-perm-headlights-right': headlights_right,
+    }
+    
+    for slug, state in state_map.items():
+        if state is None:
+            missing_slugs.append(slug)
+    
+    return render(request, 'francontcube/methods/cubienewbie/corner-permutation.html', {
+        'breadcrumbs': breadcrumbs,
+        'before_state': before.json_state if before else None,
+        'goal_state': goal.json_state if goal else None,
+        'one_correct_state': one_correct.json_state if one_correct else None,
+        'no_correct_state': no_correct.json_state if no_correct else None,
+        'headlights_left_state': headlights_left.json_state if headlights_left else None,
+        'headlights_right_state': headlights_right.json_state if headlights_right else None,
+        'missing_slugs': missing_slugs,
+    })
 
 def edge_permutation(request):
     """Step 7: Permute yellow edges (final step)"""
@@ -435,8 +560,46 @@ def edge_permutation(request):
         {'name': 'Apprenti Cubi', 'url': '/francontcube/methods/cubienewbie/', 'icon': 'star-fill'},
         {'name': 'Permutation Arêtes', 'url': '', 'icon': 'check-circle'},
     ]
-    return render(request, 'francontcube/methods/cubienewbie/edge-permutation.html', {'breadcrumbs': breadcrumbs})
-
+    
+    # Helper function to safely get cube state
+    def get_cube_state_safe(slug):
+        try:
+            return CubeState.objects.get(slug=slug)
+        except CubeState.DoesNotExist:
+            return None
+    
+    # Load all cube states needed for this page
+    before = get_cube_state_safe("edge-perm-before")
+    goal = get_cube_state_safe("edge-perm-goal")
+    
+    # Different patterns
+    pattern_clockwise = get_cube_state_safe("edge-perm-pattern-clockwise")
+    pattern_opposite = get_cube_state_safe("edge-perm-pattern-opposite")
+    pattern_adjacent = get_cube_state_safe("edge-perm-pattern-adjacent")
+    
+    # Collect missing slugs for helpful error messages
+    missing_slugs = []
+    state_map = {
+        'edge-perm-before': before,
+        'edge-perm-goal': goal,
+        'edge-perm-pattern-clockwise': pattern_clockwise,
+        'edge-perm-pattern-opposite': pattern_opposite,
+        'edge-perm-pattern-adjacent': pattern_adjacent,
+    }
+    
+    for slug, state in state_map.items():
+        if state is None:
+            missing_slugs.append(slug)
+    
+    return render(request, 'francontcube/methods/cubienewbie/edge-permutation.html', {
+        'breadcrumbs': breadcrumbs,
+        'before_state': before.json_state if before else None,
+        'goal_state': goal.json_state if goal else None,
+        'pattern_clockwise_state': pattern_clockwise.json_state if pattern_clockwise else None,
+        'pattern_opposite_state': pattern_opposite.json_state if pattern_opposite else None,
+        'pattern_adjacent_state': pattern_adjacent.json_state if pattern_adjacent else None,
+        'missing_slugs': missing_slugs,
+    })
 
 
 

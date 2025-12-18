@@ -1,0 +1,12 @@
+<!-- Top Banner - changes based on authentication status -->
+{% if user.is_authenticated %}
+    <div class="pt-5 pb-3 bg-primary text-white text-center shadow-sm">
+        <h2 class="mb-0">Welcome to the Uke4ia Volunteer Portal</h2>
+        <small>Manage your availability for upcoming performances</small>
+    </div>
+{% else %}
+    <div class="pt-5 pb-3 bg-primary text-white text-center shadow-sm">
+        <h1 class="mb-0">Welcome to Uke4ia!</h1>
+        <small>Check out our volunteer activities and public boards</small>
+    </div>
+{% endif %}
