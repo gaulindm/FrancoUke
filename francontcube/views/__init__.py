@@ -30,15 +30,15 @@ from .home import (
 # CUBIE NEWBIE METHOD
 # ============================================================
 # NOTE: Uncomment these as you migrate each view to the new structure
-# from .cubienewbie.main import method_cubienewbie
-# from .cubienewbie.daisy import daisy
-# from .cubienewbie.white_cross import white_cross
-# from .cubienewbie.bottom_corners import bottom_corners
-# from .cubienewbie.second_layer import second_layer
-# from .cubienewbie.yellow_cross import yellow_cross
-# from .cubienewbie.yellow_face import yellow_face
-# from .cubienewbie.corner_permutation import corner_permutation
-# from .cubienewbie.edge_permutation import edge_permutation
+from .cubienewbie.main import method_cubienewbie
+from .cubienewbie.daisy import daisy
+from .cubienewbie.white_cross import white_cross
+from .cubienewbie.bottom_corners import bottom_corners
+from .cubienewbie.second_layer import second_layer
+from .cubienewbie.yellow_cross import yellow_cross
+from .cubienewbie.yellow_face import yellow_face
+from .cubienewbie.corner_permutation import corner_permutation
+from .cubienewbie.edge_permutation import edge_permutation
 
 # ============================================================
 # OTHER METHODS
@@ -67,15 +67,15 @@ __all__ = [
     'tutorial_step',
     
     # Cubie Newbie (uncomment as migrated)
-    # 'method_cubienewbie',
-    # 'daisy',
-    # 'white_cross',
-    # 'bottom_corners',
-    # 'second_layer',
-    # 'yellow_cross',
-    # 'yellow_face',
-    # 'corner_permutation',
-    # 'edge_permutation',
+    'method_cubienewbie',
+    'daisy',
+    'white_cross',
+    'bottom_corners',
+    'second_layer',
+    'yellow_cross',
+    'yellow_face',
+    'corner_permutation',
+    'edge_permutation',
     
     # Other methods (add as implemented)
     # 'method_cfop',

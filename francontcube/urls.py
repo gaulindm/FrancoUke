@@ -14,7 +14,7 @@ urlpatterns = [
       # Cubie Newbie Method
     path('methods/cubienewbie/', views.method_cubienewbie, name='method_cubienewbie'),
     path('methods/cubienewbie/daisy/', views.daisy, name='daisy'),
-    path('methods/cubienewbie/notation/', views.notation, name='notation'),
+    #path('methods/cubienewbie/notation/', views.notation, name='notation'),
     path('methods/cubienewbie/white-cross/', views.white_cross, name='white_cross'),
     path('methods/cubienewbie/bottom-corners/', views.bottom_corners, name='bottom_corners'),
     path('methods/cubienewbie/second-layer/', views.second_layer, name='second_layer'),

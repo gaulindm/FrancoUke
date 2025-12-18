@@ -8,7 +8,7 @@ This is the first step in solving the Rubik's Cube using the Cubie Newbie method
 from ..base import StepView
 
 
-class DaisyView(StepView):
+class BottomCornersView(StepView):
     """
     Step 1a: Build the daisy around yellow center.
     
@@ -16,17 +16,19 @@ class DaisyView(StepView):
     Just define the configuration and you're done!
     """
     
-    template_name = "francontcube/methods/cubienewbie/daisy.html"
-    step_name = "La Marguerite"
+    template_name = "francontcube/methods/cubienewbie/bottom-corners.html"
+    step_name = "Coins inferieurs"
     step_icon = "flower3"
     
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
-        'goal_state': 'marguerite-goal',
-        'before_state': 'marguerite-before',
-        'after_state': 'marguerite-after',
+        'goal_state': 'bottom-corners-goal',
+        'before_state': 'bottom-corners-before',
+        'case_1_state': 'bottom-corners-case_1',
+        'case_2_state': 'bottom-corners-case_2',
+        'case_3_state': 'bottom-corners-case_3',
     }
 
 
 # Export the view function for URL routing
-daisy = DaisyView.as_view()
+bottom_corners = BottomCornersView.as_view()
