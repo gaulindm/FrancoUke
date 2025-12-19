@@ -39,6 +39,12 @@
     <div class="collapse navbar-collapse" id="navbarToggle">
       <div class="navbar-nav me-auto">
 
+        {# 🆕 All Apps link - visible to everyone #}
+        <a class="nav-item nav-link" href="{% url 'landing' %}">
+          <i class="bi bi-grid-3x3-gap-fill"></i>
+          {% if site_name == "FrancoUke" %} Toutes les apps {% else %} All Apps {% endif %}
+        </a>
+
         {# 🔹 FrancoUke & StrumSphere songbook links #}
         {% if site_name in "FrancoUke StrumSphere" %}
           <a class="nav-item nav-link" href="{% url 'songbook:song_list' %}">
@@ -69,29 +75,84 @@
         {% if user.is_authenticated %}
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Welcome, {{ user.first_name|default:user.username }}
+              {% if site_name == "FrancoUke" %}
+                Bienvenue, {{ user.first_name|default:user.username }}
+              {% else %}
+                Welcome, {{ user.first_name|default:user.username }}
+              {% endif %}
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-              <li><a class="dropdown-item" href="#">Name: {{ user.first_name }} {{ user.last_name }}</a></li>
+              <li><a class="dropdown-item disabled" href="#">{{ user.first_name }} {{ user.last_name }}</a></li>
+              
+              {# 🆕 All Apps Link in dropdown too #}
+              <li>
+                <a class="dropdown-item" href="{% url 'landing' %}">
+                  <i class="bi bi-house-door me-2"></i>
+                  {% if site_name == "FrancoUke" %} Toutes les apps {% else %} All Apps {% endif %}
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
 
+              {# 🆕 Quick Access to other apps #}
+              <li class="dropdown-header">
+                {% if site_name == "FrancoUke" %} Accès rapide {% else %} Quick Access {% endif %}
+              </li>
+              
+              {# Only show links to OTHER apps, not current one #}
+              {% if site_name != "StrumSphere" %}
+              <li>
+                <a class="dropdown-item" href="{% url 'songbook:home' %}">
+                  <i class="bi bi-music-note-beamed me-2"></i> StrumSphere
+                </a>
+              </li>
+              {% endif %}
+              
+              {% if site_name != "FrancoUke" %}
+              <li>
+                <a class="dropdown-item" href="{% url 'songbook:home' %}">
+                  <i class="bi bi-file-music me-2"></i> FrancoUke
+                </a>
+              </li>
+              {% endif %}
+              
+              <li>
+                <a class="dropdown-item" href="{% url 'board:full_board' %}">
+                  <i class="bi bi-people-fill me-2"></i> Uke4ia Performers
+                </a>
+              </li>
+              
+              <li>
+                <a class="dropdown-item" href="{% url 'francontcube:home' %}">
+                  <i class="bi bi-box me-2"></i> FrancontCube
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+
+              {# Song creation - only for FrancoUke/StrumSphere #}
               {% if site_name in "FrancoUke StrumSphere" %}
                 <li>
                   <a class="dropdown-item" href="{% url 'songbook:song_create' %}">
+                    <i class="bi bi-plus-circle me-2"></i>
                     {% if site_name == "FrancoUke" %} Créer une chanson {% else %} New Song {% endif %}
                   </a>
                 </li>
               {% endif %}
 
+              {# User preferences #}
               <li>
                 <a class="dropdown-item" href="{% url 'users:user_preferences' %}">
-                  User Preferences
+                  <i class="bi bi-gear me-2"></i>
+                  {% if site_name == "FrancoUke" %} Préférences {% else %} User Preferences {% endif %}
                 </a>
               </li>
 
               <li><hr class="dropdown-divider"></li>
+              
+              {# Logout #}
               <li>
-                <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                  Logout
+                <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                  <i class="bi bi-box-arrow-right me-2"></i>
+                  {% if site_name == "FrancoUke" %} Déconnexion {% else %} Logout {% endif %}
                 </a>
               </li>
             </ul>

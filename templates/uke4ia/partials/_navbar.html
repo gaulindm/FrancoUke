@@ -25,6 +25,14 @@
 
             <!-- Left: Navigation links -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- All Apps link - visible to everyone -->
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'landing' %}active{% endif %}"
+                       href="{% url 'landing' %}">
+                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> All Apps
+                    </a>
+                </li>
+
                 {% if user.is_authenticated %}
                     <!-- Authenticated users see performer portal links -->
                     <li class="nav-item">
@@ -82,9 +90,30 @@
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
                             <li>
                                 <a class="dropdown-item" href="{% url 'landing' %}">
-                                    <i class="bi bi-house-door me-2"></i> Landing Page
+                                    <i class="bi bi-house-door me-2"></i> All Apps
                                 </a>
                             </li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <!-- Quick links to other apps -->
+                            <li class="dropdown-header">Quick Access</li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'strumsphere:home' %}">
+                                    <i class="bi bi-music-note-beamed me-2"></i> StrumSphere
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'francouke:home' %}">
+                                    <i class="bi bi-file-music me-2"></i> FrancoUke
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'francontcube:home' %}">
+                                    <i class="bi bi-box me-2"></i> FrancontCube
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            
                             <li>
                                 <a class="dropdown-item disabled" href="#" title="Coming Soon!">
                                     <i class="bi bi-key me-2"></i> Change Password (soon)

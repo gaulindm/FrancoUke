@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,11 +58,7 @@ INSTALLED_APPS = [
     'cube',
     'cube_prep',
     'teleprompter',
-     "setlists",   # 👈 make sure this is here
-
-
-    
-
+    'setlists',
 ]
 
 SITE_ID = 1
@@ -82,7 +79,7 @@ ROOT_URLCONF = 'FrancoUke.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],  # <── add this
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -91,7 +88,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'songbook.context_processors.site_context',
-
             ],
         },
     },
@@ -122,9 +118,6 @@ TINYMCE_DEFAULT_CONFIG = {
     ],
     "content_style": "body { font-family: Helvetica, Arial, sans-serif; font-size: 14px }",
 }
-
-
-
 
 
 WSGI_APPLICATION = 'FrancoUke.wsgi.application'
@@ -171,49 +164,80 @@ USE_I18N = True
 
 USE_TZ = True
 
-import os
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
+# ============================================================================
+# AUTHENTICATION SETTINGS
+# ============================================================================
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
+# Login/Logout URLs and Redirects
+LOGIN_URL = 'users:login'       # Where to redirect if login required
+LOGIN_REDIRECT_URL = 'landing'  # After successful login → Landing page
+LOGOUT_REDIRECT_URL = 'landing' # After logout → Landing page
 
+# Why 'landing'?
+# - Users may have multiple roles (song contributor + performer + speedcuber)
+# - Landing page lets them choose which app to use
+# - Django's ?next= parameter will override this for protected pages
+# - Example: Try to access /board/ → Login → Auto-redirect back to /board/
+
+# Note: Most of your apps are PUBLIC with selective authentication:
+# - FrancoUke/StrumSphere: Public viewing, auth for editing ChordPro
+# - Uke4ia Public: No auth required
+# - Uke4ia Performers: Auth required for board/availability/setlists
+# - FrancontCube: Public now, will need auth for training timer/leaderboard
+
+
+# ============================================================================
+# STATIC FILES (CSS, JavaScript, Images)
+# ============================================================================
 
 STATIC_URL = '/static/'
 
-# URL to use when referring to static files
-STATIC_URL = '/static/'
-
-# Directory where Django will collect static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Use during deployment
+# Directory where Django will collect static files (for production)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Additional directories to search for static files
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),                # your app-wide static assets
-    os.path.join(BASE_DIR, 'songbook', 'chords'),    # 🎸 make chord JSONs accessible
+    os.path.join(BASE_DIR, 'static'),                # App-wide static assets
+    os.path.join(BASE_DIR, 'songbook', 'chords'),    # 🎸 Chord JSONs
 ]
 
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CCRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
-
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
-#Pour desactive la version strumsphere
-ENABLE_STRUMSPHERE = True
-
-#LOGIN_REDIRECT_URL = 'songbook-home'
-
-LOGIN_URL = '/users/login/'  # ✅ Fix the redirect issue
-LOGIN_REDIRECT_URL = '/'  # ✅ Ensure users go to home after login
-LOGOUT_REDIRECT_URL = '/'  # ✅ Ensure users go home after logout
-
-TAGGIT_CASE_INSENSITIVE = True
+# ============================================================================
+# MEDIA FILES (User-uploaded content)
+# ============================================================================
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ============================================================================
+# CRISPY FORMS SETTINGS
+# ============================================================================
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+# ============================================================================
+# TAGGIT SETTINGS
+# ============================================================================
+
+TAGGIT_CASE_INSENSITIVE = True
+
+
+# ============================================================================
+# FEATURE FLAGS
+# ============================================================================
+
+# Pour désactiver la version StrumSphere si nécessaire
+ENABLE_STRUMSPHERE = True
+
+
+# ============================================================================
+# DEFAULT PRIMARY KEY FIELD TYPE
+# ============================================================================
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

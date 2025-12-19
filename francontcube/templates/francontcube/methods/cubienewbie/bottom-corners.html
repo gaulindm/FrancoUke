@@ -47,7 +47,7 @@
         <div class="row mt-3">
             <div class="col-md-6 text-center mb-3">
                 <h5>Avant : Croix blanche</h5>
-                <div id="cube-before" class="cube-small"></div>
+                <div id="cube-before"></div>
                 <p><small class="text-muted">4 arêtes blanches en place</small></p>
             </div>
             <div class="col-md-6 text-center mb-3">
@@ -80,32 +80,113 @@
             soit déjà dans la couche du bas (mais peut-être mal orientés).
         </p>
     </div>
-
     <!-- Section Algorithmes -->
-
-<div class="card p-4 mb-4">
-    <h3 class="brand-green">🔄 Étape 2 : Insère le coin (un seul algorithme)</h3>
-
-    <p>
-        Bonne nouvelle 🎉  
-        <strong>Il n’y a qu’un seul algorithme à apprendre pour placer tous les coins blancs.</strong>
-    </p>
-
-    <div class="alert alert-success text-center">
-        <h4 class="mb-3">Algorithme unique</h4>
-
-        <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
-            <svg class="move-icon"><use href="#R"/></svg>
-            <svg class="move-icon"><use href="#U"/></svg>
-            <svg class="move-icon"><use href="#R-prime"/></svg>
-            <svg class="move-icon"><use href="#U-prime"/></svg>
+    <div class="card p-4 mb-4">
+        <div class="card p-4 mb-4">
+            <h3 class="brand-green">🔄 Étape 2 : Insère le coin (un seul algorithme)</h3>
+        
+            <p>
+                Bonne nouvelle 🎉  
+                <strong>Il n’y a qu’un seul algorithme à apprendre pour placer tous les coins blancs.</strong>
+            </p>
+        
+            <div class="alert alert-success text-center">
+                <h4 class="mb-3">Algorithme unique</h4>
+        
+                <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                    <svg class="move-icon"><use href="#R"/></svg>
+                    <svg class="move-icon"><use href="#U"/></svg>
+                    <svg class="move-icon"><use href="#R-prime"/></svg>
+                    <svg class="move-icon"><use href="#U-prime"/></svg>
+                </div>
+        
+                <p class="mb-0 mt-2">
+                    👉 <strong>Répète cet algorithme jusqu’à 5 fois</strong><br>
+                    jusqu’à ce que le coin soit bien placé.
+                </p>
+            </div>
+        </div>
+        <!-- Cas 1: Face vers la droite -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-success">✅ Cas 1 : L'arête va vers l'avant</h5>
+            <p>La couleur qui correspond au centre de devant est <strong>sur la face avant</strong>.</p>
+            
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-1" class="cube-case"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="text-center p-3 bg-white rounded border border-success border-2">
+                            <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                                <svg class="move-icon"><use href="#R"/></svg>
+                                <svg class="move-icon"><use href="#U"/></svg>
+                                <svg class="move-icon"><use href="#R-prime"/></svg>
+                                <svg class="move-icon"><use href="#U-prime"/></svg>
+                        </div>
+                        <p class="mb-0 mt-2">
+                            👉 <strong>Execute cet algorithme seulement une fois</strong><br>
+                        </p>                    
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <p class="mb-0 mt-2">
-            👉 <strong>Répète cet algorithme jusqu’à 5 fois</strong><br>
-            jusqu’à ce que le coin soit bien placé.
-        </p>
-    </div>
+        <!-- Cas 2: Face vers le haut -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-primary">✅ Cas 2 : L'arête va vers le haut</h5>
+            <p>La couleur qui correspond au centre de devant est <strong>sur la face du haut</strong>.</p>
+            
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-3" class="cube-case"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+                    <div class="text-center p-3 bg-white rounded border border-success border-2">
+                        <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                            <svg class="move-icon"><use href="#R"/></svg>
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#R-prime"/></svg>
+                            <svg class="move-icon"><use href="#U-prime"/></svg>
+                    </div>
+                    <p class="mb-0 mt-2">
+                        👉 <strong>Execute cet algorithme 3 fois</strong><br>
+                    </p>                    
+                </div>
+                </div>
+            </div>
+        </div>     
+        <!-- Cas 2: Arête va en arriere -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-primary">✅ Cas 3 : La face blanche pointe vers l'avant</h5>
+            <p>La couleur qui correspond au centre de devant est <strong>sur la face de droite</strong>.</p>
+            
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-2" class="cube-case"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+                    <div class="text-center p-3 bg-white rounded border border-success border-2">
+                        <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                            <svg class="move-icon"><use href="#R"/></svg>
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#R-prime"/></svg>
+                            <svg class="move-icon"><use href="#U-prime"/></svg>
+                    </div>
+                    <p class="mb-0 mt-2">
+                        👉 <strong>Execute cet algorithme 5 fois</strong><br>
+                    </p>                    
+                </div>
+                </div>
+            </div>
+        </div>
+    
+    
+
+
+
 
     <div class="mt-4">
         <h5 class="brand-green">📍 Position de travail (très important)</h5>
@@ -115,6 +196,7 @@
             <li>Peu importe où est le blanc sur le coin</li>
         </ul>
     </div>
+
 </div>
 
 
@@ -172,22 +254,12 @@
     <div class="card p-4 mb-4">
         <h3 class="brand-green">💡 Conseils utiles</h3>
         <ul class="mt-3">
-            <li>
-                <strong>Ne panique pas si tu défais la croix blanche!</strong> C'est normal. 
-                Les algorithmes vont la remettre en place automatiquement.
-            </li>
-            <li>
-                <strong>Répète l'algorithme plusieurs fois.</strong> Souvent il faut faire 
-                <code>R U R' U'</code> deux ou trois fois de suite.
-            </li>
+
             <li>
                 <strong>Pratique R U R' U' jusqu'à ce que ce soit automatique.</strong> 
                 C'est l'algorithme le plus important du cube!
             </li>
-            <li>
-                <strong>Tourne le cube entier</strong> pour avoir chaque coin à travailler en position 
-                "devant-droite". Ne change pas l'orientation du blanc (toujours en bas).
-            </li>
+
             <li>
                 Une fois les 4 coins placés, <strong>toute la face blanche est complète</strong> - 
                 félicitations, c'est le tiers du cube! 🎉
