@@ -48,73 +48,39 @@
             des coins - juste de leur <strong>position</strong>. L'orientation sera corrigée automatiquement 
             à la dernière étape!
         </div>
-
-        <div class="row mt-3">
-            <div class="col-md-6 text-center mb-3">
-                <h5>Avant : Face jaune complète</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">Les coins sont mal placés</small></p>
-            </div>
-            <div class="col-md-6 text-center mb-3">
-                <h5>Après : Coins bien placés</h5>
-                <div id="cube-goal" class="cube-small"></div>
-                <p><small class="text-muted">Chaque coin est au bon endroit</small></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section Comment identifier -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔍 Comment savoir si un coin est bien placé ?</h3>
-        <p>
-            Un coin est <strong>bien placé</strong> quand ses 3 couleurs correspondent aux 3 centres voisins, 
-            <strong>même s'il est mal orienté</strong>.
-        </p>
-
-        <div class="alert alert-warning">
-            <strong>⚠️ Ne regarde PAS la face jaune!</strong> Regarde les <strong>côtés</strong> du cube. 
-            Les couleurs du coin doivent correspondre aux centres, peu importe où est le jaune.
-        </div>
-
         <div class="row mt-3">
             <div class="col-md-6">
                 <div class="border rounded p-3 bg-light text-center">
-                    <h5 class="text-success">✅ Coin bien placé</h5>
+                    <h5 class="text-success">✅ 4 ensembles de phares en place</h5>
+                    <div id="cube-goal" class="cube-small"></div>
                     <p class="mb-0">Les 3 couleurs du coin correspondent aux 3 centres voisins</p>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="border rounded p-3 bg-light text-center">
-                    <h5 class="text-danger">❌ Coin mal placé</h5>
+                    <h5 class="text-warning">❌ 4 ensemble de phares mais nécessite une rotation U</h5>
+                    <div id="cube-goal-needsu" class="cube-small"></div>
                     <p class="mb-0">Au moins une couleur ne correspond pas à son centre</p>
                 </div>
             </div>
         </div>
     </div>
 
+
     <!-- Section L'algorithme -->
     <div class="card p-4 mb-4">
         <h3 class="brand-green">🔄 L'algorithme de permutation</h3>
         <p>
-            Cet algorithme fait tourner 3 coins en cercle, tout en gardant un coin fixe.
+            Cet algorithme échange les deux coins du derière du cube.
         </p>
 
         <div class="text-center p-4 bg-light rounded border border-success border-3 mb-3">
             <h2 class="mb-2">
-                <code class="fs-1 text-success">U R U' L' U R' U' L</code>
+                <code class="fs-1 text-success">R' U L' U2 R U' R' U2 L R</code>
             </h2>
-            <p class="mb-0"><small>L'algorithme de permutation des coins</small></p>
+            <p class="mb-0"><small>L'algorithme de permutation des coins du "back"</small></p>
         </div>
 
-        <div class="alert alert-info">
-            <strong>💡 Décomposition :</strong>
-            <ul class="mb-0 mt-2">
-                <li><code>U R U'</code> = Commence comme d'habitude</li>
-                <li><code>L'</code> = Main gauche intervient</li>
-                <li><code>U R' U'</code> = Retour avec la main droite</li>
-                <li><code>L</code> = Termine avec la main gauche</li>
-            </ul>
-        </div>
 
         <div class="alert alert-success mt-3">
             <strong>✋ Technique de prise :</strong>
@@ -126,71 +92,39 @@
         </div>
     </div>
 
-    <!-- Section Les cas -->
-    <div class="card p-4 mb-4 border-warning">
-        <h3 class="brand-green">📊 Les différents cas</h3>
 
-        <!-- Cas 1: Un coin correct -->
-        <div class="border rounded p-3 mb-3 bg-light">
-            <h5 class="text-success">✅ Cas 1 : UN coin est bien placé</h5>
-            <div class="row align-items-center">
-                <div class="col-md-4 text-center">
-                    <div id="cube-one-correct" class="cube-case"></div>
-                    <p class="mt-2"><small>Un coin correct</small></p>
-                </div>
-                <div class="col-md-8">
-                    <p><strong>Comment orienter :</strong></p>
-                    <ol class="mb-2">
-                        <li>Trouve le coin qui est déjà bien placé</li>
-                        <li>Tourne tout le cube pour mettre ce coin <strong>en haut à gauche devant toi</strong></li>
-                        <li>Fais l'algorithme <code>U R U' L' U R' U' L</code></li>
-                        <li>Les 3 autres coins vont se placer!</li>
-                    </ol>
-                    <div class="alert alert-warning mb-0">
-                        <strong>⚠️ Critique :</strong> Le coin correct DOIT être en haut à gauche!
-                    </div>
-                </div>
-            </div>
+    <!-- Section Comment identifier -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">Un peu de lumière sur la situation SVP!</h3>
+        <p>
+            Pour réussir cette étape, on cherche des <strong>phares (headlights) </strong>.  C'est à dire <strong>deux coins</strong> dans la couche du haut de la même couleur sur sa face.
+        </p>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ Votre cube aura 0 phareNe regarde PAS la face jaune!</strong> Regarde les <strong>côtés</strong> du cube. 
+            Les couleurs du coin doivent correspondre aux centres, peu importe où est le jaune.
         </div>
 
-        <!-- Cas 2: Aucun coin correct -->
-        <div class="border rounded p-3 mb-3 bg-light">
-            <h5 class="text-primary">✅ Cas 2 : AUCUN coin n'est bien placé</h5>
-            <div class="row align-items-center">
-                <div class="col-md-4 text-center">
-                    <div id="cube-no-correct" class="cube-case"></div>
-                    <p class="mt-2"><small>Aucun coin correct</small></p>
-                </div>
-                <div class="col-md-8">
-                    <p><strong>Comment procéder :</strong></p>
-                    <ol class="mb-2">
-                        <li>Fais l'algorithme dans n'importe quelle orientation</li>
-                        <li>Maintenant, au moins un coin sera bien placé</li>
-                        <li>Utilise le Cas 1 pour finir!</li>
-                    </ol>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-success">✅ Un ensemble de phare</h5>
+                    <div id="cube-one-correct" class="cube-small"></div>
+                    <p class="mb-0">Les 3 couleurs du coin correspondent aux 3 centres voisins</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Cas 3: Les phares -->
-        <div class="border rounded p-3 bg-light">
-            <h5 class="text-info">✅ Cas 3 : Les "phares" (2 coins de la même couleur côte à côte)</h5>
-            <p>Parfois, tu verras deux coins de la même couleur côte à côte - on appelle ça des "phares".</p>
-            
-            <div class="row mt-3">
-                <div class="col-md-6 text-center mb-3">
-                    <div id="cube-headlights-left" class="cube-case"></div>
-                    <p class="mt-2"><small>Phares à gauche</small></p>
-                </div>
-                <div class="col-md-6 text-center mb-3">
-                    <div id="cube-headlights-right" class="cube-case"></div>
-                    <p class="mt-2"><small>Phares à droite</small></p>
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-danger">❌ Aucun ensemble de phare</h5>
+                    <div id="cube-no-correct" class="cube-small"></div>
+                    <p class="mb-0">Au moins une couleur ne correspond pas à son centre</p>
                 </div>
             </div>
-            
-            <p><strong>Orientation :</strong> Mets les phares <strong>derrière toi</strong> (à l'arrière du cube), puis fais l'algorithme.</p>
         </div>
     </div>
+
+
+
 
     <!-- Section Processus complet -->
     <div class="card p-4 mb-4">
@@ -319,14 +253,13 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     // Mount all cubes
-    mountCube("cube-before", {{ before_state|safe }});
     mountCube("cube-goal", {{ goal_state|safe }});
+    mountCube("cube-goal-needsu", {{ goal_needsu_state|safe }});
     
     // Different cases
     mountCube("cube-one-correct", {{ one_correct_state|safe }});
     mountCube("cube-no-correct", {{ no_correct_state|safe }});
-    mountCube("cube-headlights-left", {{ headlights_left_state|safe }});
-    mountCube("cube-headlights-right", {{ headlights_right_state|safe }});
+    
   });
 </script>
 

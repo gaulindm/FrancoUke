@@ -23,10 +23,10 @@ class YellowCrossView(StepView):
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
         'goal_state': 'yellow-cross-goal',
-        'before_state': 'yellow-cross-before',
-        'pattern_dot_state': 'yellow-cross-case-back',
-        'pattern_l_state': 'yellow-cross-case-front',
-        'pattern_line_state': 'yellow-cross-edge-yellow',
+        #'before_state': 'yellow-cross-before',
+        'pattern_dot_state': 'yellow-cross-pattern-dot',
+        'pattern_l_state': 'yellow-cross-pattern-l',
+        'pattern_line_state': 'yellow-cross-pattern-line',
     }
 
 

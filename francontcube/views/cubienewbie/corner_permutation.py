@@ -23,9 +23,9 @@ class CornerPermutationView(StepView):
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
         'goal_state': 'corner-perm-goal',
-        'before_state': 'corner-perm-before',
-        'pattern_one_correct_state': 'corner-perm-one-correct',
-        'pattern_no_correct_state': 'corner-perm-no-correct',
+        'goal_needsu_state': 'corner-perm-goal-needsu',
+        'one_correct_state': 'corner-perm-one-correct',
+        'no_correct_state': 'corner-perm-no-correct',
     }
 
 

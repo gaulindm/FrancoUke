@@ -23,8 +23,9 @@ class EdgePermutationView(StepView):
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
         'goal_state': 'edge-perm-goal',
-        'before_state': 'edge-perm-before',
-        'pattern_opposite_state': 'edge-perm-pattern-opposite',
+        'goal_needsu_state': 'edge-perm-goal-needsu',
+        'no_good_edge_state': 'edge-perm-no-good-edge',
+        'one_good_edge_state': 'edge-perm-one-good-edge',
     
     }
 

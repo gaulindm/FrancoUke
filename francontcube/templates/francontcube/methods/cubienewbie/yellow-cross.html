@@ -46,23 +46,39 @@
 
         <div class="row mt-3">
             <div class="col-md-6 text-center mb-3">
-                <h5>Avant : Deux couches complètes</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">Les deux premières couches sont terminées</small></p>
-            </div>
-            <div class="col-md-6 text-center mb-3">
-                <h5>Après : Croix jaune</h5>
-                <div id="cube-goal" class="cube-small"></div>
+                <h5>Objectif : Croix jaune</h5>
+                <div id="cube-goal"  class="cube-small"></div>
                 <p><small class="text-muted">Croix jaune formée sur le dessus</small></p>
             </div>
         </div>
     </div>
 
+    <!-- Section L'algorithme -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 Étape 1 : Apprendre l'algorithme</h3>
+        <p>
+            Un seul algorithme pour tous les cas! Remarque bien qu'il s'agit du sexy move (R U R' U') de l'étape 2 entre un F et F'
+        </p>
+
+        <div class="text-center p-4 bg-light rounded border border-success border-3 mb-3">
+            <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                <svg class="move-icon"><use href="#F"/></svg>
+                <svg class="move-icon"><use href="#R"/></svg>
+                <svg class="move-icon"><use href="#U"/></svg>
+                <svg class="move-icon"><use href="#R-prime"/></svg>
+                <svg class="move-icon"><use href="#U-prime"/></svg>
+                <svg class="move-icon"><use href="#F-prime"/></svg>
+            </div>
+            <p class="mb-0"><small>L'algorithme de la croix jaune</small></p>
+        </div>
+    </div>
+
+
     <!-- Section Les 3 patterns -->
     <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔍 Étape 1 : Identifie le pattern sur la face jaune</h3>
+        <h3 class="brand-green">🔍 Étape 2 : IMPORTANT identifie le pattern et l'orientation sur la face jaune</h3>
         <p>
-            Regarde la face du haut. Tu verras un des 3 patterns suivants (ou déjà une croix!).
+            Regarde la face du haut. Tourne la couche (U) pour obtenir un des patterns suivants (ou déjà une croix!).
         </p>
 
         <div class="row mt-3">
@@ -72,15 +88,18 @@
                     <h5>Pattern 1: Point</h5>
                     <div id="cube-pattern-dot" class="cube-case"></div>
                     <p class="mt-2"><small>Juste le centre jaune</small></p>
+                    <p class="mt-2"><small>Après l'exécution du F R U R' U' F' tu obtiendras le Pattern 2: Coin</small></p>
                 </div>
             </div>
 
             <!-- Pattern L -->
             <div class="col-md-4 text-center mb-3">
                 <div class="border rounded p-3 bg-light">
-                    <h5>Pattern 2: L</h5>
+                    <h5>Pattern 2: Coin</h5>
                     <div id="cube-pattern-l" class="cube-case"></div>
-                    <p class="mt-2"><small>Centre + 2 arêtes en L</small></p>
+                    <p class="mt-2"><small>Centre + 2 arêtes en Coin</small></p>
+                    <p class="mt-2"><small>Après l'exécution du F R U R' U' F' tu obtiendras le Pattern 3: Ligne horizontale</small></p>
+
                 </div>
             </div>
 
@@ -90,6 +109,8 @@
                     <h5>Pattern 3: Ligne</h5>
                     <div id="cube-pattern-line" class="cube-case"></div>
                     <p class="mt-2"><small>Centre + ligne horizontale</small></p>
+                    <p class="mt-2"><small>Après l'exécution du F R U R' U' F' tu obtiendras la croix jaune</small></p>
+
                 </div>
             </div>
         </div>
@@ -99,79 +120,17 @@
         </div>
     </div>
 
-    <!-- Section L'algorithme -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔄 Étape 2 : Applique l'algorithme</h3>
-        <p>
-            Un seul algorithme pour tous les cas! Il faut juste bien <strong>orienter le cube</strong> 
-            avant de commencer.
-        </p>
 
-        <div class="text-center p-4 bg-light rounded border border-success border-3 mb-3">
-            <h2 class="mb-2">
-                <code class="fs-1 text-success">F R U R' U' F'</code>
-            </h2>
-            <p class="mb-0"><small>L'algorithme de la croix jaune</small></p>
-        </div>
-
-        <div class="alert alert-info">
-            <strong>💡 Décomposition :</strong>
-            <ul class="mb-0 mt-2">
-                <li><code>F</code> = Face avant (sens horaire)</li>
-                <li><code>R</code> = Face droite (sens horaire)</li>
-                <li><code>U</code> = Face du haut (sens horaire)</li>
-                <li><code>R'</code> = Face droite (sens anti-horaire)</li>
-                <li><code>U'</code> = Face du haut (sens anti-horaire)</li>
-                <li><code>F'</code> = Face avant (sens anti-horaire)</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Section Comment orienter -->
-    <div class="card p-4 mb-4 border-warning">
-        <h3 class="brand-green">⚠️ Comment orienter le cube (TRÈS IMPORTANT!)</h3>
-
-        <div class="border rounded p-3 mb-3 bg-light">
-            <h5 class="text-danger">Pattern 1: Point (juste le centre)</h5>
-            <p>
-                <strong>Orientation :</strong> Peu importe! Tu peux faire l'algorithme dans n'importe quelle direction.
-            </p>
-            <p class="mb-0">
-                <strong>Résultat :</strong> Tu obtiendras le pattern L
-            </p>
-        </div>
-
-        <div class="border rounded p-3 mb-3 bg-light">
-            <h5 class="text-warning">Pattern 2: L</h5>
-            <p>
-                <strong>Orientation :</strong> Place le L en <strong>bas à gauche</strong> (les deux arêtes jaunes 
-                pointent vers le bas et vers la gauche).
-            </p>
-            <p class="mb-0">
-                <strong>Résultat :</strong> Tu obtiendras une ligne
-            </p>
-        </div>
-
-        <div class="border rounded p-3 bg-light">
-            <h5 class="text-primary">Pattern 3: Ligne</h5>
-            <p>
-                <strong>Orientation :</strong> Place la ligne <strong>horizontale</strong> 
-                (de gauche à droite, pas de haut en bas).
-            </p>
-            <p class="mb-0">
-                <strong>Résultat :</strong> Tu obtiendras la croix jaune! ✓
-            </p>
-        </div>
-    </div>
-
+   
     <!-- Section Technique -->
     <div class="card p-4 mb-4 border-success">
         <h3 class="brand-green">✋ Technique de prise</h3>
         <div class="alert alert-success mb-0">
             <strong>Pour F R U R' U' F' :</strong>
             <ul class="mb-0 mt-2">
-                <li>Main gauche : tiens le cube et fait les mouvements F et F'</li>
-                <li>Main droite : fait les mouvements R, U, R', U'</li>
+                <li>Main gauche : tiens le cube</li>
+                <li>Main droite : fait les mouvements R, U, R', F et F'</li>
+                <li>Index gauche : fait le mouvement U'</li>
                 <li><strong>C'est très similaire à R U R' U'</strong> que tu connais déjà!</li>
                 <li>Pratique lentement jusqu'à ce que ce soit fluide</li>
             </ul>
@@ -183,13 +142,13 @@
         <h3 class="brand-green">📋 Processus complet</h3>
         <ol>
             <li class="mb-2">
-                <strong>Regarde la face du haut</strong> : Identifie quel pattern tu as (Point, L ou Ligne)
+                <strong>Regarde la face du haut</strong> : Identifie quel pattern tu as (Point, Coin ou Ligne)
             </li>
             <li class="mb-2">
                 <strong>Oriente le cube correctement</strong> :
                 <ul>
                     <li>Point → Peu importe</li>
-                    <li>L → En bas à gauche</li>
+                    <li>Coin → En haut à gauche</li>
                     <li>Ligne → Horizontale (gauche-droite)</li>
                 </ul>
             </li>
@@ -205,14 +164,7 @@
             </li>
         </ol>
 
-        <div class="alert alert-info mt-3 mb-0">
-            <strong>💡 Combien de fois ?</strong>
-            <ul class="mb-0">
-                <li>Point → L (1 fois) → Ligne (2 fois) → Croix (3 fois)</li>
-                <li>L → Ligne (1 fois) → Croix (2 fois)</li>
-                <li>Ligne → Croix (1 fois)</li>
-            </ul>
-        </div>
+
     </div>
 
     <!-- Section Conseils -->
@@ -268,6 +220,10 @@
     height: auto;
 }
 
+.move-icon { 
+    width: 64px; 
+    height: 86px; 
+}
 @media (max-width: 768px) {
     .cube-small svg {
         max-width: 200px;
@@ -309,7 +265,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     // Mount all cubes
-    mountCube("cube-before", {{ before_state|safe }});
+    //mountCube("cube-before", {{ before_state|safe }});
     mountCube("cube-goal", {{ goal_state|safe }});
     
     // Pattern states

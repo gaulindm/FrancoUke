@@ -18,15 +18,24 @@ class YellowFaceView(StepView):
     
     template_name = "francontcube/methods/cubienewbie/yellow-face.html"
     step_name = "Face Jaune"
-    step_icon = "flower3"
+    step_icon = "flower3"   
     
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
         'goal_state': 'yellow-face-goal',
         'before_state': 'yellow-face-before',
-        'pattern_no_corner_state': 'yellow-face-case-back',
-        'pattern_one_corner_state': 'yellow-face-case-front',
-        'pattern_two_corner_state': 'yellow-face-edge-yellow',
+        # 1 sune away
+        'yellow_sune_state': 'yellow-sune',
+        # 2 sune away
+        'yellow_antisune_state': 'yellow-antisune',
+        'yellow_doublesune_state': 'yellow-doublesune',
+        'yellow_pi_state': 'yellow-pi',
+        #3 sune away
+        'yellow_superman_state': 'yellow-superman',
+        'yellow_chameleon_state': 'yellow-chameleon',
+        'yellow_bowtie_state': 'yellow-bowtie',
+        
+
     }
 
 
