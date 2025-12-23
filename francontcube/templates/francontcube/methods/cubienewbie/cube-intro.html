@@ -1,0 +1,459 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Le cube 3×3×3 — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            <span class="brand-green">Le cube 3×3×3</span>
+        </h1>
+        <p class="lead text-muted">
+            Comprendre les pièces, la structure et le fonctionnement du Rubik's Cube.
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Introduction -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Bienvenue dans l'aventure du Rubik's Cube!</h3>
+        <p>
+            Avant de commencer à résoudre ton cube, il est important de comprendre sa structure. 
+            Le Rubik's Cube 3×3×3 n'est pas aussi complexe qu'il n'y paraît une fois qu'on connaît les bases!
+        </p>
+
+        <div class="row mt-4">
+            <div class="col-md-6 text-center mb-3">
+                <div id="cube-solved" class="cube-display"></div>
+                <p class="mt-2"><strong>Cube résolu</strong></p>
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <div id="cube-scrambled" class="cube-display"></div>
+                <p class="mt-2"><strong>Cube mélangé</strong></p>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <strong>💡 Le saviez-vous?</strong> Le Rubik's Cube possède plus de 43 quintillions de 
+            positions possibles (43 252 003 274 489 856 000 exactement)! Mais ne t'inquiète pas, 
+            tu n'as besoin d'apprendre que quelques algorithmes simples pour le résoudre. 🎉
+        </div>
+    </div>
+
+    <!-- Section Les 6 faces -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎨 Les 6 faces du cube</h3>
+        <p>
+            Le cube possède <strong>6 faces</strong>, chacune identifiée par son <strong>centre de couleur</strong>. 
+            Les centres ne bougent jamais les uns par rapport aux autres!
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="text-center">
+                    <div id="cube-faces" class="cube-display"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark border me-3" style="width: 40px;">U</span>
+                            <div>
+                                <strong>Haut (Up)</strong> — <span style="color: #FFFF00;">●</span> Jaune
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark border me-3" style="width: 40px;">D</span>
+                            <div>
+                                <strong>Bas (Down)</strong> — <span style="color: #FFFFFF;">○</span> Blanc
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark border me-3" style="width: 40px;">F</span>
+                            <div>
+                                <strong>Devant (Front)</strong> — <span style="color: #00FF00;">●</span> Vert
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark border me-3" style="width: 40px;">B</span>
+                            <div>
+                                <strong>Derrière (Back)</strong> — <span style="color: #0000FF;">●</span> Bleu
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark border me-3" style="width: 40px;">L</span>
+                            <div>
+                                <strong>Gauche (Left)</strong> — <span style="color: #FF0000;">●</span> Rouge
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark border me-3" style="width: 40px;">R</span>
+                            <div>
+                                <strong>Droite (Right)</strong> — <span style="color: #FFA500;">●</span> Orange
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-3">
+            <strong>⚠️ Important :</strong> Ces lettres (U, D, F, B, L, R) seront utilisées dans la 
+            <strong>notation</strong> pour décrire les mouvements. Tu les verras souvent dans les algorithmes!
+        </div>
+    </div>
+
+    <!-- Section Les 3 types de pièces -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🧩 Les 3 types de pièces</h3>
+        <p>
+            Le cube est composé de <strong>26 pièces visibles</strong> (54 autocollants colorés) 
+            réparties en 3 catégories différentes :
+        </p>
+
+        <!-- Les centres -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <h5 class="text-primary">1. Les centres (6 pièces)</h5>
+                    <div id="cube-centers" class="cube-piece"></div>
+                </div>
+                <div class="col-md-8">
+                    <ul class="mb-0">
+                        <li><strong>1 couleur visible</strong></li>
+                        <li>Au milieu de chaque face</li>
+                        <li><strong>Ne bougent jamais les uns par rapport aux autres</strong></li>
+                        <li>Définissent la couleur de chaque face</li>
+                        <li>Fixés sur un mécanisme central (le cœur du cube)</li>
+                    </ul>
+                    <div class="alert alert-info mt-2 mb-0">
+                        <strong>💡 Astuce :</strong> Les centres te disent toujours quelle couleur va 
+                        où. Par exemple, le centre blanc sera toujours en bas dans un cube résolu!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Les arêtes -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <h5 class="text-success">2. Les arêtes (12 pièces)</h5>
+                    <div id="cube-edges" class="cube-piece"></div>
+                </div>
+                <div class="col-md-8">
+                    <ul class="mb-0">
+                        <li><strong>2 couleurs visibles</strong></li>
+                        <li>Entre deux centres</li>
+                        <li>Peuvent tourner et se déplacer</li>
+                        <li>Doivent correspondre aux 2 centres voisins</li>
+                        <li>12 arêtes = 24 autocollants</li>
+                    </ul>
+                    <div class="alert alert-success mt-2 mb-0">
+                        <strong>💡 Exemple :</strong> Une arête blanc-rouge doit aller entre le 
+                        centre blanc et le centre rouge.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Les coins -->
+        <div class="border rounded p-3 bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <h5 class="text-warning">3. Les coins (8 pièces)</h5>
+                    <div id="cube-corners" class="cube-piece"></div>
+                </div>
+                <div class="col-md-8">
+                    <ul class="mb-0">
+                        <li><strong>3 couleurs visibles</strong></li>
+                        <li>Dans les angles du cube</li>
+                        <li>Peuvent tourner et se déplacer</li>
+                        <li>Doivent correspondre aux 3 centres voisins</li>
+                        <li>8 coins = 24 autocollants</li>
+                    </ul>
+                    <div class="alert alert-warning mt-2 mb-0">
+                        <strong>💡 Exemple :</strong> Un coin blanc-rouge-vert doit aller dans l'angle 
+                        entre les centres blanc, rouge et vert.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résumé -->
+        <div class="alert alert-primary mt-3 mb-0">
+            <strong>📊 En résumé :</strong>
+            <ul class="mb-0 mt-2">
+                <li><strong>6 centres</strong> + <strong>12 arêtes</strong> + <strong>8 coins</strong> = <strong>26 pièces</strong></li>
+                <li>6 + 24 + 24 = <strong>54 autocollants</strong> (9 par face)</li>
+                <li>Les centres ne bougent jamais entre eux (ils tournent sur place)</li>
+                <li>Les arêtes et les coins se déplacent autour des centres</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section Le mécanisme -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">⚙️ Comment ça fonctionne?</h3>
+        <p>
+            Le Rubik's Cube n'est pas magique! Il repose sur un mécanisme ingénieux inventé par 
+            Ernő Rubik en 1974.
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h5>Le mécanisme central</h5>
+                <ul>
+                    <li>Au cœur du cube : une <strong>croix en 3D</strong> avec 6 branches</li>
+                    <li>Chaque branche porte un <strong>centre de couleur</strong></li>
+                    <li>Les centres peuvent tourner mais restent toujours au même endroit</li>
+                    <li>Les arêtes et coins s'accrochent à cette structure</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5>Les pièces mobiles</h5>
+                <ul>
+                    <li>Chaque pièce a des <strong>encoches</strong> qui glissent sur les centres</li>
+                    <li>Quand tu tournes une face, les pièces glissent le long des rails</li>
+                    <li>Les pièces ne peuvent jamais se détacher (normalement!)</li>
+                    <li>C'est comme un puzzle 3D mécanique</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <strong>💡 Le saviez-vous?</strong> Dans un cube standard, il y a des ressorts sous 
+            chaque centre qui maintiennent la tension. C'est pourquoi certains cubes tournent mieux 
+            que d'autres!
+        </div>
+    </div>
+
+    <!-- Section Règles importantes -->
+    <div class="card p-4 mb-4 border-warning">
+        <h3 class="brand-green">📏 Règles importantes à comprendre</h3>
+        
+        <div class="row mt-3">
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <h5 class="text-success">✅ Ce qui est VRAI</h5>
+                        <ul class="mb-0">
+                            <li>Les <strong>centres ne bougent pas</strong> les uns par rapport aux autres</li>
+                            <li>Chaque arête a <strong>exactement 2 couleurs</strong></li>
+                            <li>Chaque coin a <strong>exactement 3 couleurs</strong></li>
+                            <li>Il n'y a qu'<strong>une seule solution</strong> pour chaque position</li>
+                            <li>On peut <strong>toujours</strong> résoudre un cube bien mélangé</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 border-danger">
+                    <div class="card-body">
+                        <h5 class="text-danger">❌ Ce qui est FAUX</h5>
+                        <ul class="mb-0">
+                            <li>Les autocollants ne peuvent pas <strong>être retirés et replacés</strong></li>
+                            <li>On ne peut pas <strong>échanger 2 pièces</strong> de place</li>
+                            <li>On ne peut pas <strong>retourner une seule pièce</strong></li>
+                            <li>Les couleurs opposées sont <strong>toujours les mêmes</strong> : blanc/jaune, rouge/orange, vert/bleu</li>
+                            <li>Si ton cube ne se résout pas, il a été <strong>démonté et mal remonté</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Vocabulaire de base -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📚 Vocabulaire de base</h3>
+        <p>Voici les termes que tu rencontreras souvent :</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <dl>
+                    <dt>Face</dt>
+                    <dd>Une des 6 surfaces du cube (9 autocollants)</dd>
+                    
+                    <dt>Couche</dt>
+                    <dd>Une tranche du cube (première couche, deuxième couche, etc.)</dd>
+                    
+                    <dt>Algorithme</dt>
+                    <dd>Une séquence de mouvements pour accomplir quelque chose</dd>
+                    
+                    <dt>Orientation</dt>
+                    <dd>La direction dans laquelle une pièce "regarde"</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl>
+                    <dt>Permutation</dt>
+                    <dd>Changer l'emplacement des pièces sans changer leur orientation</dd>
+                    
+                    <dt>Résolu</dt>
+                    <dd>Chaque face a une seule couleur uniforme</dd>
+                    
+                    <dt>Mélangé (Scramble)</dt>
+                    <dd>Cube dans une position aléatoire</dd>
+                    
+                    <dt>Speedcubing</dt>
+                    <dd>L'art de résoudre le cube le plus rapidement possible</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Prêt à commencer -->
+    <div class="card p-4 mb-4 bg-light border-success">
+        <h3 class="brand-green text-center">🚀 Prêt à commencer?</h3>
+        <p class="text-center lead">
+            Maintenant que tu comprends la structure du cube, tu es prêt à apprendre la notation 
+            et à commencer à résoudre!
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-4 text-center mb-3">
+                <div class="display-4">📖</div>
+                <p class="fw-bold">Étape suivante :</p>
+                <p>Apprendre la notation des mouvements</p>
+            </div>
+            <div class="col-md-4 text-center mb-3">
+                <div class="display-4">🌼</div>
+                <p class="fw-bold">Puis :</p>
+                <p>Construire ta première marguerite</p>
+            </div>
+            <div class="col-md-4 text-center mb-3">
+                <div class="display-4">🎉</div>
+                <p class="fw-bold">Et finalement :</p>
+                <p>Résoudre ton premier cube!</p>
+            </div>
+        </div>
+
+        <div class="alert alert-success mt-3 mb-0">
+            <strong>💪 Tu peux le faire!</strong> Des millions de personnes ont appris à résoudre 
+            le Rubik's Cube. Avec de la patience et de la pratique, tu en feras partie très bientôt!
+        </div>
+    </div>
+
+    <!-- Boutons de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-primary">
+            ← Retour aux étapes
+        </a>
+        <a href="{% url 'francontcube:cubienewbie_notation' %}" class="btn btn-success ms-2">
+            Étape suivante : La notation →
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS -->
+<style>
+.cube-display svg {
+    max-width: 350px;
+    height: auto;
+}
+
+.cube-piece svg {
+    max-width: 200px;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    .cube-display svg {
+        max-width: 250px;
+    }
+    
+    .cube-piece svg {
+        max-width: 150px;
+    }
+}
+
+dl {
+    margin-bottom: 0;
+}
+
+dt {
+    font-weight: 600;
+    color: #2d6a4f;
+    margin-top: 0.5rem;
+}
+
+dd {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+}
+</style>
+
+<!-- Script d'initialisation -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+          <small class="text-muted">Create the CubeState in your admin tool</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mount all cubes
+    mountCube("cube-solved", {{ solved_state|safe }});
+    mountCube("cube-scrambled", {{ scrambled_state|safe }});
+    mountCube("cube-faces", {{ faces_state|safe }});
+    mountCube("cube-centers", {{ centers_state|safe }});
+    mountCube("cube-edges", {{ edges_state|safe }});
+    mountCube("cube-corners", {{ corners_state|safe }});
+  });
+</script>
+
+{% endblock %}

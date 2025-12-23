@@ -1,3 +1,4 @@
+#francontcube/views/base.py
 """
 Base utilities for Francontcube views.
 
@@ -84,8 +85,13 @@ class StepView:
     template_name = None
     method_name = "Apprenti Cubi"
     step_name = None
+    step_number = None
     step_icon = None
     cube_state_slugs = {}  # Dict of {context_key: slug}
+
+    # Navigation - subclasses can override these  # ← NOUVEAU
+    next_step = None  # URL name for next step
+    prev_step = None  # URL name for previous step
     
     @classmethod
     def as_view(cls):
@@ -121,29 +127,39 @@ class StepView:
             URL string for the method's main page
         """
         method_urls = {
-            'Apprenti Cubi': '/francontcube/methods/cubienewbie/',
-            'CFOP': '/francontcube/methods/cfop/',
-            'Roux': '/francontcube/methods/roux/',
+            'Apprenti Cubi': 'francontcube:method_cubienewbie',
+            'Débutant': 'francontcube:method_beginner',
+            'CFOP': 'francontcube:method_cfop',
+            'Roux': 'francontcube:method_roux',
         }
-        return method_urls.get(self.method_name, '/francontcube/')
+        
+        url_name = method_urls.get(self.method_name)
+        if url_name:
+            try:
+                return reverse(url_name)
+            except:
+                return '/francontcube/'
+        return '/francontcube/'
     
     def get_context_data(self):
-        """
-        Get context data for template.
-        
-        Override this method in subclasses if you need custom context logic
-        (e.g., for progress arrays or special processing).
-        
-        Returns:
-            Dict of context variables for template
-        """
+        """Get context data for template."""
         states, missing = CubeStateLoader.get_multiple(self.cube_state_slugs)
         
-        return {
+        context = {
             'breadcrumbs': self.get_breadcrumbs(),
             'missing_slugs': missing,
-            **states,  # Unpack all cube states into context
+            **states,
         }
+        
+        # Add navigation if defined  # ← NOUVEAU
+        if self.step_number is not None:
+            context['step_number'] = self.step_number
+        if self.next_step:
+            context['next_step'] = self.next_step
+        if self.prev_step:
+            context['prev_step'] = self.prev_step
+        
+        return context
     
     def render(self, request):
         """

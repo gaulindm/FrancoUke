@@ -1,0 +1,668 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}La notation — Francontcube{% endblock %}
+
+{% block content %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            color: #185a9d;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #43cea2;
+        }
+
+        .section h3 {
+            color: #43cea2;
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+            text-align: justify;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .step-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(67, 206, 162, 0.3);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            border-radius: 50%;
+            line-height: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .step-card h3 {
+            color: #333;
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .step-card p {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .highlight-box {
+            background: #e8f5f1;
+            border-left: 4px solid #43cea2;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .highlight-box strong {
+            color: #185a9d;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .emoji {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-box {
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .comparison-box.newbie {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+        }
+
+        .comparison-box.other {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+        }
+
+        .comparison-box h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .comparison-box ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .comparison-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        .big-quote {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-style: italic;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 2rem 1.5rem;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 La Méthode Debutante</h1>
+            <p class="subtitle">Votre prochaine aventure avec le Rubik's Cube</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>Bienvenue a la methode debutante!</h2>
+                <p>
+                    Vous avez reussit a resoudre le cube rubik quelques fois en vous servant de la methode Cubie Newbie 
+                    et vous chez une methode un peu plus difficile et rapide ? 
+                    Cette méthode <strong>Débutant</strong> a été conçue spécialement pour réussir un peu plus rapidement ! 
+                    C'est une méthode suis les mêmes étapes sans répéter les algorithms </p>
+                <p>
+                    Contrairement aux méthodes avancées qui demandent de mémoriser des dizaines d'algorithmes complexes, la méthode Cubie Newbie se concentre sur la <strong>compréhension</strong> et la <strong>simplicité</strong>. Vous apprendrez à résoudre le cube couche par couche, avec seulement quelques mouvements faciles à retenir.
+                </p>
+            </div>
+
+            <div class="big-quote">
+                "Apprendre à résoudre le Rubik's Cube, ce n'est pas mémoriser des algorithmes, c'est découvrir qu'on est capable de plus qu'on ne le croyait."            </div>
+
+            <div class="section">
+                <h2>Les mêmes 7 Étapes!  Mais moins simples et plus rapide</h2>
+ 
+                <div class="method-comparison-table">
+                    <h2 class="comparison-title">Quelle méthode choisir ?</h2>
+                    <p class="comparison-intro">
+                        Les deux méthodes permettent de résoudre le cube, mais avec des approches différentes. 
+                        Voici un comparatif pour vous aider à choisir !
+                    </p>
+                    
+                    <div class="table-container">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th class="criteria-column">Critères</th>
+                                    <th class="cubie-column">🎓 Méthode Cubie Newbie</th>
+                                    <th class="beginner-column">🚀 Méthode Débutant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="criteria"><strong>Recommandation</strong></td>
+                                    <td class="cubie-cell">
+                                        <span class="badge recommended">Idéale pour débuter</span>
+                                    </td>
+                                    <td class="beginner-cell">
+                                        <span class="badge efficient">Plus directe</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Nombre d'étapes</strong></td>
+                                    <td class="cubie-cell">8 étapes progressives</td>
+                                    <td class="beginner-cell">7 étapes efficaces</td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Difficulté</strong></td>
+                                    <td class="cubie-cell">
+                                        <span class="stars">⭐⭐☆☆☆</span>
+                                        <br>Très accessible
+                                    </td>
+                                    <td class="beginner-cell">
+                                        <span class="stars">⭐⭐⭐☆☆</span>
+                                        <br>Accessible
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Temps d'apprentissage</strong></td>
+                                    <td class="cubie-cell">2-3 heures</td>
+                                    <td class="beginner-cell">3-4 heures</td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Algorithmes à mémoriser</strong></td>
+                                    <td class="cubie-cell">~5 algorithmes simples</td>
+                                    <td class="beginner-cell">~7 algorithmes</td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Première étape</strong></td>
+                                    <td class="cubie-cell">La marguerite (très visuelle)</td>
+                                    <td class="beginner-cell">Croix blanche (classique)</td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Avantages</strong></td>
+                                    <td class="cubie-cell">
+                                        <ul class="advantages-list">
+                                            <li>Progression ultra-douce</li>
+                                            <li>Très motivante visuellement</li>
+                                            <li>Parfaite pour les enfants</li>
+                                            <li>Succès rapides</li>
+                                        </ul>
+                                    </td>
+                                    <td class="beginner-cell">
+                                        <ul class="advantages-list">
+                                            <li>Moins d'étapes totales</li>
+                                            <li>Approche universelle</li>
+                                            <li>Base pour progresser vers CFOP</li>
+                                            <li>Plus efficace à long terme</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Idéal pour</strong></td>
+                                    <td class="cubie-cell">
+                                        Débutants absolus, enfants, personnes qui n'ont jamais touché un cube
+                                    </td>
+                                    <td class="beginner-cell">
+                                        Personnes à l'aise avec la logique spatiale, qui veulent une approche directe
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="criteria"><strong>Croix blanche</strong></td>
+                                    <td class="cubie-cell">
+                                        Utilisation de la marguerite
+                                    </td>
+                                    <td class="beginner-cell">
+                                        Marguerite optionnel
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="criteria"><strong>Coins inferieurs</strong></td>
+                                    <td class="cubie-cell">
+                                        Séquence R U R' U' répétés
+                                    </td>
+                                    <td class="beginner-cell">
+                                        Séquence pour chacun des 3 cas
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="criteria"><strong>Couche du milieu</strong></td>
+                                    <td class="cubie-cell">
+                                        Séquence avec mouvement R et U  mais plus longs
+                                    </td>
+                                    <td class="beginner-cell">
+                                        Séquence plus rapide mais avec les mouvements U,R et F. Progression vers F2L
+                                    </td>
+                                </tr>
+
+
+
+
+                                <tr class="action-row">
+                                    <td class="criteria"><strong>Commencer</strong></td>
+                                    <td class="cubie-cell">
+                                        <a href="{% url 'francontcube:method_cubienewbie' %}" class="table-button cubie-button">
+                                            Choisir Cubie Newbie
+                                        </a>
+                                    </td>
+                                    <td class="beginner-cell">
+                                        <a href="{% url 'francontcube:method_beginner' %}" class="table-button beginner-button">
+                                            Choisir Débutant
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="comparison-note">
+                        <p><strong>💡 Notre conseil :</strong> Les deux méthodes fonctionnent parfaitement ! Si vous hésitez, commencez par Cubie Newbie. 
+                        Vous pourrez toujours passer à la méthode Débutant plus tard si vous voulez un parcours plus direct.</p>
+                    </div>
+                </div>
+                
+                <style>
+                .method-comparison-table {
+                    max-width: 1400px;
+                    margin: 40px auto;
+                    padding: 20px;
+                }
+                
+                .comparison-title {
+                    text-align: center;
+                    font-size: 2.5em;
+                    color: #2c3e50;
+                    margin-bottom: 15px;
+                }
+                
+                .comparison-intro {
+                    text-align: center;
+                    font-size: 1.2em;
+                    color: #555;
+                    margin-bottom: 40px;
+                    max-width: 800px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .table-container {
+                    overflow-x: auto;
+                    margin-bottom: 30px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    border-radius: 12px;
+                }
+                
+                .comparison-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: white;
+                    border-radius: 12px;
+                    overflow: hidden;
+                }
+                
+                .comparison-table thead {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+                
+                .comparison-table th {
+                    padding: 20px;
+                    font-size: 1.3em;
+                    font-weight: 600;
+                    text-align: center;
+                }
+                
+                .criteria-column {
+                    width: 20%;
+                    text-align: left !important;
+                }
+                
+                .cubie-column {
+                    width: 40%;
+                    background: rgba(52, 152, 219, 0.1);
+                }
+                
+                .beginner-column {
+                    width: 40%;
+                    background: rgba(231, 76, 60, 0.1);
+                }
+                
+                .comparison-table tbody tr {
+                    border-bottom: 1px solid #ecf0f1;
+                    transition: background-color 0.3s ease;
+                }
+                
+                .comparison-table tbody tr:hover {
+                    background-color: #f8f9fa;
+                }
+                
+                .comparison-table tbody tr:last-child {
+                    border-bottom: none;
+                }
+                
+                .comparison-table td {
+                    padding: 20px;
+                    vertical-align: top;
+                }
+                
+                .criteria {
+                    background-color: #f8f9fa;
+                    font-weight: 600;
+                    color: #2c3e50;
+                }
+                
+                .cubie-cell {
+                    background-color: rgba(52, 152, 219, 0.03);
+                    text-align: center;
+                }
+                
+                .beginner-cell {
+                    background-color: rgba(231, 76, 60, 0.03);
+                    text-align: center;
+                }
+                
+                .badge {
+                    display: inline-block;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    font-size: 0.9em;
+                }
+                
+                .badge.recommended {
+                    background: #3498db;
+                    color: white;
+                }
+                
+                .badge.efficient {
+                    background: #e74c3c;
+                    color: white;
+                }
+                
+                .stars {
+                    font-size: 1.2em;
+                    color: #f39c12;
+                }
+                
+                .advantages-list {
+                    text-align: left;
+                    margin: 0;
+                    padding-left: 20px;
+                    display: inline-block;
+                }
+                
+                .advantages-list li {
+                    margin-bottom: 8px;
+                    color: #555;
+                }
+                
+                .action-row td {
+                    padding: 25px 20px;
+                    background-color: #f8f9fa !important;
+                }
+                
+                .table-button {
+                    display: inline-block;
+                    padding: 12px 30px;
+                    text-decoration: none;
+                    color: white;
+                    font-weight: bold;
+                    border-radius: 8px;
+                    transition: all 0.3s ease;
+                    font-size: 1.05em;
+                }
+                
+                .cubie-button {
+                    background: #3498db;
+                }
+                
+                .cubie-button:hover {
+                    background: #2980b9;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+                }
+                
+                .beginner-button {
+                    background: #e74c3c;
+                }
+                
+                .beginner-button:hover {
+                    background: #c0392b;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+                }
+                
+                .comparison-note {
+                    background: #fff3cd;
+                    border-left: 4px solid #f39c12;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-top: 30px;
+                }
+                
+                .comparison-note p {
+                    margin: 0;
+                    color: #856404;
+                    line-height: 1.6;
+                }
+                
+                /* Responsive */
+                @media (max-width: 768px) {
+                    .comparison-title {
+                        font-size: 1.8em;
+                    }
+                    
+                    .comparison-intro {
+                        font-size: 1em;
+                    }
+                    
+                    .comparison-table th,
+                    .comparison-table td {
+                        padding: 12px 8px;
+                        font-size: 0.9em;
+                    }
+                    
+                    .advantages-list {
+                        padding-left: 15px;
+                    }
+                    
+                    .table-button {
+                        padding: 10px 20px;
+                        font-size: 0.95em;
+                    }
+                }
+                </style>
+            </div>
+
+            </div>
+
+            
+            <div class="section">
+                <h2>À quoi s'attendre ?</h2>
+                <ul>
+                    <li><strong>Temps de résolution initial :</strong> 5-10 minutes (c'est normal !)</li>
+                    <li><strong>Avec pratique :</strong> 2-3 minutes après quelques cubes</li>
+                    <li><strong>Mémorisation :</strong> 7-8 algorithmes simples maximum</li>
+                    <li><strong>Difficulté :</strong> Facile - Tout le monde peut y arriver !</li>
+                    <li><strong>Temps d'apprentissage :</strong> 1-2 heures pour votre premier cube complet</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Ce que vous allez gagner</h2>
+                <p>
+                    En maîtrisant la méthode Cubie Newbie, vous ne résoudrez pas seulement un cube. Vous développerez :
+                </p>
+                <ul>
+                    <li><strong>Confiance :</strong> La fierté d'avoir résolu un puzzle considéré comme difficile</li>
+                    <li><strong>Patience :</strong> L'apprentissage étape par étape forge la persévérance</li>
+                    <li><strong>Logique spatiale :</strong> Vous entraînez votre cerveau à visualiser en 3D</li>
+                    <li><strong>Base solide :</strong> Prêt à explorer des méthodes plus avancées si vous le souhaitez</li>
+                    <li><strong>Un talent impressionnant :</strong> Épatez vos amis et votre famille !</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Et après ?</h2>
+                <p>
+                    Une fois que vous maîtrisez Cubie Newbie et que vous pouvez résoudre le cube confortablement en 3-5 minutes, vous aurez plusieurs options :
+                </p>
+                <ul>
+                    <li><strong>Continuez à pratiquer :</strong> Améliorez votre fluidité et votre vitesse avec cette méthode</li>
+                    <li><strong>Explorez d'autres puzzles :</strong> Cube 2x2, 4x4, Pyraminx, et plus encore !</li>
+                    <li><strong>Passez à la méthode CFOP :</strong> La méthode des champions pour aller plus vite</li>
+                    <li><strong>Apprenez d'autres méthodes :</strong> Roux, ZZ, Petrus... Il y a tout un monde à découvrir !</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Prêt à commencer votre aventure ?</h2>
+                <p>
+                    Le Rubik's Cube peut sembler impossible au début, mais avec la méthode Cubie Newbie, vous découvrirez que c'est accessible à tous. Pas besoin d'être un génie ou d'avoir des talents spéciaux - juste un peu de patience et la volonté d'apprendre.
+                </p>
+                <p>
+                    Des millions de personnes dans le monde ont appris à résoudre le Rubik's Cube. Vous êtes sur le point de rejoindre cette communauté passionnante. Allons-y ensemble, un mouvement à la fois !
+                </p>
+            </div>
+
+            <div class="big-quote">
+                "Le secret n'est pas d'être rapide, c'est de ne jamais abandonner. Chaque cube résolu est une victoire !"
+            </div>
+        </div>
+    </div>
+{% endblock %}

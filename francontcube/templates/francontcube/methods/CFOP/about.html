@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À propos de la Méthode Débutant (CFOP)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+            text-align: justify;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .step-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            line-height: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .step-card h3 {
+            color: #333;
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .step-card p {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .highlight-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .highlight-box strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 2rem 1.5rem;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>La Méthode Débutant (CFOP)</h1>
+            <p class="subtitle">La méthode la plus populaire pour résoudre le Rubik's Cube</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>Qu'est-ce que la Méthode CFOP ?</h2>
+                <p>
+                    La méthode CFOP (Cross, F2L, OLL, PLL) est la méthode de résolution la plus utilisée par les speedcubers du monde entier. Développée dans les années 1980, elle est devenue la référence pour résoudre le Rubik's Cube rapidement et efficacement.
+                </p>
+                <p>
+                    Cette méthode est également connue sous le nom de "Méthode Fridrich" en l'honneur de Jessica Fridrich, qui l'a popularisée et systématisée. Elle permet aux cubers débutants d'atteindre des temps de résolution sous les 2 minutes, et aux experts de descendre sous les 10 secondes !
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>Les 4 Étapes de la Méthode</h2>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3>Cross</h3>
+                        <p>Former une croix blanche sur la face inférieure</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3>F2L</h3>
+                        <p>First Two Layers - Compléter les deux premières couches</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3>OLL</h3>
+                        <p>Orient Last Layer - Orienter la dernière couche</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h3>PLL</h3>
+                        <p>Permute Last Layer - Permuter la dernière couche</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Détails des Étapes</h2>
+                
+                <h3>1. Cross (La Croix)</h3>
+                <p>
+                    La première étape consiste à former une croix blanche sur la face inférieure du cube, en s'assurant que les arêtes correspondent aux centres des faces adjacentes. Cette étape est intuitive et ne nécessite pas de mémorisation d'algorithmes.
+                </p>
+
+                <h3>2. F2L (First Two Layers)</h3>
+                <p>
+                    Cette étape consiste à insérer simultanément les coins et les arêtes pour compléter les deux premières couches du cube. Il existe 41 cas différents de F2L, mais vous pouvez commencer par apprendre les cas de base et développer votre intuition.
+                </p>
+
+                <h3>3. OLL (Orient Last Layer)</h3>
+                <p>
+                    L'objectif est d'orienter tous les cubies de la dernière couche pour que la face supérieure soit entièrement jaune. Il existe 57 cas OLL, mais de nombreux cubers débutants commencent par une approche en deux étapes (OLL en 2-look) qui ne nécessite que 10 algorithmes.
+                </p>
+
+                <h3>4. PLL (Permute Last Layer)</h3>
+                <p>
+                    La dernière étape consiste à permuter les pièces de la dernière couche pour résoudre complètement le cube. Il y a 21 cas PLL. Les débutants peuvent utiliser une approche en 2-look PLL avec seulement 6 algorithmes.
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>Statistiques de la Méthode</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <span class="stat-number">119</span>
+                        <span class="stat-label">Algorithmes totaux</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">55-60</span>
+                        <span class="stat-label">Mouvements moyens</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">#1</span>
+                        <span class="stat-label">Méthode la plus populaire</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Pourquoi choisir la Méthode CFOP ?</h2>
+                <ul>
+                    <li><strong>Populaire :</strong> Utilisée par la majorité des champions du monde</li>
+                    <li><strong>Efficace :</strong> Permet d'atteindre des temps très rapides (sub-10 secondes)</li>
+                    <li><strong>Progressive :</strong> Vous pouvez commencer simplement et améliorer graduellement</li>
+                    <li><strong>Ressources abondantes :</strong> Tutoriels, vidéos et communauté très active</li>
+                    <li><strong>Versatile :</strong> S'adapte à tous les niveaux, du débutant à l'expert</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Progression Recommandée</h2>
+                <div class="highlight-box">
+                    <strong>Étape 1 : Les Bases (1-2 semaines)</strong>
+                    <p>Maîtriser le Cross et la méthode F2L intuitive. Objectif : résoudre en 2-3 minutes.</p>
+                </div>
+                <div class="highlight-box">
+                    <strong>Étape 2 : OLL et PLL Simplifié (2-4 semaines)</strong>
+                    <p>Apprendre le 2-look OLL (10 algorithmes) et 2-look PLL (6 algorithmes). Objectif : sous 1 minute.</p>
+                </div>
+                <div class="highlight-box">
+                    <strong>Étape 3 : F2L Avancé (1-3 mois)</strong>
+                    <p>Apprendre les 41 cas de F2L pour améliorer la fluidité. Objectif : sous 30 secondes.</p>
+                </div>
+                <div class="highlight-box">
+                    <strong>Étape 4 : Full OLL et PLL (3-6 mois)</strong>
+                    <p>Maîtriser tous les algorithmes OLL et PLL. Objectif : sous 20 secondes.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Prêt à Commencer ?</h2>
+                <p>
+                    La méthode CFOP peut sembler intimidante au début avec ses nombreux algorithmes, mais rappelez-vous que tous les champions ont commencé par le début ! L'important est de progresser à votre rythme et de pratiquer régulièrement.
+                </p>
+                <p>
+                    Notre tutoriel vous guidera étape par étape, en commençant par les concepts les plus simples jusqu'aux techniques avancées. Chaque cas est illustré avec des diagrammes clairs et des algorithmes détaillés.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,480 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}La notation — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            <span class="brand-green">La notation des mouvements</span>
+        </h1>
+        <p class="lead text-muted">
+            Apprendre à lire et comprendre les mouvements du Rubik's Cube.
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Introduction -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📖 Pourquoi une notation?</h3>
+        <p>
+            Pour communiquer les mouvements du cube, on utilise une <strong>notation universelle</strong> 
+            inventée par David Singmaster. Cette notation est utilisée partout dans le monde par tous 
+            les speedcubers!
+        </p>
+        <p class="mb-0">
+            Avec cette notation, tu pourras lire des algorithmes, suivre des tutoriels et partager 
+            tes découvertes avec d'autres passionnés de Rubik's Cube.
+        </p>
+    </div>
+
+    <!-- Section Les 6 mouvements de base -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 Les 6 mouvements de base</h3>
+        <p>
+            Chaque face du cube peut être tournée de <strong>90°</strong> dans le sens horaire. 
+            On utilise une lettre pour représenter chaque face :
+        </p>
+
+        <div class="row mt-4">
+            <!-- R - Right -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-danger">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h2 class="text-danger mb-0">R</h2>
+                            <small class="text-muted">Right (Droite)</small>
+                        </div>
+                        <div class="text-center mb-3">
+                            <div id="cube-r-move" class="notation-cube"></div>
+                        </div>
+                        <p class="mb-2"><strong>Face droite, sens horaire</strong></p>
+                        <ul class="mb-0 small">
+                            <li>Tourne la face de droite de 90° (¼ de tour)</li>
+                            <li>Imagine que tu regardes la face de face</li>
+                            <li>C'est le mouvement le plus utilisé!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- L - Left -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-warning">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h2 class="text-warning mb-0">L</h2>
+                            <small class="text-muted">Left (Gauche)</small>
+                        </div>
+                        <div class="text-center mb-3">
+                            <div id="cube-l-move" class="notation-cube"></div>
+                        </div>
+                        <p class="mb-2"><strong>Face gauche, sens horaire</strong></p>
+                        <ul class="mb-0 small">
+                            <li>Tourne la face de gauche de 90°</li>
+                            <li>Vue de face, sens horaire</li>
+                            <li>Utilisé moins souvent que R</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- U - Up -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h2 class="text-primary mb-0">U</h2>
+                            <small class="text-muted">Up (Haut)</small>
+                        </div>
+                        <div class="text-center mb-3">
+                            <div id="cube-u-move" class="notation-cube"></div>
+                        </div>
+                        <p class="mb-2"><strong>Face du haut, sens horaire</strong></p>
+                        <ul class="mb-0 small">
+                            <li>Tourne la face du dessus de 90°</li>
+                            <li>Vue de dessus, sens horaire</li>
+                            <li>Très fréquent dans les algorithmes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- D - Down -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-secondary">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h2 class="text-secondary mb-0">D</h2>
+                            <small class="text-muted">Down (Bas)</small>
+                        </div>
+                        <div class="text-center mb-3">
+                            <div id="cube-d-move" class="notation-cube"></div>
+                        </div>
+                        <p class="mb-2"><strong>Face du bas, sens horaire</strong></p>
+                        <ul class="mb-0 small">
+                            <li>Tourne la face du dessous de 90°</li>
+                            <li>Vue de dessous, sens horaire</li>
+                            <li>Moins utilisé que U</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- F - Front -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h2 class="text-success mb-0">F</h2>
+                            <small class="text-muted">Front (Devant)</small>
+                        </div>
+                        <div class="text-center mb-3">
+                            <div id="cube-f-move" class="notation-cube"></div>
+                        </div>
+                        <p class="mb-2"><strong>Face de devant, sens horaire</strong></p>
+                        <ul class="mb-0 small">
+                            <li>Tourne la face avant de 90°</li>
+                            <li>Sens horaire vu de face</li>
+                            <li>Important pour plusieurs algorithmes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B - Back -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-info">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h2 class="text-info mb-0">B</h2>
+                            <small class="text-muted">Back (Derrière)</small>
+                        </div>
+                        <div class="text-center mb-3">
+                            <div id="cube-b-move" class="notation-cube"></div>
+                        </div>
+                        <p class="mb-2"><strong>Face de derrière, sens horaire</strong></p>
+                        <ul class="mb-0 small">
+                            <li>Tourne la face arrière de 90°</li>
+                            <li>Le plus difficile à visualiser</li>
+                            <li>Peu utilisé dans la méthode débutant</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>💡 Astuce pour se souvenir :</strong> Toutes les lettres simples (R, L, U, D, F, B) 
+            tournent dans le <strong>sens horaire</strong> quand on regarde la face de face.
+        </div>
+    </div>
+
+    <!-- Section Sens anti-horaire -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">↩️ Tourner dans l'autre sens</h3>
+        <p>
+            Pour tourner une face dans le <strong>sens anti-horaire</strong>, on ajoute une 
+            <strong>apostrophe ( ' )</strong> ou un <strong>prime</strong> après la lettre :
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card border-danger">
+                    <div class="card-body text-center">
+                        <h3 class="text-danger">R'</h3>
+                        <p class="mb-2">Se lit "R prime"</p>
+                        <div id="cube-r-prime" class="notation-cube mx-auto"></div>
+                        <p class="mt-3 mb-0"><small>Face droite, sens <strong>anti-horaire</strong></small></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary">U'</h3>
+                        <p class="mb-2">Se lit "U prime"</p>
+                        <div id="cube-u-prime" class="notation-cube mx-auto"></div>
+                        <p class="mt-3 mb-0"><small>Face du haut, sens <strong>anti-horaire</strong></small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-success mt-3">
+            <strong>✅ Important :</strong> R' est simplement l'<strong>inverse</strong> de R. 
+            Si tu fais R puis R', tu reviens à la position de départ!
+        </div>
+    </div>
+
+    <!-- Section Double tour -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔁 Le double tour (180°)</h3>
+        <p>
+            Pour tourner une face de <strong>180°</strong> (demi-tour), on ajoute le chiffre 
+            <strong>2</strong> après la lettre :
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card border-danger">
+                    <div class="card-body text-center">
+                        <h3 class="text-danger">R2</h3>
+                        <p class="mb-2">Se lit "R deux"</p>
+                        <div id="cube-r2" class="notation-cube mx-auto"></div>
+                        <p class="mt-3 mb-0"><small>Face droite, <strong>180°</strong></small></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h3 class="text-success">F2</h3>
+                        <p class="mb-2">Se lit "F deux"</p>
+                        <div id="cube-f2" class="notation-cube mx-auto"></div>
+                        <p class="mt-3 mb-0"><small>Face avant, <strong>180°</strong></small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <strong>💡 Astuce :</strong> R2 peut être fait dans n'importe quel sens (horaire ou 
+            anti-horaire), le résultat est le même! C'est pourquoi on ne met jamais R2' - ça 
+            n'aurait pas de sens.
+        </div>
+    </div>
+
+    <!-- Section Lire un algorithme -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📝 Lire un algorithme complet</h3>
+        <p>
+            Un algorithme est une <strong>séquence de mouvements</strong> écrits de gauche à droite. 
+            Voyons quelques exemples :
+        </p>
+
+        <!-- Exemple 1 -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-center mb-3">
+                <code class="fs-4 text-success">R U R' U'</code>
+            </h5>
+            <p><strong>Décomposition :</strong></p>
+            <ol>
+                <li><code>R</code> = Droite, sens horaire</li>
+                <li><code>U</code> = Haut, sens horaire</li>
+                <li><code>R'</code> = Droite, sens anti-horaire</li>
+                <li><code>U'</code> = Haut, sens anti-horaire</li>
+            </ol>
+            <p class="mb-0 text-muted">
+                <small>C'est l'algorithme le plus célèbre du Rubik's Cube! Tu l'utiliseras constamment.</small>
+            </p>
+        </div>
+
+        <!-- Exemple 2 -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-center mb-3">
+                <code class="fs-4 text-primary">F R U R' U' F'</code>
+            </h5>
+            <p><strong>Décomposition :</strong></p>
+            <ol>
+                <li><code>F</code> = Devant, sens horaire</li>
+                <li><code>R</code> = Droite, sens horaire</li>
+                <li><code>U</code> = Haut, sens horaire</li>
+                <li><code>R'</code> = Droite, sens anti-horaire</li>
+                <li><code>U'</code> = Haut, sens anti-horaire</li>
+                <li><code>F'</code> = Devant, sens anti-horaire</li>
+            </ol>
+            <p class="mb-0 text-muted">
+                <small>L'algorithme de la croix jaune que tu apprendras plus tard!</small>
+            </p>
+        </div>
+
+        <!-- Exemple 3 -->
+        <div class="border rounded p-3 bg-light">
+            <h5 class="text-center mb-3">
+                <code class="fs-4 text-danger">R2 D2 R2</code>
+            </h5>
+            <p><strong>Décomposition :</strong></p>
+            <ol>
+                <li><code>R2</code> = Droite, 180°</li>
+                <li><code>D2</code> = Bas, 180°</li>
+                <li><code>R2</code> = Droite, 180° (encore)</li>
+            </ol>
+            <p class="mb-0 text-muted">
+                <small>Un algorithme simple qui échange deux arêtes opposées.</small>
+            </p>
+        </div>
+    </div>
+
+    <!-- Section Conseils pratiques -->
+    <div class="card p-4 mb-4 border-success">
+        <h3 class="brand-green">💡 Conseils pour bien débuter</h3>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h5>✅ À FAIRE :</h5>
+                <ul>
+                    <li>Lis l'algorithme <strong>en entier</strong> avant de commencer</li>
+                    <li>Fais les mouvements <strong>lentement</strong> au début</li>
+                    <li>Vérifie ton orientation du cube <strong>avant</strong> de commencer</li>
+                    <li>Compte les mouvements pour ne pas te perdre</li>
+                    <li><strong>Pratique</strong> chaque mouvement jusqu'à ce qu'il soit naturel</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5>❌ À ÉVITER :</h5>
+                <ul>
+                    <li>Ne tournes pas <strong>tout le cube</strong> dans tes mains</li>
+                    <li>N'invente pas ta propre notation (utilise la standard)</li>
+                    <li>Ne saute pas d'étapes dans un algorithme</li>
+                    <li>Ne te décourage pas si c'est difficile au début</li>
+                    <li>N'apprends pas 10 algorithmes en même temps</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Exercices -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Exercices pour pratiquer</h3>
+        <p>Avant de passer à la résolution, pratique ces mouvements sur ton cube :</p>
+
+        <ol>
+            <li class="mb-3">
+                <strong>Exercice 1 : Les mouvements de base</strong><br>
+                Fais chaque mouvement 10 fois : R, L, U, D, F, B<br>
+                <small class="text-muted">Objectif : Te familiariser avec chaque face</small>
+            </li>
+            <li class="mb-3">
+                <strong>Exercice 2 : Aller-retour</strong><br>
+                Fais R puis R', vérifie que le cube est revenu au départ<br>
+                Répète avec toutes les faces<br>
+                <small class="text-muted">Objectif : Comprendre que X' annule X</small>
+            </li>
+            <li class="mb-3">
+                <strong>Exercice 3 : Le célèbre R U R' U'</strong><br>
+                Pratique cet algorithme jusqu'à pouvoir le faire sans réfléchir<br>
+                <small class="text-muted">Objectif : Tu l'utiliseras tout le temps!</small>
+            </li>
+            <li class="mb-3">
+                <strong>Exercice 4 : Les doubles tours</strong><br>
+                Pratique R2, U2, F2 jusqu'à ce que ce soit fluide<br>
+                <small class="text-muted">Objectif : Développer la vitesse</small>
+            </li>
+        </ol>
+
+        <div class="alert alert-warning">
+            <strong>⏱️ Prends ton temps!</strong> Il vaut mieux faire les mouvements lentement 
+            et correctement que rapidement et mal. La vitesse viendra naturellement avec la pratique.
+        </div>
+    </div>
+
+    <!-- Section Prêt -->
+    <div class="card p-4 mb-4 bg-light border-success">
+        <h3 class="brand-green text-center">🎓 Tu maîtrises maintenant la notation!</h3>
+        <p class="text-center lead">
+            Tu es prêt à commencer à résoudre ton cube. La première étape : construire la marguerite!
+        </p>
+        
+        <div class="text-center mt-3">
+            <div class="display-1">🌼</div>
+            <p class="mt-3 mb-0">
+                <strong>Conseil :</strong> Garde cette page en favoris, tu devras peut-être 
+                revenir vérifier la notation au début!
+            </p>
+        </div>
+    </div>
+
+    <!-- Boutons de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:cube_intro' %}" class="btn btn-outline-primary">
+            ← Retour : Le cube
+        </a>
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
+            Vue d'ensemble
+        </a>
+        <a href="{% url 'francontcube:daisy' %}" class="btn btn-success ms-2">
+            Commencer : La marguerite →
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS -->
+<style>
+.notation-cube svg {
+    max-width: 180px;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    .notation-cube svg {
+        max-width: 120px;
+    }
+}
+</style>
+
+<!-- Script d'initialisation -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-3">
+          <i class="bi bi-cube text-muted" style="font-size: 2rem;"></i>
+          <p class="mb-0 mt-1 small text-muted">State not available</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mount all move demonstrations
+    mountCube("cube-r-move", {{ r_move_state|safe }});
+    mountCube("cube-l-move", {{ l_move_state|safe }});
+    mountCube("cube-u-move", {{ u_move_state|safe }});
+    mountCube("cube-d-move", {{ d_move_state|safe }});
+    mountCube("cube-f-move", {{ f_move_state|safe }});
+    mountCube("cube-b-move", {{ b_move_state|safe }});
+    mountCube("cube-r-prime", {{ r_prime_state|safe }});
+    mountCube("cube-u-prime", {{ u_prime_state|safe }});
+    mountCube("cube-r2", {{ r2_state|safe }});
+    mountCube("cube-f2", {{ f2_state|safe }});
+  });
+</script>
+
+{% endblock %}

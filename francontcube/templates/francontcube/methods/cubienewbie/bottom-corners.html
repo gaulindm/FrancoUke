@@ -266,13 +266,13 @@
 
     <!-- Bouton de navigation -->
     <div class="text-center">
-        <a href="{% url 'francontcube:white_cross' %}" class="btn btn-outline-primary">
+        <a href="{% url 'francontcube:cubienewbie_white_cross' %}" class="btn btn-outline-primary">
             ← Retour : La croix blanche
         </a>
         <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
             Vue d'ensemble
         </a>
-        <a href="{% url 'francontcube:second_layer' %}" class="btn btn-success ms-2">
+        <a href="{% url 'francontcube:cubienewbie_second_layer' %}" class="btn btn-success ms-2">
             Étape suivante : La deuxième couche →
         </a>
     </div>
@@ -283,7 +283,7 @@
 .cube-small svg { 
     width: 275px; 
     height: auto;
-
+    outline: 2px solid red; 
 }
 
 #cube-case-1 svg, 
@@ -301,7 +301,7 @@
 
 @media (max-width: 768px) {
     .cube-small svg { 
-        width: 200px; 
+        max-width: 200px; 
     }
     
     #cube-case-1 svg, 

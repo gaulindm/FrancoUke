@@ -9,13 +9,13 @@
     <!-- Titre principal -->
     <div class="text-center mb-5">
         <h1 class="hero-title">
-            Étape 1b : <span class="brand-green">La croix blanche</span>
+            Étape 1: <span class="brand-green">La croix blanche</span>
         </h1>
         <p class="lead text-muted">
-            Transformer ta marguerite en croix blanche en plaçant les arêtes au bon endroit.
+            Vous pouvez maintenant apprendre comment créer la croix blanche sans utiliser la méthode margerite.
         </p>
     </div>
-
+ 
     <!-- Charger le template SVG (caché) -->
     {% include "cube/partials/_cube_svg.html" %}
 
@@ -54,8 +54,7 @@
         <h3 class="brand-green">🧩 Comment faire ?</h3>
 
         <p>
-            Tu as déjà la marguerite de l'étape précédente. Maintenant, il faut
-            <strong>« retourner les pétales »</strong> un par un vers le bas.
+            Tu as certainement plus d'expérience avec le cube pour te permettre de réaliser cette étape par <strong>intuition</strong>
         </p>
 
         <ol class="mt-3">
@@ -80,40 +79,10 @@
             puis R2 (la droite) pour faire descendre.
         </div>
 
-        <!-- Comparaison Avant/Après -->
-        <div class="row mt-4">
-            <div class="col-md-6 text-center mb-3">
-                <h5 class="brand-green">Avant : La marguerite</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">Les arêtes blanches sont en haut</small></p>
-            </div>
-            <div class="col-md-6 text-center mb-3">
-                <h5 class="brand-green">Après : La croix blanche</h5>
-                <div id="cube-after" class="cube-small"></div>
-                <p><small class="text-muted">Les arêtes blanches forment une croix en bas</small></p>
-            </div>
-        </div>
+  
     </div>
 
-    <!-- Section Progression interactive -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📊 Progression étape par étape</h3>
-        <p>Clique sur les boutons pour voir comment retourner chaque arête.</p>
 
-        <div class="text-center mt-3">
-            <div id="cube-progress"></div>
-            <div class="btn-group mt-3" role="group" aria-label="Progression de la croix blanche">
-                <button class="btn btn-sm btn-outline-primary active" onclick="updateCrossProgress(0)">Marguerite</button>
-                <button class="btn btn-sm btn-outline-primary" onclick="updateCrossProgress(1)">Aligne le petal</button>
-                <button class="btn btn-sm btn-outline-primary" onclick="updateCrossProgress(2)">Descendre le petal</button>
-                <button class="btn btn-sm btn-outline-primary" onclick="updateCrossProgress(3)">On tourne le cube</button>
-                <button class="btn btn-sm btn-outline-success" onclick="updateCrossProgress(4)">Repete pour les 3 autres pétals</button>
-            </div>
-            <div id="cross-progress-message" class="mt-3 p-3 bg-light rounded" style="display: none;">
-                <p class="mb-0 text-center fw-bold"></p>
-            </div>
-        </div>
-    </div>
 
     <!-- Section Important -->
     <div class="card p-4 mb-4 border-warning">
@@ -139,65 +108,6 @@
         </p>
     </div>
 
-    <!-- Section Algorithme -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔄 L'algorithme simple</h3>
-        <p>Pour faire descendre une arête blanche du haut vers le bas :</p>
-
-        <div class="text-center p-4 bg-light rounded border border-success border-3">
-            <svg class="move-icon"><use href="#R2"/></svg>
-            <p class="mt-2 mb-0"><small>(Tourne la face droite deux fois / demi-tour avec la main droite)</small></p>
-        </div>
-
-        <div class="alert alert-success mt-3">
-            <strong>✋ Technique recommandée :</strong>
-            <ul class="mb-0">
-                <li>Tiens le cube <strong>fermement avec ta main gauche</strong></li>
-                <li>Utilise ta <strong>main droite pour faire R2</strong></li>
-                <li>Tourne la face du haut (U) avec ton index droit pour positionner l'arête</li>
-                <li>Cette technique développe de bonnes habitudes pour la suite !</li>
-            </ul>
-        </div>
-
-        <div class="alert alert-info mt-3 mb-0">
-            <strong>💡 Comment positionner l'arête avant de faire R2 :</strong>
-            <ol class="mb-0 mt-2">
-                <li>Regarde la couleur du <strong>côté</strong> de l'arête blanche (pas le blanc !)</li>
-                <li>Tourne U (la face du haut) jusqu'à ce que cette couleur soit <strong>au-dessus du centre de la même couleur à droite</strong></li>
-                <li>Fais <strong>R2</strong> avec ta main droite - l'arête descend au bon endroit !</li>
-            </ol>
-        </div>
-    </div>
-
-    <!-- Section Conseils -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">💡 Conseils utiles</h3>
-        <ul class="mt-3">
-            <li>
-                <strong>Tiens le cube avec ta main gauche</strong> pendant toute l'étape.
-                Ta main droite est libre pour faire R2 rapidement !
-            </li>
-            <li>
-                <strong>Travaille une arête à la fois.</strong> Ne te précipite pas !
-            </li>
-            <li>
-                <strong>Vérifie toujours les couleurs</strong> avant de faire R2.
-                Est-ce que la couleur du côté de l'arête est au-dessus du centre de droite de la même couleur ?
-            </li>
-            <li>
-                Si tu fais une erreur, pas de problème ! Refais simplement R2 pour remonter l'arête
-                et recommence.
-            </li>
-            <li>
-                <strong>Pratique R2 !</strong> C'est un mouvement que tu vas utiliser beaucoup.
-                Essaie de le faire vite et avec fluidité.
-            </li>
-            <li>
-                <strong>Une fois la croix terminée,</strong> retourne ton cube pour voir la croix blanche
-                en bas. C'est la base de ton cube résolu !
-            </li>
-        </ul>
-    </div>
 
     <!-- Bouton de navigation -->
     <div class="text-center">
@@ -304,8 +214,8 @@
   document.addEventListener("DOMContentLoaded", () => {
     // Mount all static cubes
     mountCube("cube-goal", {{ goal_state|safe }});
-    mountCube("cube-before", {{ before_state|safe }});
-    mountCube("cube-after", {{ after_state|safe }});
+    //mountCube("cube-before", {{ before_state|safe }});
+    //mountCube("cube-after", {{ after_state|safe }});
     mountCube("cube-wrong", {{ wrong_state|safe }});
     mountCube("cube-correct", {{ correct_state|safe }});
 

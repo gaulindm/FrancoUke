@@ -35,6 +35,14 @@ def home(request):
             'available': True,
         },
         {
+            'name': 'Méthode Débutant',
+            'desc': 'Apprenez des nouvelles algo pour résoudre le cube 3×3 avec la méthode couche par couche',
+            'icon': 'bi-book',
+            'logo': None,
+            'url': '/francontcube/methods/beginner/',
+            'available': True,
+        },
+        {
             'name': 'CFOP',
             'desc': 'Méthode avancée : Cross, F2L, OLL, PLL',
             'icon': 'bi-lightning',

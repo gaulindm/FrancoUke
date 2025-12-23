@@ -29,20 +29,35 @@ from .home import (
 # ============================================================
 # CUBIE NEWBIE METHOD
 # ============================================================
-# NOTE: Uncomment these as you migrate each view to the new structure
 from .cubienewbie.main import method_cubienewbie
-from .cubienewbie.daisy import daisy
-from .cubienewbie.white_cross import white_cross
-from .cubienewbie.bottom_corners import bottom_corners
-from .cubienewbie.second_layer import second_layer
-from .cubienewbie.yellow_cross import yellow_cross
-from .cubienewbie.yellow_face import yellow_face
-from .cubienewbie.corner_permutation import corner_permutation
-from .cubienewbie.edge_permutation import edge_permutation
+from .cubienewbie.daisy import daisy as cubienewbie_daisy
+from .cubienewbie.white_cross import white_cross as cubienewbie_white_cross
+from .cubienewbie.bottom_corners import bottom_corners as cubienewbie_bottom_corners
+from .cubienewbie.second_layer import second_layer as cubienewbie_second_layer
+from .cubienewbie.yellow_cross import yellow_cross as cubienewbie_yellow_cross
+from .cubienewbie.yellow_face import yellow_face as cubienewbie_yellow_face
+from .cubienewbie.corner_permutation import corner_permutation as cubienewbie_corner_permutation
+from .cubienewbie.edge_permutation import edge_permutation as cubienewbie_edge_permutation
+from .cubienewbie.cube_intro import cube_intro as cubienewbie_cube_intro
+from .cubienewbie.notation import notation as cubienewbie_notation
+from .cubienewbie.about import about as cubienewbie_about
 
 # ============================================================
-# OTHER METHODS
+# BEGINNER METHOD
 # ============================================================
+from .beginner.main import method_beginner as beginner_method
+from .beginner.white_cross import white_cross as beginner_white_cross
+from .beginner.bottom_corners import bottom_corners as beginner_bottom_corners
+from .beginner.second_layer import second_layer as beginner_second_layer
+from .beginner.yellow_cross import yellow_cross as beginner_yellow_cross
+from .beginner.yellow_face import yellow_face as beginner_yellow_face
+from .beginner.corner_permutation import corner_permutation as beginner_corner_permutation
+from .beginner.edge_permutation import edge_permutation as beginner_edge_permutation
+from .beginner.about import about as beginner_about
+
+
+
+
 # Add imports here as you implement other methods:
 # from .cfop.main import method_cfop
 # from .cfop.cross import cfop_cross
@@ -68,6 +83,9 @@ __all__ = [
     
     # Cubie Newbie (uncomment as migrated)
     'method_cubienewbie',
+    'about',
+    'cube_intro',
+    'notation',
     'daisy',
     'white_cross',
     'bottom_corners',

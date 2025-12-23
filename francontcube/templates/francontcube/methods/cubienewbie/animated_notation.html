@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Rubik's Cube Moves</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .demo-card {
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid #e0e0e0;
+            transition: transform 0.3s;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+
+        .demo-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .demo-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .icon-display {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Animation styles */
+        @keyframes arrowBounceUp {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes arrowBounceDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+
+        @keyframes arrowSlideLeft {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-8px); }
+        }
+
+        @keyframes arrowSlideRight {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(8px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Apply animations to specific moves */
+        .animate-r .arrow-up {
+            animation: arrowBounceUp 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .animate-r-prime .arrow-down {
+            animation: arrowBounceDown 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .animate-l .arrow-down {
+            animation: arrowBounceDown 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .animate-l-prime .arrow-up {
+            animation: arrowBounceUp 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .animate-u .arrow-left {
+            animation: arrowSlideLeft 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .animate-u-prime .arrow-right {
+            animation: arrowSlideRight 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .animate-d .arrow-right {
+            animation: arrowSlideRight 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .animate-d-prime .arrow-left {
+            animation: arrowSlideLeft 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        /* Rotate animation for F and B moves */
+        @keyframes rotateClockwise {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateCounterClockwise {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        .animate-f .rotation-arc,
+        .animate-b-prime .rotation-arc {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .animate-f-prime .rotation-arc,
+        .animate-b .rotation-arc {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .toggle-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        .toggle-button:hover {
+            background: #5568d3;
+        }
+
+        .toggle-button.active {
+            background: #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Animated Rubik's Cube Moves</h1>
+        <p class="subtitle">Watch the arrows to understand rotation direction</p>
+
+        <div class="demo-grid">
+            <!-- R Move -->
+            <div class="demo-card">
+                <h3>R - Right Clockwise</h3>
+                <p>The arrow bounces upward to show clockwise rotation</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-r">
+                        <use href="#R"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-r')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- R' Move -->
+            <div class="demo-card">
+                <h3>R' - Right Counter-Clockwise</h3>
+                <p>The arrow bounces downward to show counter-clockwise rotation</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-r-prime">
+                        <use href="#R-prime"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-r-prime')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- L Move -->
+            <div class="demo-card">
+                <h3>L - Left Clockwise</h3>
+                <p>The arrow bounces downward (clockwise from left view)</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-l">
+                        <use href="#L"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-l')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- L' Move -->
+            <div class="demo-card">
+                <h3>L' - Left Counter-Clockwise</h3>
+                <p>The arrow bounces upward</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-l-prime">
+                        <use href="#L-prime"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-l-prime')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- U Move -->
+            <div class="demo-card">
+                <h3>U - Up Clockwise</h3>
+                <p>The arrow slides left to show clockwise rotation from above</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-u">
+                        <use href="#U"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-u')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- U' Move -->
+            <div class="demo-card">
+                <h3>U' - Up Counter-Clockwise</h3>
+                <p>The arrow slides right</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-u-prime">
+                        <use href="#U-prime"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-u-prime')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- D Move -->
+            <div class="demo-card">
+                <h3>D - Down Clockwise</h3>
+                <p>The arrow slides right (clockwise from below)</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-d">
+                        <use href="#D"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-d')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- D' Move -->
+            <div class="demo-card">
+                <h3>D' - Down Counter-Clockwise</h3>
+                <p>The arrow slides left</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-d-prime">
+                        <use href="#D-prime"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-d-prime')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- F Move -->
+            <div class="demo-card">
+                <h3>F - Front Clockwise</h3>
+                <p>The arc pulses to show rotation</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-f">
+                        <use href="#F"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-f')">
+                    Animation ON
+                </button>
+            </div>
+
+            <!-- F' Move -->
+            <div class="demo-card">
+                <h3>F' - Front Counter-Clockwise</h3>
+                <p>The arc pulses in reverse direction</p>
+                <div class="icon-display">
+                    <svg width="80" height="90" class="animate-f-prime">
+                        <use href="#F-prime"/>
+                    </svg>
+                </div>
+                <button class="toggle-button active" onclick="toggleAnimation(this, 'animate-f-prime')">
+                    Animation ON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SVG Symbol Definitions -->
+    <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <!-- R Move -->
+            <symbol id="R" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">R</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="32" y1="32.5" x2="32" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="52" y1="32.5" x2="52" y2="73.5" stroke="black" stroke-width="3" />
+                <polygon class="arrow-up" points="52,28 46,38 58,38" fill="black" />
+            </symbol>
+
+            <!-- R' Move -->
+            <symbol id="R-prime" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">R'</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="32" y1="32.5" x2="32" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="52" y1="32.5" x2="52" y2="73.5" stroke="black" stroke-width="3" />
+                <polygon class="arrow-down" points="52,76 46,66 58,66" fill="black" />
+            </symbol>
+
+            <!-- L Move -->
+            <symbol id="L" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">L</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="32" y1="32.5" x2="32" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="52" y1="32.5" x2="52" y2="73.5" stroke="black" stroke-width="3" />
+                <polygon class="arrow-down" points="12,76 6,66 18,66" fill="black" />
+            </symbol>
+
+            <!-- L' Move -->
+            <symbol id="L-prime" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">L'</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="12" y1="32.5" x2="12" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="32" y1="32.5" x2="32" y2="73.5" stroke="black" stroke-width="3" />
+                <line x1="52" y1="32.5" x2="52" y2="73.5" stroke="black" stroke-width="3" />
+                <polygon class="arrow-up" points="12,28 6,38 18,38" fill="black" />
+            </symbol>
+
+            <!-- U Move -->
+            <symbol id="U" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">U</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="53" x2="53.5" y2="53" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="72" x2="53.5" y2="72" stroke="black" stroke-width="3" />
+                <polygon class="arrow-left" points="8,34 18,28 18,40" fill="black" />
+            </symbol>
+
+            <!-- U' Move -->
+            <symbol id="U-prime" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">U'</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="53" x2="53.5" y2="53" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="72" x2="53.5" y2="72" stroke="black" stroke-width="3" />
+                <polygon class="arrow-right" points="56,34 46,28 46,40" fill="black" />
+            </symbol>
+
+            <!-- D Move -->
+            <symbol id="D" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">D</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="53" x2="53.5" y2="53" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="72" x2="53.5" y2="72" stroke="black" stroke-width="3" />
+                <polygon class="arrow-right" points="56,72 46,66 46,78" fill="black" />
+            </symbol>
+
+            <!-- D' Move -->
+            <symbol id="D-prime" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">D'</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <line x1="10.5" y1="34" x2="53.5" y2="34" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="53" x2="53.5" y2="53" stroke="black" stroke-width="3" />
+                <line x1="10.5" y1="72" x2="53.5" y2="72" stroke="black" stroke-width="3" />
+                <polygon class="arrow-left" points="8,72 18,66 18,78" fill="black" />
+            </symbol>
+
+            <!-- F Move -->
+            <symbol id="F" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">F</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <path class="rotation-arc" d="M 32 70.92 A 17.92 17.92 0 1 1 49.92 53" stroke="black" stroke-width="3" fill="none" />
+                <polygon points="49,63 43,53 55,53" fill="black" />
+            </symbol>
+
+            <!-- F' Move -->
+            <symbol id="F-prime" viewBox="0 0 64 90">
+                <text x="32" y="13" font-size="26" text-anchor="middle" dominant-baseline="middle">F'</text>
+                <rect x="1" y="22" width="62" height="62" rx="5" ry="5" fill="white" stroke="black" stroke-width="2"/>
+                <line x1="21.333" y1="23" x2="21.333" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="42.667" y1="23" x2="42.667" y2="83" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="43.333" x2="62" y2="43.333" stroke="lightgray" stroke-width="0.1" />
+                <line x1="2" y1="64.667" x2="62" y2="64.667" stroke="lightgray" stroke-width="0.1" />
+                <path class="rotation-arc" d="M 32 70.92 A 17.92 17.92 0 1 0 14.08 53" stroke="black" stroke-width="3" fill="none" />
+                <polygon points="15,63 9,53 21,53" fill="black" />
+            </symbol>
+        </defs>
+    </svg>
+
+    <script>
+        function toggleAnimation(button, className) {
+            const svg = button.parentElement.querySelector('svg');
+            svg.classList.toggle(className);
+            
+            if (svg.classList.contains(className)) {
+                button.textContent = 'Animation ON';
+                button.classList.add('active');
+            } else {
+                button.textContent = 'Animation OFF';
+                button.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
