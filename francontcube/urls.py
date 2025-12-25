@@ -1,4 +1,6 @@
 from django.urls import path
+#from francontcube.views.cfop.f2l import cfop, cfop_f2l_basic
+
 from . import views
 
 app_name = "francontcube"
@@ -42,6 +44,20 @@ urlpatterns = [
     path('methods/beginner/corner-permutation/', views.beginner_corner_permutation, name='beginner_corner_permutation'),
     path('methods/beginner/edge-permutation/', views.beginner_edge_permutation, name='beginner_edge_permutation'),
     
+    # ============================================================
+    # CFOP METHOD
+    # ============================================================
+    path('methods/cfop/', views.method_cfop, name='method_cfop'),
+    #path('methods/cfop/', cfop, name='method_cfop'),  # ← Use imported cfop directly
+    path('methods/cfop/about/', views.cfop_about, name='cfop_about'),
+    path('methods/cfop/cross/', views.cfop_cross, name='cfop_cross'),
+    path('methods/cfop/f2l/', views.cfop_f2l, name='cfop_f2l'),
+    path('methods/cfop/f2l/basic/', views.cfop_f2l_basic, name='cfop_f2l_basic'),
+
+    #path('methods/cfop/f2l/basic/', cfop_f2l_basic, name='cfop_f2l_basic'),  # ← Use imported function
+    path('methods/cfop/oll/', views.cfop_oll, name='cfop_oll'),
+    path('methods/cfop/pll/', views.cfop_pll, name='cfop_pll'),
+
     # ============================================================
     # OTHER METHODS (legacy - to be migrated)
     # ============================================================

@@ -129,7 +129,7 @@ class StepView:
         method_urls = {
             'Apprenti Cubi': 'francontcube:method_cubienewbie',
             'Débutant': 'francontcube:method_beginner',
-            'CFOP': 'francontcube:method_cfop',
+            'CFOP': 'francontcube:method_cfop',  # ← AJOUTER
             'Roux': 'francontcube:method_roux',
         }
         

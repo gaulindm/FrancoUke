@@ -1,0 +1,185 @@
+{% extends "francontcube/partials/base.html" %}
+{% load cube_filters %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary mb-3">
+            <i class="bi bi-lightning-charge"></i> {{ method_name }}
+        </h1>
+        <p class="lead text-muted">{{ method_description }}</p>
+        
+        <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
+            <span class="badge bg-danger fs-6 px-3 py-2">
+                <i class="bi bi-bar-chart-fill"></i> {{ difficulty }}
+            </span>
+            <span class="badge bg-info fs-6 px-3 py-2">
+                <i class="bi bi-clock"></i> {{ estimated_time }}
+            </span>
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                <i class="bi bi-list-ol"></i> {{ total_steps }} étapes
+            </span>
+            <span class="badge bg-success fs-6 px-3 py-2">
+                <i class="bi bi-braces"></i> {{ algorithms_count }}
+            </span>
+        </div>
+    </div>
+    
+    <!-- What is CFOP? -->
+    <div class="alert alert-primary mb-5" role="alert">
+        <h4 class="alert-heading"><i class="bi bi-info-circle"></i> Qu'est-ce que CFOP ?</h4>
+        <p class="mb-0">
+            CFOP (Cross, F2L, OLL, PLL) est la méthode de speedcubing la plus populaire au monde. 
+            Utilisée par la majorité des speedcubers professionnels, elle permet d'atteindre des temps 
+            de résolution extrêmement rapides (sous 10 secondes pour les experts). Cette méthode nécessite 
+            l'apprentissage de 78+ algorithmes mais offre une efficacité inégalée.
+        </p>
+    </div>
+    <div class="moves-preview">
+        {{ cube_state.algorithm|parse_algorithm }}
+    </div>
+    <!-- Steps List -->
+    <div class="row g-4">
+        {% for step in steps %}
+        <div class="col-12">
+            <div class="card shadow-sm h-100 {% if not step.available %}opacity-50{% endif %}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <!-- Icon -->
+                        <div class="col-auto">
+                            <div class="text-center">
+                                <i class="{{ step.icon }} display-4 {% if step.step_number %}text-primary{% else %}text-secondary{% endif %}"></i>
+                                {% if step.step_number %}
+                                    <div class="badge bg-primary mt-2">Étape {{ step.step_number }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="col">
+                            <h3 class="card-title mb-2">{{ step.name }}</h3>
+                            <p class="card-text text-muted mb-0">{{ step.desc }}</p>
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <div class="col-auto">
+                            {% if step.available %}
+                                <a href="{{ step.url }}" class="btn btn-primary btn-lg">
+                                    {% if step.step_number %}
+                                        Apprendre <i class="bi bi-arrow-right"></i>
+                                    {% else %}
+                                        En savoir plus <i class="bi bi-arrow-right"></i>
+                                    {% endif %}
+                                </a>
+                            {% else %}
+                                <button class="btn btn-secondary btn-lg" disabled>
+                                    Bientôt disponible
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Prerequisites Warning -->
+    <div class="alert alert-warning mt-5" role="alert">
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Prérequis</h5>
+        <p class="mb-0">
+            <strong>CFOP est une méthode avancée.</strong> Nous recommandons de maîtriser d'abord la 
+            <a href="{% url 'francontcube:method_beginner' %}" class="alert-link">méthode débutant</a> 
+            avant de vous lancer dans CFOP. Vous devriez être capable de résoudre le cube de manière 
+            intuitive et confortable avant d'apprendre les nombreux algorithmes de cette méthode.
+        </p>
+    </div>
+    
+    <!-- Comparison with other methods -->
+    <div class="card mt-5 bg-light">
+        <div class="card-body">
+            <h4 class="card-title mb-4"><i class="bi bi-graph-up"></i> Pourquoi choisir CFOP ?</h4>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h5 class="text-success"><i class="bi bi-check-circle"></i> Avantages</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-arrow-right text-success"></i> <strong>La plus rapide :</strong> Permet des temps sous 10 secondes</li>
+                        <li class="mb-2"><i class="bi bi-arrow-right text-success"></i> <strong>Ressources abondantes :</strong> Tutoriels et communauté énorme</li>
+                        <li class="mb-2"><i class="bi bi-arrow-right text-success"></i> <strong>Ergonomique :</strong> Mouvements fluides et rapides</li>
+                        <li class="mb-2"><i class="bi bi-arrow-right text-success"></i> <strong>Évolutive :</strong> Apprenez progressivement (2-look OLL/PLL d'abord)</li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <h5 class="text-warning"><i class="bi bi-exclamation-circle"></i> Défis</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-arrow-right text-warning"></i> <strong>Nombreux algorithmes :</strong> 78+ à mémoriser</li>
+                        <li class="mb-2"><i class="bi bi-arrow-right text-warning"></i> <strong>Temps d'apprentissage :</strong> Plusieurs semaines/mois</li>
+                        <li class="mb-2"><i class="bi bi-arrow-right text-warning"></i> <strong>Mémorisation :</strong> Requiert de la discipline</li>
+                        <li class="mb-2"><i class="bi bi-arrow-right text-warning"></i> <strong>Pratique intensive :</strong> Nécessite beaucoup de répétition</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Learning Path -->
+    <div class="card mt-5 border-primary">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-map"></i> Parcours d'apprentissage recommandé</h4>
+        </div>
+        <div class="card-body">
+            <ol class="mb-0">
+                <li class="mb-3">
+                    <strong>Maîtrisez la méthode débutant</strong> - Soyez capable de résoudre le cube intuitivement
+                </li>
+                <li class="mb-3">
+                    <strong>Apprenez la Cross efficace</strong> - Visez moins de 8 mouvements
+                </li>
+                <li class="mb-3">
+                    <strong>Pratiquez F2L intuitif</strong> - Comprenez les paires avant d'apprendre les algorithmes
+                </li>
+                <li class="mb-3">
+                    <strong>2-look OLL et 2-look PLL</strong> - Apprenez d'abord 10 algorithmes de base
+                </li>
+                <li class="mb-0">
+                    <strong>Full OLL et Full PLL</strong> - Progressez vers les 78 algorithmes complets
+                </li>
+            </ol>
+        </div>
+    </div>
+    
+    <!-- Back to methods -->
+    <div class="text-center mt-5">
+        <a href="{% url 'francontcube:home' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left"></i> Retour aux méthodes
+        </a>
+    </div>
+</div>
+
+<style>
+    .display-4 {
+        font-size: 3rem;
+    }
+    
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover:not(.opacity-50) {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+    
+    .alert a {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

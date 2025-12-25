@@ -55,15 +55,19 @@ from .beginner.corner_permutation import corner_permutation as beginner_corner_p
 from .beginner.edge_permutation import edge_permutation as beginner_edge_permutation
 from .beginner.about import about as beginner_about
 
+# ============================================================
+# CFOP METHOD
+# ============================================================
+from .cfop.main import method_cfop
+from .cfop.about import about as cfop_about
+from .cfop.cross import cross as cfop_cross
+from .cfop.f2l import cfop, cfop_f2l_basic  # ← Add this line
+from .cfop.f2l import f2l as cfop_f2l
+from .cfop.oll import oll as cfop_oll
+from .cfop.pll import pll as cfop_pll
 
 
 
-# Add imports here as you implement other methods:
-# from .cfop.main import method_cfop
-# from .cfop.cross import cfop_cross
-# from .cfop.f2l import cfop_f2l
-# from .cfop.oll import cfop_oll
-# from .cfop.pll import cfop_pll
 
 # ============================================================
 # EXPORTS
@@ -94,11 +98,14 @@ __all__ = [
     'yellow_face',
     'corner_permutation',
     'edge_permutation',
-    
-    # Other methods (add as implemented)
-    # 'method_cfop',
-    # 'cfop_cross',
-    # 'cfop_f2l',
-    # 'cfop_oll',
-    # 'cfop_pll',
+
+        # CFOP
+    'method_cfop',
+    'cfop_about',
+    'cfop_cross',
+    'cfop',                # ← Add this
+    'cfop_f2l_basic',      # ← Add this
+    'cfop_f2l',
+    'cfop_oll',
+    'cfop_pll',
 ]

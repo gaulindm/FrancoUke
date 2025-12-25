@@ -1,5 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
+import json  # ← Add this line
+from django.utils.safestring import mark_safe  # ← Add this line
+
 
 
 class CubeState(models.Model):
@@ -27,6 +30,21 @@ class CubeState(models.Model):
         choices=METHOD_CHOICES,
         default="beginner",
     )
+
+    def get_algorithm_svg(self):
+            """Generate SVG icons from algorithm string"""
+            if not self.algorithm or self.algorithm.strip() == '':
+                return ''
+            
+            moves = self.algorithm.strip().split()
+            svg_list = []
+            
+            for move in moves:
+                svg_id = move.replace("'", "-prime").replace("2", "2")
+                svg_list.append(f'<svg class="move-icon"><use href="#{svg_id}"/></svg>')
+            
+            return mark_safe('\n                            '.join(svg_list))
+    
 
     def save(self, *args, **kwargs):
         if not self.slug:

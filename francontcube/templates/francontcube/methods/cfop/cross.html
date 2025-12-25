@@ -1,0 +1,49 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>Étape {{ step_number }}: {{ step_name }}</h1>
+    
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        <strong>Étape CFOP {{ step_number }}/4</strong> - Cross
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Introduction</h2>
+            <p>
+                La croix est la première étape de CFOP. L'objectif est de résoudre
+                la croix blanche en bas de manière efficace (idéalement en moins de 8 mouvements)
+                tout en planifiant les paires F2L.
+            </p>
+            
+            <!-- Votre contenu ici -->
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Cube states, tips, etc. -->
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between mt-4">
+        {% if prev_step %}
+            <a href="{% url prev_step %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Étape précédente
+            </a>
+        {% else %}
+            <a href="{% url 'francontcube:method_cfop' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-list"></i> Vue d'ensemble
+            </a>
+        {% endif %}
+        
+        {% if next_step %}
+            <a href="{% url next_step %}" class="btn btn-primary">
+                Étape suivante <i class="bi bi-arrow-right"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

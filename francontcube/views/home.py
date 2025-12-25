@@ -47,8 +47,8 @@ def home(request):
             'desc': 'Méthode avancée : Cross, F2L, OLL, PLL',
             'icon': 'bi-lightning',
             'logo': None,
-            'url': '/francontcube/methods/beginner/',
-            'available': False,
+            'url': '/francontcube/methods/cfop/',
+            'available': True,
         },
         {
             'name': 'Algorithmes',
