@@ -54,6 +54,7 @@ urlpatterns = [
     path('methods/cfop/f2l/', views.cfop_f2l, name='cfop_f2l'),
     path('methods/cfop/f2l/basic/', views.cfop_f2l_basic, name='cfop_f2l_basic'),
 
+
     #path('methods/cfop/f2l/basic/', cfop_f2l_basic, name='cfop_f2l_basic'),  # ← Use imported function
     path('methods/cfop/oll/', views.cfop_oll, name='cfop_oll'),
     path('methods/cfop/pll/', views.cfop_pll, name='cfop_pll'),

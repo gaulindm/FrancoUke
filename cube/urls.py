@@ -12,6 +12,7 @@ urlpatterns = [
     path("sequence/", views.browser, name="sequence"),
     path("demo-backend-cube/", views.demo_backend_cube, name="demo_backend_cube"),
     path("demo-backend-svg/", views.demo_backend_svg, name="demo_backend_svg"),  # NEW
+    path('f2l/<slug:slug>/', views.f2l_case_detail, name='f2l_case_detail'),
 
     path("demo-daisy/", views.demo_daisy, name="demo_daisy"),
 

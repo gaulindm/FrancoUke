@@ -21,7 +21,7 @@ class SiteContextMixin:
         elif site_name == "StrumSphere":
             return "base_strumsphere.html"
         elif site_name == "Uke4ia":
-            return "base_uke4ia.html"
+            return "uke4ia/base.html"
         return "base.html"  # fallback
 
     def get_context_data(self, **kwargs):

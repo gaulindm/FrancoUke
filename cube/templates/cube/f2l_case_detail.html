@@ -1,0 +1,156 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}{{ cube_state.name }} - Détails{% endblock %}
+
+{% block content %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script src="{% static 'js/roofpig_and_three.min.js' %}"></script>
+
+
+<style>
+    .roofpig-container {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+    
+    .roofpig {
+        margin: 0 auto;
+    }
+</style>
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary">
+            <i class="bi bi-puzzle"></i> {{ cube_state.name }}
+        </h1>
+        <p class="lead text-muted">{{ cube_state.description }}</p>
+    </div>
+
+    <!-- Roofpig 3D Animation -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-play-circle"></i> Animation 3D</h4>
+        </div>
+        <div class="card-body">
+            <div class="roofpig-container">
+                <div class="roofpig" 
+                     data-config="{{ roofpig_config }}"
+                     style="width: 400px; height: 500px;">
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i> 
+                <strong>Contrôles:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Cliquez sur les boutons sous le cube pour jouer/pause l'animation</li>
+                    <li>Utilisez la souris pour faire pivoter le cube en 3D (hover=2)</li>
+                    <li>L'algorithme s'affiche automatiquement avec les mouvements</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Algorithm Details -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="bi bi-code-square"></i> Algorithme</h4>
+        </div>
+        <div class="card-body">
+            <!-- Move Icons -->
+            <div class="moves-preview d-flex flex-wrap gap-2 justify-content-center p-3 bg-light rounded mb-3">
+                {{ cube_state.get_algorithm_svg }}
+            </div>
+            
+            <!-- Algorithm Text -->
+            <div class="text-center">
+                <code class="fs-4 text-primary fw-bold p-3 bg-light rounded d-inline-block">
+                    {{ cube_state.algorithm }}
+                </code>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Information (if present) -->
+    {% if cube_state.roofpig_setup %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning">
+            <h4 class="mb-0"><i class="bi bi-gear"></i> Setup (Position de départ)</h4>
+        </div>
+        <div class="card-body">
+            <p class="mb-2">Pour arriver à cette configuration:</p>
+            <code class="fs-5">{{ cube_state.roofpig_setup }}</code>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Description & Tips -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0"><i class="bi bi-lightbulb"></i> Explication</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">{{ cube_state.description }}</p>
+            
+            <div class="alert alert-light mt-3">
+                <h5 class="alert-heading">💡 Conseils pour ce cas:</h5>
+                <ul class="mb-0">
+                    <li>Regardez attentivement la position de départ des pièces</li>
+                    <li>Suivez l'animation plusieurs fois pour comprendre le mouvement</li>
+                    <li>Pratiquez lentement au début, puis augmentez la vitesse</li>
+                    <li>Essayez de faire le miroir (main gauche) si c'est un cas à droite</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Cases (Optional - you can expand this) -->
+    <div class="card shadow-sm mb-4 border-secondary">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0"><i class="bi bi-collection"></i> Informations</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Méthode:</strong> {{ cube_state.get_method_display }}
+                </div>
+                <div class="col-md-6">
+                    <strong>Numéro de cas:</strong> #{{ cube_state.step_number }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="text-center mt-5">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg me-2">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        <a href="{% url 'francontcube:cfop_f2l_basic' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-grid"></i> Tous les cas F2L
+        </a>
+    </div>
+</div>
+
+<style>
+    .move-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Include SVG move icons -->
+{% include "cube/partials/_cube_svg.html" %}
+{% endblock %}

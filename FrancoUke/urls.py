@@ -40,6 +40,7 @@ urlpatterns = [
     #nouvel application pour le site francontcube
     path("francontcube/", include("francontcube.urls")),
 
+    path('cube/', include('cube.urls')),  # ← Ajouter cette ligne
 
 ]
 

@@ -99,7 +99,7 @@ def cfop(request):
 def cfop_f2l_basic(request):
     """Display the first 4 basic F2L cases"""
     
-    slugs = ['f2l1', 'f2l2', 'f2l3', 'f2l4']
+    slugs = ['f2l-01', 'f2l-02', 'f2l-03', 'f2l-04','f2l-05', 'f2l-06']
     cube_states = OrderedDict()
     
     for slug in slugs:
@@ -137,3 +137,4 @@ def cfop_f2l_basic(request):
     print(f"cube_states_json in context: {'cube_states_json' in context}")  # Debug
     
     return render(request, 'francontcube/methods/cfop/f2l_basic.html', context)
+

@@ -65,9 +65,14 @@
                         </div>
                         
                         <div class="card-footer text-center bg-light">
-                            <button class="btn btn-outline-primary btn-sm" onclick="practiceCase('{{ slug }}')">
-                                <i class="bi bi-play-circle"></i> Pratiquer ce cas
-                            </button>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'cube:f2l_case_detail' slug=slug %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-info-circle"></i> Détails & Animation
+                                </a>
+                                <button class="btn btn-outline-primary btn-sm" onclick="practiceCase('{{ slug }}')">
+                                    <i class="bi bi-play-circle"></i> Pratiquer
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

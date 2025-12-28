@@ -18,7 +18,7 @@ class CubeStateAdminForm(forms.ModelForm):
 @admin.register(CubeState)
 class CubeStateAdmin(admin.ModelAdmin):
     form = CubeStateAdminForm
-    list_display = ("name", "method", "step_number")
+    list_display = ("name", "algorithm", "method", "step_number")
     list_filter = ("method",)
     search_fields = ("name", "description", "algorithm")
     ordering = ("method", "step_number")

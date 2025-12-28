@@ -78,3 +78,18 @@ def demo_daisy(request):
     return render(request, "cube/demo_daisy.html", {
         "json_state": daisy.json_state
     })
+
+
+def f2l_case_detail(request, slug):
+    """
+    Display detailed view of a single F2L case with Roofpig animation
+    """
+    cube_state = get_object_or_404(CubeState, slug=slug, method='cfop')
+    
+    context = {
+        'cube_state': cube_state,
+        'page_title': cube_state.name,
+        'roofpig_config': cube_state.get_roofpig_config(),
+    }
+    
+    return render(request, 'cube/f2l_case_detail.html', context)

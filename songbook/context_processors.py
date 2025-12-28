@@ -6,7 +6,7 @@ def site_context(request):
     site_map = {
         "francouke":  ("FrancoUke", "base_francouke.html"),
         "strumsphere": ("StrumSphere", "base_strumsphere.html"),
-        "uke4ia":     ("Uke4ia", "base_uke4ia.html"),
+        "uke4ia":     ("Uke4ia", "uke4ia/base.html"),
     }
 
     default_site = ("StrumSphere", "base_strumsphere.html")
