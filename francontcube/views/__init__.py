@@ -61,12 +61,12 @@ from .beginner.about import about as beginner_about
 from .cfop.main import method_cfop
 from .cfop.about import about as cfop_about
 from .cfop.cross import cross as cfop_cross
-from .cfop.f2l import cfop, cfop_f2l_basic  # ← Add this line
-from .cfop.f2l import f2l as cfop_f2l
+#from .cfop.f2l import f2l as cfop_f2l
 from .cfop.oll import oll as cfop_oll
 from .cfop.pll import pll as cfop_pll
 
-
+#from .cfop.f2l import cfop_f2l_basic
+from .cfop.f2l import cfop, cfop_f2l_basic  # ← Ajouter cfop ici
 
 
 # ============================================================
@@ -105,7 +105,6 @@ __all__ = [
     'cfop_cross',
     'cfop',                # ← Add this
     'cfop_f2l_basic',      # ← Add this
-    'cfop_f2l',
     'cfop_oll',
     'cfop_pll',
 ]

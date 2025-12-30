@@ -1,5 +1,5 @@
 from django.urls import path
-#from francontcube.views.cfop.f2l import cfop, cfop_f2l_basic
+from francontcube.views.cfop.f2l import cfop, cfop_f2l_basic
 
 from . import views
 
@@ -51,9 +51,9 @@ urlpatterns = [
     #path('methods/cfop/', cfop, name='method_cfop'),  # ← Use imported cfop directly
     path('methods/cfop/about/', views.cfop_about, name='cfop_about'),
     path('methods/cfop/cross/', views.cfop_cross, name='cfop_cross'),
-    path('methods/cfop/f2l/', views.cfop_f2l, name='cfop_f2l'),
+    #path('methods/cfop/f2l/', views.cfop_f2l, name='cfop_f2l'),
     path('methods/cfop/f2l/basic/', views.cfop_f2l_basic, name='cfop_f2l_basic'),
-
+    path('methods/cfop/f2l/<str:category>/', cfop_f2l_basic, name='cfop_f2l_category'),  # Filtered by category
 
     #path('methods/cfop/f2l/basic/', cfop_f2l_basic, name='cfop_f2l_basic'),  # ← Use imported function
     path('methods/cfop/oll/', views.cfop_oll, name='cfop_oll'),

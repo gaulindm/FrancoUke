@@ -13,6 +13,12 @@ class CubeState(models.Model):
         ("roux", "Roux"),
         ("zz", "ZZ"),
     ]
+    
+    DIFFICULTY_CHOICES = [
+        ('facile', 'Facile'),
+        ('moyen', 'Moyen'),
+        ('difficile', 'Difficile'),
+    ]
 
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
@@ -29,6 +35,19 @@ class CubeState(models.Model):
         max_length=20,
         choices=METHOD_CHOICES,
         default="beginner",
+    )
+    
+    # Category and difficulty
+    category = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Category/group for filtering (e.g., 'basic', 'corner-right-edge-right')"
+    )
+    difficulty = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=DIFFICULTY_CHOICES,
+        help_text="Difficulty level of the case"
     )
     
     # Roofpig configuration fields
