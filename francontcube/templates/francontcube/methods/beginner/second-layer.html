@@ -44,11 +44,7 @@
         </p>
 
         <div class="row mt-3">
-            <div class="col-md-6 text-center mb-3">
-                <h5>Avant : Première couche complète</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">Face blanche terminée</small></p>
-            </div>
+
             <div class="col-md-6 text-center mb-3">
                 <h5>Après : Deux couches complètes</h5>
                 <div id="cube-goal" class="cube-small"></div>
@@ -108,17 +104,16 @@
                     <div class="col-md-8">
                         <div class="text-center p-3 bg-white rounded border border-success border-2">
                             <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                            <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                            <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
+                                <svg class="move-icon"><use href="#U-prime"/></svg>
+                                <svg class="move-icon"><use href="#L-prime"/></svg>
+                                <svg class="move-icon"><use href="#U"/></svg>
+                                <svg class="move-icon"><use href="#L"/></svg>
+                                <svg class="move-icon"><use href="#U"/></svg>
+                                <svg class="move-icon"><use href="#R"/></svg>
+                                <svg class="move-icon"><use href="#U-prime"/></svg>
+                                <svg class="move-icon"><use href="#R-prime"/></svg>
                         </div>
-                            <p class="mt-2 mb-0"><small>L'arête descend dans le slot de droite</small></p>
+                            <p class="mt-2 mb-0"><small>Tenir le cube avec le pouce droit sur la face de droite pour les 4 premiers mouvements ensuite reprendre la position orignale pour les 4 derniers</small></p>
                     </div>
                 </div>
             </div>
@@ -138,15 +133,15 @@
                     
                     <div class="text-center p-3 bg-white rounded border border-success border-2">
                             <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
-                            <svg class="move-icon"><use href="#R"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
                             <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
+                            <svg class="move-icon"><use href="#L-prime"/></svg>
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#L"/></svg>
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#F"/></svg>
                             <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
+                            <svg class="move-icon"><use href="#F-prime"/></svg>
+                            
                         </div>
                         
                         <p class="mt-2 mb-0"><small>L'arête descend dans le slot de gauche</small></p>
@@ -267,13 +262,13 @@
 
     <!-- Bouton de navigation -->
     <div class="text-center">
-        <a href="{% url 'francontcube:bottom_corners' %}" class="btn btn-outline-primary">
+        <a href="{% url 'francontcube:beginner_bottom_corners' %}" class="btn btn-outline-primary">
             ← Retour : Les coins blancs
         </a>
         <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
             Vue d'ensemble
         </a>
-        <a href="{% url 'francontcube:yellow_cross' %}" class="btn btn-success ms-2">
+        <a href="{% url 'francontcube:beginner_yellow_cross' %}" class="btn btn-success ms-2">
             Étape suivante : La croix jaune →
         </a>
     </div>
@@ -338,7 +333,6 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     // Mount all cubes
-    mountCube("cube-before", {{ before_state|safe }});
     mountCube("cube-goal", {{ goal_state|safe }});
     
     // Algorithm cases

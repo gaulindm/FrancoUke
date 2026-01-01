@@ -16,7 +16,9 @@ class SecondLayerView(StepView):
     Just define the configuration and you're done!
     """
     
-    template_name = "francontcube/methods/cubienewbie/second-layer.html"
+    template_name = "francontcube/methods/beginner/second-layer.html"
+    method_name = "Débutant"
+
     step_name = "Couche du milieu"
     step_icon = "flower3"
     

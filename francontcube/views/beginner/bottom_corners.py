@@ -17,6 +17,7 @@ class BottomCornersView(StepView):
     """
     
     template_name = "francontcube/methods/beginner/bottom-corners.html"
+    method_name = "Débutant"
     step_name = "Coins inferieurs"
     step_icon = "flower3"
     
