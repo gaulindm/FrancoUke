@@ -1,42 +1,41 @@
+# users/models.py - APRÈS (correct)
+import uuid
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User, AbstractUser
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser  # ← Vérifie que c'est là!
 
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
 
     def __str__(self):
-        # Prefer full name if available, fallback to username
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}".strip()
         return self.username
-        
 
-@receiver(post_save, sender=User)
+
+# ✅ Utilise settings.AUTH_USER_MODEL au lieu de User
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_preference(sender, instance, created, **kwargs):
     if created:
         UserPreference.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_user_preference(sender, instance, **kwargs):
-    instance.userpreference.save()
+    if hasattr(instance, 'userpreference'):
+        instance.userpreference.save()
 
-class Profile(models.Model):
-        #user = models.OntonOneField(User, on_delete=models.CASCADE)
-        # Opted to not have pics on FrancoUKe but keeping Profile class for future implementation of bio
-        # part 8: https://www.youtube.com/watch?v=FdVuKt_iuSI
-        #image = models.ImageField(default='default.jpg',upload_to='profile_pics')
 
-        def __str__(self):
-                return f'{self.username} Profile'
-        
 
 class UserPreference(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='userpreference')
-    transpose_value = models.IntegerField(default=0)  # e.g., semiton
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='userpreference'
+    )
+    transpose_value = models.IntegerField(default=0)
     primary_instrument = models.CharField(
         max_length=20,
         choices=[
@@ -59,19 +58,14 @@ class UserPreference(models.Model):
             ("banjo", "Banjo"),
             ("mandolin", "Mandolin"),
         ],
-        default=None,  # No secondary instrument by default
         null=True,
-        blank=True  # Allows the field to be optional
+        blank=True
     )
     is_lefty = models.BooleanField(default=False)
     is_printing_alternate_chord = models.BooleanField(default=False)
     known_chords = models.JSONField(default=list, blank=True)
     use_known_chord_filter = models.BooleanField(default=False)
 
-
-
-
-
     def __str__(self):
         sec = f", Secondary: {self.secondary_instrument}" if self.secondary_instrument else ""
-        return f"{self.primary_instrument}{sec} - Lefty: {self.is_lefty}, Alt Chords: {self.is_printing_alternate_chord}"
+        return f"{self.user.username} - {self.primary_instrument}{sec}"

@@ -1,37 +1,220 @@
-{% extends "base.html" %}
+{% extends "base_strumsphere.html" %}
+{% load static %}
+{% load site_urls %}
+
 {% block content %}
-    <h1 class="mb-3">Songs added by {{ view.kwargs.username}} ({{ page_obj.paginator.count}})</h1>
-    {% for song in songs %}
-        <article class="media content-section">
-            <div class="media-body">
-            <div class="article-metadata">
-                <a class="mr-2" href="{% url 'user-songs' song.contributor.username %}">{{ song.contributor }}</a>
-                <small class="text-muted">{{ song.date_posted|date:"F d, Y" }}</small>
+<div class="container">
+    
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h1 class="mb-2">
+                        <i class="bi bi-person-circle me-2"></i>
+                        {% if site_name == "FrancoUke" %}
+                            Chansons de {{ view.kwargs.username }}
+                        {% else %}
+                            Songs by {{ view.kwargs.username }}
+                        {% endif %}
+                    </h1>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-music-note-list me-1"></i>
+                        {% if site_name == "FrancoUke" %}
+                            {{ page_obj.paginator.count }} chanson{{ page_obj.paginator.count|pluralize }} contribuée{{ page_obj.paginator.count|pluralize }}
+                        {% else %}
+                            {{ page_obj.paginator.count }} song{{ page_obj.paginator.count|pluralize }} contributed
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <!-- Back to all songs button -->
+                <div>
+                    <a href="{% url 'songbook:song_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        {% if site_name == "FrancoUke" %} Toutes les chansons {% else %} All Songs {% endif %}
+                    </a>
+                </div>
             </div>
-            <h2><a class="article-title" href="{% url 'song-detail' song.id%}">{{ song.songTitle }}</a></h2>
-            <p class="article-content">{{ song.songChordPro }}</p>
-            </div>
-        </article>
-    {% endfor %}
-    {% if is_paginated %}
+            <hr class="mt-3">
+        </div>
+    </div>
 
-      {% if page_obj.has_previous %}
-        <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
-        <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-      {% endif %}
-
-      {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-          <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-          <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
-        {% endif %}
-      {% endfor %}
-
-      {% if page_obj.has_next %}
-        <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
-        <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-      {% endif %}
-
+    <!-- Songs Grid/List -->
+    {% if songs %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+            {% for song in songs %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm hover-card">
+                        <div class="card-body">
+                            <!-- Song Title -->
+                            <h5 class="card-title">
+                                <a href="{% url 'song-detail' song.id %}" class="text-decoration-none text-dark">
+                                    {{ song.songTitle }}
+                                </a>
+                            </h5>
+                            
+                            <!-- Artist (if available) -->
+                            {% if song.songArtist %}
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    <i class="bi bi-mic me-1"></i>{{ song.songArtist }}
+                                </h6>
+                            {% endif %}
+                            
+                            <!-- Metadata -->
+                            <div class="small text-muted mb-3">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                {{ song.date_posted|date:"M d, Y" }}
+                            </div>
+                            
+                            <!-- Preview of ChordPro (first 100 chars) -->
+                            {% if song.songChordPro %}
+                                <p class="card-text text-muted small font-monospace" 
+                                   style="max-height: 3rem; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ song.songChordPro|truncatewords:15 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Card Footer with Actions -->
+                        <div class="card-footer bg-transparent border-top-0">
+                            <a href="{% url 'song-detail' song.id %}" class="btn btn-sm btn-primary w-100">
+                                <i class="bi bi-eye me-1"></i>
+                                {% if site_name == "FrancoUke" %} Voir la chanson {% else %} View Song {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- No songs message -->
+        <div class="alert alert-info text-center py-5" role="alert">
+            <i class="bi bi-music-note-list" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">
+                {% if site_name == "FrancoUke" %}
+                    Aucune chanson pour l'instant
+                {% else %}
+                    No songs yet
+                {% endif %}
+            </h4>
+            <p class="mb-0">
+                {% if site_name == "FrancoUke" %}
+                    {{ view.kwargs.username }} n'a pas encore contribué de chansons.
+                {% else %}
+                    {{ view.kwargs.username }} hasn't contributed any songs yet.
+                {% endif %}
+            </p>
+        </div>
     {% endif %}
+
+    <!-- Pagination (Bootstrap 5 Modern Style) -->
+    {% if is_paginated %}
+        <nav aria-label="{% if site_name == 'FrancoUke' %}Pagination des chansons{% else %}Song pagination{% endif %}" class="mt-4">
+            <ul class="pagination pagination-lg justify-content-center flex-wrap">
+                
+                <!-- First Page -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" 
+                           aria-label="{% if site_name == 'FrancoUke' %}Première{% else %}First{% endif %}">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" 
+                           aria-label="{% if site_name == 'FrancoUke' %}Précédente{% else %}Previous{% endif %}">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;&laquo;</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;</span>
+                    </li>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Last Page -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" 
+                           aria-label="{% if site_name == 'FrancoUke' %}Suivante{% else %}Next{% endif %}">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" 
+                           aria-label="{% if site_name == 'FrancoUke' %}Dernière{% else %}Last{% endif %}">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;&raquo;</span>
+                    </li>
+                {% endif %}
+            </ul>
+            
+            <!-- Page Info -->
+            <p class="text-center text-muted small mt-2">
+                {% if site_name == "FrancoUke" %}
+                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                {% else %}
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                {% endif %}
+            </p>
+        </nav>
+    {% endif %}
+
+</div>
+
+<!-- Custom CSS for hover effects -->
+<style>
+.hover-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-title a:hover {
+    color: var(--bs-primary) !important;
+}
+
+/* Responsive pagination */
+@media (max-width: 576px) {
+    .pagination-lg .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
 {% endblock content %}

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'cube_prep',
     'teleprompter',
     'setlists',
+    'cubing_users',
 ]
 
 SITE_ID = 1
@@ -72,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'cubing_users.middleware.CuberSessionMiddleware',
+
 ]
 
 ROOT_URLCONF = 'FrancoUke.urls'
