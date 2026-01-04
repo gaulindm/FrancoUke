@@ -39,8 +39,11 @@ urlpatterns = [
 
     #nouvel application pour le site francontcube
     path("francontcube/", include("francontcube.urls")),
+    path('training/', include('training.urls')),   # ← Ajouter ici
 
     path('cube/', include('cube.urls')),  # ← Ajouter cette ligne
+    path('cuber/', include('cubing_users.urls')),
+
 
 ]
 

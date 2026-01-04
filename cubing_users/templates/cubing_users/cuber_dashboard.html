@@ -1,0 +1,56 @@
+
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}Mon Tableau de Bord{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="text-white text-center mb-4">
+            <h1 class="display-4 fw-bold">
+                Salut {{ cuber.color }} {{ cuber.adjective }} {{ cuber.superhero }}! 👋
+            </h1>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h3 class="card-title">🏫 Mes Groupes</h3>
+                {% if memberships %}
+                    <div class="list-group">
+                        {% for membership in memberships %}
+                        <div class="list-group-item">
+                            <h5>{{ membership.group.group_name }}</h5>
+                            <small class="text-muted">{{ membership.group.get_group_type_display }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Aucun groupe pour le moment.</p>
+                    <a href="{% url 'cubing_users:join_group' %}" class="btn btn-primary btn-cube">
+                        Rejoindre un Groupe
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h3 class="card-title">📊 Mon Progrès F2L</h3>
+                <div class="text-center my-4">
+                    <div class="display-3 fw-bold text-primary">0/41</div>
+                    <p class="text-muted">Cas complétés</p>
+                </div>
+                <a href="#" class="btn btn-success btn-cube w-100">
+                    Commencer l'Apprentissage 🎯
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

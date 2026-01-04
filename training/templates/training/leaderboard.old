@@ -1,0 +1,299 @@
+<!-- training/templates/training/leaderboard.html -->
+{% extends 'francontcube/partials/base.html' %}
+
+
+{% block title %}Classement - {{ algorithm.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4">🏆 Classement</h1>
+        <h3 class="text-muted">{{ algorithm.name }}</h3>
+        <div class="algorithm-display">
+            {{ algorithm.notation }}
+        </div>
+    </div>
+    
+    <!-- Stats globales -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h6 class="text-muted">Record Mondial</h6>
+                <div class="fs-2 fw-bold text-warning">
+                    {% if world_record %}
+                        {{ world_record.time_formatted }}
+                    {% else %}
+                        --:--:--
+                    {% endif %}
+                </div>
+                {% if world_record and world_record.user %}
+                <small class="text-muted">par {{ world_record.user.username }}</small>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h6 class="text-muted">Moyenne Top 10</h6>
+                <div class="fs-2 fw-bold text-info">
+                    {% if avg_top_10 %}
+                        {{ avg_top_10 }}
+                    {% else %}
+                        --:--:--
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h6 class="text-muted">Total Tentatives</h6>
+                <div class="fs-2 fw-bold text-primary">{{ total_attempts|default:0 }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ton meilleur temps -->
+    {% if user_best %}
+    <div class="alert alert-info mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                {% if is_cuber %}
+                    <span class="badge bg-info me-2">🎨 Cuber</span>
+                {% elif is_leader %}
+                    <span class="badge bg-success me-2">👨‍🏫 Leader</span>
+                {% endif %}
+                <strong>Ton record personnel:</strong>
+                <span class="fs-4 ms-3">{{ user_best.best_time_formatted }}</span>
+            </div>
+            <div>
+                <span class="badge bg-primary">Rang #{{ user_rank }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Tabs: Top Times vs Top Users -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="times-tab" data-bs-toggle="tab" data-bs-target="#times" type="button">
+                ⚡ Meilleurs Temps
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">
+                👥 Meilleurs Utilisateurs
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Tab: Meilleurs temps (toutes tentatives) -->
+        <div class="tab-pane fade show active" id="times" role="tabpanel">
+            <div class="stats-card">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="60">#</th>
+                            <th>Utilisateur</th>
+                            <th>Temps</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in top_times %}
+                        <tr>
+                            <td>
+                                {% if forloop.counter <= 3 %}
+                                    <span class="fs-4">
+                                        {% if forloop.counter == 1 %}🥇
+                                        {% elif forloop.counter == 2 %}🥈
+                                        {% elif forloop.counter == 3 %}🥉
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    {{ forloop.counter }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if session.cuber %}
+                                    <span class="badge bg-info me-2">🎨 Cuber</span>
+                                {% elif session.leader %}
+                                    <span class="badge bg-success me-2">👨‍🏫 Leader</span>
+                                {% else %}
+                                    <span class="badge bg-secondary me-2">👤 Anonyme</span>
+                                {% endif %}
+                                <strong>{{ session.user_display }}</strong>
+                            </td>
+                            <td>
+                                <span class="fs-5 fw-bold text-success">
+                                    {{ session.time_formatted }}
+                                </span>
+                            </td>
+                            <td class="text-muted">
+                                {{ session.created_at|date:"d/m/Y H:i" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                Aucun temps enregistré pour cet algorithme.<br>
+                                <a href="{% url 'training:trainer' algorithm.slug %}" class="btn btn-sm btn-primary mt-2">
+                                    Sois le premier! 🚀
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Tab: Meilleurs utilisateurs (records personnels) -->
+        <div class="tab-pane fade" id="users" role="tabpanel">
+            <div class="stats-card">
+                <!-- Cubers -->
+                <h5 class="mt-3 mb-3">🎨 Meilleurs Cubers</h5>
+                <table class="table table-hover mb-5">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="60">#</th>
+                            <th>Cuber</th>
+                            <th>Record</th>
+                            <th>Tentatives</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for progress in top_cubers %}
+                        <tr>
+                            <td>
+                                {% if forloop.counter <= 3 %}
+                                    <span class="fs-4">
+                                        {% if forloop.counter == 1 %}🥇
+                                        {% elif forloop.counter == 2 %}🥈
+                                        {% elif forloop.counter == 3 %}🥉
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    {{ forloop.counter }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ progress.cuber }}</strong>
+                            </td>
+                            <td>
+                                <span class="fs-5 fw-bold text-success">
+                                    {{ progress.best_time_formatted }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ progress.total_attempts }} essais
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">
+                                Aucun Cuber enregistré.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- Leaders -->
+                <h5 class="mt-4 mb-3">👨‍🏫 Meilleurs Leaders</h5>
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="60">#</th>
+                            <th>Leader</th>
+                            <th>Record</th>
+                            <th>Tentatives</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for progress in top_leaders %}
+                        <tr>
+                            <td>
+                                {% if forloop.counter <= 3 %}
+                                    <span class="fs-4">
+                                        {% if forloop.counter == 1 %}🥇
+                                        {% elif forloop.counter == 2 %}🥈
+                                        {% elif forloop.counter == 3 %}🥉
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    {{ forloop.counter }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>
+                                    {{ progress.leader.user.get_full_name|default:progress.leader.user.username }}
+                                </strong>
+                            </td>
+                            <td>
+                                <span class="fs-5 fw-bold text-success">
+                                    {{ progress.best_time_formatted }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ progress.total_attempts }} essais
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">
+                                Aucun Leader enregistré.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="text-center mt-5">
+        <a href="{% url 'training:trainer' algorithm.slug %}" class="btn btn-primary btn-lg me-2">
+            <i class="bi bi-play-fill"></i> S'entraîner maintenant
+        </a>
+        <a href="{% url 'training:hub' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left"></i> Retour au hub
+        </a>
+    </div>
+    
+    <!-- Info Box -->
+    <div class="alert alert-light mt-5">
+        <h6><i class="bi bi-info-circle"></i> Comment ça marche?</h6>
+        <ul class="mb-0">
+            <li><strong>Meilleurs Temps:</strong> Tous les temps enregistrés, triés du plus rapide au plus lent</li>
+            <li><strong>Meilleurs Utilisateurs:</strong> Classement séparé pour Cubers et Leaders avec leurs records personnels</li>
+            {% if not is_cuber and not is_leader %}
+            <li><strong>💡 Astuce:</strong> <a href="{% url 'cubing_auth:cuber_login' %}">Connecte-toi comme Cuber</a> pour sauvegarder tes temps et apparaître dans le classement!</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<style>
+    .table tbody tr:hover {
+        transform: translateX(5px);
+        transition: transform 0.2s ease;
+    }
+    
+    .nav-tabs .nav-link {
+        font-weight: 600;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        border: none;
+    }
+</style>
+{% endblock %}

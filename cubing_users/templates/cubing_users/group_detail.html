@@ -1,0 +1,13 @@
+{% extends 'cubing_users/base.html' %}
+{% block content %}
+<h1 class="text-white">Détails du Groupe</h1>
+<div class="card">
+    <div class="card-body">
+        {% if group %}
+            <h3>{{ group.group_name }}</h3>
+            <p>Code: <code>{{ group.group_code }}</code></p>
+            <p>Membres: {{ memberships.count }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -13,6 +13,10 @@ from users.models import UserPreference
 
 from django.contrib.auth.models import User
 from types import SimpleNamespace
+from django.contrib.auth import get_user_model  # ✅ Add this
+
+
+User = get_user_model()  # ✅ Add this line
 
 
 # -------------------------------------------------------------
@@ -36,18 +40,32 @@ class LandingView(TemplateView):
 # -------------------------------------------------------------
 # List of Songs by a User
 # -------------------------------------------------------------
-class UserSongListView(ListView):
+# songbook/views/song_display_views.py
+
+from songbook.mixins import SiteContextMixin
+
+class UserSongListView(SiteContextMixin, ListView):
+    """
+    Display all songs contributed by a specific user, filtered by site.
+    """
     model = Song
     template_name = "songbook/user_songs.html"
     context_object_name = "songs"
-    ordering = ["songTitle"]
     paginate_by = 15
 
     def get_queryset(self):
-        user = get_object_or_404(User, username=self.kwargs.get("username"))
-        site_name = self.kwargs.get("site_name")
-        return Song.objects.filter(contributor=user, site_name=site_name).order_by("songTitle")
-
+        self.user = get_object_or_404(User, username=self.kwargs.get("username"))
+        site_name = self.get_site_name()
+        
+        return Song.objects.filter(
+            contributor=self.user, 
+            site_name=self.get_site_name()
+        ).order_by("songTitle")
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['viewed_user'] = self.user  # Makes username available in template
+        return context
 
 # -------------------------------------------------------------
 # Score View (detailed view of a single song)

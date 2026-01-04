@@ -1,96 +1,92 @@
-<!-- training/templates/training/index.html -->
-{% extends 'francontcube/partials/base.html' %}
-{% load static %}
+{% extends 'training/base.html' %}
 
-{% block title %}Centre d'Entraînement | FrancontCube{% endblock %}
+{% block title %}Training Hub - FrancontCube{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container mt-5">
     <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold mb-3">🎯 Centre d'Entraînement</h1>
-        <p class="lead text-muted">
-            Développe tes finger tricks et améliore ta vitesse !
-        </p>
-        <p class="text-muted">
-            <em>De l'Apprenti Cubi au Maître Cubi, chaque répétition compte ! 🚀</em>
-        </p>
+        <h1 class="display-4">🎯 Training Hub</h1>
+        <p class="lead">Entraîne-toi sur tes algorithmes F2L préférés!</p>
     </div>
-
-    <!-- Groupe par niveau de difficulté -->
-    {% regroup algorithms by difficulty as difficulty_groups %}
     
-    {% for difficulty in difficulty_groups %}
-    <div class="mb-5">
-        <h2 class="h3 mb-4 pb-2 border-bottom">
-            {% if difficulty.grouper == 'apprenti' %}
-                🌱 Apprenti Cubi
-            {% elif difficulty.grouper == 'confirme' %}
-                🎯 Cubiste Confirmé
-            {% elif difficulty.grouper == 'speedcube' %}
-                ⚡ Speedcubiste
-            {% elif difficulty.grouper == 'maitre' %}
-                🏆 Maître Cubi
-            {% endif %}
-        </h2>
-        
-        <div class="row g-4">
-            {% for algo in difficulty.list %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm hover-lift">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h5 class="card-title mb-0">{{ algo.name }}</h5>
-                            {% if algo.category %}
-                            <span class="badge bg-secondary">{{ algo.category }}</span>
-                            {% endif %}
-                        </div>
-                        
-                        <p class="font-monospace text-primary mb-2">{{ algo.notation }}</p>
-                        
-                        {% if algo.repetitions > 1 %}
-                        <p class="text-muted small mb-3">
-                            <i class="bi bi-repeat"></i> × {{ algo.repetitions }} répétitions
-                        </p>
-                        {% endif %}
-                        
-                        <p class="text-muted small mb-3">{{ algo.description }}</p>
-                        
-                        <div class="mt-auto">
-                            <a href="{% url 'training:trainer' algo.slug %}" 
-                               class="btn btn-primary w-100">
-                                <i class="bi bi-play-circle"></i> Commencer
-                            </a>
-                        </div>
+    <!-- Filtres par difficulté -->
+    <div class="btn-group mb-4 d-flex justify-content-center" role="group">
+        <button type="button" class="btn btn-outline-primary active" data-filter="all">
+            Tous
+        </button>
+        <button type="button" class="btn btn-outline-success" data-filter="apprenti">
+            Apprenti
+        </button>
+        <button type="button" class="btn btn-outline-info" data-filter="confirme">
+            Confirmé
+        </button>
+        <button type="button" class="btn btn-outline-warning" data-filter="speedcube">
+            Speedcube
+        </button>
+        <button type="button" class="btn btn-outline-danger" data-filter="maitre">
+            Maître
+        </button>
+    </div>
+    
+    <!-- Liste des algorithmes -->
+    <div class="row" id="algorithms-grid">
+        {% for algo in algorithms %}
+        <div class="col-md-6 col-lg-4 mb-4 algorithm-card" data-difficulty="{{ algo.difficulty }}">
+            <div class="card h-100 shadow-sm hover-shadow">
+                <div class="card-header bg-{{ algo.difficulty }}-subtle">
+                    <h5 class="mb-0">{{ algo.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="algorithm-notation mb-3">
+                        <code class="fs-5">{{ algo.notation }}</code>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary">{{ algo.get_difficulty_display }}</span>
+                        <span class="text-muted">{{ algo.repetitions }}x répétitions</span>
+                    </div>
+                    {% if algo.description %}
+                    <p class="text-muted small">{{ algo.description|truncatewords:15 }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'training:trainer' algo.slug %}" class="btn btn-primary">
+                            <i class="bi bi-play-fill"></i> S'entraîner
+                        </a>
+                        <a href="{% url 'training:leaderboard' algo.slug %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-trophy"></i> Classement
+                        </a>
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="text-muted">Aucun algorithme disponible. Exécutez <code>python manage.py populate_training</code></p>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-    
-    {% if not algorithms %}
-    <div class="alert alert-info text-center">
-        <h5><i class="bi bi-info-circle"></i> Aucun algorithme disponible</h5>
-        <p class="mb-0">
-            Les algorithmes seront bientôt ajoutés. Reviens plus tard !
-        </p>
-    </div>
-    {% endif %}
 </div>
 
-<style>
-    .hover-lift {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .hover-lift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    }
-    
-    .font-monospace {
-        font-size: 1.1rem;
-    }
-</style>
+<script>
+// Filtrage par difficulté
+document.querySelectorAll('[data-filter]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const filter = this.dataset.filter;
+        
+        // Mettre à jour les boutons actifs
+        document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Filtrer les cartes
+        document.querySelectorAll('.algorithm-card').forEach(card => {
+            if (filter === 'all' || card.dataset.difficulty === filter) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

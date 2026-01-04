@@ -53,6 +53,15 @@
           <a class="nav-item nav-link" href="{% url 'songbook:artist_list' %}">
             {% if site_name == "FrancoUke" %} Artistes {% else %} Artists {% endif %}
           </a>
+          
+          {# My Collection - only for authenticated users #}
+          {% if user.is_authenticated %}
+            <a class="nav-item nav-link" href="{% url 'songbook:user-songs' user.username %}">
+              <i class="bi bi-collection me-1"></i>
+              {% if site_name == "FrancoUke" %} Ma Collection {% else %} My Collection {% endif %}
+            </a>
+          {% endif %}
+          
           <a class="nav-item nav-link"
           href="#"
           onclick="window.open('{% url 'songbook:chord_dictionary' %}', 'ChordDict', 'width=1200,height=900'); return false;">

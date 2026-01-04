@@ -1,0 +1,35 @@
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}Créer un Groupe{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body p-5">
+                <h1 class="card-title text-center mb-4">➕ Créer un Groupe</h1>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nom du groupe</label>
+                        {{ form.group_name }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Type</label>
+                        {{ form.group_type }}
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-cube btn-lg">
+                            Créer le Groupe 🚀
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

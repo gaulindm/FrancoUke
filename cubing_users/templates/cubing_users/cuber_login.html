@@ -1,0 +1,63 @@
+<!-- cubing_users/templates/cubing_users/cuber_login.html -->
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}Connexion Cubeur - CubingHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body p-5">
+                <h1 class="card-title text-center mb-4">🔐 Connexion Cubeur</h1>
+                <p class="text-center text-muted mb-4">
+                    Entre ton identité et ton code secret
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Identité -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Je suis</label>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                {{ form.color }}
+                            </div>
+                            <div class="col-4">
+                                {{ form.adjective }}
+                            </div>
+                            <div class="col-4">
+                                {{ form.superhero }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Code couleur -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Mon Code Secret</label>
+                        <p class="text-muted small">Clique les 6 couleurs dans l'ordre</p>
+                        <div class="d-flex justify-content-center flex-wrap gap-2">
+                            {{ form.color_code_1 }}
+                            {{ form.color_code_2 }}
+                            {{ form.color_code_3 }}
+                            {{ form.color_code_4 }}
+                            {{ form.color_code_5 }}
+                            {{ form.color_code_6 }}
+                        </div>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-cube btn-lg">
+                            Se Connecter 🚀
+                        </button>
+                        <a href="{% url 'cubing_users:cuber_register' %}" class="btn btn-outline-primary btn-cube">
+                            Créer une Identité
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

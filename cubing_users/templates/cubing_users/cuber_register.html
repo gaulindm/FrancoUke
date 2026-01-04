@@ -1,0 +1,159 @@
+<!-- cubing_users/templates/cubing_users/cuber_register.html -->
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}Créer ton Identité - CubingHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .identity-preview {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .identity-preview h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 20px 0;
+    }
+    
+    .color-code-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-width: 300px;
+        margin: 20px auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-5">
+                <h1 class="card-title text-center mb-4">🎨 Crée Ton Identité de Cubeur!</h1>
+                <p class="text-center text-muted mb-4">
+                    Choisis ton style unique et mémorise ton code secret de couleurs
+                </p>
+
+                <!-- Preview de l'identité -->
+                <div class="identity-preview" id="identityPreview">
+                    <div class="display-1" id="colorEmoji">🟥</div>
+                    <h2 id="identityText">
+                        <span id="previewColor">Rouge</span>
+                        <span id="previewAdjective">Rapide</span>
+                        <span id="previewSuperhero">Solveur</span>
+                    </h2>
+                </div>
+
+                <form method="post" id="cuberForm">
+                    {% csrf_token %}
+                    
+                    <!-- Couleur -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-5">1️⃣ Choisis ta couleur</label>
+                        {{ form.color }}
+                    </div>
+
+                    <!-- Adjectif -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-5">2️⃣ Choisis ton mot de pouvoir</label>
+                        {{ form.adjective }}
+                    </div>
+
+                    <!-- Super-héros -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-5">3️⃣ Choisis ton titre</label>
+                        {{ form.superhero }}
+                    </div>
+
+                    <!-- Avatar variant -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-5">4️⃣ Choisis ton style</label>
+                        {{ form.avatar_variant }}
+                    </div>
+
+                    <!-- Code couleur -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-5">5️⃣ Crée ton code secret de couleurs</label>
+                        <p class="text-muted small">Choisis 6 couleurs - tu devras t'en souvenir pour te connecter!</p>
+                        <div class="color-code-grid">
+                            <div>
+                                <label class="form-label small">Position 1</label>
+                                {{ form.color_code_1 }}
+                            </div>
+                            <div>
+                                <label class="form-label small">Position 2</label>
+                                {{ form.color_code_2 }}
+                            </div>
+                            <div>
+                                <label class="form-label small">Position 3</label>
+                                {{ form.color_code_3 }}
+                            </div>
+                            <div>
+                                <label class="form-label small">Position 4</label>
+                                {{ form.color_code_4 }}
+                            </div>
+                            <div>
+                                <label class="form-label small">Position 5</label>
+                                {{ form.color_code_5 }}
+                            </div>
+                            <div>
+                                <label class="form-label small">Position 6</label>
+                                {{ form.color_code_6 }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Erreurs -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Boutons -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-cube btn-lg">
+                            Créer Mon Identité! 🚀
+                        </button>
+                        <a href="{% url 'cubing_users:cuber_login' %}" class="btn btn-outline-secondary btn-cube">
+                            J'ai déjà un compte
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Preview en temps réel
+    const colorEmojis = {
+        'Rouge': '🟥',
+        'Bleu': '🟦',
+        'Vert': '🟩',
+        'Jaune': '🟨',
+        'Orange': '🟧',
+        'Blanc': '⬜'
+    };
+    
+    document.getElementById('id_color').addEventListener('change', function() {
+        const color = this.options[this.selectedIndex].text.split(' ')[1];
+        document.getElementById('previewColor').textContent = color;
+        document.getElementById('colorEmoji').textContent = colorEmojis[color] || '🎲';
+    });
+    
+    document.getElementById('id_adjective').addEventListener('change', function() {
+        document.getElementById('previewAdjective').textContent = this.value;
+    });
+    
+    document.getElementById('id_superhero').addEventListener('change', function() {
+        document.getElementById('previewSuperhero').textContent = this.value;
+    });
+</script>
+{% endblock %}

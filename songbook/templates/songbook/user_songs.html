@@ -20,10 +20,18 @@
                     </h1>
                     <p class="text-muted mb-0">
                         <i class="bi bi-music-note-list me-1"></i>
-                        {% if site_name == "FrancoUke" %}
-                            {{ page_obj.paginator.count }} chanson{{ page_obj.paginator.count|pluralize }} contribuée{{ page_obj.paginator.count|pluralize }}
+                        {% if page_obj %}
+                            {% if site_name == "FrancoUke" %}
+                                {{ page_obj.paginator.count }} chanson{{ page_obj.paginator.count|pluralize }} contribuée{{ page_obj.paginator.count|pluralize }}
+                            {% else %}
+                                {{ page_obj.paginator.count }} song{{ page_obj.paginator.count|pluralize }} contributed
+                            {% endif %}
                         {% else %}
-                            {{ page_obj.paginator.count }} song{{ page_obj.paginator.count|pluralize }} contributed
+                            {% if site_name == "FrancoUke" %}
+                                {{ songs|length }} chanson{{ songs|length|pluralize }} contribuée{{ songs|length|pluralize }}
+                            {% else %}
+                                {{ songs|length }} song{{ songs|length|pluralize }} contributed
+                            {% endif %}
                         {% endif %}
                     </p>
                 </div>
@@ -49,15 +57,15 @@
                         <div class="card-body">
                             <!-- Song Title -->
                             <h5 class="card-title">
-                                <a href="{% url 'song-detail' song.id %}" class="text-decoration-none text-dark">
+                                <a href="{% url 'songbook:score_view' song.id %}" class="text-decoration-none text-dark">
                                     {{ song.songTitle }}
                                 </a>
                             </h5>
                             
                             <!-- Artist (if available) -->
-                            {% if song.songArtist %}
+                            {% if song.metadata.artist %}
                                 <h6 class="card-subtitle mb-2 text-muted">
-                                    <i class="bi bi-mic me-1"></i>{{ song.songArtist }}
+                                    <i class="bi bi-mic me-1"></i>{{ song.metadata.artist }}
                                 </h6>
                             {% endif %}
                             
@@ -78,7 +86,7 @@
                         
                         <!-- Card Footer with Actions -->
                         <div class="card-footer bg-transparent border-top-0">
-                            <a href="{% url 'song-detail' song.id %}" class="btn btn-sm btn-primary w-100">
+                            <a href="{% url 'songbook:score_view' song.id %}" class="btn btn-sm btn-primary w-100">
                                 <i class="bi bi-eye me-1"></i>
                                 {% if site_name == "FrancoUke" %} Voir la chanson {% else %} View Song {% endif %}
                             </a>

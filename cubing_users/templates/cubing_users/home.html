@@ -1,0 +1,71 @@
+<!-- cubing_users/templates/cubing_users/home.html -->
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}Bienvenue - CubingHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-10">
+        <div class="text-center text-white mb-5">
+            <h1 class="display-3 fw-bold mb-4">🎲 Bienvenue sur CubingHub!</h1>
+            <p class="lead fs-4">Apprends le F2L comme un pro avec tes amis!</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Card Cubeur -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center p-5">
+                        <div class="display-1 mb-3">🧒</div>
+                        <h2 class="card-title mb-4">Je suis un Cubeur</h2>
+                        <p class="card-text mb-4">
+                            Crée ton identité de super-héros du cube et rejoins ta classe ou ton club!
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'cubing_users:cuber_register' %}" class="btn btn-primary btn-cube btn-lg">
+                                Créer mon Identité 🎨
+                            </a>
+                            <a href="{% url 'cubing_users:cuber_login' %}" class="btn btn-outline-primary btn-cube">
+                                J'ai déjà un compte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Leader -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center p-5">
+                        <div class="display-1 mb-3">👨‍🏫</div>
+                        <h2 class="card-title mb-4">Je suis un Leader</h2>
+                        <p class="card-text mb-4">
+                            Enseignant, coach ou animateur? Crée et gère tes groupes de cubeurs!
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'cubing_users:leader_register' %}" class="btn btn-success btn-cube btn-lg">
+                                Créer un Compte Leader 🎓
+                            </a>
+                            <a href="{% url 'cubing_users:leader_login' %}" class="btn btn-outline-success btn-cube">
+                                Se connecter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row mt-5">
+            <div class="col-md-6 text-center text-white">
+                <div class="display-4 fw-bold">{{ total_cubers }}</div>
+                <p class="lead">Cubeurs Inscrits</p>
+            </div>
+            <div class="col-md-6 text-center text-white">
+                <div class="display-4 fw-bold">{{ total_groups }}</div>
+                <p class="lead">Groupes Actifs</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -52,6 +52,10 @@ urlpatterns = [
     # 🔹 AJAX scroll speed
     path("song/<int:song_id>/save_scroll_speed/", save_scroll_speed, name="save_scroll_speed"),
 
+    path('user/<str:username>/', UserSongListView.as_view(), name='user-songs'),
+    
+
+
     # 🔹 Static
     path("about/", about, name="about"),
     path("whats-new/", whats_new, name="whats_new"),

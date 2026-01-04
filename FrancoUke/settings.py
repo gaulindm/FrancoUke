@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'public',
     'assets',
     'francontcube',
+    'training',
     'cube',
     'cube_prep',
     'teleprompter',

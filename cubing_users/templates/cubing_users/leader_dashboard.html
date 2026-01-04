@@ -1,0 +1,106 @@
+<!-- cubing_users/templates/cubing_users/leader_dashboard.html -->
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}Tableau de Bord Leader - CubingHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="text-white mb-4">
+            <h1 class="display-5 fw-bold">
+                Bienvenue {{ leader.user.get_full_name }}! 👋
+            </h1>
+            <p class="lead">{{ leader.get_role_display }} - {{ leader.organization|default:"" }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-primary">{{ groups.count }}</h3>
+                <p class="text-muted mb-0">Groupes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="display-4 fw-bold text-success">{{ total_students }}</h3>
+                <p class="text-muted mb-0">Étudiants</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <a href="{% url 'cubing_users:create_group' %}" class="btn btn-primary btn-cube">
+                    ➕ Créer un Groupe
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des groupes -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">📚 Mes Groupes</h3>
+                
+                {% if groups %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nom du Groupe</th>
+                                    <th>Type</th>
+                                    <th>Code</th>
+                                    <th>Membres</th>
+                                    <th>Créé le</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for group in groups %}
+                                <tr>
+                                    <td class="fw-bold">{{ group.group_name }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ group.get_group_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <code class="fs-5">{{ group.group_code }}</code>
+                                    </td>
+                                    <td>{{ group.member_count }}</td>
+                                    <td>{{ group.created_date|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'cubing_users:group_detail' group.group_id %}" 
+                                           class="btn btn-sm btn-primary">
+                                            Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">
+                        Tu n'as pas encore de groupes. Commence par en créer un!
+                    </p>
+                    <div class="text-center">
+                        <a href="{% url 'cubing_users:create_group' %}" class="btn btn-primary btn-cube">
+                            Créer mon Premier Groupe 🚀
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

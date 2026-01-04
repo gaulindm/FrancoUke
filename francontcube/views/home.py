@@ -23,8 +23,8 @@ def home(request):
             'desc': 'Practice finger tricks and algorithms to improve your speed',
             'icon': 'bi-stopwatch',
             'logo': None,
-            'url': '/francontcube/training/',
-            'available': False,
+            'url': '/training/',
+            'available': True,
         },
         {
             'name': 'Méthode Apprenti Cubi',

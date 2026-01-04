@@ -1,0 +1,100 @@
+<!-- cubing_users/templates/cubing_users/leader_register.html -->
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}Inscription Leader - CubingHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-body p-5">
+                <h1 class="card-title text-center mb-4">👨‍🏫 Créer un Compte Leader</h1>
+                <p class="text-center text-muted mb-4">
+                    Pour enseignants, coachs et animateurs de clubs
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <!-- Prénom -->
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nom -->
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-12">
+                            <label class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Rôle -->
+                        <div class="col-12">
+                            <label class="form-label">{{ form.role.label }}</label>
+                            {{ form.role }}
+                        </div>
+
+                        <!-- Organisation -->
+                        <div class="col-12">
+                            <label class="form-label">{{ form.organization.label }}</label>
+                            {{ form.organization }}
+                        </div>
+
+                        <!-- Mot de passe -->
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.password1.label }}</label>
+                            {{ form.password1 }}
+                            <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                            {% if form.password1.errors %}
+                                <div class="text-danger small">{{ form.password1.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Confirmation -->
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.password2.label }}</label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <div class="text-danger small">{{ form.password2.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Erreurs globales -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger mt-3">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Boutons -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-cube btn-lg">
+                            Créer mon Compte 🎓
+                        </button>
+                        <a href="{% url 'cubing_users:leader_login' %}" class="btn btn-outline-secondary btn-cube">
+                            J'ai déjà un compte
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

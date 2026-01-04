@@ -1,0 +1,96 @@
+<!-- training/templates/training/index.html -->
+{% extends 'francontcube/partials/base.html' %}
+{% load static %}
+
+{% block title %}Centre d'Entraînement | FrancontCube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">🎯 Centre d'Entraînement</h1>
+        <p class="lead text-muted">
+            Développe tes finger tricks et améliore ta vitesse !
+        </p>
+        <p class="text-muted">
+            <em>De l'Apprenti Cubi au Maître Cubi, chaque répétition compte ! 🚀</em>
+        </p>
+    </div>
+
+    <!-- Groupe par niveau de difficulté -->
+    {% regroup algorithms by difficulty as difficulty_groups %}
+    
+    {% for difficulty in difficulty_groups %}
+    <div class="mb-5">
+        <h2 class="h3 mb-4 pb-2 border-bottom">
+            {% if difficulty.grouper == 'apprenti' %}
+                🌱 Apprenti Cubi
+            {% elif difficulty.grouper == 'confirme' %}
+                🎯 Cubiste Confirmé
+            {% elif difficulty.grouper == 'speedcube' %}
+                ⚡ Speedcubiste
+            {% elif difficulty.grouper == 'maitre' %}
+                🏆 Maître Cubi
+            {% endif %}
+        </h2>
+        
+        <div class="row g-4">
+            {% for algo in difficulty.list %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm hover-lift">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">{{ algo.name }}</h5>
+                            {% if algo.category %}
+                            <span class="badge bg-secondary">{{ algo.category }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="font-monospace text-primary mb-2">{{ algo.notation }}</p>
+                        
+                        {% if algo.repetitions > 1 %}
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-repeat"></i> × {{ algo.repetitions }} répétitions
+                        </p>
+                        {% endif %}
+                        
+                        <p class="text-muted small mb-3">{{ algo.description }}</p>
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'training:trainer' algo.slug %}" 
+                               class="btn btn-primary w-100">
+                                <i class="bi bi-play-circle"></i> Commencer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if not algorithms %}
+    <div class="alert alert-info text-center">
+        <h5><i class="bi bi-info-circle"></i> Aucun algorithme disponible</h5>
+        <p class="mb-0">
+            Les algorithmes seront bientôt ajoutés. Reviens plus tard !
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .font-monospace {
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
