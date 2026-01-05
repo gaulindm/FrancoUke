@@ -1,6 +1,5 @@
 
-{% extends 'cubing_users/base.html' %}
-
+{% extends "francontcube/partials/base.html" %}
 {% block title %}Mon Tableau de Bord{% endblock %}
 
 {% block content %}
@@ -46,7 +45,7 @@
                     <div class="display-3 fw-bold text-primary">0/41</div>
                     <p class="text-muted">Cas complétés</p>
                 </div>
-                <a href="#" class="btn btn-success btn-cube w-100">
+                <a href="{% url 'training:hub' %}" class="btn btn-success btn-cube w-100">
                     Commencer l'Apprentissage 🎯
                 </a>
             </div>

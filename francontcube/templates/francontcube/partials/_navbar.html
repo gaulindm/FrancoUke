@@ -1,10 +1,9 @@
 {% load static %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
-
+        <!-- Logo principal -->
         <a class="navbar-brand fw-bold" href="{% url 'francontcube:home' %}">
-            <img src="{% static 'francontcube/img/francontcube_logo.png' %}" alt="logo" height="40"
-                 class="me-2">
+            <img src="{% static 'francontcube/img/francontcube_logo.png' %}" alt="logo" height="40" class="me-2">
             FrancontCube
         </a>
 
@@ -13,12 +12,142 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navMenu">
+            <!-- Liens principaux (gauche/centre) -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'francontcube:ressources3par3' %}">3×3 Ressources</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="methodsDropdown" role="button" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Méthodes
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="methodsDropdown">
+                        <li><a class="dropdown-item" href="{% url 'francontcube:method_cubienewbie' %}">🟢 Cubie Newbie</a></li>
+                        <li><a class="dropdown-item" href="{% url 'francontcube:method_beginner' %}">🟡 Beginner Method</a></li>
+                        <li><a class="dropdown-item" href="{% url 'francontcube:method_cfop' %}">🔴 CFOP</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cube_prep:color_matrix' %}">4×4 & Mosaic</a>
+                </li>
+            </ul>
+
+            <!-- Liens utilisateur (droite) -->
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'francontcube:ressources3par3' %}">3×3 Ressources</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'francontcube:method_cubienewbie' %}">Méthode Débutante</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'cube_prep:color_matrix' %}">4×4 & Mosaic</a></li>
+                {% if request.cuber %}
+                    <!-- Cubeur connecté -->
+                    <li class="nav-item">
+                        <span class="nav-link fw-bold" style="color: #667eea;">
+                            🎲 {{ request.cuber.color }} {{ request.cuber.adjective }} {{ request.cuber.superhero }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cubing_users:cuber_dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cubing_users:my_groups' %}">
+                            <i class="bi bi-people-fill"></i> Mes Groupes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="{% url 'cubing_users:cuber_logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> Déconnexion
+                        </a>
+                    </li>
+                
+                {% elif user.is_authenticated %}
+                    <!-- Leader connecté -->
+                    <li class="nav-item">
+                        <span class="nav-link fw-bold">
+                            👨‍🏫 {{ user.get_full_name }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cubing_users:leader_dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cubing_users:create_group' %}">
+                            <i class="bi bi-plus-circle"></i> Créer Groupe
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="{% url 'cubing_users:leader_logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> Déconnexion
+                        </a>
+                    </li>
+                
+                {% else %}
+                    <!-- Non connecté -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> Connexion
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loginDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'cubing_users:cuber_login' %}">
+                                    🎲 Connexion Cubeur
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'cubing_users:leader_login' %}">
+                                    👨‍🏫 Connexion Leader
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% endif %}
             </ul>
         </div>
-
     </div>
 </nav>
+
+<!-- Style additionnel pour améliorer l'apparence -->
+<style>
+    .navbar {
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+    
+    .navbar-brand img {
+        transition: transform 0.3s ease;
+    }
+    
+    .navbar-brand:hover img {
+        transform: rotate(5deg) scale(1.05);
+    }
+    
+    .nav-link {
+        transition: all 0.3s ease;
+        border-radius: 6px;
+        margin: 0 4px;
+    }
+    
+    .nav-link:hover {
+        background-color: rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .dropdown-menu {
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        border: none;
+    }
+    
+    .dropdown-item {
+        border-radius: 6px;
+        margin: 4px 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+        background-color: rgba(102, 126, 234, 0.15);
+        transform: translateX(5px);
+    }
+</style>
