@@ -1,55 +1,223 @@
-
 {% extends "francontcube/partials/base.html" %}
 {% block title %}Mon Tableau de Bord{% endblock %}
 
+{% block extra_css %}
+<style>
+    .dashboard-hero {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .dashboard-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+    
+    .list-group-item {
+        border-left: 4px solid #667eea;
+        margin-bottom: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .btn-cube {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cube:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .method-btn {
+        border-radius: 10px;
+        padding: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .method-btn:hover {
+        transform: translateX(5px);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-display {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 1.5rem 0;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-lg-12">
-        <div class="text-white text-center mb-4">
-            <h1 class="display-4 fw-bold">
-                Salut {{ cuber.color }} {{ cuber.adjective }} {{ cuber.superhero }}! 👋
-            </h1>
-        </div>
-    </div>
+<!-- Hero Header -->
+<div class="dashboard-hero text-white text-center">
+    <h1 class="display-4 fw-bold mb-0">
+        Salut {{ cuber.color }} {{ cuber.adjective }} {{ cuber.superhero }}! 👋
+    </h1>
 </div>
 
+<!-- Main Cards Grid -->
 <div class="row g-4">
-    <div class="col-lg-6">
-        <div class="card h-100">
+    
+    <!-- Carte 1: Mes Groupes -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card">
             <div class="card-body">
-                <h3 class="card-title">🏫 Mes Groupes</h3>
+                <h3 class="card-title">
+                    🏫 Mes Groupes
+                </h3>
+                
                 {% if memberships %}
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for membership in memberships %}
                         <div class="list-group-item">
-                            <h5>{{ membership.group.group_name }}</h5>
-                            <small class="text-muted">{{ membership.group.get_group_type_display }}</small>
+                            <h5 class="mb-1">{{ membership.group.group_name }}</h5>
+                            <small class="text-muted">
+                                <i class="bi bi-tag-fill"></i> 
+                                {{ membership.group.get_group_type_display }}
+                            </small>
                         </div>
                         {% endfor %}
                     </div>
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'cubing_users:my_groups' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-eye"></i> Voir Tous les Groupes
+                        </a>
+                    </div>
                 {% else %}
-                    <p class="text-muted">Aucun groupe pour le moment.</p>
-                    <a href="{% url 'cubing_users:join_group' %}" class="btn btn-primary btn-cube">
-                        Rejoindre un Groupe
-                    </a>
+                    <div class="empty-state">
+                        <i class="bi bi-people" style="font-size: 3rem; color: #667eea;"></i>
+                        <p class="text-muted mt-3 mb-3">
+                            Aucun groupe pour le moment.
+                        </p>
+                        <a href="{% url 'cubing_users:join_group' %}" class="btn btn-primary btn-cube">
+                            <i class="bi bi-plus-circle"></i> Rejoindre un Groupe
+                        </a>
+                    </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="col-lg-6">
-        <div class="card h-100">
+    <!-- Carte 2: Mon Progrès F2L -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card dashboard-card">
             <div class="card-body">
-                <h3 class="card-title">📊 Mon Progrès F2L</h3>
-                <div class="text-center my-4">
-                    <div class="display-3 fw-bold text-primary">0/41</div>
-                    <p class="text-muted">Cas complétés</p>
+                <h3 class="card-title">
+                    📊 Mon Progrès F2L
+                </h3>
+                
+                <div class="progress-display text-center">
+                    <div class="display-3 fw-bold" style="color: #667eea;">
+                        0/41
+                    </div>
+                    <p class="text-muted mb-0">Cas complétés</p>
                 </div>
-                <a href="{% url 'training:hub' %}" class="btn btn-success btn-cube w-100">
-                    Commencer l'Apprentissage 🎯
-                </a>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'training:hub' %}" class="btn btn-success btn-cube">
+                        <i class="bi bi-play-circle-fill"></i> Commencer l'Apprentissage
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary">
+                        <i class="bi bi-graph-up"></i> Voir mes Statistiques
+                    </a>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Carte 3: Méthodes & Tutoriels -->
+    <div class="col-lg-4 col-md-12">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h3 class="card-title">
+                    <i class="bi bi-book-fill"></i> Méthodes & Tutoriels
+                </h3>
+                
+                <p class="text-muted mb-4">
+                    Apprendre avec nos guides pas-à-pas
+                </p>
+                
+                <div class="d-grid gap-3">
+                    <a href="{% url 'francontcube:method_cubienewbie' %}" 
+                       class="btn btn-outline-info method-btn text-start">
+                        <div class="d-flex align-items-center">
+                            <span style="font-size: 1.5rem; margin-right: 0.75rem;">🟢</span>
+                            <div>
+                                <strong>Cubie Newbie</strong>
+                                <br>
+                                <small class="text-muted">Pour vrais débutants</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'francontcube:method_beginner' %}" 
+                       class="btn btn-outline-warning method-btn text-start">
+                        <div class="d-flex align-items-center">
+                            <span style="font-size: 1.5rem; margin-right: 0.75rem;">🟡</span>
+                            <div>
+                                <strong>Beginner Method</strong>
+                                <br>
+                                <small class="text-muted">Méthode par couches</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'francontcube:method_cfop' %}" 
+                       class="btn btn-outline-danger method-btn text-start">
+                        <div class="d-flex align-items-center">
+                            <span style="font-size: 1.5rem; margin-right: 0.75rem;">🔴</span>
+                            <div>
+                                <strong>CFOP</strong>
+                                <br>
+                                <small class="text-muted">Méthode avancée</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="alert alert-info mt-4 mb-0">
+                    <i class="bi bi-lightbulb-fill"></i>
+                    <small>Commence par Cubie Newbie si tu débutes !</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 {% endblock %}

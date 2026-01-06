@@ -3,7 +3,10 @@
 {% load site_urls %}
 
 {% block content %}
-<div class="container">
+
+<link rel="stylesheet" href="{% static 'songbook/song_list.css' %}">
+
+<div class="container-fluid">
     
     <!-- Page Header -->
     <div class="row mb-4">
@@ -38,7 +41,7 @@
                 
                 <!-- Back to all songs button -->
                 <div>
-                    <a href="{% url 'songbook:song_list' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'songbook:song_list' %}" class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}">
                         <i class="bi bi-arrow-left me-1"></i>
                         {% if site_name == "FrancoUke" %} Toutes les chansons {% else %} All Songs {% endif %}
                     </a>
@@ -48,52 +51,99 @@
         </div>
     </div>
 
-    <!-- Songs Grid/List -->
+    <!-- Songs Table -->
     {% if songs %}
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
-            {% for song in songs %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm hover-card">
-                        <div class="card-body">
-                            <!-- Song Title -->
-                            <h5 class="card-title">
-                                <a href="{% url 'songbook:score_view' song.id %}" class="text-decoration-none text-dark">
-                                    {{ song.songTitle }}
-                                </a>
-                            </h5>
-                            
-                            <!-- Artist (if available) -->
-                            {% if song.metadata.artist %}
-                                <h6 class="card-subtitle mb-2 text-muted">
-                                    <i class="bi bi-mic me-1"></i>{{ song.metadata.artist }}
-                                </h6>
-                            {% endif %}
-                            
-                            <!-- Metadata -->
-                            <div class="small text-muted mb-3">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                {{ song.date_posted|date:"M d, Y" }}
-                            </div>
-                            
-                            <!-- Preview of ChordPro (first 100 chars) -->
-                            {% if song.songChordPro %}
-                                <p class="card-text text-muted small font-monospace" 
-                                   style="max-height: 3rem; overflow: hidden; text-overflow: ellipsis;">
-                                    {{ song.songChordPro|truncatewords:15 }}
-                                </p>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Card Footer with Actions -->
-                        <div class="card-footer bg-transparent border-top-0">
-                            <a href="{% url 'songbook:score_view' song.id %}" class="btn btn-sm btn-primary w-100">
-                                <i class="bi bi-eye me-1"></i>
-                                {% if site_name == "FrancoUke" %} Voir la chanson {% else %} View Song {% endif %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover compact-table">
+                <thead>
+                    <tr>
+                        {% if site_name == 'FrancoUke' %}
+                            <th>Partitions</th>
+                            <th>Status</th>
+                            <th>Interprètes</th>
+                            <th>Année</th>
+                            <th>Balises</th>
+                            <th class="text-center">Date ajoutée</th>
+                            <th class="text-center">Actions</th>
+                        {% else %}
+                            <th>Songs</th>
+                            <th>Status</th>
+                            <th>Artists</th>
+                            <th>Year</th>
+                            <th>Tags</th>
+                            <th class="text-center">Date Added</th>
+                            <th class="text-center">Teleprompter</th>
+                            <th class="text-center">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for song in songs %}
+                    <tr>
+                        <!-- Song Title -->
+                        <td>
+                            <a href="{% url 'songbook:score_view' song.id %}" 
+                               class="song-link"
+                               title="{{ song.songTitle }}"
+                               aria-label="View score for {{ song.songTitle }}">
+                                {{ song.songTitle }}
                             </a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+                        </td>
+                        
+                        <!-- Formatted Status -->
+                        <td>
+                            {% if song.songformatting %}
+                                ✅
+                            {% else %}
+                                ❌
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Artist -->
+                        <td>{{ song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
+                        
+                        <!-- Year -->
+                        <td class="text-center">{{ song.metadata.year|default_if_none:"" }}</td>
+                        
+                        <!-- Tags -->
+                        <td>
+                            {% for tag in song.tags.all %}
+                                <small>{{ tag }}</small>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        
+                        <!-- Date Posted -->
+                        <td class="text-center">
+                            <small class="text-muted">{{ song.date_posted|date:"M d, Y" }}</small>
+                        </td>
+                        
+                        <!-- Teleprompter (StrumSphere only) -->
+                        {% if site_name != 'FrancoUke' %}
+                        <td class="text-center">
+                            {% if song.pk %}
+                                <a href="{% url 'teleprompter:teleprompter' song.pk %}" 
+                                   class="btn btn-sm btn-outline-primary"
+                                   target="_blank" rel="noopener">
+                                   Teleprompter
+                                </a>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        
+                        <!-- Actions (PDF) -->
+                        <td class="text-center">
+                            {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
+                            <a href="{% url pdf_url song.id %}" class="btn btn-sm {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}">
+                                <i class="bi bi-file-pdf me-1"></i> PDF
+                            </a>
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         <!-- No songs message -->
@@ -116,113 +166,54 @@
         </div>
     {% endif %}
 
-    <!-- Pagination (Bootstrap 5 Modern Style) -->
+    <!-- Pagination (Bootstrap 5 Style) -->
     {% if is_paginated %}
-        <nav aria-label="{% if site_name == 'FrancoUke' %}Pagination des chansons{% else %}Song pagination{% endif %}" class="mt-4">
-            <ul class="pagination pagination-lg justify-content-center flex-wrap">
-                
-                <!-- First Page -->
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1" 
-                           aria-label="{% if site_name == 'FrancoUke' %}Première{% else %}First{% endif %}">
-                            <span aria-hidden="true">&laquo;&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" 
-                           aria-label="{% if site_name == 'FrancoUke' %}Précédente{% else %}Previous{% endif %}">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">&laquo;&laquo;</span>
-                    </li>
-                    <li class="page-item disabled">
-                        <span class="page-link">&laquo;</span>
-                    </li>
-                {% endif %}
+        <div class="pagination d-flex gap-2 mb-0">
+            {% if page_obj.has_previous %}
+                <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+                   href="?page=1">
+                    {% if site_name == 'FrancoUke' %}Première{% else %}First{% endif %}
+                </a>
+                <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+                   href="?page={{ page_obj.previous_page_number }}">
+                    {% if site_name == 'FrancoUke' %}Précédente{% else %}Previous{% endif %}
+                </a>
+            {% endif %}
 
-                <!-- Page Numbers -->
-                {% for num in page_obj.paginator.page_range %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
                     {% if page_obj.number == num %}
-                        <li class="page-item active" aria-current="page">
-                            <span class="page-link">{{ num }}</span>
-                        </li>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                    {% elif num == 1 or num == page_obj.paginator.num_pages %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                    {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
+                        <a class="btn {% if site_name == 'FrancoUke' %}btn-success{% else %}btn-primary{% endif %}" 
+                           href="?page={{ num }}">{{ num }}</a>
+                    {% else %}
+                        <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+                           href="?page={{ num }}">{{ num }}</a>
                     {% endif %}
-                {% endfor %}
+                {% endif %}
+            {% endfor %}
 
-                <!-- Last Page -->
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" 
-                           aria-label="{% if site_name == 'FrancoUke' %}Suivante{% else %}Next{% endif %}">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" 
-                           aria-label="{% if site_name == 'FrancoUke' %}Dernière{% else %}Last{% endif %}">
-                            <span aria-hidden="true">&raquo;&raquo;</span>
-                        </a>
-                    </li>
-                {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">&raquo;</span>
-                    </li>
-                    <li class="page-item disabled">
-                        <span class="page-link">&raquo;&raquo;</span>
-                    </li>
-                {% endif %}
-            </ul>
-            
-            <!-- Page Info -->
-            <p class="text-center text-muted small mt-2">
-                {% if site_name == "FrancoUke" %}
-                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
-                {% else %}
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                {% endif %}
-            </p>
-        </nav>
+            {% if page_obj.has_next %}
+                <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+                   href="?page={{ page_obj.next_page_number }}">
+                    {% if site_name == 'FrancoUke' %}Suivante{% else %}Next{% endif %}
+                </a>
+                <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+                   href="?page={{ page_obj.paginator.num_pages }}">
+                    {% if site_name == 'FrancoUke' %}Dernière{% else %}Last{% endif %}
+                </a>
+            {% endif %}
+        </div>
+        
+        <!-- Page Info -->
+        <p class="text-center text-muted small mt-3">
+            {% if site_name == "FrancoUke" %}
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+            {% else %}
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            {% endif %}
+        </p>
     {% endif %}
 
 </div>
 
-<!-- Custom CSS for hover effects -->
-<style>
-.hover-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.hover-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
-
-.card-title a:hover {
-    color: var(--bs-primary) !important;
-}
-
-/* Responsive pagination */
-@media (max-width: 576px) {
-    .pagination-lg .page-link {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.9rem;
-    }
-}
-</style>
 {% endblock content %}
