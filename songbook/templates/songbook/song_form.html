@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends base_template|default:"base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
 <style>
@@ -26,12 +26,41 @@
                                 {% endif %}
                             </legend>
 
-                            <!-- Render non-accordion fields -->
-                            {% for field in form %}
-                                {% if field.name != 'metadata' and field.name != 'lyrics_with_chords' %}
-                                    {{ field|as_crispy_field }}
-                                {% endif %}
-                            {% endfor %}
+                            <!-- 🆕 Render fields in specific order, checking if they exist in the form -->
+                            {% if 'songTitle' in form.fields %}
+                                {{ form.songTitle|as_crispy_field }}
+                            {% endif %}
+                            
+                            {% if 'songChordPro' in form.fields %}
+                                {{ form.songChordPro|as_crispy_field }}
+                            {% endif %}
+                            
+                            {# 🆕 Only render is_public if it exists in the form (leaders only) #}
+                            {% if 'is_public' in form.fields %}
+                                <div class="alert alert-info">
+                                    <strong>Privacy Setting (Leaders Only):</strong>
+                                    {{ form.is_public|as_crispy_field }}
+                                    <small class="form-text text-muted">
+                                        {% if site_name == "FrancoUke" %}
+                                            Cochez pour rendre cette chanson visible à tous les utilisateurs.
+                                        {% else %}
+                                            Check to make this song visible to all users.
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                            
+                            {% if 'revised_on' in form.fields %}
+                                {{ form.revised_on|as_crispy_field }}
+                            {% endif %}
+                            
+                            {% if 'tags' in form.fields %}
+                                {{ form.tags|as_crispy_field }}
+                            {% endif %}
+                            
+                            {% if 'acknowledgement' in form.fields %}
+                                {{ form.acknowledgement|as_crispy_field }}
+                            {% endif %}
 
                         </fieldset>
 
@@ -46,10 +75,18 @@
                                 <div id="collapseMetadata" class="accordion-collapse collapse" aria-labelledby="headingMetadata" data-bs-parent="#formAccordion">
                                     <div class="accordion-body">
                                         <!-- Metadata Field -->
-                                        <div id="metadataField">
-                                            {{ form.metadata|as_crispy_field }}
-                                        </div>
-
+                                        {% if 'metadata' in form.fields %}
+                                            <div id="metadataField">
+                                                {{ form.metadata|as_crispy_field }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Lyrics with Chords (for edit only) -->
+                                        {% if 'lyrics_with_chords' in form.fields %}
+                                            <div id="lyricsField">
+                                                {{ form.lyrics_with_chords|as_crispy_field }}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -274,6 +311,7 @@
     {% endverbatim %}
         {% endif %}
         </div>   
+    </div>
     <!-- Include Bootstrap CSS -->
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"

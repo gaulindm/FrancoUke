@@ -12,28 +12,50 @@ from songbook.models import Song
 from songbook.context_processors import site_context
 from songbook.parsers import parse_song_data
 
-
 class SongCreateView(LoginRequiredMixin, CreateView):
     model = Song
-    fields = [
-        "songTitle",
-        "songChordPro",
-        "is_public",  # 🆕 Add privacy field
-        "metadata",
-        "revised_on",
-        "tags",
-        "acknowledgement",
-    ]
+    template_name = 'songbook/song_form.html'
+    
+    def get_form_class(self):
+        """Create form with dynamic fields based on user permissions."""
+        from django import forms
+        
+        # Base fields for everyone
+        base_fields = [
+            "songTitle",
+            "songChordPro",
+            "metadata",
+            "revised_on",
+            "tags",
+            "acknowledgement",
+        ]
+        
+        # 🆕 Only leaders can set privacy
+        if self.request.user.groups.filter(name='Leaders').exists():
+            base_fields.insert(2, "is_public")  # Add after songChordPro
+        
+        class DynamicSongForm(forms.ModelForm):
+            class Meta:
+                model = Song
+                fields = base_fields
+        
+        return DynamicSongForm
 
     def form_valid(self, form):
         form.instance.contributor = self.request.user
         context_data = site_context(self.request)
         form.instance.site_name = context_data.get("site_name")
+        
+        # 🆕 Non-leaders: songs are private by default
+        if not self.request.user.groups.filter(name='Leaders').exists():
+            form.instance.is_public = False
+        
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(site_context(self.request))
+        context['is_leader'] = self.request.user.groups.filter(name='Leaders').exists()
         return context
 
     def get_success_url(self):
@@ -43,24 +65,39 @@ class SongCreateView(LoginRequiredMixin, CreateView):
 
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Song
-    fields = [
-        "songTitle",
-        "songChordPro",
-        "is_public",  # 🆕 Add privacy field
-        "lyrics_with_chords",
-        "metadata",
-        "revised_on",
-        "tags",
-        "acknowledgement",
-    ]
+    template_name = 'songbook/song_form.html'
+    
+    def get_form_class(self):
+        """Create form with dynamic fields based on user permissions."""
+        from django import forms
+        
+        # Base fields for everyone
+        base_fields = [
+            "songTitle",
+            "songChordPro",
+            "lyrics_with_chords",
+            "metadata",
+            "revised_on",
+            "tags",
+            "acknowledgement",
+        ]
+        
+        # 🆕 Only leaders can edit privacy
+        if self.request.user.groups.filter(name='Leaders').exists():
+            base_fields.insert(2, "is_public")  # Add after songChordPro
+        
+        class DynamicSongForm(forms.ModelForm):
+            class Meta:
+                model = Song
+                fields = base_fields
+        
+        return DynamicSongForm
 
     def test_func(self):
-        # 🆕 Only song owner can edit
         song = self.get_object()
         return self.request.user == song.contributor
 
     def form_valid(self, form):
-        # Convert raw ChordPro into parsed lyrics_with_chords
         raw_lyrics = form.cleaned_data.get("songChordPro", "")
         try:
             parsed_lyrics = parse_song_data(raw_lyrics)
@@ -70,17 +107,23 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
         form.instance.lyrics_with_chords = parsed_lyrics
         form.instance.contributor = self.request.user
+        
+        # 🆕 Non-leaders cannot change privacy via form manipulation
+        if not self.request.user.groups.filter(name='Leaders').exists():
+            original = Song.objects.get(pk=self.object.pk)
+            form.instance.is_public = original.is_public
+        
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(site_context(self.request))
+        context['is_leader'] = self.request.user.groups.filter(name='Leaders').exists()
         return context
 
     def get_success_url(self):
         site_name = self.object.site_name or site_context(self.request)["site_name"]
         return reverse(f"{site_name.lower()}:score_view", kwargs={"pk": self.object.pk})
-
 
 class SongDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Song

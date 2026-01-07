@@ -205,21 +205,23 @@
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     
-                                    {# 🆕 Toggle Privacy Button #}
-                                    {% if song.is_public %}
-                                        <a href="{% url 'songbook:make_private' song.id %}" 
-                                           class="btn btn-outline-warning"
-                                           title="{% if site_name == 'FrancoUke' %}Rendre privée{% else %}Make Private{% endif %}"
-                                           onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson privée?{% else %}Make this song private?{% endif %}');">
-                                            <i class="bi bi-lock"></i>
-                                        </a>
-                                    {% else %}
-                                        <a href="{% url 'songbook:make_public' song.id %}" 
-                                           class="btn btn-outline-success"
-                                           title="{% if site_name == 'FrancoUke' %}Rendre publique{% else %}Make Public{% endif %}"
-                                           onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson publique?{% else %}Make this song public?{% endif %}');">
-                                            <i class="bi bi-unlock"></i>
-                                        </a>
+                                    {# 🆕 Toggle Privacy Button - LEADERS ONLY #}
+                                    {% if user.groups.all|length > 0 and 'Leaders' in user.groups.all|join:',' %}
+                                        {% if song.is_public %}
+                                            <a href="{% url 'songbook:make_private' song.id %}" 
+                                               class="btn btn-outline-warning"
+                                               title="{% if site_name == 'FrancoUke' %}Rendre privée{% else %}Make Private{% endif %}"
+                                               onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson privée?{% else %}Make this song private?{% endif %}');">
+                                                <i class="bi bi-lock"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'songbook:make_public' song.id %}" 
+                                               class="btn btn-outline-success"
+                                               title="{% if site_name == 'FrancoUke' %}Rendre publique{% else %}Make Public{% endif %}"
+                                               onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson publique?{% else %}Make this song public?{% endif %}');">
+                                                <i class="bi bi-unlock"></i>
+                                            </a>
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             </div>
