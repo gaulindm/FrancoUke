@@ -1,16 +1,94 @@
-{% extends "base.html" %}
+{% extends base_template|default:"base_strumsphere.html" %}
+{% load static %}
+
 {% block content %}
-    <div class="content-section">
-        <form method="POST">
-            {% csrf_token %}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Delete Song</legend>
-                <h2>Are you sure you want to delete the song {{ object.title }}</h2>
-            </fieldset>
-            <div class="form-group">
-                <button class="btn btn-outline-danger" type="submit">Yes, Delete</button>
-                <a class="btn btn-outline-secondary" href="{% url 'score' object.id %}">Cancel</a>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        {% if site_name == "FrancoUke" %}
+                            Supprimer la chanson
+                        {% else %}
+                            Delete Song
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="alert alert-warning" role="alert">
+                            <h4 class="alert-heading">
+                                {% if site_name == "FrancoUke" %}
+                                    ⚠️ Attention!
+                                {% else %}
+                                    ⚠️ Warning!
+                                {% endif %}
+                            </h4>
+                            <p class="mb-0">
+                                {% if site_name == "FrancoUke" %}
+                                    Êtes-vous sûr de vouloir supprimer la chanson:
+                                {% else %}
+                                    Are you sure you want to delete the song:
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div class="p-3 bg-light border rounded mb-4">
+                            <h4 class="mb-2">{{ object.songTitle }}</h4>
+                            {% if object.metadata.artist %}
+                                <p class="text-muted mb-1">
+                                    <i class="bi bi-mic me-1"></i>
+                                    {{ object.metadata.artist }}
+                                </p>
+                            {% endif %}
+                            <p class="text-muted mb-0">
+                                <small>
+                                    {% if site_name == "FrancoUke" %}
+                                        Contribué par: {{ object.contributor.username }}
+                                    {% else %}
+                                        Contributed by: {{ object.contributor.username }}
+                                    {% endif %}
+                                </small>
+                            </p>
+                        </div>
+                        
+                        <p class="text-danger">
+                            <strong>
+                                {% if site_name == "FrancoUke" %}
+                                    Cette action est irréversible!
+                                {% else %}
+                                    This action cannot be undone!
+                                {% endif %}
+                            </strong>
+                        </p>
+                        
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a class="btn btn-secondary" 
+                               href="{% url 'songbook:score_view' object.id %}">
+                                <i class="bi bi-x-circle me-1"></i>
+                                {% if site_name == "FrancoUke" %}
+                                    Annuler
+                                {% else %}
+                                    Cancel
+                                {% endif %}
+                            </a>
+                            <button class="btn btn-danger" type="submit">
+                                <i class="bi bi-trash me-1"></i>
+                                {% if site_name == "FrancoUke" %}
+                                    Oui, supprimer
+                                {% else %}
+                                    Yes, Delete
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
+</div>
 {% endblock content %}

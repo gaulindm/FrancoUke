@@ -9,9 +9,10 @@ from songbook.views.pdf_views import (
     generate_multi_song_pdf,
     generate_single_song_pdf,
     preview_pdf,
+    
 )
 
-from songbook.views.song_crud_views import (SongCreateView, SongUpdateView, SongDeleteView,)
+from songbook.views.song_crud_views import (SongCreateView, SongUpdateView, SongDeleteView, toggle_privacy, clone_song, make_public, make_private,)
 from songbook.views.song_display_views import (LandingView, UserSongListView, ScoreView, SongListView,)
 from songbook.views.chord_views import (chord_dictionary, serve_chords_json, get_chord_definition,)
 
@@ -54,7 +55,12 @@ urlpatterns = [
 
     path('user/<str:username>/', UserSongListView.as_view(), name='user-songs'),
     
-
+    # 🆕 Privacy Management URLs
+    path('songs/<int:song_id>/toggle-privacy/', toggle_privacy, name='toggle_privacy'),
+    path('songs/<int:song_id>/clone/', clone_song, name='clone_song'),
+    path('songs/<int:song_id>/make-public/', make_public, name='make_public'),
+    path('songs/<int:song_id>/make-private/', make_private, name='make_private'),
+    
 
     # 🔹 Static
     path("about/", about, name="about"),

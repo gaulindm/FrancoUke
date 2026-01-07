@@ -88,13 +88,28 @@
             {% for item in song_data %}
             <tr>
                 <td>
-                    
                     <a href="{% url site_namespace|add:':score_view' item.song.id %}" 
-                    class="song-link"
-                    title="{{ item.song.songTitle }}"
-                    aria-label="View score for {{ item.song.songTitle }}">
-                     {{ item.song.songTitle }}
-                 </a>
+                       class="song-link"
+                       title="{{ item.song.songTitle }}"
+                       aria-label="View score for {{ item.song.songTitle }}">
+                        {{ item.song.songTitle }}
+                    </a>
+                    
+                    {# 🆕 Privacy badge - only show for YOUR private songs #}
+                    {% if not item.song.is_public and item.song.contributor == user %}
+                        <span class="badge bg-warning text-dark ms-2" 
+                              title="{% if site_name == 'FrancoUke' %}Privée - Visible seulement par vous{% else %}Private - Only visible to you{% endif %}">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+                    {% endif %}
+                    
+                    {# 🆕 Cloned badge #}
+                    {% if item.song.cloned_from %}
+                        <span class="badge bg-info ms-2" 
+                              title="{% if site_name == 'FrancoUke' %}Version personnalisée{% else %}Personalized version{% endif %}">
+                            <i class="bi bi-files"></i>
+                        </span>
+                    {% endif %}
                 </td>
                 <td>{% if item.is_formatted %}✅{% else %}❌{% endif %}</td>
                 <td>{{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>

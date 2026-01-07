@@ -57,6 +57,21 @@ class Song(models.Model):
         help_text="Leave empty to hide this song from all platforms"
     )
 
+    # 🆕 ADD THESE TWO FIELDS
+    is_public = models.BooleanField(
+        default=True,  # 👈 Default to True so existing songs stay public
+        help_text="If True, visible to all users. If False, only visible to contributor."
+    )
+    
+    cloned_from = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='clones',
+        help_text="Original song if this is a personalized copy."
+    )
+
     def save(self, *args, **kwargs):
         if self.pk:
             old_song = Song.objects.get(pk=self.pk)
@@ -113,8 +128,12 @@ class Song(models.Model):
         return render_lyrics_with_chords_html(lyrics_data, site_name=site_name)
 
     def __str__(self):
-        return f"{self.songTitle} ({self.site_name})" if self.songTitle else f"Untitled Song ({self.site_name})"
-
+        # 🆕 UPDATE THIS to show privacy status
+        privacy = "" if self.is_public else " 🔒"
+        site = f"({self.site_name})" if self.site_name else "(No Site)"
+        title = self.songTitle if self.songTitle else "Untitled Song"
+        return f"{title}{privacy} {site}"
+    
     def get_absolute_url(self):
         return reverse("songbook:score-view", kwargs={"pk": self.pk})
 

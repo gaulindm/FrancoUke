@@ -16,24 +16,24 @@
                     <h1 class="mb-2">
                         <i class="bi bi-person-circle me-2"></i>
                         {% if site_name == "FrancoUke" %}
-                            Chansons de {{ view.kwargs.username }}
+                            Chansons de {{ viewed_user.username }}
                         {% else %}
-                            Songs by {{ view.kwargs.username }}
+                            Songs by {{ viewed_user.username }}
                         {% endif %}
                     </h1>
                     <p class="text-muted mb-0">
                         <i class="bi bi-music-note-list me-1"></i>
                         {% if page_obj %}
                             {% if site_name == "FrancoUke" %}
-                                {{ page_obj.paginator.count }} chanson{{ page_obj.paginator.count|pluralize }} contribuée{{ page_obj.paginator.count|pluralize }}
+                                {{ page_obj.paginator.count }} chanson{{ page_obj.paginator.count|pluralize }} 
                             {% else %}
-                                {{ page_obj.paginator.count }} song{{ page_obj.paginator.count|pluralize }} contributed
+                                {{ page_obj.paginator.count }} song{{ page_obj.paginator.count|pluralize }}
                             {% endif %}
                         {% else %}
                             {% if site_name == "FrancoUke" %}
-                                {{ songs|length }} chanson{{ songs|length|pluralize }} contribuée{{ songs|length|pluralize }}
+                                {{ songs|length }} chanson{{ songs|length|pluralize }}
                             {% else %}
-                                {{ songs|length }} song{{ songs|length|pluralize }} contributed
+                                {{ songs|length }} song{{ songs|length|pluralize }}
                             {% endif %}
                         {% endif %}
                     </p>
@@ -51,6 +51,34 @@
         </div>
     </div>
 
+    <!-- 🆕 Privacy Filter Tabs (only for own collection) -->
+    {% if is_own_collection %}
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'all' %}active{% endif %}" 
+               href="{% url 'songbook:user-songs' viewed_user.username %}">
+                {% if site_name == "FrancoUke" %}
+                    Toutes ({{ total_count }})
+                {% else %}
+                    All ({{ total_count }})
+                {% endif %}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'public' %}active{% endif %}" 
+               href="?filter=public">
+                🌐 {% if site_name == "FrancoUke" %}Publiques{% else %}Public{% endif %} ({{ public_count }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_filter == 'private' %}active{% endif %}" 
+               href="?filter=private">
+                🔒 {% if site_name == "FrancoUke" %}Privées{% else %}Private{% endif %} ({{ private_count }})
+            </a>
+        </li>
+    </ul>
+    {% endif %}
+
     <!-- Songs Table -->
     {% if songs %}
         <div class="table-responsive">
@@ -59,6 +87,7 @@
                     <tr>
                         {% if site_name == 'FrancoUke' %}
                             <th>Partitions</th>
+                            <th>Confidentialité</th>
                             <th>Status</th>
                             <th>Interprètes</th>
                             <th>Année</th>
@@ -67,6 +96,7 @@
                             <th class="text-center">Actions</th>
                         {% else %}
                             <th>Songs</th>
+                            <th>Privacy</th>
                             <th>Status</th>
                             <th>Artists</th>
                             <th>Year</th>
@@ -88,6 +118,29 @@
                                aria-label="View score for {{ song.songTitle }}">
                                 {{ song.songTitle }}
                             </a>
+                            
+                            {# 🆕 Cloned badge #}
+                            {% if song.cloned_from %}
+                                <span class="badge bg-info ms-2" 
+                                      title="{% if site_name == 'FrancoUke' %}Version personnalisée{% else %}Personalized version{% endif %}">
+                                    <i class="bi bi-files"></i>
+                                </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- 🆕 Privacy Status -->
+                        <td>
+                            {% if song.is_public %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-globe2"></i>
+                                    {% if site_name == "FrancoUke" %}Publique{% else %}Public{% endif %}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-lock-fill"></i>
+                                    {% if site_name == "FrancoUke" %}Privée{% else %}Private{% endif %}
+                                </span>
+                            {% endif %}
                         </td>
                         
                         <!-- Formatted Status -->
@@ -134,11 +187,42 @@
                         
                         <!-- Actions (PDF) -->
                         <td class="text-center">
-                            {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
-                            <a href="{% url pdf_url song.id %}" class="btn btn-sm {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}">
-                                <i class="bi bi-file-pdf me-1"></i> PDF
-                            </a>
-                            {% endwith %}
+                            <div class="btn-group btn-group-sm" role="group">
+                                {# PDF Download - always available #}
+                                {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
+                                <a href="{% url pdf_url song.id %}" 
+                                   class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}"
+                                   title="{% if site_name == 'FrancoUke' %}Télécharger PDF{% else %}Download PDF{% endif %}">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                                {% endwith %}
+                                
+                                {# 🆕 Edit/Privacy buttons - only for owner #}
+                                {% if is_own_collection %}
+                                    <a href="{% url 'songbook:song_update' song.id %}" 
+                                       class="btn btn-outline-secondary"
+                                       title="{% if site_name == 'FrancoUke' %}Modifier{% else %}Edit{% endif %}">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    
+                                    {# 🆕 Toggle Privacy Button #}
+                                    {% if song.is_public %}
+                                        <a href="{% url 'songbook:make_private' song.id %}" 
+                                           class="btn btn-outline-warning"
+                                           title="{% if site_name == 'FrancoUke' %}Rendre privée{% else %}Make Private{% endif %}"
+                                           onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson privée?{% else %}Make this song private?{% endif %}');">
+                                            <i class="bi bi-lock"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'songbook:make_public' song.id %}" 
+                                           class="btn btn-outline-success"
+                                           title="{% if site_name == 'FrancoUke' %}Rendre publique{% else %}Make Public{% endif %}"
+                                           onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson publique?{% else %}Make this song public?{% endif %}');">
+                                            <i class="bi bi-unlock"></i>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

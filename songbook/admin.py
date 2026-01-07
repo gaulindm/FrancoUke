@@ -8,7 +8,7 @@ from django import forms
 
 from .models import Song, SongFormatting
 from .utils.admin_chordpro_transposer import transpose_chordpro_text
-from .utils.transposer import transpose_chordpro  # ✅ Using your transposer.py
+from .utils.transposer import transpose_chordpro
 
 
 # ---------- SongFormatting Admin ----------
@@ -47,6 +47,20 @@ class SongFormattingAdmin(admin.ModelAdmin):
 
 # ---------- Song Admin ----------
 
+# 🆕 Privacy Actions
+@admin.action(description="🌐 Make selected songs PUBLIC")
+def make_public(modeladmin, request, queryset):
+    updated = queryset.update(is_public=True)
+    messages.success(request, f"{updated} song(s) marked as PUBLIC.")
+
+
+@admin.action(description="🔒 Make selected songs PRIVATE")
+def make_private(modeladmin, request, queryset):
+    updated = queryset.update(is_public=False)
+    messages.success(request, f"{updated} song(s) marked as PRIVATE.")
+
+
+# Transpose Actions
 @admin.action(description="Transpose songChordPro UP 1 semitone")
 def transpose_up_1(modeladmin, request, queryset):
     for song in queryset:
@@ -67,7 +81,7 @@ def transpose_down_1(modeladmin, request, queryset):
     messages.success(request, f"{queryset.count()} song(s) transposed DOWN 1 semitone.")
 
 
-# ✅ Custom filter to include Hidden (None)
+# Site Name Filter
 class SiteNameFilter(admin.SimpleListFilter):
     title = 'Site Name'
     parameter_name = 'site_name'
@@ -87,6 +101,28 @@ class SiteNameFilter(admin.SimpleListFilter):
             return queryset.filter(site_name=value)
         return queryset
 
+
+# 🆕 Privacy Filter
+class PrivacyFilter(admin.SimpleListFilter):
+    title = 'Privacy Status'
+    parameter_name = 'is_public'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('public', '🌐 Public'),
+            ('private', '🔒 Private'),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == 'public':
+            return queryset.filter(is_public=True)
+        elif value == 'private':
+            return queryset.filter(is_public=False)
+        return queryset
+
+
+# Hide/Restore Actions
 @admin.action(description="Hide selected songs (set site_name=None)")
 def mark_hidden(modeladmin, request, queryset):
     updated = queryset.update(site_name=None)
@@ -104,30 +140,89 @@ def restore_strumsphere(modeladmin, request, queryset):
     updated = queryset.filter(site_name__isnull=True).update(site_name='StrumSphere')
     messages.success(request, f"{updated} hidden song(s) restored to StrumSphere.")
 
+
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
     change_form_template = "admin/song_change_form_with_transpose.html"
 
-    list_display = ['songTitle', 'get_artist', 'date_posted', 'get_year', 'get_youtube', 'site_name', 'get_tags']
+    # 🆕 Added privacy and contributor to list_display
+    list_display = [
+        'songTitle', 
+        'get_artist', 
+        'contributor',           # 🆕 Show who owns the song
+        'get_privacy_status',    # 🆕 Show privacy status
+        'get_is_clone',          # 🆕 Show if it's a clone
+        'date_posted', 
+        'get_year', 
+        'get_youtube', 
+        'site_name', 
+        'get_tags'
+    ]
+    
+    # 🆕 Added is_public to editable fields
     list_editable = ['site_name']
-    search_fields = ['songTitle', 'metadata__artist']
+    
+    search_fields = ['songTitle', 'metadata__artist', 'contributor__username']  # 🆕 Can search by contributor
     ordering = ('metadata__artist',)
-    list_filter = [SiteNameFilter]  # ✅ Custom filter
+    
+    # 🆕 Added PrivacyFilter
+    list_filter = [SiteNameFilter, PrivacyFilter, 'contributor']
+    
+    # 🆕 Added privacy actions
     actions = [
+        make_public,             # 🆕 Make public
+        make_private,            # 🆕 Make private
         transpose_up_1,
         transpose_down_1,
-        mark_hidden,             # ✅ Hide songs
-        restore_francouke,       # ✅ Restore to FrancoUke
-        restore_strumsphere,     # ✅ Restore to StrumSphere
+        mark_hidden,
+        restore_francouke,
+        restore_strumsphere,
     ]
 
-
+    # 🆕 Show privacy and clone fields in detail view
+    fieldsets = (
+        ('Song Information', {
+            'fields': ('songTitle', 'songChordPro', 'contributor', 'site_name')
+        }),
+        ('Privacy Settings', {
+            'fields': ('is_public', 'cloned_from'),
+            'classes': ('collapse',),  # Collapsible section
+        }),
+        ('Metadata', {
+            'fields': ('metadata', 'tags', 'revised_on', 'acknowledgement'),
+            'classes': ('collapse',),
+        }),
+        ('Advanced', {
+            'fields': ('lyrics_with_chords', 'scroll_speed'),
+            'classes': ('collapse',),
+        }),
+    )
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return queryset.annotate(
             tags_string=Concat('tags__name', Value(', '))
-        )
+        ).select_related('contributor', 'cloned_from')  # 🆕 Optimize queries
+
+    # 🆕 Display privacy status with icon
+    def get_privacy_status(self, obj):
+        if obj.is_public:
+            return format_html('<span style="color: green;">🌐 Public</span>')
+        else:
+            return format_html('<span style="color: orange;">🔒 Private</span>')
+    get_privacy_status.short_description = 'Privacy'
+    get_privacy_status.admin_order_field = 'is_public'
+
+    # 🆕 Show if song is a clone
+    def get_is_clone(self, obj):
+        if obj.cloned_from:
+            return format_html(
+                '📋 <a href="{}">{}</a>',
+                reverse('admin:songbook_song_change', args=[obj.cloned_from.pk]),
+                obj.cloned_from.songTitle[:30]
+            )
+        return '-'
+    get_is_clone.short_description = 'Cloned From'
 
     def get_year(self, obj):
         return obj.metadata.get('year', 'Unknown') if obj.metadata else 'No Metadata'
@@ -143,12 +238,10 @@ class SongAdmin(admin.ModelAdmin):
         return obj.metadata.get('artist', 'Unknown') if obj.metadata else ''
     get_artist.short_description = 'Artist'
 
-
     def get_view_on_site_url(self, obj):
         if obj is None or obj.pk is None:
             return None
         return reverse("songbook:score_view", kwargs={"pk": obj.pk})
-
 
     def get_tags(self, obj):
         return ", ".join(obj.tags.names())
@@ -184,4 +277,3 @@ class SongAdmin(admin.ModelAdmin):
         direction = "up" if semitones > 0 else "down"
         messages.success(request, f"Transposed {direction} {abs(semitones)} semitone(s).")
         return redirect(f"../../")
-
