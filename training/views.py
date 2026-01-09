@@ -1,9 +1,10 @@
 # training/views.py
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Min, Avg, Count, Q
 import json
+from cube.models import CubeState  # <-- ADD THIS LINE
 
 from .models import (
     Algorithm, 
@@ -68,6 +69,64 @@ def training_hub(request):
         'is_leader': is_leader,
     }
     return render(request, 'training/index.html', context)
+
+
+def trainer_from_f2l(request, slug):
+    """
+    Training view that accepts F2L case slugs (like 'f2l-01')
+    Creates or finds a matching Algorithm and redirects to trainer
+    """
+    # Get the F2L case
+    cube_state = get_object_or_404(CubeState, slug=slug, method='cfop')
+    
+    # Validate that the cube_state has an algorithm
+    if not cube_state.algorithm or cube_state.algorithm.strip() == '':
+        # Redirect back with error message
+        return_url = request.GET.get('return_url', '/methods/cfop/f2l/')
+        # You could add a message here if you have messages framework
+        return redirect(return_url)
+    
+    # Map difficulty from CubeState to Algorithm difficulty choices
+    difficulty_map = {
+        'facile': 'apprenti',
+        'moyen': 'confirme',
+        'difficile': 'speedcube',
+    }
+    
+    algo_difficulty = difficulty_map.get(
+        cube_state.difficulty, 
+        'confirme'  # default
+    )
+    
+    # Try to find or create a matching Algorithm
+    algorithm, created = Algorithm.objects.get_or_create(
+        notation=cube_state.algorithm.strip(),
+        defaults={
+            'name': cube_state.name,
+            'slug': f'practice-{slug}',
+            'repetitions': 6,
+            'difficulty': algo_difficulty,
+            'description': cube_state.description or f'Pratique du cas {cube_state.name}',
+            'category': 'f2l'
+        }
+    )
+    
+    # If algorithm already existed but with different slug, use the existing one
+    if not created and algorithm.slug != f'practice-{slug}':
+        # Algorithm exists with same notation but different slug
+        pass
+    
+    # Get return URL
+    return_url = request.GET.get('return_url', '')
+    
+    # Redirect to the trainer with the algorithm and return URL
+    redirect_url = f"/training/practice/{algorithm.slug}/"
+    if return_url:
+        from urllib.parse import urlencode
+        redirect_url += f"?{urlencode({'return_url': return_url})}"
+    
+    return redirect(redirect_url)
+
 
 
 def algorithm_trainer(request, slug):

@@ -2,6 +2,7 @@
 from django.db import models
 from django.conf import settings
 from django.db.models import Min, Avg, Count
+from django.utils.safestring import mark_safe  # ADD THIS IMPORT
 
 class Algorithm(models.Model):
     """Différents algorithmes que les élèves peuvent pratiquer"""
@@ -25,6 +26,21 @@ class Algorithm(models.Model):
     slug = models.SlugField(unique=True)
     category = models.CharField(max_length=50, blank=True, verbose_name="Catégorie")
     
+    # ADD THIS METHOD
+    def get_algorithm_svg(self):
+        """Generate SVG icons from algorithm notation string"""
+        if not self.notation or self.notation.strip() == '':
+            return ''
+        
+        moves = self.notation.strip().split()
+        svg_list = []
+        
+        for move in moves:
+            svg_id = move.replace("'", "-prime").replace("2", "2")
+            svg_list.append(f'<svg class="move-icon"><use href="#{svg_id}"/></svg>')
+        
+        return mark_safe('\n                            '.join(svg_list))
+    
     def __str__(self):
         return f"{self.name} ({self.notation})"
     
@@ -32,7 +48,6 @@ class Algorithm(models.Model):
         verbose_name = "Algorithme"
         verbose_name_plural = "Algorithmes"
         ordering = ['difficulty', 'name']
-
 
 class TrainingSession(models.Model):
     """

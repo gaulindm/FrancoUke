@@ -98,9 +98,9 @@
                                 <a href="{% url 'cube:f2l_case_detail' slug=slug %}" class="btn btn-primary btn-sm">
                                     <i class="bi bi-info-circle"></i> Détails & Animation
                                 </a>
-                                <button class="btn btn-outline-primary btn-sm" onclick="practiceCase('{{ slug }}')">
+                                <a href="{% url 'training:trainer_from_f2l' slug=slug %}?return_url={{ request.path }}" class="btn btn-outline-primary btn-sm">
                                     <i class="bi bi-play-circle"></i> Pratiquer
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -244,11 +244,5 @@
   });
 </script>
 
-<script>
-    function practiceCase(slug) {
-        alert('Practice mode for ' + slug + ' coming soon!');
-        // TODO: Implement practice mode
-    }
-</script>
 
 {% endblock %}

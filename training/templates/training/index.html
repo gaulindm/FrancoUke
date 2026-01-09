@@ -1,4 +1,9 @@
 {% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+<!-- Load SVG template for move icons -->
+{% include "cube/partials/_cube_svg.html" %}
+
 {% block title %}Training Hub - FrancontCube{% endblock %}
 
 {% block content %}
@@ -34,17 +39,29 @@
             <div class="card h-100 shadow-sm hover-shadow">
                 <div class="card-header bg-{{ algo.difficulty }}-subtle">
                     <h5 class="mb-0">{{ algo.name }}</h5>
+                    <small class="text-muted">
+                        <i class="bi bi-arrow-repeat"></i> {{ algo.repetitions }}× répétitions
+                    </small>
                 </div>
                 <div class="card-body">
-                    <div class="algorithm-notation mb-3">
-                        <code class="fs-5">{{ algo.notation }}</code>
+                    <!-- Algorithm with Move Icons -->
+                    <div class="algorithm-display mb-3">
+                        <div class="moves-preview d-flex flex-wrap gap-2 justify-content-center p-2 bg-light rounded">
+                            {{ algo.get_algorithm_svg }}
+                        </div>
+                        <div class="algorithm-notation text-center mt-2">
+                            <code class="text-muted small">{{ algo.notation }}</code>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-secondary">{{ algo.get_difficulty_display }}</span>
-                        <span class="text-muted">{{ algo.repetitions }}x répétitions</span>
+                    
+                    <div class="d-flex justify-content-center mb-2">
+                        <span class="badge bg-{{ algo.difficulty }}-badge fs-6 px-3 py-2">
+                            {{ algo.get_difficulty_display }}
+                        </span>
                     </div>
+                    
                     {% if algo.description %}
-                    <p class="text-muted small">{{ algo.description|truncatewords:15 }}</p>
+                    <p class="text-muted small text-center">{{ algo.description|truncatewords:15 }}</p>
                     {% endif %}
                 </div>
                 <div class="card-footer bg-transparent">
@@ -67,6 +84,131 @@
     </div>
 </div>
 
+<style>
+/* ============================================
+   Algorithm Cards
+   ============================================ */
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+
+/* ============================================
+   Algorithm Display with Move Icons
+   ============================================ */
+.algorithm-display {
+    margin: 0.5rem 0;
+}
+
+.moves-preview {
+    min-height: 60px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    align-items: center;
+}
+
+.move-icon {
+    width: 40px;
+    height: 40px;
+    transition: transform 0.2s;
+}
+
+.move-icon:hover {
+    transform: scale(1.15);
+}
+
+.algorithm-notation code {
+    background: transparent;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   Difficulty Badges with Colors
+   ============================================ */
+.bg-apprenti-subtle {
+    background-color: #d1f4e0 !important;
+}
+
+.bg-confirme-subtle {
+    background-color: #d1ecf1 !important;
+}
+
+.bg-speedcube-subtle {
+    background-color: #fff3cd !important;
+}
+
+.bg-maitre-subtle {
+    background-color: #f8d7da !important;
+}
+
+.bg-apprenti-badge {
+    background-color: #28a745 !important;
+}
+
+.bg-confirme-badge {
+    background-color: #17a2b8 !important;
+}
+
+.bg-speedcube-badge {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.bg-maitre-badge {
+    background-color: #dc3545 !important;
+}
+
+/* ============================================
+   Card Header Styling
+   ============================================ */
+.card-header h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.card-header small {
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 768px) {
+    .move-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .moves-preview {
+        gap: 0.5rem !important;
+    }
+}
+
+/* ============================================
+   Filter Buttons
+   ============================================ */
+.btn-group {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+@media (max-width: 576px) {
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem !important;
+    }
+}
+</style>
+
 <script>
 // Filtrage par difficulté
 document.querySelectorAll('[data-filter]').forEach(btn => {
@@ -81,11 +223,25 @@ document.querySelectorAll('[data-filter]').forEach(btn => {
         document.querySelectorAll('.algorithm-card').forEach(card => {
             if (filter === 'all' || card.dataset.difficulty === filter) {
                 card.style.display = '';
+                // Animation d'apparition
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                }, 50);
             } else {
-                card.style.display = 'none';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
             }
         });
     });
+});
+
+// Smooth transitions pour les cartes
+document.querySelectorAll('.algorithm-card').forEach(card => {
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
 });
 </script>
 {% endblock %}

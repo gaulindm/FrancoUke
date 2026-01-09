@@ -1,4 +1,9 @@
 {% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+<!-- Load SVG template for move icons -->
+{% include "cube/partials/_cube_svg.html" %}
+
 {% block title %}{{ algorithm.name }} - Training{% endblock %}
 
 {% block content %}
@@ -6,22 +11,47 @@
     <!-- Header -->
     <div class="text-center mb-4">
         <h1>{{ algorithm.name }}</h1>
-        <div class="algorithm-display">
-            {{ algorithm.notation }}
+        
+        <!-- Algorithm with Move Icons -->
+        <div class="algorithm-display mb-3">
+            <div class="moves-preview d-flex align-items-center gap-3 justify-content-center p-3 bg-light rounded shadow-sm">
+                <!-- Moves -->
+                <div class="d-flex flex-wrap gap-2">
+                    {{ algorithm.get_algorithm_svg }}
+                </div>
+                
+                <!-- Multiplier -->
+                <div class="d-flex align-items-center gap-2 border-start border-3 border-primary ps-3 ms-2">
+                    <i class="bi bi-x-lg text-primary fs-3"></i>
+                    <span class="badge bg-primary fs-3 px-3 py-2">{{ algorithm.repetitions }}</span>
+                </div>
+            </div>
         </div>
-        <p class="text-muted">Répète {{ algorithm.repetitions }} fois</p>
     </div>
     
     <!-- Timer -->
     <div class="row justify-content-center mb-4">
         <div class="col-md-8">
             <div class="stats-card text-center">
-                <div class="timer-display" id="timer">00:00.00</div>
-                <button class="btn start-button" id="startBtn">
-                    <i class="bi bi-play-fill"></i> Démarrer
+                <!-- Large Tap Area for Timer -->
+                <div class="timer-tap-zone" id="timerTapZone">
+                    <div class="timer-display" id="timer">00:00.00</div>
+                    <div class="timer-status" id="timerStatus">
+                        <i class="bi bi-hand-index-thumb"></i> Touche l'écran pour démarrer
+                    </div>
+                </div>
+                
+                <!-- Large Start/Stop Button -->
+                <button class="btn btn-lg w-100 start-button mt-3" id="startBtn">
+                    <i class="bi bi-play-fill fs-2"></i>
+                    <span class="d-block mt-2 fs-5">Démarrer</span>
                 </button>
+                
                 <div class="mt-3">
-                    <small class="text-muted">Appuie sur Espace pour démarrer/arrêter</small>
+                    <small class="text-muted">
+                        <i class="bi bi-hand-index-thumb"></i> Touche n'importe où dans le chrono
+                        <span class="d-none d-md-inline">• Espace sur clavier</span>
+                    </small>
                 </div>
             </div>
         </div>
@@ -73,16 +103,174 @@
         </div>
     </div>
     
-    <!-- Liens -->
+    
+    <!-- Liens - Dynamic Back Button -->
     <div class="text-center mt-4">
-        <a href="{% url 'training:hub' %}" class="btn btn-outline-secondary me-2">
-            <i class="bi bi-arrow-left"></i> Retour au hub
-        </a>
-        <a href="{% url 'training:leaderboard' algorithm.slug %}" class="btn btn-outline-primary">
+        {% if return_url %}
+            <a href="{{ return_url }}" class="btn btn-outline-secondary btn-lg me-2">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        {% else %}
+            <a href="{% url 'training:hub' %}" class="btn btn-outline-secondary btn-lg me-2">
+                <i class="bi bi-arrow-left"></i> Retour au hub
+            </a>
+        {% endif %}
+        <a href="{% url 'training:leaderboard' algorithm.slug %}" class="btn btn-outline-primary btn-lg">
             <i class="bi bi-trophy"></i> Voir le classement
         </a>
     </div>
 </div>
+
+<style>
+/* ============================================
+   Algorithm Display with Move Icons
+   ============================================ */
+.algorithm-display {
+    margin: 1.5rem auto;
+    max-width: 800px;
+}
+
+.moves-preview {
+    min-height: 70px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.move-icon {
+    width: 48px;
+    height: 48px;
+    transition: transform 0.2s;
+}
+
+.move-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 576px) {
+    .moves-preview {
+        flex-direction: column !important;
+    }
+    
+    .moves-preview .border-start {
+        border-start: none !important;
+        border-top: 3px solid var(--bs-primary) !important;
+        padding-start: 0 !important;
+        padding-top: 1rem !important;
+        margin-top: 1rem !important;
+        margin-start: 0 !important;
+    }
+}
+
+/* ============================================
+   Timer Styles - iPad Optimized
+   ============================================ */
+.stats-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Timer Tap Zone - Large Touch Target */
+.timer-tap-zone {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.timer-tap-zone:active {
+    transform: scale(0.98);
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.timer-tap-zone.running {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(245, 87, 108, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(245, 87, 108, 0.8); }
+}
+
+.timer-display {
+    font-size: 4rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    letter-spacing: 0.1em;
+    margin: 0;
+}
+
+.timer-status {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+.timer-status i {
+    font-size: 1.5rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Start Button - iPad Optimized */
+.start-button {
+    min-height: 80px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.start-button:hover, .start-button:active {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.start-button.btn-danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.start-button i {
+    display: block;
+}
+
+/* Mobile/iPad Optimizations */
+@media (max-width: 768px) {
+    .timer-display {
+        font-size: 3rem;
+    }
+    
+    .timer-tap-zone {
+        padding: 2.5rem 1.5rem;
+    }
+    
+    .start-button {
+        min-height: 100px;
+        font-size: 1.75rem;
+    }
+}
+</style>
 
 <script>
 let timerInterval;
@@ -90,6 +278,8 @@ let startTime;
 let isRunning = false;
 
 const timerDisplay = document.getElementById('timer');
+const timerStatus = document.getElementById('timerStatus');
+const timerTapZone = document.getElementById('timerTapZone');
 const startBtn = document.getElementById('startBtn');
 
 function formatTime(ms) {
@@ -100,14 +290,28 @@ function formatTime(ms) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
 }
 
+function updateUI(running) {
+    if (running) {
+        timerTapZone.classList.add('running');
+        timerStatus.innerHTML = '<i class="bi bi-hand-index-thumb"></i> Touche pour arrêter';
+        startBtn.innerHTML = '<i class="bi bi-stop-fill fs-2"></i><span class="d-block mt-2 fs-5">Arrêter</span>';
+        startBtn.classList.add('btn-danger');
+        startBtn.classList.remove('btn-primary');
+    } else {
+        timerTapZone.classList.remove('running');
+        timerStatus.innerHTML = '<i class="bi bi-hand-index-thumb"></i> Touche pour démarrer';
+        startBtn.innerHTML = '<i class="bi bi-play-fill fs-2"></i><span class="d-block mt-2 fs-5">Démarrer</span>';
+        startBtn.classList.remove('btn-danger');
+        startBtn.classList.add('btn-primary');
+    }
+}
+
 function startTimer() {
     if (isRunning) return;
     
     startTime = Date.now();
     isRunning = true;
-    startBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Arrêter';
-    startBtn.classList.add('btn-danger');
-    startBtn.classList.remove('btn-primary');
+    updateUI(true);
     
     timerInterval = setInterval(() => {
         const elapsed = Date.now() - startTime;
@@ -121,13 +325,18 @@ function stopTimer() {
     clearInterval(timerInterval);
     isRunning = false;
     const finalTime = Date.now() - startTime;
+    updateUI(false);
     
-    startBtn.innerHTML = '<i class="bi bi-play-fill"></i> Démarrer';
-    startBtn.classList.remove('btn-danger');
-    startBtn.classList.add('btn-primary');
-    
-    // Sauvegarder le temps
+    // Save time
     saveTime(finalTime);
+}
+
+function toggleTimer() {
+    if (isRunning) {
+        stopTimer();
+    } else {
+        startTimer();
+    }
 }
 
 async function saveTime(timeMs) {
@@ -147,8 +356,8 @@ async function saveTime(timeMs) {
             if (data.is_new_pb) {
                 showPBNotification();
             }
-            // Recharger la page pour voir les nouveaux temps
-            setTimeout(() => location.reload(), 1000);
+            // Reload to show new times
+            setTimeout(() => location.reload(), 1500);
         }
     } catch (error) {
         console.error('Erreur:', error);
@@ -159,6 +368,8 @@ function showPBNotification() {
     const notification = document.createElement('div');
     notification.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
     notification.style.zIndex = '9999';
+    notification.style.fontSize = '1.5rem';
+    notification.style.padding = '1.5rem';
     notification.innerHTML = `
         <strong>🎉 Nouveau Record Personnel!</strong>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -167,25 +378,48 @@ function showPBNotification() {
     setTimeout(() => notification.remove(), 3000);
 }
 
-// Event listeners
-startBtn.addEventListener('click', () => {
-    if (isRunning) {
-        stopTimer();
-    } else {
-        startTimer();
-    }
+// Event Listeners
+
+// Tap Zone - Main interaction for iPad
+timerTapZone.addEventListener('click', toggleTimer);
+
+// Prevent double-tap zoom on iOS
+timerTapZone.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    toggleTimer();
 });
 
-// Touche Espace
+// Button - Secondary control
+startBtn.addEventListener('click', toggleTimer);
+
+// Keyboard - For desktop users
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
         e.preventDefault();
-        if (isRunning) {
-            stopTimer();
-        } else {
-            startTimer();
-        }
+        toggleTimer();
     }
 });
+
+// Prevent accidental navigation on swipe
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const touchEndY = e.changedTouches[0].screenY;
+    
+    const diffX = touchStartX - touchEndX;
+    const diffY = touchStartY - touchEndY;
+    
+    // Prevent accidental back navigation on horizontal swipe
+    if (Math.abs(diffX) > 50 && Math.abs(diffY) < 50) {
+        e.preventDefault();
+    }
+}, { passive: false });
 </script>
 {% endblock %}
