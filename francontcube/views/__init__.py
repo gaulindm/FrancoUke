@@ -5,7 +5,8 @@ This module organizes views into a clean directory structure:
 - base.py: Reusable utilities and base classes
 - home.py: Home page and legacy views
 - cubienewbie/: Apprenti Cubi method views (8 step views)
-- cfop/: CFOP method views (coming soon)
+- beginner/: Beginner method views
+- cfop/: CFOP method views
 - roux/: Roux method views (coming soon)
 
 All views are exported from this module for easy URL routing.
@@ -61,18 +62,19 @@ from .beginner.about import about as beginner_about
 from .cfop.main import method_cfop
 from .cfop.about import about as cfop_about
 from .cfop.cross import cross as cfop_cross
-#from .cfop.f2l import f2l as cfop_f2l
-from .cfop.oll import oll as cfop_oll
-from .cfop.pll import pll as cfop_pll
+from .cfop.f2l import cfop, cfop_f2l_basic
 
-#from .cfop.f2l import cfop_f2l_basic
-from .cfop.f2l import cfop, cfop_f2l_basic  # ← Ajouter cfop ici
-
+# OLL & PLL - New system with categories and filtering
+from .cfop.oll_pll import (
+    cfop_oll_view,
+    cfop_pll_view,
+    oll_case_detail,
+    pll_case_detail,
+)
 
 # ============================================================
 # EXPORTS
 # ============================================================
-# List all views that should be accessible from francontcube.views
 __all__ = [
     # Home & legacy
     'home',
@@ -85,26 +87,41 @@ __all__ = [
     'ressources3par3',
     'tutorial_step',
     
-    # Cubie Newbie (uncomment as migrated)
+    # Cubie Newbie
     'method_cubienewbie',
-    'about',
-    'cube_intro',
-    'notation',
-    'daisy',
-    'white_cross',
-    'bottom_corners',
-    'second_layer',
-    'yellow_cross',
-    'yellow_face',
-    'corner_permutation',
-    'edge_permutation',
+    'cubienewbie_about',
+    'cubienewbie_cube_intro',
+    'cubienewbie_notation',
+    'cubienewbie_daisy',
+    'cubienewbie_white_cross',
+    'cubienewbie_bottom_corners',
+    'cubienewbie_second_layer',
+    'cubienewbie_yellow_cross',
+    'cubienewbie_yellow_face',
+    'cubienewbie_corner_permutation',
+    'cubienewbie_edge_permutation',
+    
+    # Beginner Method
+    'beginner_method',
+    'beginner_about',
+    'beginner_white_cross',
+    'beginner_bottom_corners',
+    'beginner_second_layer',
+    'beginner_yellow_cross',
+    'beginner_yellow_face',
+    'beginner_corner_permutation',
+    'beginner_edge_permutation',
 
-        # CFOP
+    # CFOP
     'method_cfop',
     'cfop_about',
     'cfop_cross',
-    'cfop',                # ← Add this
-    'cfop_f2l_basic',      # ← Add this
-    'cfop_oll',
-    'cfop_pll',
+    'cfop',
+    'cfop_f2l_basic',
+    
+    # OLL & PLL - New system
+    'cfop_oll_view',
+    'cfop_pll_view',
+    'oll_case_detail',
+    'pll_case_detail',
 ]

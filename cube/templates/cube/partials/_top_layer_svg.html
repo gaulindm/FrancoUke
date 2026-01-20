@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLL/PLL Top Layer Viewer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .cube-display {
+            display: flex;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .view-section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .view-section h2 {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .svg-wrapper {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            display: inline-block;
+        }
+        
+        .sticker {
+            stroke: #222;
+            stroke-width: 3;
+            stroke-linejoin: round;
+            transition: all 0.2s;
+        }
+        
+        .sticker:hover {
+            stroke-width: 5;
+            cursor: pointer;
+        }
+        
+        .side-sticker {
+            stroke: #222;
+            stroke-width: 2;
+            stroke-linejoin: round;
+        }
+        
+        .controls {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        button {
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+        
+        button.active {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .preset-buttons button {
+            padding: 12px 20px;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+        }
+        
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        
+        .color-legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #222;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 OLL/PLL Top Layer Viewer</h1>
+        <p class="subtitle">Visualiseur interactif pour les cas OLL et PLL du Rubik's Cube 3x3</p>
+        
+        <div class="info-box">
+            <h3>À propos de cette vue</h3>
+            <p><strong>Vue plate (2D):</strong> Représentation standard utilisée dans les tutoriels OLL/PLL, montrant le dessus du cube et les côtés visibles.</p>
+            <p><strong>Vue étendue (Net):</strong> Projection complète montrant toutes les faces autour du dessus, idéale pour voir tous les stickers d'un coup.</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>🎨 Presets OLL Célèbres:</label>
+                <div class="preset-buttons">
+                    <button onclick="loadSolved()">Résolu</button>
+                    <button onclick="loadOLLCross()">OLL Cross</button>
+                    <button onclick="loadOLLDot()">OLL Dot</button>
+                    <button onclick="loadOLLLine()">OLL Line</button>
+                    <button onclick="loadOLLLShape()">OLL L-Shape</button>
+                    <button onclick="loadPLLTPerm()">PLL T-Perm</button>
+                    <button onclick="loadPLLJaPerm()">PLL Ja-Perm</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>🎨 Couleurs pour le dessus (U face):</label>
+                <div class="button-grid">
+                    <button onclick="setColor('yellow')" style="background: #FFD700;">Jaune</button>
+                    <button onclick="setColor('white')" style="background: #FFFFFF;">Blanc</button>
+                    <button onclick="setColor('green')" style="background: #00D800;">Vert</button>
+                    <button onclick="setColor('blue')" style="background: #0051BA;">Bleu</button>
+                    <button onclick="setColor('red')" style="background: #C41E3A;">Rouge</button>
+                    <button onclick="setColor('orange')" style="background: #FF5800;">Orange</button>
+                    <button onclick="setColor('gray')" style="background: #808080;">Gris</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>🎨 Couleurs pour les côtés:</label>
+                <div class="button-grid">
+                    <button onclick="setSideColor('yellow')" style="background: #FFD700;">Jaune</button>
+                    <button onclick="setSideColor('white')" style="background: #FFFFFF;">Blanc</button>
+                    <button onclick="setSideColor('green')" style="background: #00D800;">Vert</button>
+                    <button onclick="setSideColor('blue')" style="background: #0051BA;">Bleu</button>
+                    <button onclick="setSideColor('red')" style="background: #C41E3A;">Rouge</button>
+                    <button onclick="setSideColor('orange')" style="background: #FF5800;">Orange</button>
+                    <button onclick="setSideColor('gray')" style="background: #808080;">Gris</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cube-display">
+            <div class="view-section">
+                <h2>Vue Plate Standard (2D)</h2>
+                <div class="svg-wrapper">
+                    <!-- Template 1: Standard 2D flat view -->
+                    <svg id="flat-view" width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <style>
+                                .face-label { font-family: Arial, sans-serif; font-size: 20px; font-weight: bold; fill: #666; }
+                            </style>
+                        </defs>
+                        
+                        <!-- Background -->
+                        <rect width="400" height="400" fill="#f5f5f5"/>
+                        
+                        <!-- U Face (Top) - Center -->
+                        <g id="u-face-flat">
+                            <!-- Row 0 -->
+                            <rect id="flat-U-0-0" class="sticker" x="135" y="135" width="40" height="40" fill="#FFD700"/>
+                            <rect id="flat-U-0-1" class="sticker" x="180" y="135" width="40" height="40" fill="#FFD700"/>
+                            <rect id="flat-U-0-2" class="sticker" x="225" y="135" width="40" height="40" fill="#FFD700"/>
+                            
+                            <!-- Row 1 -->
+                            <rect id="flat-U-1-0" class="sticker" x="135" y="180" width="40" height="40" fill="#FFD700"/>
+                            <rect id="flat-U-1-1" class="sticker" x="180" y="180" width="40" height="40" fill="#FFD700"/>
+                            <rect id="flat-U-1-2" class="sticker" x="225" y="180" width="40" height="40" fill="#FFD700"/>
+                            
+                            <!-- Row 2 -->
+                            <rect id="flat-U-2-0" class="sticker" x="135" y="225" width="40" height="40" fill="#FFD700"/>
+                            <rect id="flat-U-2-1" class="sticker" x="180" y="225" width="40" height="40" fill="#FFD700"/>
+                            <rect id="flat-U-2-2" class="sticker" x="225" y="225" width="40" height="40" fill="#FFD700"/>
+                        </g>
+                        
+                        <!-- Side stickers (top row of F, R, B, L faces) -->
+                        
+                        <!-- F Face (Front) - Top row -->
+                        <g id="f-face-flat">
+                            <rect id="flat-F-0-0" class="side-sticker" x="135" y="270" width="40" height="25" fill="#00D800"/>
+                            <rect id="flat-F-0-1" class="side-sticker" x="180" y="270" width="40" height="25" fill="#00D800"/>
+                            <rect id="flat-F-0-2" class="side-sticker" x="225" y="270" width="40" height="25" fill="#00D800"/>
+                            <text x="200" y="313" class="face-label" text-anchor="middle">F</text>
+                        </g>
+                        
+                        <!-- R Face (Right) - Top row -->
+                        <g id="r-face-flat">
+                            <rect id="flat-R-0-0" class="side-sticker" x="270" y="135" width="25" height="40" fill="#C41E3A"/>
+                            <rect id="flat-R-0-1" class="side-sticker" x="270" y="180" width="25" height="40" fill="#C41E3A"/>
+                            <rect id="flat-R-0-2" class="side-sticker" x="270" y="225" width="25" height="40" fill="#C41E3A"/>
+                            <text x="310" y="205" class="face-label" text-anchor="middle">R</text>
+                        </g>
+                        
+                        <!-- B Face (Back) - Top row -->
+                        <g id="b-face-flat">
+                            <rect id="flat-B-0-0" class="side-sticker" x="135" y="105" width="40" height="25" fill="#0051BA"/>
+                            <rect id="flat-B-0-1" class="side-sticker" x="180" y="105" width="40" height="25" fill="#0051BA"/>
+                            <rect id="flat-B-0-2" class="side-sticker" x="225" y="105" width="40" height="25" fill="#0051BA"/>
+                            <text x="200" y="95" class="face-label" text-anchor="middle">B</text>
+                        </g>
+                        
+                        <!-- L Face (Left) - Top row -->
+                        <g id="l-face-flat">
+                            <rect id="flat-L-0-2" class="side-sticker" x="105" y="135" width="25" height="40" fill="#FF5800"/>
+                            <rect id="flat-L-0-1" class="side-sticker" x="105" y="180" width="25" height="40" fill="#FF5800"/>
+                            <rect id="flat-L-0-0" class="side-sticker" x="105" y="225" width="25" height="40" fill="#FF5800"/>
+                            <text x="90" y="205" class="face-label" text-anchor="middle">L</text>
+                        </g>
+                        
+                        <!-- Label -->
+                        <text x="200" y="360" style="font-size: 16px; fill: #999;" text-anchor="middle">Vue Standard 2D</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="view-section">
+                <h2>Vue Étendue (Net/Projection)</h2>
+                <div class="svg-wrapper">
+                    <!-- Template 2: Extended net view showing all surrounding faces -->
+                    <svg id="net-view" width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <style>
+                                .net-label { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; fill: #666; }
+                            </style>
+                        </defs>
+                        
+                        <!-- Background -->
+                        <rect width="500" height="500" fill="#f5f5f5"/>
+                        
+                        <!-- B Face (Back) - Top -->
+                        <g id="b-face-net">
+                            <rect id="net-B-0-0" class="sticker" x="190" y="20" width="35" height="35" fill="#0051BA"/>
+                            <rect id="net-B-0-1" class="sticker" x="230" y="20" width="35" height="35" fill="#0051BA"/>
+                            <rect id="net-B-0-2" class="sticker" x="270" y="20" width="35" height="35" fill="#0051BA"/>
+                            <text x="247" y="80" class="net-label" text-anchor="middle">B</text>
+                        </g>
+                        
+                        <!-- U Face (Top) - Center -->
+                        <g id="u-face-net">
+                            <!-- Row 0 -->
+                            <rect id="net-U-0-0" class="sticker" x="190" y="100" width="35" height="35" fill="#FFD700"/>
+                            <rect id="net-U-0-1" class="sticker" x="230" y="100" width="35" height="35" fill="#FFD700"/>
+                            <rect id="net-U-0-2" class="sticker" x="270" y="100" width="35" height="35" fill="#FFD700"/>
+                            
+                            <!-- Row 1 -->
+                            <rect id="net-U-1-0" class="sticker" x="190" y="140" width="35" height="35" fill="#FFD700"/>
+                            <rect id="net-U-1-1" class="sticker" x="230" y="140" width="35" height="35" fill="#FFD700"/>
+                            <rect id="net-U-1-2" class="sticker" x="270" y="140" width="35" height="35" fill="#FFD700"/>
+                            
+                            <!-- Row 2 -->
+                            <rect id="net-U-2-0" class="sticker" x="190" y="180" width="35" height="35" fill="#FFD700"/>
+                            <rect id="net-U-2-1" class="sticker" x="230" y="180" width="35" height="35" fill="#FFD700"/>
+                            <rect id="net-U-2-2" class="sticker" x="270" y="180" width="35" height="35" fill="#FFD700"/>
+                        </g>
+                        
+                        <!-- L Face (Left) -->
+                        <g id="l-face-net">
+                            <rect id="net-L-0-2" class="sticker" x="110" y="100" width="35" height="35" fill="#FF5800"/>
+                            <rect id="net-L-0-1" class="sticker" x="110" y="140" width="35" height="35" fill="#FF5800"/>
+                            <rect id="net-L-0-0" class="sticker" x="110" y="180" width="35" height="35" fill="#FF5800"/>
+                            <text x="127" y="238" class="net-label" text-anchor="middle">L</text>
+                        </g>
+                        
+                        <!-- R Face (Right) -->
+                        <g id="r-face-net">
+                            <rect id="net-R-0-0" class="sticker" x="350" y="100" width="35" height="35" fill="#C41E3A"/>
+                            <rect id="net-R-0-1" class="sticker" x="350" y="140" width="35" height="35" fill="#C41E3A"/>
+                            <rect id="net-R-0-2" class="sticker" x="350" y="180" width="35" height="35" fill="#C41E3A"/>
+                            <text x="367" y="238" class="net-label" text-anchor="middle">R</text>
+                        </g>
+                        
+                        <!-- F Face (Front) - Bottom -->
+                        <g id="f-face-net">
+                            <rect id="net-F-0-0" class="sticker" x="190" y="260" width="35" height="35" fill="#00D800"/>
+                            <rect id="net-F-0-1" class="sticker" x="230" y="260" width="35" height="35" fill="#00D800"/>
+                            <rect id="net-F-0-2" class="sticker" x="270" y="260" width="35" height="35" fill="#00D800"/>
+                            <text x="247" y="318" class="net-label" text-anchor="middle">F</text>
+                        </g>
+                        
+                        <!-- Label -->
+                        <text x="247" y="360" style="font-size: 16px; fill: #999;" text-anchor="middle">Vue Étendue (Net)</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>💡 Utilisation</h3>
+            <div class="color-legend">
+                <div class="color-item">
+                    <div class="color-box" style="background: #FFD700;"></div>
+                    <span>Jaune (Top)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #00D800;"></div>
+                    <span>Vert (Front)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #C41E3A;"></div>
+                    <span>Rouge (Right)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #0051BA;"></div>
+                    <span>Bleu (Back)</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box" style="background: #FF5800;"></div>
+                    <span>Orange (Left)</span>
+                </div>
+            </div>
+            <p style="margin-top: 15px;"><strong>Instructions:</strong> Cliquez sur les stickers pour changer leur couleur. Utilisez les presets pour charger des cas OLL/PLL célèbres.</p>
+        </div>
+    </div>
+
+    <script>
+        const COLORS = {
+            'yellow': '#FFD700',
+            'white': '#FFFFFF',
+            'green': '#00D800',
+            'blue': '#0051BA',
+            'red': '#C41E3A',
+            'orange': '#FF5800',
+            'gray': '#808080'
+        };
+        
+        let selectedColor = 'yellow';
+        let selectedSideColor = 'green';
+        let selectedSticker = null;
+        
+        // Make stickers clickable
+        document.querySelectorAll('.sticker').forEach(sticker => {
+            sticker.addEventListener('click', function() {
+                this.setAttribute('fill', COLORS[selectedColor]);
+                
+                // Update corresponding sticker in other view
+                const id = this.id;
+                const otherView = id.startsWith('flat-') ? 'net-' : 'flat-';
+                const correspondingId = id.replace(/^(flat-|net-)/, otherView);
+                const otherSticker = document.getElementById(correspondingId);
+                if (otherSticker) {
+                    otherSticker.setAttribute('fill', COLORS[selectedColor]);
+                }
+            });
+        });
+        
+        document.querySelectorAll('.side-sticker').forEach(sticker => {
+            sticker.addEventListener('click', function() {
+                this.setAttribute('fill', COLORS[selectedSideColor]);
+                
+                // Update corresponding sticker in other view
+                const id = this.id;
+                const otherView = id.startsWith('flat-') ? 'net-' : 'flat-';
+                const correspondingId = id.replace(/^(flat-|net-)/, otherView);
+                const otherSticker = document.getElementById(correspondingId);
+                if (otherSticker) {
+                    otherSticker.setAttribute('fill', COLORS[selectedSideColor]);
+                }
+            });
+        });
+        
+        function setColor(color) {
+            selectedColor = color;
+            // Visual feedback
+            document.querySelectorAll('.button-grid button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function setSideColor(color) {
+            selectedSideColor = color;
+        }
+        
+        function setAllStickers(color) {
+            document.querySelectorAll('.sticker').forEach(sticker => {
+                sticker.setAttribute('fill', COLORS[color]);
+            });
+        }
+        
+        function setSideStickers(facePrefix, color) {
+            document.querySelectorAll(`[id*="${facePrefix}"]`).forEach(sticker => {
+                if (sticker.classList.contains('side-sticker') || sticker.classList.contains('sticker')) {
+                    sticker.setAttribute('fill', COLORS[color]);
+                }
+            });
+        }
+        
+        function loadSolved() {
+            // Yellow top
+            setAllStickers('yellow');
+            
+            // Side colors
+            setSideStickers('F', 'green');
+            setSideStickers('R', 'red');
+            setSideStickers('B', 'blue');
+            setSideStickers('L', 'orange');
+        }
+        
+        function loadOLLCross() {
+            // Yellow cross pattern on top
+            setAllStickers('gray');
+            
+            // Cross pieces yellow
+            ['U-0-1', 'U-1-0', 'U-1-1', 'U-1-2', 'U-2-1'].forEach(pos => {
+                document.querySelectorAll(`[id*="${pos}"]`).forEach(el => {
+                    if (el.classList.contains('sticker')) el.setAttribute('fill', COLORS['yellow']);
+                });
+            });
+            
+            setSideStickers('F', 'green');
+            setSideStickers('R', 'red');
+            setSideStickers('B', 'blue');
+            setSideStickers('L', 'orange');
+        }
+        
+        function loadOLLDot() {
+            // Only center is yellow
+            setAllStickers('gray');
+            
+            document.querySelectorAll('[id*="U-1-1"]').forEach(el => {
+                if (el.classList.contains('sticker')) el.setAttribute('fill', COLORS['yellow']);
+            });
+            
+            setSideStickers('F', 'green');
+            setSideStickers('R', 'red');
+            setSideStickers('B', 'blue');
+            setSideStickers('L', 'orange');
+        }
+        
+        function loadOLLLine() {
+            // Horizontal line pattern
+            setAllStickers('gray');
+            
+            ['U-1-0', 'U-1-1', 'U-1-2'].forEach(pos => {
+                document.querySelectorAll(`[id*="${pos}"]`).forEach(el => {
+                    if (el.classList.contains('sticker')) el.setAttribute('fill', COLORS['yellow']);
+                });
+            });
+            
+            setSideStickers('F', 'green');
+            setSideStickers('R', 'red');
+            setSideStickers('B', 'blue');
+            setSideStickers('L', 'orange');
+        }
+        
+        function loadOLLLShape() {
+            // L-shape pattern
+            setAllStickers('gray');
+            
+            ['U-0-0', 'U-1-0', 'U-2-0', 'U-2-1', 'U-1-1'].forEach(pos => {
+                document.querySelectorAll(`[id*="${pos}"]`).forEach(el => {
+                    if (el.classList.contains('sticker')) el.setAttribute('fill', COLORS['yellow']);
+                });
+            });
+            
+            setSideStickers('F', 'green');
+            setSideStickers('R', 'red');
+            setSideStickers('B', 'blue');
+            setSideStickers('L', 'orange');
+        }
+        
+        function loadPLLTPerm() {
+            // All yellow on top
+            setAllStickers('yellow');
+            
+            // T-Perm side pattern
+            setSideStickers('F', 'green');
+            setSideStickers('R', 'red');
+            setSideStickers('B', 'blue');
+            setSideStickers('L', 'orange');
+            
+            // Swap some edges to show T-perm pattern
+            document.querySelectorAll('[id*="F-0-1"]').forEach(el => {
+                if (el.classList.contains('side-sticker') || el.classList.contains('sticker')) 
+                    el.setAttribute('fill', COLORS['blue']);
+            });
+            document.querySelectorAll('[id*="B-0-1"]').forEach(el => {
+                if (el.classList.contains('side-sticker') || el.classList.contains('sticker')) 
+                    el.setAttribute('fill', COLORS['green']);
+            });
+        }
+        
+        function loadPLLJaPerm() {
+            // All yellow on top
+            setAllStickers('yellow');
+            
+            // Ja-Perm pattern
+            setSideStickers('F', 'green');
+            setSideStickers('R', 'red');
+            setSideStickers('B', 'blue');
+            setSideStickers('L', 'orange');
+            
+            // Corner swap pattern
+            document.querySelectorAll('[id*="R-0-0"]').forEach(el => {
+                if (el.classList.contains('side-sticker') || el.classList.contains('sticker')) 
+                    el.setAttribute('fill', COLORS['blue']);
+            });
+            document.querySelectorAll('[id*="B-0-2"]').forEach(el => {
+                if (el.classList.contains('side-sticker') || el.classList.contains('sticker')) 
+                    el.setAttribute('fill', COLORS['red']);
+            });
+        }
+        
+        // Initialize with solved state
+        loadSolved();
+    </script>
+</body>
+</html>

@@ -93,3 +93,75 @@ def f2l_case_detail(request, slug):
     }
     
     return render(request, 'cube/f2l_case_detail.html', context)
+
+def test_top_layer_svg(request):
+    """
+    Test view for top layer SVG visualization
+    Shows different OLL/PLL patterns
+    """
+    from cube.models import CubeState
+    
+    # Get some sample cases
+    test_cases = []
+    
+    # Try to get OLL cases
+    oll_cases = CubeState.objects.filter(slug__startswith='oll-')[:5]
+    test_cases.extend(oll_cases)
+    
+    # Try to get PLL cases
+    pll_cases = CubeState.objects.filter(slug__startswith='pll-')[:5]
+    test_cases.extend(pll_cases)
+    
+    # Create some manual test patterns if no cases exist
+    if not test_cases:
+        test_cases = [
+            {
+                'name': 'Test Pattern - Solved',
+                'colors': {
+                    'U': {
+                        '0': {'0': '#FFD700', '1': '#FFD700', '2': '#FFD700'},
+                        '1': {'0': '#FFD700', '1': '#FFD700', '2': '#FFD700'},
+                        '2': {'0': '#FFD700', '1': '#FFD700', '2': '#FFD700'},
+                    },
+                    'F': {'0': {'0': '#00D800', '1': '#00D800', '2': '#00D800'}},
+                    'R': {'0': {'0': '#C41E3A', '1': '#C41E3A', '2': '#C41E3A'}},
+                    'B': {'0': {'0': '#0051BA', '1': '#0051BA', '2': '#0051BA'}},
+                    'L': {'0': {'0': '#FF5800', '1': '#FF5800', '2': '#FF5800'}},
+                }
+            },
+            {
+                'name': 'Test Pattern - Dot (OLL)',
+                'colors': {
+                    'U': {
+                        '0': {'0': '#808080', '1': '#808080', '2': '#808080'},
+                        '1': {'0': '#808080', '1': '#FFD700', '2': '#808080'},
+                        '2': {'0': '#808080', '1': '#808080', '2': '#808080'},
+                    },
+                    'F': {'0': {'0': '#00D800', '1': '#00D800', '2': '#00D800'}},
+                    'R': {'0': {'0': '#C41E3A', '1': '#C41E3A', '2': '#C41E3A'}},
+                    'B': {'0': {'0': '#0051BA', '1': '#0051BA', '2': '#0051BA'}},
+                    'L': {'0': {'0': '#FF5800', '1': '#FF5800', '2': '#FF5800'}},
+                }
+            },
+            {
+                'name': 'Test Pattern - Line (OLL)',
+                'colors': {
+                    'U': {
+                        '0': {'0': '#808080', '1': '#808080', '2': '#808080'},
+                        '1': {'0': '#FFD700', '1': '#FFD700', '2': '#FFD700'},
+                        '2': {'0': '#808080', '1': '#808080', '2': '#808080'},
+                    },
+                    'F': {'0': {'0': '#00D800', '1': '#00D800', '2': '#00D800'}},
+                    'R': {'0': {'0': '#C41E3A', '1': '#C41E3A', '2': '#C41E3A'}},
+                    'B': {'0': {'0': '#0051BA', '1': '#0051BA', '2': '#0051BA'}},
+                    'L': {'0': {'0': '#FF5800', '1': '#FF5800', '2': '#FF5800'}},
+                }
+            },
+        ]
+    
+    context = {
+        'test_cases': test_cases,
+        'page_title': 'Top Layer SVG Test',
+    }
+    
+    return render(request, 'cube/test_top_layer.html', context)

@@ -48,11 +48,7 @@
         </p>
 
         <div class="row mt-3">
-            <div class="col-md-6 text-center mb-3">
-                <h5>Avant : Croix blanche</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">4 arêtes blanches en place</small></p>
-            </div>
+
             <div class="col-md-6 text-center mb-3">
                 <h5>Après : Première couche complète</h5>
                 <div id="cube-goal" class="cube-small"></div>
@@ -60,6 +56,37 @@
             </div>
         </div>
     </div>
+
+
+        <!-- Cas 1: Face vers la droite -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-success">✅ Un seul algorithm a executer</h5>
+            <p>La couleur qui correspond au centre de devant est <strong>sur la face avant</strong>.</p>
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="text-center p-3 bg-white rounded border border-success border-2">
+                        <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                            <svg class="move-icon"><use href="#R"/></svg>
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#R-prime"/></svg>
+                            <svg class="move-icon"><use href="#U-prime"/></svg>
+                        </div>
+                   
+                    </div>
+                </div>
+                <div class="col-md-6 text-center">
+                    <div class="text-center p-3 bg-white rounded border border-success border-2">
+                        
+                        <p class="mb-0 mt-6">
+                            👉 <strong>Executez l'algorithme 6 fois et votre cube reprendera.</strong><br>
+                        </p>                    
+                    </div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+
+            </div>
+        </div>
 
     <!-- Section Trouver le coin -->
     <div class="card p-4 mb-4">
@@ -351,7 +378,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     // Mount all cubes
-    mountCube("cube-before", {{ before_state|safe }});
+    
     mountCube("cube-goal", {{ goal_state|safe }});
     
     // The 3 algorithm cases

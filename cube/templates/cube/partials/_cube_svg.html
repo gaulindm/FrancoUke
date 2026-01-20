@@ -1,7 +1,7 @@
 <!-- _cube_svg.html -->
 <template id="cube-template">
   <div class="cube-wrapper">
-    <svg id="cube-svg" width="550" height="460" viewBox="0 0 550 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rubik's cube isometric view">
+    <svg id="cube-svg" width="550" height="460" viewBox="0 0 500 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rubik's cube isometric view">
       
       <style>
         .sticker {
@@ -9,26 +9,77 @@
           stroke-width: 2;
           stroke-linejoin: round;
         }
+        .sticker-hidden {
+          stroke: #eeeeee;
+          stroke-width: 4;
+          stroke-linejoin: round;
+        }
       </style>
+      <polygon points="0,0 500,0 500,360 0,360" style="fill:#eeeeee" />
+
 
       <g id="cube">
 
         <!-- ===================== -->
-        <!--  R (Right) Face       -->
+        <!--  B Face               -->
         <!-- ===================== -->
-        <g id="face-R">
-            <polygon id="sticker-R-0-0" class="sticker" points="287.7,133.8 310.633,108.167 313.456,164.644 291.700,191.167" />
-            <polygon id="sticker-R-0-1" class="sticker" points="310.633,108.167 333.567,82.533 335.211,138.122 313.456,164.644" />
-            <polygon id="sticker-R-0-2" class="sticker" points="333.567,82.533 356.5,56.9 356.967,111.600 335.211,138.122" />
+        <g id="face-B">
+          <!-- Only top row and right column will be visible -->
+          <!-- Shifted right (+200px total) and up by 1/6 of cube height (~46px) -->
+          <polygon id="sticker-B-0-0" class="sticker-hidden" points="229.14,22.905 278.26,27.594 278.729,82.269 229.61,77.581" /> 
+          <polygon id="sticker-B-0-1" class="sticker-hidden" points="278.26,27.594 327.379,32.28 327.847,86.96 278.729,82.269" />
+          <polygon id="sticker-B-0-2" class="sticker-hidden" points="327.379,32.28 376.499,36.973 376.966,91.649 327.847,86.96" />  
 
-            <polygon id="sticker-R-1-0" class="sticker" points="291.700,191.167 313.456,164.644 316.278,221.122 295.700,248.533" />
-            <polygon id="sticker-R-1-1" class="sticker" points="313.456,164.644 335.211,138.122 336.856,193.711 316.278,221.122" />
-            <polygon id="sticker-R-1-2" class="sticker" points="335.211,138.122 356.967,111.600 357.433,166.300 336.856,193.711" />
+          <polygon id="sticker-B-1-0" class="sticker-hidden" points="229.61,77.581 278.729,82.269 279.197,136.945 230.079,132.256" />
+          <polygon id="sticker-B-1-1" class="sticker-hidden" points="278.729,82.269 327.847,86.96 328.315,141.634 279.197,136.945" />
+          <polygon id="sticker-B-1-2" class="sticker-hidden" points="327.847,86.96 376.966,91.649 377.433,146.324 328.315,141.634" />
 
-            <polygon id="sticker-R-2-0" class="sticker" points="295.700,248.533 316.278,221.122 319.100,277.600 299.700,305.900" />
-            <polygon id="sticker-R-2-1" class="sticker" points="316.278,221.122 336.856,193.711 338.500,249.300 319.100,277.600" />
-            <polygon id="sticker-R-2-2" class="sticker" points="336.856,193.711 357.433,166.300 357.900,221.000 338.500,249.300" />
-        </g>
+          <polygon id="sticker-B-2-0" class="sticker-hidden" points="230.079,132.256 279.197,136.945 279.666,191.62 230.549,186.932" />
+          <polygon id="sticker-B-2-1" class="sticker-hidden" points="279.197,136.945 328.315,141.634 328.783,196.311 279.666,191.62" />
+          <polygon id="sticker-B-2-2" class="sticker-hidden" points="328.315,141.634 377.433,146.324 377.9,201 328.783,196.311" />
+      </g>
+
+
+
+
+
+
+
+        <!-- ===================== -->
+        <!--  L Face               -->
+        <!-- ===================== -->
+        <g id="face-L">
+          <polygon id="sticker-L-0-0" class="sticker-hidden" points="94.1,92 122.449,68.968 128.45,120.912 101.433,145.233" />  
+          <polygon id="sticker-L-0-1" class="sticker-hidden" points="122.449,68.968 150.799,45.94 155.468,96.591 128.45,120.912" />
+          <polygon id="sticker-L-0-2" class="sticker-hidden" points="150.799,45.94 179.148,22.905 182.485,72.27 155.468,96.591" /> 
+          
+          <polygon id="sticker-L-1-0" class="sticker-hidden" points="101.433,145.233 128.45,120.912 134.452,172.856 108.767,198.467" />
+          <polygon id="sticker-L-1-1" class="sticker-hidden" points="128.45,120.912 155.468,96.591 160.136,147.247 134.452,172.856" />
+          <polygon id="sticker-L-1-2" class="sticker-hidden" points="155.468,96.591 182.485,72.27 185.821,121.635 160.136,147.247" />
+
+          <polygon id="sticker-L-2-0" class="sticker-hidden" points="108.767,198.467 134.452,172.856 140.453,224.8 116.1,251.7" />
+          <polygon id="sticker-L-2-1" class="sticker-hidden" points="134.452,172.856 160.136,147.247 164.805,197.9 140.453,224.8" />
+          <polygon id="sticker-L-2-2" class="sticker-hidden" points="160.136,147.247 185.821,121.635 189.158,171 164.805,197.9" />
+      </g>
+
+        <!-- ===================== -->
+        <!--  D Face               -->
+        <!-- ===================== -->
+        <g id="face-D">
+          <polygon id="sticker-D-2-0" class="sticker-hidden" points="214.3,210.8 266.167,220.533 246.545,249.389 194.9,239.1" /> 
+          <polygon id="sticker-D-2-1" class="sticker-hidden" points="266.167,220.533 318.033,230.27 298.189,259.678 246.545,249.389" />
+          <polygon id="sticker-D-2-2" class="sticker-hidden" points="318.033,230.27 369.9,240 349.833,269.967 298.189,259.678" />  
+
+          <polygon id="sticker-D-1-0" class="sticker-hidden" points="194.9,239.1 246.545,249.389 226.922,278.244 175.5,267.4" />
+          <polygon id="sticker-D-1-1" class="sticker-hidden" points="246.545,249.389 298.189,259.678 278.344,289.09 226.922,278.244" />
+          <polygon id="sticker-D-1-2" class="sticker-hidden" points="298.189,259.678 349.833,269.967 329.767,299.933 278.344,289.09" />
+
+          <polygon id="sticker-D-0-0" class="sticker-hidden" points="175.5,267.4 226.922,278.244 207.3,307.1 156.1,295.7" />
+          <polygon id="sticker-D-0-1" class="sticker-hidden" points="226.922,278.244 278.344,289.09 258.5,318.5 207.3,307.1" />
+          <polygon id="sticker-D-0-2" class="sticker-hidden" points="278.344,289.09 329.767,299.933 309.7,329.9 258.5,318.5" />
+      </g>
+
+      
 
         <!-- ===================== -->
         <!--  F (Front) Face       -->
@@ -64,56 +115,35 @@
             <polygon id="sticker-U-2-2" class="sticker" points="257.928,101.813 310.657,108.22 287.736,133.844 233.2,126.577" />
         </g>
 
-        <!-- ===================== -->
-        <!--  L Face               -->
-        <!-- ===================== -->
-        <g id="face-L">
-            <polygon id="sticker-L-0-0" class="sticker" points="37.7,103.8 60.633,78.167 63.456,134.644 41.7,161.167" /> 
-            <polygon id="sticker-L-0-1" class="sticker" points="60.633,78.167 83.567,52.533 85.211,108.122 63.456,134.644" />
-            <polygon id="sticker-L-0-2" class="sticker" points="83.567,52.533 106.5,26.9 106.967,81.6 85.211,108.122" />  
 
-            <polygon id="sticker-L-1-0" class="sticker" points="41.7,161.167 63.456,134.644 66.278,191.122 45.7,218.533" />
-            <polygon id="sticker-L-1-1" class="sticker" points="63.456,134.644 85.211,108.122 86.856,163.711 66.278,191.122" />
-            <polygon id="sticker-L-1-2" class="sticker" points="85.211,108.122 106.967,81.6 107.433,136.3 86.856,163.711" />
 
-            <polygon id="sticker-L-2-0" class="sticker" points="45.7,218.533 66.278,191.122 69.1,247.6 49.7,275.9" />
-            <polygon id="sticker-L-2-1" class="sticker" points="66.278,191.122 86.856,163.711 88.5,219.3 69.1,247.6" />
-            <polygon id="sticker-L-2-2" class="sticker" points="86.856,163.711 107.433,136.3 107.9,191 88.5,219.3" />
-        </g>
 
         <!-- ===================== -->
-        <!--  D Face               -->
+        <!--  R (Right) Face       -->
         <!-- ===================== -->
-        <g id="face-D">
-            <polygon id="sticker-D-2-0" class="sticker" points="209.148,321.905 258.265,323.594 231.732,345.5 180.808,341.951" /> 
-            <polygon id="sticker-D-2-1" class="sticker" points="258.265,323.594 307.382,325.284 282.655,349.048 231.732,345.5" />
-            <polygon id="sticker-D-2-2" class="sticker" points="307.382,325.284 356.499,326.973 333.578,352.597 282.655,349.048" />  
+        <g id="face-R">
+          <polygon id="sticker-R-0-0" class="sticker" points="287.7,133.8 310.633,108.167 313.456,164.644 291.700,191.167" />
+          <polygon id="sticker-R-0-1" class="sticker" points="310.633,108.167 333.567,82.533 335.211,138.122 313.456,164.644" />
+          <polygon id="sticker-R-0-2" class="sticker" points="333.567,82.533 356.5,56.9 356.967,111.600 335.211,138.122" />
 
-            <polygon id="sticker-D-1-0" class="sticker" points="180.808,341.951 231.732,345.5 205.198,367.405 152.469,361.998" />
-            <polygon id="sticker-D-1-1" class="sticker" points="231.732,345.5 282.655,349.048 257.928,372.813 205.198,367.405" />
-            <polygon id="sticker-D-1-2" class="sticker" points="282.655,349.048 333.578,352.597 310.657,378.22 257.928,372.813" />
+          <polygon id="sticker-R-1-0" class="sticker" points="291.700,191.167 313.456,164.644 316.278,221.122 295.700,248.533" />
+          <polygon id="sticker-R-1-1" class="sticker" points="313.456,164.644 335.211,138.122 336.856,193.711 316.278,221.122" />
+          <polygon id="sticker-R-1-2" class="sticker" points="335.211,138.122 356.967,111.600 357.433,166.300 336.856,193.711" />
 
-            <polygon id="sticker-D-0-0" class="sticker" points="152.469,361.998 205.198,367.405 178.665,389.311 124.129,382.044" />
-            <polygon id="sticker-D-0-1" class="sticker" points="205.198,367.405 257.928,372.813 233.2,396.577 178.665,389.311" />
-            <polygon id="sticker-D-0-2" class="sticker" points="257.928,372.813 310.657,378.22 287.736,403.844 233.2,396.577" />
-        </g>
+          <polygon id="sticker-R-2-0" class="sticker" points="295.700,248.533 316.278,221.122 319.100,277.600 299.700,305.900" />
+          <polygon id="sticker-R-2-1" class="sticker" points="316.278,221.122 336.856,193.711 338.500,249.300 319.100,277.600" />
+          <polygon id="sticker-R-2-2" class="sticker" points="336.856,193.711 357.433,166.300 357.900,221.000 338.500,249.300" />
+      </g>
+      <!--  R whole Face       
+      <polygon points="287.7,133.8  356.5,56.9 357.900,221.000 299.700,305.900" style="fill:None;stroke:purple;stroke-width:3" />-->
+      <!--  L whole Face       
+      <polygon points="94.100,92.000  179.148,22.905 189.158,171.000 116.100,251.700" style="fill:None;stroke:cyan;stroke-width:5" />-->
 
-        <!-- ===================== -->
-        <!--  B Face               -->
-        <!-- ===================== -->
-        <g id="face-B">
-            <polygon id="sticker-B-0-0" class="sticker" points="473.167,76.533 527.7,83.8 531.7,141.167 478.278,132.522" /> 
-            <polygon id="sticker-B-0-1" class="sticker" points="418.633,69.267 473.167,76.533 478.278,132.522 424.856,123.878" />
-            <polygon id="sticker-B-0-2" class="sticker" points="364.1,62 418.633,69.267 424.856,123.878 371.433,115.233" />  
+      <!--  D whole Face    
+      <polygon points="214.3,210.8 369.900,240.000 309.700,329.900 156.100,295.700" style="fill:None;stroke:cyan;stroke-width:5" />-->
 
-            <polygon id="sticker-B-1-0" class="sticker" points="478.278,132.522 531.7,141.167 535.7,198.533 483.389,188.511" />
-            <polygon id="sticker-B-1-1" class="sticker" points="424.856,123.878 478.278,132.522 483.389,188.511 431.078,178.489" />
-            <polygon id="sticker-B-1-2" class="sticker" points="371.433,115.233 424.856,123.878 431.078,178.489 378.767,168.467" />
-
-            <polygon id="sticker-B-2-0" class="sticker" points="483.389,188.511 535.7,198.533 539.7,255.9 488.5,244.5" />
-            <polygon id="sticker-B-2-1" class="sticker" points="431.078,178.489 483.389,188.511 488.5,244.5 437.3,233.1" />
-            <polygon id="sticker-B-2-2" class="sticker" points="378.767,168.467 431.078,178.489 437.3,233.1 386.1,221.7" />
-        </g>
+      <!--  B whole Face
+      <polygon points="229.148,22.905 376.499,36.973 377.900,201.000 230.549,186.932" style="fill:None;stroke:cyan;stroke-width:5" />-->
 
       </g>
     </svg>

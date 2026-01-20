@@ -23,7 +23,6 @@ class BottomCornersView(StepView):
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
         'goal_state': 'bottom-corners-goal',
-        'before_state': 'bottom-corners-before',
         'case_1_state': 'bottom-corners-case_1',
         'case_2_state': 'bottom-corners-case_2',
         'case_3_state': 'bottom-corners-case_3',
