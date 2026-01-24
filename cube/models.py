@@ -81,92 +81,92 @@ class CubeState(models.Model):
         return mark_safe('\n                            '.join(svg_list))
     
     
-def get_top_layer_colors(self):
-    """
-    Generate color mapping for top layer SVG visualization.
-    
-    Imports patterns from separate OLL and PLL files for maintainability.
-    Returns a dict with color values for each sticker position.
-    
-    For OLL: Yellow = oriented, Gray = not oriented
-    For PLL: All yellow on top, side colors show permutation
-    """
-    from .oll_patterns import get_oll_pattern
-    from .pll_patterns import get_pll_pattern
-    
-    # Try to get pattern from appropriate file
-    pattern = None
-    if self.slug.startswith('oll-'):
-        pattern = get_oll_pattern(self.slug)
-    elif self.slug.startswith('pll-'):
-        pattern = get_pll_pattern(self.slug)
-    
-    # Default pattern if not found (solved cube)
-    if not pattern:
-        pattern = {
-            'U': [
-                ['#FFD700', '#FFD700', '#FFD700'],
-                ['#FFD700', '#FFD700', '#FFD700'],
-                ['#FFD700', '#FFD700', '#FFD700'],
-            ],
-            'F': ['#00D800', '#00D800', '#00D800'],
-            'R': ['#C41E3A', '#C41E3A', '#C41E3A'],
-            'B': ['#0051BA', '#0051BA', '#0051BA'],
-            'L': ['#FF5800', '#FF5800', '#FF5800'],
+    def get_top_layer_colors(self):
+        """
+        Generate color mapping for top layer SVG visualization.
+        
+        Imports patterns from separate OLL and PLL files for maintainability.
+        Returns a dict with color values for each sticker position.
+        
+        For OLL: Yellow = oriented, Gray = not oriented
+        For PLL: All yellow on top, side colors show permutation
+        """
+        from .oll_patterns import get_oll_pattern
+        from .pll_patterns import get_pll_pattern
+        
+        # Try to get pattern from appropriate file
+        pattern = None
+        if self.slug.startswith('oll-'):
+            pattern = get_oll_pattern(self.slug)
+        elif self.slug.startswith('pll-'):
+            pattern = get_pll_pattern(self.slug)
+        
+        # Default pattern if not found (solved cube)
+        if not pattern:
+            pattern = {
+                'U': [
+                    ['#FFD700', '#FFD700', '#FFD700'],
+                    ['#FFD700', '#FFD700', '#FFD700'],
+                    ['#FFD700', '#FFD700', '#FFD700'],
+                ],
+                'F': ['#00D800', '#00D800', '#00D800'],
+                'R': ['#C41E3A', '#C41E3A', '#C41E3A'],
+                'B': ['#0051BA', '#0051BA', '#0051BA'],
+                'L': ['#FF5800', '#FF5800', '#FF5800'],
+            }
+        
+        # Convert pattern to template format
+        # Template expects: colors.U.0.0, colors.U.0.1, etc.
+        colors = {
+            'U': {
+                '0': {
+                    '0': pattern['U'][0][0],
+                    '1': pattern['U'][0][1],
+                    '2': pattern['U'][0][2],
+                },
+                '1': {
+                    '0': pattern['U'][1][0],
+                    '1': pattern['U'][1][1],
+                    '2': pattern['U'][1][2],
+                },
+                '2': {
+                    '0': pattern['U'][2][0],
+                    '1': pattern['U'][2][1],
+                    '2': pattern['U'][2][2],
+                },
+            },
+            'F': {
+                '0': {
+                    '0': pattern.get('F', ['#00D800', '#00D800', '#00D800'])[0],
+                    '1': pattern.get('F', ['#00D800', '#00D800', '#00D800'])[1],
+                    '2': pattern.get('F', ['#00D800', '#00D800', '#00D800'])[2],
+                }
+            },
+            'R': {
+                '0': {
+                    '0': pattern.get('R', ['#C41E3A', '#C41E3A', '#C41E3A'])[0],
+                    '1': pattern.get('R', ['#C41E3A', '#C41E3A', '#C41E3A'])[1],
+                    '2': pattern.get('R', ['#C41E3A', '#C41E3A', '#C41E3A'])[2],
+                }
+            },
+            'B': {
+                '0': {
+                    '0': pattern.get('B', ['#0051BA', '#0051BA', '#0051BA'])[0],
+                    '1': pattern.get('B', ['#0051BA', '#0051BA', '#0051BA'])[1],
+                    '2': pattern.get('B', ['#0051BA', '#0051BA', '#0051BA'])[2],
+                }
+            },
+            'L': {
+                '0': {
+                    # Note: L face is reversed (right to left in the pattern)
+                    '0': pattern.get('L', ['#FF5800', '#FF5800', '#FF5800'])[2],
+                    '1': pattern.get('L', ['#FF5800', '#FF5800', '#FF5800'])[1],
+                    '2': pattern.get('L', ['#FF5800', '#FF5800', '#FF5800'])[0],
+                }
+            },
         }
-    
-    # Convert pattern to template format
-    # Template expects: colors.U.0.0, colors.U.0.1, etc.
-    colors = {
-        'U': {
-            '0': {
-                '0': pattern['U'][0][0],
-                '1': pattern['U'][0][1],
-                '2': pattern['U'][0][2],
-            },
-            '1': {
-                '0': pattern['U'][1][0],
-                '1': pattern['U'][1][1],
-                '2': pattern['U'][1][2],
-            },
-            '2': {
-                '0': pattern['U'][2][0],
-                '1': pattern['U'][2][1],
-                '2': pattern['U'][2][2],
-            },
-        },
-        'F': {
-            '0': {
-                '0': pattern.get('F', ['#00D800', '#00D800', '#00D800'])[0],
-                '1': pattern.get('F', ['#00D800', '#00D800', '#00D800'])[1],
-                '2': pattern.get('F', ['#00D800', '#00D800', '#00D800'])[2],
-            }
-        },
-        'R': {
-            '0': {
-                '0': pattern.get('R', ['#C41E3A', '#C41E3A', '#C41E3A'])[0],
-                '1': pattern.get('R', ['#C41E3A', '#C41E3A', '#C41E3A'])[1],
-                '2': pattern.get('R', ['#C41E3A', '#C41E3A', '#C41E3A'])[2],
-            }
-        },
-        'B': {
-            '0': {
-                '0': pattern.get('B', ['#0051BA', '#0051BA', '#0051BA'])[0],
-                '1': pattern.get('B', ['#0051BA', '#0051BA', '#0051BA'])[1],
-                '2': pattern.get('B', ['#0051BA', '#0051BA', '#0051BA'])[2],
-            }
-        },
-        'L': {
-            '0': {
-                # Note: L face is reversed (right to left in the pattern)
-                '0': pattern.get('L', ['#FF5800', '#FF5800', '#FF5800'])[2],
-                '1': pattern.get('L', ['#FF5800', '#FF5800', '#FF5800'])[1],
-                '2': pattern.get('L', ['#FF5800', '#FF5800', '#FF5800'])[0],
-            }
-        },
-    }
-    
-    return colors
+        
+        return colors
 
 
 

@@ -1,0 +1,81 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}La marguerite — Animation | Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 1a : <span class="brand-green">La marguerite</span>
+        </h1>
+        <p class="lead text-muted">
+            Observe les mouvements nécessaires pour construire la marguerite autour du centre jaune.
+        </p>
+    </div>
+
+    {% if missing_slugs %}
+    <div class="alert alert-warning">
+        <strong>⚠️ États manquants</strong>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Animation Roofpig -->
+    <div class="card p-4 mb-4 text-center">
+        <h3 class="brand-green mb-3">🎥 Animation de la marguerite</h3>
+
+        {% if roofpig_config %}
+            <div class="d-flex justify-content-center">
+                <div class="roofpig"
+                     data-config="{{ roofpig_config }}">
+                </div>
+            </div>
+
+            <p class="mt-3 text-muted">
+                Clique sur ▶︎ pour voir comment les arêtes blanches sont amenées autour du centre jaune.
+            </p>
+        {% else %}
+            <div class="alert alert-secondary">
+                Animation non disponible — vérifie ton CubeState.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Explications -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🧠 Ce qu’il faut comprendre</h3>
+
+        <ul class="mt-3">
+            <li>Le centre jaune ne bouge jamais.</li>
+            <li>Les arêtes blanches sont amenées sur la face jaune une par une.</li>
+            <li>Aucun algorithme à mémoriser : observe simplement les rotations.</li>
+        </ul>
+
+        <p class="mt-3">
+            👉 Tu peux faire <strong>pause</strong>, <strong>reculer</strong> et <strong>rejouer</strong>
+            l’animation autant de fois que nécessaire.
+        </p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:cubienewbie_daisy' %}" class="btn btn-outline-primary">
+            ← Version statique
+        </a>
+        <a href="{% url 'francontcube:cubienewbie_white_cross' %}" class="btn btn-success ms-2">
+            Étape suivante : La croix blanche →
+        </a>
+    </div>
+
+</div>
+
+<!-- Roofpig -->
+<script src="https://roofpig.net/js/roofpig_and_three.min.js"></script>
+{% endblock %}

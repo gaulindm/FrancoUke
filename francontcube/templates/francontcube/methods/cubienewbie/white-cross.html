@@ -6,312 +6,387 @@
 {% block content %}
 <div class="container py-5">
 
-    <!-- Titre principal -->
+    <!-- Titre principal avec emoji -->
     <div class="text-center mb-5">
         <h1 class="hero-title">
-            Étape 1b : <span class="brand-green">La croix blanche</span>
+            ✨ Étape 2 : <span class="brand-green">Retourner les pétales!</span>
         </h1>
-        <p class="lead text-muted">
-            Transformer ta marguerite en croix blanche en plaçant les arêtes au bon endroit.
+        <p class="lead">
+            Transforme ta marguerite 🌼 en croix blanche ➕
         </p>
     </div>
 
-    <!-- Charger le template SVG (caché) -->
-    {% include "cube/partials/_cube_svg.html" %}
 
-    <!-- Warning for missing cube states (only shown if any are missing) -->
-    {% if missing_slugs %}
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
-        <p>The following CubeState objects need to be created in the database:</p>
-        <ul class="mb-0">
-            {% for slug in missing_slugs %}
-            <li><code>{{ slug }}</code></li>
-            {% endfor %}
-        </ul>
-        <hr>
-        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endif %}
-
-    <!-- Section Objectif -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🎯 Objectif</h3>
-        <p>
-            Amener les 4 arêtes blanches <strong>en bas du cube</strong>, formant une croix.
-            <strong>Important :</strong> Les couleurs des côtés doivent correspondre aux centres !
-        </p>
-
-        <div class="text-center mt-3">
-            <div id="cube-goal"></div>
-            <p class="mt-2"><small class="text-muted">La croix blanche complète avec les bonnes couleurs</small></p>
+    <!-- C'est quoi le but? -->
+    <div class="card border-success border-3 shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-4">🎯 C'est quoi le but?</h2>
+            <div id="cube-goal" class="mb-3"></div>
+            <h4 class="brand-green">Faire descendre les 4 pétales blancs en bas!</h4>
+            <p class="lead mb-0">Et les bonnes couleurs doivent être au bon endroit 🌈</p>
         </div>
     </div>
 
-    <!-- Section Comment faire -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🧩 Comment faire ?</h3>
-
-        <p>
-            Tu as déjà la marguerite de l'étape précédente. Maintenant, il faut
-            <strong>« retourner les pétales »</strong> un par un vers le bas.
-        </p>
-
-        <ol class="mt-3">
-            <li>
-                <strong>Choisis une arête blanche</strong> sur la face du haut (un « pétale »).
-            </li>
-            <li>
-                <strong>Tourne la face du haut (U)</strong> avec ton index droit pour que la couleur du côté de l'arête
-                soit <strong>au-dessus du centre de droite de la même couleur</strong>.
-            </li>
-            <li>
-                <strong>Fais R2 avec ta main droite</strong> pour faire descendre l'arête au bon endroit.
-            </li>
-            <li>
-                <strong>Répète pour les 3 autres arêtes.</strong>
-            </li>
-        </ol>
-
-        <div class="alert alert-warning mt-3">
-            <strong>🎯 Astuce importante :</strong> Garde toujours le cube dans la même orientation !
-            Ne tourne pas tout le cube dans tes mains. Utilise seulement U (le haut) pour positionner,
-            puis R2 (la droite) pour faire descendre.
-        </div>
-
-        <!-- Comparaison Avant/Après -->
-        <div class="row mt-4">
-            <div class="col-md-6 text-center mb-3">
-                <h5 class="brand-green">Avant : La marguerite</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">Les arêtes blanches sont en haut</small></p>
+    <!-- Section interactive principale -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">🎮 Clique sur les boutons pour apprendre!</h2>
+            
+            <div class="cube-container">
+                <div class="roofpig" 
+                     data-config="alg=U' R2 y' U2 R2 y' U' R2 y' R2 | colored=D*/e */m | speed:0.7 canvas:400 | hover=2">
+                </div>
             </div>
-            <div class="col-md-6 text-center mb-3">
-                <h5 class="brand-green">Après : La croix blanche</h5>
-                <div id="cube-after" class="cube-small"></div>
-                <p><small class="text-muted">Les arêtes blanches forment une croix en bas</small></p>
+
+
+
+
+
+            <!-- Message d'encouragement -->
+            <div id="cross-progress-message" class="alert alert-primary text-center py-4" style="display: none;">
+                <h4 class="mb-0"></h4>
             </div>
         </div>
     </div>
 
-    <!-- Section Progression interactive -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📊 Progression étape par étape</h3>
-        <p>Clique sur les boutons pour voir comment retourner chaque arête.</p>
 
-        <div class="text-center mt-3">
-            <div id="cube-progress"></div>
-            <div class="btn-group mt-3" role="group" aria-label="Progression de la croix blanche">
-                <button class="btn btn-sm btn-outline-primary active" onclick="updateCrossProgress(0)">Marguerite</button>
-                <button class="btn btn-sm btn-outline-primary" onclick="updateCrossProgress(1)">Aligne le petal</button>
-                <button class="btn btn-sm btn-outline-primary" onclick="updateCrossProgress(2)">Descendre le petal</button>
-                <button class="btn btn-sm btn-outline-primary" onclick="updateCrossProgress(3)">On tourne le cube</button>
-                <button class="btn btn-sm btn-outline-success" onclick="updateCrossProgress(4)">Repete pour les 3 autres pétals</button>
-            </div>
-            <div id="cross-progress-message" class="mt-3 p-3 bg-light rounded" style="display: none;">
-                <p class="mb-0 text-center fw-bold"></p>
+
+    <div class="steps-container">
+        <div id="step-0" class="step active">
+            <span class="step-number">▶</span>
+            <span class="step-description">Clique sur le bouton <strong>+</strong> sous le cube pour commencer! 👇</span>
+        </div>
+        <div id="step-1" class="step">
+            <span class="step-number">1</span>
+            <span class="step-description">Tourne la face du haut <span class="step-move">U'</span> pour aligner la première arête blanche avec son centre de couleur</span>
+        </div>
+        <div id="step-2" class="step">
+            <span class="step-number">2</span>
+            <span class="step-description">Bascule l'arête dans la croix avec <span class="step-move">R2</span></span>
+        </div>
+        <div id="step-3" class="step">
+            <span class="step-number">3</span>
+            <span class="step-description">Tourne tout le cube aligner le prochain pétale</span>
+        </div>
+        <div id="step-4" class="step">
+            <span class="step-number">4</span>
+            <span class="step-description">Aligne la deuxième arête <span class="step-move">U2</span></span>
+        </div>
+        <div id="step-5" class="step">
+            <span class="step-number">5</span>
+            <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
+        </div>
+        <div id="step-6" class="step">
+            <span class="step-number">6</span>
+            <span class="step-description">Tourne le cube encore </span>
+        </div>
+        <div id="step-7" class="step">
+            <span class="step-number">7</span>
+            <span class="step-description">Aligne la troisième arête <span class="step-move">U'</span></span>
+        </div>
+        <div id="step-8" class="step">
+            <span class="step-number">8</span>
+            <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
+        </div>
+        <div id="step-9" class="step">
+            <span class="step-number">9</span>
+            <span class="step-description">Tourne le cube une dernière fois </span>
+        </div>
+        <div id="step-10" class="step">
+            <span class="step-number">10</span>
+            <span class="step-description">Bascule la dernière arête <span class="step-move">R2</span></span>
+        </div>
+        <div id="step-complete" class="step-complete">
+            <h3>🎉 Croix Blanche Complète!</h3>
+            <p>Bravo! Les quatre arêtes blanches sont maintenant en place. Clique sur le bouton reset (↩) pour réessayer.</p>
+        </div>
+    </div>
+
+    <!-- Astuce super importante -->
+    <div class="card border-warning border-3 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h3 class="text-center mb-4">💡 L'astuce la plus importante!</h3>
+            
+            <div class="alert alert-warning text-center mt-4 mb-0">
+                <h5 class="mb-3">🔑 Le secret:</h5>
+                <p class="lead mb-0">
+                    <strong>AVANT</strong> de faire R2, tourne le haut (U) pour mettre<br>
+                    la bonne couleur au-dessus du bon centre!
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- Section Important -->
-    <div class="card p-4 mb-4 border-warning">
-        <h3 class="brand-green">⚠️ Attention : Les couleurs doivent correspondre !</h3>
 
-        <div class="row mt-3">
-            <div class="col-md-6 text-center mb-3">
-                <h5 class="text-danger">❌ Croix incorrecte</h5>
-                <div id="cube-wrong" class="cube-small"></div>
-                <p><small class="text-muted">Les couleurs ne correspondent pas aux centres</small></p>
-            </div>
-            <div class="col-md-6 text-center mb-3">
-                <h5 class="text-success">✅ Croix correcte</h5>
-                <div id="cube-correct" class="cube-small"></div>
-                <p><small class="text-muted">Chaque couleur correspond à son centre</small></p>
-            </div>
-        </div>
-
-        <p class="mt-3 mb-0">
-            <strong>Astuce :</strong> Avant de faire descendre une arête,
-            <span class="bg-warning px-2">tourne la face du haut (U)</span>
-            pour que la couleur du côté de l'arête soit devant le bon centre de couleur !
-        </p>
-    </div>
-
-    <!-- Section Algorithme -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔄 L'algorithme simple</h3>
-        <p>Pour faire descendre une arête blanche du haut vers le bas :</p>
-
-        <div class="text-center p-4 bg-light rounded border border-success border-3">
-            <svg class="move-icon"><use href="#R2"/></svg>
-            <p class="mt-2 mb-0"><small>(Tourne la face droite deux fois / demi-tour avec la main droite)</small></p>
-        </div>
-
-        <div class="alert alert-success mt-3">
-            <strong>✋ Technique recommandée :</strong>
-            <ul class="mb-0">
-                <li>Tiens le cube <strong>fermement avec ta main gauche</strong></li>
-                <li>Utilise ta <strong>main droite pour faire R2</strong></li>
-                <li>Tourne la face du haut (U) avec ton index droit pour positionner l'arête</li>
-                <li>Cette technique développe de bonnes habitudes pour la suite !</li>
-            </ul>
-        </div>
-
-        <div class="alert alert-info mt-3 mb-0">
-            <strong>💡 Comment positionner l'arête avant de faire R2 :</strong>
-            <ol class="mb-0 mt-2">
-                <li>Regarde la couleur du <strong>côté</strong> de l'arête blanche (pas le blanc !)</li>
-                <li>Tourne U (la face du haut) jusqu'à ce que cette couleur soit <strong>au-dessus du centre de la même couleur à droite</strong></li>
-                <li>Fais <strong>R2</strong> avec ta main droite - l'arête descend au bon endroit !</li>
-            </ol>
+    <!-- Encouragement final -->
+    <div class="card bg-success text-white shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-3">🌟 Tu peux le faire!</h2>
+            <p class="lead mb-0">
+                Retourne les 4 pétales un par un.<br>
+                Prends ton temps, vérifie les couleurs, et amuse-toi! 🎉
+            </p>
         </div>
     </div>
 
-    <!-- Section Conseils -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">💡 Conseils utiles</h3>
-        <ul class="mt-3">
-            <li>
-                <strong>Tiens le cube avec ta main gauche</strong> pendant toute l'étape.
-                Ta main droite est libre pour faire R2 rapidement !
-            </li>
-            <li>
-                <strong>Travaille une arête à la fois.</strong> Ne te précipite pas !
-            </li>
-            <li>
-                <strong>Vérifie toujours les couleurs</strong> avant de faire R2.
-                Est-ce que la couleur du côté de l'arête est au-dessus du centre de droite de la même couleur ?
-            </li>
-            <li>
-                Si tu fais une erreur, pas de problème ! Refais simplement R2 pour remonter l'arête
-                et recommence.
-            </li>
-            <li>
-                <strong>Pratique R2 !</strong> C'est un mouvement que tu vas utiliser beaucoup.
-                Essaie de le faire vite et avec fluidité.
-            </li>
-            <li>
-                <strong>Une fois la croix terminée,</strong> retourne ton cube pour voir la croix blanche
-                en bas. C'est la base de ton cube résolu !
-            </li>
-        </ul>
-    </div>
-
-    <!-- Bouton de navigation -->
-    <div class="text-center">
-        <a href="{% url 'francontcube:cubienewbie_daisy' %}" class="btn btn-outline-primary">
-            ← Retour : La marguerite
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+        <a href="{% url 'francontcube:cubienewbie_daisy' %}" class="btn btn-outline-primary btn-lg">
+            ← La marguerite
         </a>
-        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
-            Vue d'ensemble
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
+            🏠 Menu
         </a>
-        <a href="{% url 'francontcube:cubienewbie_bottom_corners' %}" class="btn btn-success ms-2">
-            Étape suivante : Les coins blancs →
+        <a href="{% url 'francontcube:cubienewbie_bottom_corners' %}" class="btn btn-success btn-lg">
+            Coins blancs →
         </a>
     </div>
 </div>
 
-<!-- Styles CSS pour les cubes -->
+<!-- Styles CSS -->
 <style>
-/* Cubes réduits */
 .cube-small svg {
-    max-width: 275px;
+    max-width: 250px;
     height: auto;
 }
 
-/* Sur mobile, garder les cubes plus petits */
-@media (max-width: 768px) {
-    .cube-small svg {
-        max-width: 200px;
-    }
+#cube-goal svg,
+#cube-progress svg {
+    max-width: 350px;
+    height: auto;
+}
 
-    #cube-goal svg,
-    #cube-progress svg {
-        max-width: 350px;
+/* Animation pour les messages */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
+
+.animate-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+/* Effet hover sur les boutons */
+.btn-lg:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s;
+}
+
+/* Badges numériques */
+.badge {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+}
+
+/* Style pour les icônes de mouvement inline */
+.move-icon-inline {
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.move-icon-inline svg {
+    display: block;
+}
+.cube-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            min-height: 250px;
+        }
+        
+        .roofpig {
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            overflow: hidden;
+            width: 400px !important;
+            height: 297px !important;
+        }
+        
+        .roofpig canvas {
+            width: 400px !important;
+            height: 246px !important;
+        }
+        
+        .steps-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 120px;
+            position: relative;
+        }
+        
+        .step {
+            padding: 20px;
+            margin: 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            background: #e3f2fd;
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #2196f3;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+            animation: pulse 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        .step-move {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 20px;
+            color: #2196f3;
+            background: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin: 0 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .step-description {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .step-complete {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .step-complete.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .step-complete h3 {
+            color: #4caf50;
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+        
+        .step-complete p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .controls-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .controls-info strong {
+            color: #1976d2;
+        }
+
 </style>
 
-<!-- Script d'initialisation de la page -->
-<script type="module">
-  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
-
-  function mountCube(containerId, state) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Clear any existing content
-
-    // If state is missing, show a placeholder
-    if (!state) {
-      container.innerHTML = `
-        <div class="alert alert-secondary text-center py-4">
-          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
-          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
-          <small class="text-muted">Create the CubeState in your admin tool</small>
-        </div>
-      `;
-      return;
-    }
-
-    const template = document.getElementById("cube-template");
-    const clone = template.content.cloneNode(true);
-    container.appendChild(clone);
-
-    const svg = container.querySelector("svg");
-    renderCube(svg, state);
-  }
-
-  // Store progress states for easy access (filter out nulls)
-  const progressStates = {{ progress_states|safe }};
-
-  // Messages d'encouragement pour chaque étape
-  const messages = [
-    "Commence avec la marguerite ! 🌼",
-    "On fait tourner la couche du haut (U) pour aligner le sous-petal avec le centre de la face de droite",
-    "On fait R2.  Le petale sera maintenant à sa place dans la couche du bas",
-    "On tourne le cube vers la droite ou vers la gauche.  Assures-toi d'avoir le centre jaune en haut",
-    "On répète pour toutes les pétales blancs du haut"
-  ];
-
-  // Make updateCrossProgress globally accessible
-  window.updateCrossProgress = function(numEdges) {
-    // Update cube visualization
-    mountCube('cube-progress', progressStates[numEdges]);
-
-    // Feedback visuel sur les boutons
-    const buttons = document.querySelectorAll('.btn-group button');
-    buttons.forEach((btn, index) => {
-      btn.classList.remove('active');
-      if (index === numEdges) {
-        btn.classList.add('active');
-      }
-    });
-
-    // Afficher le message d'encouragement
-    const messageBox = document.getElementById('cross-progress-message');
-    const messageText = messageBox.querySelector('p');
-    messageText.textContent = messages[numEdges];
-    messageBox.style.display = 'block';
-
-    // Animation simple
-    messageBox.classList.add('animate__animated', 'animate__fadeIn');
-    setTimeout(() => {
-      messageBox.classList.remove('animate__animated', 'animate__fadeIn');
-    }, 1000);
-  };
-
-  document.addEventListener("DOMContentLoaded", () => {
-    // Mount all static cubes
-    mountCube("cube-goal", {{ goal_state|safe }});
-    mountCube("cube-before", {{ before_state|safe }});
-    mountCube("cube-after", {{ after_state|safe }});
-    mountCube("cube-wrong", {{ wrong_state|safe }});
-    mountCube("cube-correct", {{ correct_state|safe }});
-
-    // Initialize progress cube with first state
-    updateCrossProgress(0);
-  });
-</script>
-
+<!-- Script JavaScript -->
+    <!-- Load jQuery first (required by Roofpig) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <!-- Load Roofpig from your Django static files -->
+    <script src="{% static 'cube/js/roofpig_and_three.min.js' %}"></script>
+    
+    <script>
+        console.log('=== SCRIPT CHARGÉ ===');
+        console.log('jQuery disponible?', typeof $ !== 'undefined');
+        
+        // Attendre que la page soit complètement chargée
+        window.addEventListener('load', function() {
+            console.log('=== FENÊTRE CHARGÉE ===');
+            
+            // Attendre l'initialisation de Roofpig
+            setTimeout(function() {
+                console.log('=== DÉMARRAGE DU SUIVI DES ÉTAPES ===');
+                
+                let etapeActuelle = -1;
+                
+                // Afficher l'étape initiale
+                $('#step-0').addClass('active');
+                console.log('Étape initiale step-0 activée');
+                
+                // Vérifier les changements
+                setInterval(function() {
+                    const pastAlg = document.querySelector('.roofpig-past-algtext');
+                    
+                    if (!pastAlg) {
+                        return; // Pas encore prêt
+                    }
+                    
+                    const texteAlg = pastAlg.textContent.trim();
+                    const mouvements = texteAlg.split(/\s+/).filter(m => m.length > 0);
+                    const nouvelleEtape = mouvements.length;
+                    
+                    if (nouvelleEtape !== etapeActuelle) {
+                        console.log('CHANGEMENT ÉTAPE:', etapeActuelle, '->', nouvelleEtape, 'Mouvements:', mouvements);
+                        
+                        // Cacher tout
+                        $('.step').removeClass('active');
+                        $('#step-complete').removeClass('active');
+                        
+                        // Afficher l'étape actuelle
+                        if (nouvelleEtape > 10) {
+                            $('#step-complete').addClass('active');
+                            console.log('Affichage du message de complétion');
+                        } else {
+                            $('#step-' + nouvelleEtape).addClass('active');
+                            console.log('Étape activée: step-' + nouvelleEtape);
+                        }
+                        
+                        etapeActuelle = nouvelleEtape;
+                    }
+                }, 200);
+                
+                console.log('=== VÉRIFICATION DÉMARRÉE ===');
+            }, 2000);
+        });
+    </script>
 {% endblock %}

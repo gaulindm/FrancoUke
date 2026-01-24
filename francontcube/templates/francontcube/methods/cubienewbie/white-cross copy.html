@@ -1,0 +1,282 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}La croix blanche — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal avec emoji -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            ✨ Étape 2 : <span class="brand-green">Retourner les pétales!</span>
+        </h1>
+        <p class="lead">
+            Transforme ta marguerite 🌼 en croix blanche ➕
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- C'est quoi le but? -->
+    <div class="card border-success border-3 shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-4">🎯 C'est quoi le but?</h2>
+            <div id="cube-goal" class="mb-3"></div>
+            <h4 class="brand-green">Faire descendre les 4 pétales blancs en bas!</h4>
+            <p class="lead mb-0">Et les bonnes couleurs doivent être au bon endroit 🌈</p>
+        </div>
+    </div>
+
+    <!-- Section interactive principale -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">🎮 Clique sur les boutons pour apprendre!</h2>
+            
+            <div class="cube-container">
+                <div class="roofpig" 
+                     data-config="alg=U' R2 y' U2 R2 y' U' R2 y' R2 | colored=D*/e */m | flags=showalg speed:0.7 canvas:400 | hover=2">
+                </div>
+            </div>
+
+
+            <!-- Gros boutons colorés pour enfants -->
+            <div class="d-grid gap-2 mb-4">
+                <button class="btn btn-lg btn-outline-primary position-relative" onclick="updateCrossProgress(0)">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary">1</span>
+                    🌼 Ta marguerite (point de départ)
+                </button>
+                <button class="btn btn-lg btn-outline-info position-relative" onclick="updateCrossProgress(1)">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-info">2</span>
+                    🔄 Tourne le haut (U) pour aligner
+                    <span class="move-icon-inline">
+                        <svg class="move-icon" style="width: 40px; height: 40px;"><use href="#U-prime"/></svg>
+                    </span>
+                </button>
+                <button class="btn btn-lg btn-outline-warning position-relative" onclick="updateCrossProgress(2)">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-warning">3</span>
+                    ⬇️ Fais R2 - Le pétale descend!
+                    <span class="move-icon-inline">
+                        <svg class="move-icon" style="width: 40px; height: 40px;"><use href="#R2"/></svg>
+                    </span>
+                </button>
+                <button class="btn btn-lg btn-outline-secondary position-relative" onclick="updateCrossProgress(3)">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-secondary">4</span>
+                    🔃 Tourne tout le cube
+                </button>
+                <button class="btn btn-lg btn-outline-success position-relative" onclick="updateCrossProgress(4)">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-success">5</span>
+                    🔁 Répète 3 fois de plus!
+                </button>
+            </div>
+
+            <!-- Message d'encouragement -->
+            <div id="cross-progress-message" class="alert alert-primary text-center py-4" style="display: none;">
+                <h4 class="mb-0"></h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Astuce super importante -->
+    <div class="card border-warning border-3 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h3 class="text-center mb-4">💡 L'astuce la plus importante!</h3>
+            
+            <div class="alert alert-warning text-center mt-4 mb-0">
+                <h5 class="mb-3">🔑 Le secret:</h5>
+                <p class="lead mb-0">
+                    <strong>AVANT</strong> de faire R2, tourne le haut (U) pour mettre<br>
+                    la bonne couleur au-dessus du bon centre!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Encouragement final -->
+    <div class="card bg-success text-white shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-3">🌟 Tu peux le faire!</h2>
+            <p class="lead mb-0">
+                Retourne les 4 pétales un par un.<br>
+                Prends ton temps, vérifie les couleurs, et amuse-toi! 🎉
+            </p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+        <a href="{% url 'francontcube:cubienewbie_daisy' %}" class="btn btn-outline-primary btn-lg">
+            ← La marguerite
+        </a>
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
+            🏠 Menu
+        </a>
+        <a href="{% url 'francontcube:cubienewbie_bottom_corners' %}" class="btn btn-success btn-lg">
+            Coins blancs →
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS -->
+<style>
+.cube-small svg {
+    max-width: 250px;
+    height: auto;
+}
+
+#cube-goal svg,
+#cube-progress svg {
+    max-width: 350px;
+    height: auto;
+}
+
+/* Animation pour les messages */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+/* Effet hover sur les boutons */
+.btn-lg:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s;
+}
+
+/* Badges numériques */
+.badge {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+}
+
+/* Style pour les icônes de mouvement inline */
+.move-icon-inline {
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.move-icon-inline svg {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .cube-small svg {
+        max-width: 180px;
+    }
+    
+    #cube-goal svg,
+    #cube-progress svg {
+        max-width: 280px;
+    }
+    
+    .btn-lg {
+        font-size: 1rem;
+    }
+    
+    .move-icon-inline svg {
+        width: 30px !important;
+        height: 30px !important;
+    }
+}
+</style>
+
+<!-- Script JavaScript -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube non disponible</p>
+        </div>
+      `;
+      return;
+    }
+
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  const progressStates = {{ progress_states|safe }};
+
+  // Messages encourageants et simples pour les enfants
+  const messages = [
+    "🌼 Commence ici! C'est ta marguerite avec 4 pétales blancs en haut.",
+    "🔄 Tourne le haut (U) jusqu'à ce que la couleur du pétale soit au-dessus du bon centre!",
+    "⬇️ Maintenant fais R2! Le pétale descend comme par magie!",
+    "🔃 Tourne tout le cube pour voir le prochain pétale. Garde le jaune en haut!",
+    "🔁 Super! Maintenant refais la même chose pour les 3 autres pétales!"
+  ];
+
+  window.updateCrossProgress = function(step) {
+    mountCube('cube-progress', progressStates[step]);
+
+    // Mettre à jour le message
+    const messageBox = document.getElementById('cross-progress-message');
+    const messageText = messageBox.querySelector('h4');
+    messageText.textContent = messages[step];
+    messageBox.style.display = 'block';
+    messageBox.classList.add('animate-in');
+    
+    setTimeout(() => {
+      messageBox.classList.remove('animate-in');
+    }, 500);
+
+    // Effet visuel sur le bouton actif
+    const buttons = document.querySelectorAll('.d-grid button');
+    buttons.forEach((btn, index) => {
+      if (index === step) {
+        btn.classList.remove('btn-outline-primary', 'btn-outline-info', 'btn-outline-warning', 'btn-outline-secondary', 'btn-outline-success');
+        btn.classList.add('btn-primary', 'btn-info', 'btn-warning', 'btn-secondary', 'btn-success')[step];
+      } else {
+        // Reset to outline version
+        const colors = ['primary', 'info', 'warning', 'secondary', 'success'];
+        btn.classList.remove('btn-primary', 'btn-info', 'btn-warning', 'btn-secondary', 'btn-success');
+        btn.classList.add(`btn-outline-${colors[index]}`);
+      }
+    });
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    mountCube("cube-goal", {{ goal_state|safe }});
+    mountCube("cube-wrong", {{ wrong_state|safe }});
+    mountCube("cube-correct", {{ correct_state|safe }});
+    updateCrossProgress(0);
+  });
+</script>
+
+{% endblock %}

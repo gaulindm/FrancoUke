@@ -1,0 +1,336 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marguerite vers Croix Blanche - Étape par Étape</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .algorithm {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        
+        .cube-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            min-height: 250px;
+        }
+        
+        .roofpig {
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            overflow: hidden;
+            width: 400px !important;
+            height: 300px !important;
+        }
+        
+        .roofpig canvas {
+            width: 400px !important;
+            height: 246px !important;
+        }
+        
+        .info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .info h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        .info p {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .steps-container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 120px;
+            position: relative;
+        }
+        
+        .step {
+            padding: 20px;
+            margin: 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            background: #e3f2fd;
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #2196f3;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+            animation: pulse 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        .step-move {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 20px;
+            color: #2196f3;
+            background: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin: 0 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .step-description {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .step-complete {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .step-complete.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .step-complete h3 {
+            color: #4caf50;
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+        
+        .step-complete p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .controls-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .controls-info strong {
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌼 Marguerite vers Croix Blanche</h1>
+        <div class="algorithm">U' R2 y' U2 R2 y' U' R2 y' R2</div>
+        
+        <div class="cube-container">
+            <div class="roofpig" 
+                 data-config="alg=U' R2 y' U2 R2 y' U' R2 y' R2 | colored=D*/e */m | flags=showalg speed:0.7 canvas:400 | hover=2">
+            </div>
+        </div>
+        
+        <div class="steps-container">
+            <div id="step-0" class="step active">
+                <span class="step-number">▶</span>
+                <span class="step-description">Clique sur le bouton <strong>+</strong> sous le cube pour commencer! 👇</span>
+            </div>
+            <div id="step-1" class="step">
+                <span class="step-number">1</span>
+                <span class="step-description">Tourne la face du haut <span class="step-move">U'</span> pour aligner la première arête blanche avec son centre de couleur</span>
+            </div>
+            <div id="step-2" class="step">
+                <span class="step-number">2</span>
+                <span class="step-description">Bascule l'arête dans la croix avec <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-3" class="step">
+                <span class="step-number">3</span>
+                <span class="step-description">Tourne tout le cube <span class="step-move">y'</span> pour voir la prochaine arête</span>
+            </div>
+            <div id="step-4" class="step">
+                <span class="step-number">4</span>
+                <span class="step-description">Aligne la deuxième arête <span class="step-move">U2</span></span>
+            </div>
+            <div id="step-5" class="step">
+                <span class="step-number">5</span>
+                <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-6" class="step">
+                <span class="step-number">6</span>
+                <span class="step-description">Tourne le cube encore <span class="step-move">y'</span></span>
+            </div>
+            <div id="step-7" class="step">
+                <span class="step-number">7</span>
+                <span class="step-description">Aligne la troisième arête <span class="step-move">U'</span></span>
+            </div>
+            <div id="step-8" class="step">
+                <span class="step-number">8</span>
+                <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-9" class="step">
+                <span class="step-number">9</span>
+                <span class="step-description">Tourne le cube une dernière fois <span class="step-move">y'</span></span>
+            </div>
+            <div id="step-10" class="step">
+                <span class="step-number">10</span>
+                <span class="step-description">Bascule la dernière arête <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-complete" class="step-complete">
+                <h3>🎉 Croix Blanche Complète!</h3>
+                <p>Bravo! Les quatre arêtes blanches sont maintenant en place. Clique sur le bouton reset (↩) pour réessayer.</p>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3>🎯 Ce que tu apprends</h3>
+            <p>
+                Ce tutoriel montre comment transformer une <strong>marguerite jaune</strong> (4 arêtes blanches 
+                autour du centre jaune) en une <strong>croix blanche</strong> en bas.
+            </p>
+            <p>
+                Le secret est d'<strong>aligner chaque arête blanche</strong> avec la couleur de son centre 
+                en utilisant les mouvements U, puis de la <strong>basculer vers le bas</strong> avec R2. 
+                Les mouvements y' tournent tout le cube pour toujours travailler avec la face de devant.
+            </p>
+        </div>
+        
+        <div class="controls-info">
+            <strong>💡 Comment utiliser:</strong> Clique sur le bouton <strong>+</strong> sous le cube pour avancer étape par étape. Observe le cube et lis l'instruction pour chaque mouvement!
+        </div>
+    </div>
+
+    <!-- Load jQuery first (required by Roofpig) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    
+    <!-- Load Roofpig from your Django static files -->
+    <script src="{% static 'cube/js/roofpig_and_three.min.js' %}"></script>
+    
+    <script>
+        console.log('=== SCRIPT CHARGÉ ===');
+        console.log('jQuery disponible?', typeof $ !== 'undefined');
+        
+        // Attendre que la page soit complètement chargée
+        window.addEventListener('load', function() {
+            console.log('=== FENÊTRE CHARGÉE ===');
+            
+            // Attendre l'initialisation de Roofpig
+            setTimeout(function() {
+                console.log('=== DÉMARRAGE DU SUIVI DES ÉTAPES ===');
+                
+                let etapeActuelle = -1;
+                
+                // Afficher l'étape initiale
+                $('#step-0').addClass('active');
+                console.log('Étape initiale step-0 activée');
+                
+                // Vérifier les changements
+                setInterval(function() {
+                    const pastAlg = document.querySelector('.roofpig-past-algtext');
+                    
+                    if (!pastAlg) {
+                        return; // Pas encore prêt
+                    }
+                    
+                    const texteAlg = pastAlg.textContent.trim();
+                    const mouvements = texteAlg.split(/\s+/).filter(m => m.length > 0);
+                    const nouvelleEtape = mouvements.length;
+                    
+                    if (nouvelleEtape !== etapeActuelle) {
+                        console.log('CHANGEMENT ÉTAPE:', etapeActuelle, '->', nouvelleEtape, 'Mouvements:', mouvements);
+                        
+                        // Cacher tout
+                        $('.step').removeClass('active');
+                        $('#step-complete').removeClass('active');
+                        
+                        // Afficher l'étape actuelle
+                        if (nouvelleEtape > 10) {
+                            $('#step-complete').addClass('active');
+                            console.log('Affichage du message de complétion');
+                        } else {
+                            $('#step-' + nouvelleEtape).addClass('active');
+                            console.log('Étape activée: step-' + nouvelleEtape);
+                        }
+                        
+                        etapeActuelle = nouvelleEtape;
+                    }
+                }, 200);
+                
+                console.log('=== VÉRIFICATION DÉMARRÉE ===');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

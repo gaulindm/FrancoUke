@@ -29,6 +29,57 @@ def view_cube(request):
         "svg_color_map_json": json.dumps(svg_color_map)
     })
 
+
+def view_4x4_cube(request):
+    """
+    View for 4x4x4 cube visualization
+    Displays the isometric SVG from my_4x4cube.html
+    """
+    # Standard 4x4 color palette
+    PALETTE_4x4 = {
+        'U': '#FFFFFF',  # White
+        'R': '#D32F2F',  # Red
+        'F': '#2E7D32',  # Green
+        'D': '#FFEB3B',  # Yellow
+        'L': '#F57C00',  # Orange
+        'B': '#1565C0',  # Blue
+    }
+    
+    # Solved state: 96 characters (6 faces × 16 stickers)
+    # Order: U(0-15), R(16-31), F(32-47), D(48-63), L(64-79), B(80-95)
+    state = request.GET.get('state')
+    if state and len(state) == 96:
+        cube_state = state
+    else:
+        # Default solved state
+        cube_state = 'U'*16 + 'R'*16 + 'F'*16 + 'D'*16 + 'L'*16 + 'B'*16
+    
+    # Build facelet to SVG ID mapping (same as in the HTML)
+    FACES = [['U', 0], ['R', 16], ['F', 32], ['D', 48], ['L', 64], ['B', 80]]
+    facelet_to_id = {}
+    for face, start in FACES:
+        for i in range(16):
+            idx = start + i
+            r = i // 4
+            c = i % 4
+            facelet_to_id[idx] = f'sticker-{face}-{r}-{c}'
+    
+    # Build SVG color map
+    svg_color_map = {}
+    for i in range(96):
+        facelet = cube_state[i]
+        svg_id = facelet_to_id[i]
+        svg_color_map[svg_id] = PALETTE_4x4.get(facelet, '#CCCCCC')
+    
+    context = {
+        'svg_color_map_json': json.dumps(svg_color_map),
+        'cube_state': cube_state,
+        'page_title': '4x4x4 Cube Viewer',
+    }
+    
+    return render(request, 'cube/my_4x4cube.html', context)
+
+
 def index(request):
     return render(request, "cube/index.html")
 
@@ -70,7 +121,6 @@ def demo_backend_svg(request):
         "cube_json": cube.to_json(),
     }
     return render(request, "cube/demo_backend_svg.html", context)
-
 
 
 def demo_daisy(request):

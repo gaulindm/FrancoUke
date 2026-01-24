@@ -16,6 +16,7 @@ urlpatterns = [
     path('test/top-layer/', views.test_top_layer_svg, name='test_top_layer_svg'),
     path("demo-daisy/", views.demo_daisy, name="demo_daisy"),
 
-
+    # 4x4x4 routes
+    path("4x4/", views.view_4x4_cube, name="view_4x4_cube"),
 
 ]

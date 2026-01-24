@@ -26,6 +26,9 @@ class BottomCornersView(StepView):
         'case_1_state': 'bottom-corners-case_1',
         'case_2_state': 'bottom-corners-case_2',
         'case_3_state': 'bottom-corners-case_3',
+        'wrong_bottom_corner':'bottom-corners-wrong_bottom_corner',
+        'two_wrong_color':'bottom-corners-two_wrong_color',
+        'one_wrong_color':'bottom-corners-one_wrong_color',
     }
 
 

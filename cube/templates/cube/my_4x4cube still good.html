@@ -1,0 +1,421 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Isometric Cube — Left-hand Teaching Orientation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { 
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; 
+      padding: 18px; 
+      background: #f5f5f5;
+    }
+    #controls {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #2E7D32;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #1B5E20;
+    }
+    #cube-wrapper { 
+      width: 600px; 
+      max-width: 95vw; 
+      margin: 18px 0;
+      background: #f0fdf4;  /* Very light green tint */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .sticker { 
+      stroke: #0F0F0F; 
+      stroke-width: 3; 
+      vector-effect: non-scaling-stroke; 
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .sticker:hover {
+      opacity: 0.8;
+    }
+    /* Hidden back-face stickers with transparent stroke */
+    .sticker-hidden {
+      stroke:#f5f5f5;  /* Very subtle 15% opacity */
+      stroke-width: 4;
+      vector-effect: non-scaling-stroke;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .sticker-hidden:hover {
+      opacity: 0.8;
+    }
+    .info {
+      margin-top: 10px;
+      padding: 10px;
+      background: #E3F2FD;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Isometric Cube — Left-hand Teaching Orientation</h1>
+
+  <div id="controls">
+    <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+    <button onclick="exportAsImage()">📥 Download PNG</button>
+    <button onclick="resetAllGrey()">🔄 Reset All to Grey</button>
+
+    <div class="info">
+      <strong>Tip:</strong> Click any sticker to cycle colors.  
+      Use <strong>Copy to Clipboard</strong> → paste directly into Google Slides.
+    </div>
+  </div>
+
+  <div id="cube-wrapper">
+    <svg id="cube-svg" width="600" height="500" viewBox="0 0 600 500"
+         xmlns="http://www.w3.org/2000/svg" role="img">
+      <style>.sticker { stroke-linejoin: round; }</style>
+
+      <!-- Add subtle green background rectangle -->
+      <rect width="600" height="500" fill="#f0fdf4" />
+
+      <g id="cube" transform="rotate(0 0 0)">
+       
+        <!-- ===================== -->
+        <!--  L (Left) Face         -->
+        <!-- ===================== -->
+        <g id="face-L">
+          <!-- Row 0 -->
+          <polygon id="sticker-L-0-0" class="sticker-hidden" points="15,100 40,85 40,145 15,160" />
+          <polygon id="sticker-L-0-1" class="sticker-hidden" points="40,85 65,70 65,130 40,145" />
+          <polygon id="sticker-L-0-2" class="sticker-hidden" points="65,70 90,55 90,115 65,130" />
+          <polygon id="sticker-L-0-3" class="sticker-hidden" points="90,55 115,40 115,100 90,115" />
+  
+          <!-- Row 1 -->
+          <polygon id="sticker-L-1-0" class="sticker-hidden" points="15,160 40,145 40,205 15,220" />
+          <polygon id="sticker-L-1-1" class="sticker-hidden" points="40,145 65,130 65,190 40,205" />
+          <polygon id="sticker-L-1-2" class="sticker-hidden" points="65,130 90,115 90,175 65,190" />
+          <polygon id="sticker-L-1-3" class="sticker-hidden" points="90,115 115,100 115,160 90,175" />
+          
+          <!-- Row 2 -->
+          <polygon id="sticker-L-2-0" class="sticker-hidden" points="15,220 40,205 40,265 15,280" />
+          <polygon id="sticker-L-2-1" class="sticker-hidden" points="40,205 65,190 65,250 40,265" />
+          <polygon id="sticker-L-2-2" class="sticker-hidden" points="65,190 90,175 90,235 65,250" />
+          <polygon id="sticker-L-2-3" class="sticker-hidden" points="90,175 115,160 115,220 90,235" />
+  
+          <!-- Row 3 -->
+          <polygon id="sticker-L-3-0" class="sticker-hidden" points="15,280 40,265 40,325 15,340" />
+          <polygon id="sticker-L-3-1" class="sticker-hidden" points="40,265 65,250 65,310 40,325" />
+          <polygon id="sticker-L-3-2" class="sticker-hidden" points="65,250 90,235 90,295 65,310" />
+          <polygon id="sticker-L-3-3" class="sticker-hidden" points="90,235 115,220 115,280 90,295" />
+        </g>
+        
+        <!-- ===================== -->
+        <!--  D (Down) Face         -->
+        <!-- ===================== -->
+        <g id="face-D">
+          <!-- Row 0 -->
+          <polygon id="sticker-D-0-0" class="sticker-hidden" points="220,350 270,360 240,375 190,365" />
+          <polygon id="sticker-D-0-1" class="sticker-hidden" points="270,360 320,370 290,385 240,375" />
+          <polygon id="sticker-D-0-2" class="sticker-hidden" points="320,370 370,380 340,395 290,385" />
+          <polygon id="sticker-D-0-3" class="sticker-hidden" points="370,380 420,390 390,405 340,395" />
+
+          <!-- Row 1 -->
+          <polygon id="sticker-D-1-0" class="sticker-hidden" points="190,365 240,375 210,390 160,380" />
+          <polygon id="sticker-D-1-1" class="sticker-hidden" points="240,375 290,385 260,400 210,390" />
+          <polygon id="sticker-D-1-2" class="sticker-hidden" points="290,385 340,395 310,410 260,400" />
+          <polygon id="sticker-D-1-3" class="sticker-hidden" points="340,395 390,405 360,420 310,410" />
+          
+          <!-- Row 2 -->
+          <polygon id="sticker-D-2-0" class="sticker-hidden" points="160,380 210,390 180,405 130,395" />
+          <polygon id="sticker-D-2-1" class="sticker-hidden" points="210,390 260,400 230,415 180,405" />
+          <polygon id="sticker-D-2-2" class="sticker-hidden" points="260,400 310,410 280,425 230,415" />
+          <polygon id="sticker-D-2-3" class="sticker-hidden" points="310,410 360,420 330,435 280,425" />
+
+          <!-- Row 3 -->
+          <polygon id="sticker-D-3-0" class="sticker-hidden" points="130,395 180,405 150,420 100,410" />
+          <polygon id="sticker-D-3-1" class="sticker-hidden" points="180,405 230,415 200,430 150,420" />
+          <polygon id="sticker-D-3-2" class="sticker-hidden" points="230,415 280,425 250,440 200,430" />
+          <polygon id="sticker-D-3-3" class="sticker-hidden" points="280,425 330,435 300,450 250,440" />
+        </g>
+
+        <!-- ===================== -->
+        <!--  B (Back) Face         -->
+        <!-- ===================== -->
+        <g id="face-B">
+          <!-- Row 0 -->
+          <polygon id="sticker-B-0-0" class="sticker-hidden" points="390,40 432.5,47.5 432.5,107.5 390,100" />
+          <polygon id="sticker-B-0-1" class="sticker-hidden" points="432.5,47.5 475,55 475,115 432.5,107.5" />
+          <polygon id="sticker-B-0-2" class="sticker-hidden" points="475,55 517.5,62.5 517.5,122.5 475,115" />
+          <polygon id="sticker-B-0-3" class="sticker-hidden" points="517.5,62.5 560,70 560,130 517.5,122.5" />
+
+          <!-- Row 1 -->
+          <polygon id="sticker-B-1-0" class="sticker-hidden" points="390,100 432.5,107.5 432.5,167.5 390,160" />
+          <polygon id="sticker-B-1-1" class="sticker-hidden" points="432.5,107.5 475,115 475,175 432.5,167.5" />
+          <polygon id="sticker-B-1-2" class="sticker-hidden" points="475,115 517.5,122.5 517.5,182.5 475,175" />
+          <polygon id="sticker-B-1-3" class="sticker-hidden" points="517.5,122.5 560,130 560,190 517.5,182.5" />
+          
+          <!-- Row 2 -->
+          <polygon id="sticker-B-2-0" class="sticker-hidden" points="390,160 432.5,167.5 432.5,227.5 390,220" />
+          <polygon id="sticker-B-2-1" class="sticker-hidden" points="432.5,167.5 475,175 475,235 432.5,227.5" />
+          <polygon id="sticker-B-2-2" class="sticker-hidden" points="475,175 517.5,182.5 517.5,242.5 475,235" />
+          <polygon id="sticker-B-2-3" class="sticker-hidden" points="517.5,182.5 560,190 560,250 517.5,242.5" />
+
+          <!-- Row 3 -->
+          <polygon id="sticker-B-3-0" class="sticker-hidden" points="390,220 432.5,227.5 432.5,287.5 390,280" />
+          <polygon id="sticker-B-3-1" class="sticker-hidden" points="432.5,227.5 475,235 475,295 432.5,287.5" />
+          <polygon id="sticker-B-3-2" class="sticker-hidden" points="475,235 517.5,242.5 517.5,302.5 475,295" />
+          <polygon id="sticker-B-3-3" class="sticker-hidden" points="517.5,242.5 560,250 560,310 517.5,302.5" />
+        </g>
+
+        <!-- ===================== -->
+        <!--  R (Right) Face       -->
+        <!-- ===================== -->
+        <g id="face-R">
+          <!-- Row 0 -->
+          <polygon id="sticker-R-0-0" class="sticker" points="300,140 330,125 330,185 300,200" />
+          <polygon id="sticker-R-0-1" class="sticker" points="330,125 360,110 360,170 330,185" />
+          <polygon id="sticker-R-0-2" class="sticker" points="360,110 390,95 390,155 360,170" />
+          <polygon id="sticker-R-0-3" class="sticker" points="390,95 420,80 420,140 390,155" />
+          
+          <!-- Row 1 -->
+          <polygon id="sticker-R-1-0" class="sticker" points="300,200 330,185 330,245 300,260" />
+          <polygon id="sticker-R-1-1" class="sticker" points="330,185 360,170 360,230 330,245" />
+          <polygon id="sticker-R-1-2" class="sticker" points="360,170 390,155 390,215 360,230" />
+          <polygon id="sticker-R-1-3" class="sticker" points="390,155 420,140 420,200 390,215" />
+          
+          <!-- Row 2 -->
+          <polygon id="sticker-R-2-0" class="sticker" points="300,260 330,245 330,305 300,320" />
+          <polygon id="sticker-R-2-1" class="sticker" points="330,245 360,230 360,290 330,305" />
+          <polygon id="sticker-R-2-2" class="sticker" points="360,230 390,215 390,275 360,290" />
+          <polygon id="sticker-R-2-3" class="sticker" points="390,215 420,200 420,260 390,275" />
+
+          <!-- Row 3 -->
+          <polygon id="sticker-R-3-0" class="sticker" points="300,320 330,305 330,365 300,380" />
+          <polygon id="sticker-R-3-1" class="sticker" points="330,305 360,290 360,350 330,365" />
+          <polygon id="sticker-R-3-2" class="sticker" points="360,290 390,275 390,335 360,350" />
+          <polygon id="sticker-R-3-3" class="sticker" points="390,275 420,260 420,320 390,335" />
+        </g>
+
+        <!-- ===================== -->
+        <!--  F (Front) Face       -->
+        <!-- ===================== -->
+        <g id="face-F">
+          <!-- Row 0 -->
+          <polygon id="sticker-F-0-0" class="sticker" points="100,100 150,110 150,170 100,160"/>
+          <polygon id="sticker-F-0-1" class="sticker" points="150,110 200,120 200,180 150,170" />
+          <polygon id="sticker-F-0-2" class="sticker" points="200,120 250,130 250,190 200,180" />
+          <polygon id="sticker-F-0-3" class="sticker" points="250,130 300,140 300,200 250,190" />
+
+          <!-- Row 1 -->
+          <polygon id="sticker-F-1-0" class="sticker" points="100,160 150,170 150,230 100,220" />
+          <polygon id="sticker-F-1-1" class="sticker" points="150,170 200,180 200,240 150,230" />
+          <polygon id="sticker-F-1-2" class="sticker" points="200,180 250,190 250,250 200,240" />
+          <polygon id="sticker-F-1-3" class="sticker" points="250,190 300,200 300,260 250,250" />
+
+          <!-- Row 2 -->
+          <polygon id="sticker-F-2-0" class="sticker" points="100,220 150,230 150,290 100,280" /> 
+          <polygon id="sticker-F-2-1" class="sticker" points="150,230 200,240 200,300 150,290" />
+          <polygon id="sticker-F-2-2" class="sticker" points="200,240 250,250 250,310 200,300" />
+          <polygon id="sticker-F-2-3" class="sticker" points="250,250 300,260 300,320 250,310" />
+
+          <!-- Row 3 -->
+          <polygon id="sticker-F-3-0" class="sticker" points="100,280 150,290 150,350 100,340" />
+          <polygon id="sticker-F-3-1" class="sticker" points="150,290 200,300 200,360 150,350" />
+          <polygon id="sticker-F-3-2" class="sticker" points="200,300 250,310 250,370 200,360" />
+          <polygon id="sticker-F-3-3" class="sticker" points="250,310 300,320 300,380 250,370" />
+        </g>
+
+        <!-- ===================== -->
+        <!--  U (Top) Face         -->
+        <!-- ===================== -->
+        <g id="face-U">
+          <!-- Row 0 -->
+          <polygon id="sticker-U-0-0" class="sticker" points="220,40 270,50 240,65 190,55" />
+          <polygon id="sticker-U-0-1" class="sticker" points="270,50 320,60 290,75 240,65" />
+          <polygon id="sticker-U-0-2" class="sticker" points="320,60 370,70 340,85 290,75" />
+          <polygon id="sticker-U-0-3" class="sticker" points="370,70 420,80 390,95 340,85" />
+ 
+          <!-- Row 1 -->
+          <polygon id="sticker-U-1-0" class="sticker" points="190,55 240,65 210,80 160,70" />
+          <polygon id="sticker-U-1-1" class="sticker" points="240,65 290,75 260,90 210,80" />
+          <polygon id="sticker-U-1-2" class="sticker" points="290,75 340,85 310,100 260,90" />
+          <polygon id="sticker-U-1-3" class="sticker" points="340,85 390,95 360,110 310,100 " />
+          
+          <!-- Row 2 -->
+          <polygon id="sticker-U-2-0" class="sticker" points="160,70 210,80 180,95 130,85" />
+          <polygon id="sticker-U-2-1" class="sticker" points="210,80 260,90 230,105 180,95" />
+          <polygon id="sticker-U-2-2" class="sticker" points="260,90 310,100 280,115 230,105" />
+          <polygon id="sticker-U-2-3" class="sticker" points="310,100 360,110 330,125 280,115 " />
+
+          <!-- Row 3 -->
+          <polygon id="sticker-U-3-0" class="sticker" points="130,85 180,95 150,110 100,100" />
+          <polygon id="sticker-U-3-1" class="sticker" points="180,95 230,105 200,120 150,110" />
+          <polygon id="sticker-U-3-2" class="sticker" points="230,105 280,115 250,130 200,120" />
+          <polygon id="sticker-U-3-3" class="sticker" points="280,115 330,125 300,140 250,130" />
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <script>
+    // =========================
+    // Constants
+    // =========================
+    const DARK_GREY = '#BBBBBB';
+  
+    const PALETTE = { 
+      U:'#FFFFFF', 
+      R:'#D32F2F', 
+      F:'#2E7D32', 
+      D:'#FFEB3B', 
+      L:'#F57C00', 
+      B:'#1565C0',
+      G: DARK_GREY
+    };
+  
+    // =========================
+    // Initialization
+    // =========================
+    function initializeCube() {
+      // Select BOTH .sticker and .sticker-hidden
+      document.querySelectorAll('.sticker, .sticker-hidden').forEach(el => {
+        el.setAttribute('fill', DARK_GREY);
+      });
+    }
+
+    function resetAllGrey() {
+      initializeCube();
+    }
+    // =========================
+    // 🔧 CRITICAL FIX
+    // Inline strokes so canvas + Google Slides keep them
+    // =========================
+    function inlineStickerStrokes() {
+      // Handle regular stickers
+      document.querySelectorAll('.sticker').forEach(el => {
+        el.setAttribute('stroke', '#0F0F0F');
+        el.setAttribute('stroke-width', '2');
+        el.removeAttribute('vector-effect'); // canvas-safe
+      });
+      
+      // Handle hidden stickers (back faces)
+      document.querySelectorAll('.sticker-hidden').forEach(el => {
+        el.setAttribute('stroke', 'rgba(15, 15, 15, 0.15)');
+        el.setAttribute('stroke-width', '2');
+        el.removeAttribute('vector-effect'); // canvas-safe
+      });
+    }
+  
+    // =========================
+    // Export as PNG (Download)
+    // =========================
+    function exportAsImage() {
+      const svg = document.getElementById('cube-svg');
+  
+      inlineStickerStrokes(); // 🔑 IMPORTANT
+  
+      const svgData = new XMLSerializer().serializeToString(svg);
+  
+      const canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 500;
+  
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#f0fdf4';  // Match the light green background
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+      const img = new Image();
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+  
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+  
+        canvas.toBlob(blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'rubiks-cube.png';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        });
+      };
+  
+      img.src = url;
+    }
+  
+    // =========================
+    // Copy to Clipboard (PNG)
+    // =========================
+    async function copyToClipboard() {
+      const svg = document.getElementById('cube-svg');
+  
+      inlineStickerStrokes(); // 🔑 IMPORTANT
+  
+      const svgData = new XMLSerializer().serializeToString(svg);
+  
+      const canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 500;
+  
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#f0fdf4';  // Match the light green background
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+      const img = new Image();
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+  
+      img.onload = async () => {
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+  
+        canvas.toBlob(async pngBlob => {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': pngBlob })
+          ]);
+          alert('Cube copied to clipboard! Paste into Google Slides.');
+        });
+      };
+  
+      img.src = url;
+    }
+  
+    // =========================
+    // Sticker click behavior - works for both .sticker and .sticker-hidden
+    // =========================
+        document.querySelectorAll('.sticker, .sticker-hidden').forEach(el => {
+          el.addEventListener('click', () => {
+            const colors = Object.values(PALETTE);
+            const current = el.getAttribute('fill') || colors[0];
+            const next = colors[(colors.indexOf(current) + 1) % colors.length];
+            el.setAttribute('fill', next);
+          });
+        });
+    // =========================
+    // Startup
+    // =========================
+    initializeCube();
+  
+    // Expose functions
+    window.exportAsImage = exportAsImage;
+    window.copyToClipboard = copyToClipboard;
+    window.resetAllGrey = resetAllGrey;
+  </script>
+  
+</body>
+</html>

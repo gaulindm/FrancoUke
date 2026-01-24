@@ -1,0 +1,185 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}La marguerite — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 1a : <span class="brand-green">La marguerite</span>
+        </h1>
+        <p class="lead text-muted">
+            Première étape pour maîtriser ton Rubik's Cube : construire la marguerite autour du centre jaune.
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states (only shown if any are missing) -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+            <div id="cube-goal"></div>
+
+        <p>
+            Amener les 4 arêtes <strong>blanches</strong> autour du <strong>centre jaune</strong>, comme une fleur.
+        </p>
+
+        <div class="text-center mt-3">
+            <p class="mt-2"><small class="text-muted">La marguerite complète : 4 arêtes blanches autour du centre jaune</small></p>
+        </div>
+    </div>
+
+    <!-- Section Comment faire -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🧩 Comment faire ?</h3>
+
+        <ol class="mt-3">
+            <li>Trouve une arête blanche n'importe où sur le cube.</li>
+            <li>Amène l'arête blanche sur la <strong>face jaune</strong>.</li>
+            <li>Répète pour les 4 arêtes blanches.</li>
+        </ol>
+
+        <p class="mt-3">
+            Pour cette étape, aucun algorithme n'est requis.  
+            <strong>Utilise seulement tes intuitions et des rotations simples !</strong>
+        </p>
+
+        <!-- Comparaison Avant/Après -->
+        <div class="row mt-4">
+            <div class="col-md-6 text-center mb-3">
+                <h5 class="brand-green">Avant</h5>
+                <div id="cube-before"></div>
+                <p><small class="text-muted">Arêtes blanches dispersées sur le cube</small></p>
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <h5 class="brand-green">Après</h5>
+                <div id="cube-after"></div>
+                <p><small class="text-muted">Marguerite complète!</small></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Progression interactive -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📊 Ta progression</h3>
+        <p>Clique sur les boutons pour voir comment la marguerite se construit étape par étape.</p>
+        
+        <div class="text-center mt-3">
+            <div id="cube-container-progress"></div>
+            <div class="btn-group mt-3" role="group" aria-label="Progression de la marguerite">
+                <button class="btn btn-sm btn-outline-primary active" onclick="updateProgress(0)">0/4</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="updateProgress(1)">1/4</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="updateProgress(2)">2/4</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="updateProgress(3)">3/4</button>
+                <button class="btn btn-sm btn-outline-success" onclick="updateProgress(4)">4/4 ✓</button>
+            </div>
+            <div id="progress-message" class="mt-3 p-3 bg-light rounded" style="display: none;">
+                <p class="mb-0 text-center fw-bold"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Conseils -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">💡 Conseils utiles</h3>
+        <ul class="mt-3">
+            <li>Tourne le cube dans tes mains pour repérer les arêtes blanches.</li>
+            <li>Si une arête blanche est « coincée » en bas, utilise <code>R U R'</code> pour la libérer.</li>
+            <li>Ne t'en fais pas pour les couleurs autour – ce sera important à l'étape suivante !</li>
+            <li><strong>Astuce :</strong> Commence par trouver UNE arête blanche, puis concentre-toi sur celle-là avant de chercher les autres.</li>
+        </ul>
+    </div>
+
+    <!-- Bouton de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-primary">
+            ← Retour aux étapes
+        </a>
+        <a href="{% url 'francontcube:cubienewbie_white_cross' %}" class="btn btn-success ms-2">
+            Étape suivante : La croix blanche →
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS pour les cubes -->
+<style>
+/* Cube de taille normale (pour objectif et progression) */
+#cube-container-goal svg,
+#cube-container-progress svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Cubes réduits à 1/4 (pour avant/après) */
+.cube-small svg {
+    max-width: 275px;  /* 550px / 2 */
+    height: auto;
+}
+
+/* Sur mobile, garder les cubes plus petits */
+@media (max-width: 768px) {
+    .cube-small svg {
+        max-width: 200px;
+    }
+    
+    #cube-container-goal svg,
+    #cube-container-progress svg {
+        max-width: 350px;
+    }
+}
+</style>
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
+    
+    // If state is missing, show a placeholder
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+          <small class="text-muted">Create the CubeState in your admin tool</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    mountCube("cube-goal", {{ goal_state|safe }});
+    mountCube("cube-before", {{ before_state|safe }});
+    mountCube("cube-after", {{ after_state|safe }});
+  });
+</script>
+
+{% endblock %}
