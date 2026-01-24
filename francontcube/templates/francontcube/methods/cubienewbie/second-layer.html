@@ -6,20 +6,20 @@
 {% block content %}
 <div class="container py-5">
 
-    <!-- Titre principal -->
+    <!-- Titre principal avec emoji -->
     <div class="text-center mb-5">
         <h1 class="hero-title">
-            Étape 3 : <span class="brand-green">La deuxième couche</span>
+            🧩 Étape 4 : <span class="brand-green">La deuxième couche!</span>
         </h1>
-        <p class="lead text-muted">
-            Placer les 4 arêtes du milieu pour compléter les deux premières couches du cube.
+        <p class="lead">
+            Place 4 arêtes dans le milieu du cube
         </p>
     </div>
 
     <!-- Charger le template SVG (caché) -->
     {% include "cube/partials/_cube_svg.html" %}
 
-    <!-- Warning for missing cube states (only shown if any are missing) -->
+    <!-- Warning for missing cube states -->
     {% if missing_slugs %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <h4 class="alert-heading">⚠️ Missing Cube States</h4>
@@ -29,305 +29,320 @@
             <li><code>{{ slug }}</code></li>
             {% endfor %}
         </ul>
-        <hr>
-        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endif %}
 
-    <!-- Section Objectif -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🎯 Objectif</h3>
-        <p>
-            Placer les 4 arêtes de la deuxième couche (le milieu du cube). 
-            Ces arêtes n'ont <strong>PAS de jaune</strong> - elles vont entre la face blanche du bas et la face jaune du haut.
-        </p>
-
-        <div class="row mt-3">
-            <div class="col-md-6 text-center mb-3">
-                <h5>Avant : Première couche complète</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">Face blanche terminée</small></p>
-            </div>
-            <div class="col-md-6 text-center mb-3">
-                <h5>Après : Deux couches complètes</h5>
-                <div id="cube-goal" class="cube-small"></div>
-                <p><small class="text-muted">Les 4 arêtes du milieu sont en place!</small></p>
-            </div>
+  
+    <!-- C'est quoi le but? -->
+    <div class="card border-success border-3 shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-4">🎯 C'est quoi le but?</h2>
+            <div id="cube-goal" class="mb-3 d-flex justify-content-center"></div>
+            <p><strong>2 couches complètes!</strong> 🎉</p>
         </div>
     </div>
 
-    <!-- Section Identifier l'arête -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔍 Étape 1 : Trouve la bonne arête</h3>
-        <p>
-            Cherche une arête dans la couche du <strong>haut</strong> qui n'a <strong>pas de jaune</strong>.
-        </p>
+<!-- Trouver la bonne arête - SIMPLIFIÉ -->
+<div class="card border-info border-3 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <h3 class="text-center mb-4">🔍 Cherche une arête SANS jaune pour former un T à l'envers sur le côté droit</h3>
         
-        <div class="alert alert-info">
-            <strong>💡 Comment identifier l'arête :</strong>
-            <ol class="mb-0 mt-2">
-                <li>Regarde les arêtes sur la face du haut (U)</li>
-                <li>Trouve une arête <strong>sans jaune</strong> (elle a 2 autres couleurs)</li>
-                <li>Cette arête va dans la deuxième couche!</li>
-                <li>Si toutes les arêtes du haut ont du jaune, tu devras d'abord sortir une arête coincée dans le milieu</li>
-            </ol>
-        </div>
-
-        <div class="alert alert-warning mt-3">
-            <strong>⚠️ Arête avec du jaune :</strong>
-            <div class="row mt-2 align-items-center">
-                <div class="col-md-4 text-center">
-                    <div id="cube-edge-yellow" class="cube-case"></div>
-                </div>
-                <div class="col-md-8">
-                    <p class="mb-0">
-                        Si l'arête a du <strong>jaune</strong>, elle appartient à la dernière couche. 
-                        Ne la touche pas pour l'instant - trouve une autre arête sans jaune!
-                    </p>
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center mb-3">
+                <div class="p-4 bg-light rounded">
+                    <h4 class="text-danger mb-3">❌ Mauvaise arête</h4>
+                    <p class="lead mb-3">A du jaune =<br><strong>Pas pour maintenant!</strong></p>
+                    <div class="d-flex justify-content-center">
+                        <div id="cube-edge-yellow"></div>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <div class="alert alert-info text-center mt-4 mb-0">
+            <strong>💡 Astuce:</strong> Cherche dans la couche du HAUT. Il y a 4 arêtes à placer!
+        </div>
     </div>
+</div>
 
-    <!-- Section Algorithmes -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔄 Étape 2 : Insère l'arête avec l'algorithme</h3>
-        <p>Il y a deux cas selon l'orientation de l'arête. Les deux algorithmes sont similaires!</p>
-
-        <!-- Cas 1: Arête va en ARRIERE -->
-        <div class="border rounded p-3 mb-3 bg-light">
-            <h5 class="text-success">✅ Cas 1 : L'arête va vers l'avant</h5>
-            <p>La couleur qui correspond au centre de devant est <strong>sur la face avant</strong>.</p>
+    <!-- Les 2 algorithmes -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">🎮 Les 2 cas possibles</h2>
+            <p class="text-center lead mb-4">Regarde où la couleur du centre devant apparaît sur ton arête</p>
             
-            <div class="row align-items-center">
-                <div class="col-md-4 text-center">
-                    <div id="cube-case-front" class="cube-case"></div>
-                    <p class="mt-2"><small>Position de départ</small></p>
+            <!-- Cas 1: Couleur devant -->
+            <div class="case-card p-4 mb-4 border border-3 border-success rounded">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-3">
+                        <h4 class="text-success mb-3">Cas 1: L'arête va en AVANT</h4>
+                        <div id="cube-case-front" class="mb-3"></div>
                     </div>
                     <div class="col-md-8">
-                        <div class="text-center p-3 bg-white rounded border border-success border-2">
-                            <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                            <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                            <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
+                        <div class="text-center p-4 bg-light rounded">
+                            <h5 class="mb-3">Fais cet algorithme:</h5>
+                            <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap mb-3">
+                                <svg class="move-icon"><use href="#R-prime"/></svg>
+                                <svg class="move-icon"><use href="#U-prime"/></svg>
+                                <svg class="move-icon"><use href="#R-prime"/></svg>
+                                <svg class="move-icon"><use href="#U-prime"/></svg>
+                                <svg class="move-icon"><use href="#R-prime"/></svg>
+                                <svg class="move-icon"><use href="#U"/></svg>
+                                <svg class="move-icon"><use href="#R"/></svg>
+                                <svg class="move-icon"><use href="#U"/></svg>
+                                <svg class="move-icon"><use href="#R"/></svg>
+                                
+                            </div>
+                            <p class="text-success mb-0"><strong>L'arête descend en avant! →</strong></p>
                         </div>
-                            <p class="mt-2 mb-0"><small>L'arête descend dans le slot de droite</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cas 2: Couleur à droite -->
+            <div class="case-card p-4 border border-3 border-primary rounded">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-3">
+                        <h4 class="text-primary mb-3">Cas 2: L'arête va à l'ARRIÈRE</h4>
+                        <div id="cube-case-back" class="mb-3"></div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="text-center p-4 bg-light rounded">
+                            <h5 class="mb-3">Fais cet algorithme:</h5>
+                            <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap mb-3">
+
+
+                                <svg class="move-icon"><use href="#R"/></svg>
+                                <svg class="move-icon"><use href="#U"/></svg>
+                                <svg class="move-icon"><use href="#R"/></svg>
+                                <svg class="move-icon"><use href="#U"/></svg>
+                                <svg class="move-icon"><use href="#R"/></svg>
+                                <svg class="move-icon"><use href="#U-prime"/></svg>
+                                <svg class="move-icon"><use href="#R-prime"/></svg>
+                                <svg class="move-icon"><use href="#U-prime"/></svg>
+                                <svg class="move-icon"><use href="#R-prime"/></svg>
+                            </div>
+                            <p class="text-primary mb-0"><strong>L'arête descend à l'arrière! ←</strong></p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Cas 2: Arête va en arriere -->
-        <div class="border rounded p-3 bg-light">
-            <h5 class="text-primary">✅ Cas 2 : L'arête va vers l'arriere</h5>
-            <p>La couleur qui correspond au centre de devant est <strong>sur la face de droite</strong>.</p>
+    <!-- Comment faire - 3 étapes simples -->
+    <div class="card border-warning border-2 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h3 class="text-center mb-4">📝 Comment faire? (3 étapes!)</h3>
+            
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="display-1 text-primary">1️⃣</div>
+                    <h4 class="mt-3 brand-green">Trouve</h4>
+                    <p class="lead">Cherche une arête SANS jaune en haut</p>
+                </div>
+                
+                <div class="col-md-4 text-center mb-4">
+                    <div class="display-1 text-info">2️⃣</div>
+                    <h4 class="mt-3 brand-green">Positionne</h4>
+                    <p class="lead">Forme un T en l'envers sur la face de droite</p>
+                </div>
+                
+                <div class="col-md-4 text-center mb-4">
+                    <div class="display-1 text-success">3️⃣</div>
+                    <h4 class="mt-3 brand-green">Choisis</h4>
+                    <p class="lead">Cas 1 (AVANT) ou Cas 2 (ARRIÈRE)?</p>
+                </div>
+            </div>
+
+            <div class="alert alert-success text-center mt-4 mb-0">
+                <h5>🔄 Répète pour les 4 arêtes!</h5>
+                <div class="d-flex justify-content-center gap-3 mt-3 flex-wrap">
+                    <span class="edge-progress">1️⃣</span>
+                    <span class="edge-progress">2️⃣</span>
+                    <span class="edge-progress">3️⃣</span>
+                    <span class="edge-progress">4️⃣</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cas spécial: Arête coincée -->
+    <div class="card border-danger border-2 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h3 class="text-center mb-4">⚠️ Arête coincée dans le milieu?</h3>
             
             <div class="row align-items-center">
-                <div class="col-md-4 text-center">
-                    <div id="cube-case-back" class="cube-case"></div>
-                    <p class="mt-2"><small>Position de départ</small></p>
+                <div class="col-md-4 text-center mb-3">
+                    <div id="cube-edge-stuck" class="mb-3"></div>
+                    <p><small>Arête mal placée</small></p>
                 </div>
                 <div class="col-md-8">
-                    
-                    <div class="text-center p-3 bg-white rounded border border-success border-2">
-                            <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
-                            <svg class="move-icon"><use href="#R"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
-                            <svg class="move-icon"><use href="#U"/></svg>
-                            <svg class="move-icon"><use href="#R"/></svg>
-                            <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                            <svg class="move-icon"><use href="#U-prime"/></svg>
-                            <svg class="move-icon"><use href="#R-prime"/></svg>
-                        </div>
-                        
-                        <p class="mt-2 mb-0"><small>L'arête descend dans le slot de gauche</small></p>
+                    <div class="p-4 bg-light rounded">
+                        <h5 class="text-danger mb-3">Solution simple:</h5>
+                        <ol class="mb-0">
+                            <li class="mb-2">Mets n'importe quelle arête au-dessus</li>
+                            <li class="mb-2">Fais un des 2 algorithmes</li>
+                            <li class="mb-0">L'arête coincée sort en haut - maintenant tu peux la replacer!</li>
+                        </ol>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Section Cas spécial -->
-    <div class="card p-4 mb-4 border-warning">
-        <h3 class="brand-green">⚠️ Cas spécial : Arête coincée dans le milieu</h3>
-        <p>
-            Si une arête est <strong>déjà dans la deuxième couche mais mal placée ou mal orientée</strong>, 
-            tu dois d'abord la sortir.
-        </p>
-
-        <div class="row mt-3 align-items-center">
-            <div class="col-md-4 text-center">
-                <div id="cube-edge-stuck" class="cube-case"></div>
-                <p class="mt-2"><small>Arête mal placée dans le milieu</small></p>
-            </div>
-            <div class="col-md-8">
-                <div class="bg-white p-3 rounded border border-warning border-2">
-                    <h5>Solution :</h5>
-                    <ol class="mb-0">
-                        <li>Place n'importe quelle autre arête au-dessus de la position coincée</li>
-                        <li>Fais un des deux algorithmes (droite ou gauche)</li>
-                        <li>L'arête coincée va sortir et monter dans la couche du haut</li>
-                        <li>Maintenant tu peux la réinsérer au bon endroit!</li>
-                    </ol>
-                </div>
-            </div>
+    <!-- Encouragement final -->
+    <div class="card bg-success text-white shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-3">🌟 Tu y es presque!</h2>
+            <p class="lead mb-0">
+                Ces algorithmes sont plus longs, mais avec de la pratique,<br>
+                ils deviennent faciles! Continue - tu fais du super travail! 🎉
+            </p>
         </div>
     </div>
 
-    <!-- Section Technique -->
-    <div class="card p-4 mb-4 border-success">
-        <h3 class="brand-green">✋ Technique de prise</h3>
-        <div class="alert alert-success">
-            <strong>Pour l'algorithme de DROITE (U R U' R' U' F' U F) :</strong>
-            <ul class="mb-0 mt-2">
-                <li>Main gauche : tiens le cube fermement</li>
-                <li>Main droite : fait tous les mouvements R et U</li>
-                <li>Index gauche : fait les mouvements F et F'</li>
-                <li><strong>Pratique lentement, puis accélère progressivement</strong></li>
-            </ul>
-        </div>
-        
-        <div class="alert alert-info mb-0">
-            <strong>Pour l'algorithme de GAUCHE (U' L' U L U F U' F') :</strong>
-            <ul class="mb-0 mt-2">
-                <li>Main droite : tiens le cube</li>
-                <li>Main gauche : fait les mouvements L et U</li>
-                <li>Index gauche : fait aussi les mouvements F</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Section Processus complet -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📋 Processus complet pour chaque arête</h3>
-        <ol>
-            <li class="mb-2">
-                <strong>Trouve une arête sans jaune</strong> dans la couche du haut
-            </li>
-            <li class="mb-2">
-                <strong>Identifie où elle va</strong> : Regarde les deux couleurs de l'arête. 
-                Elle va entre les deux centres de ces couleurs
-            </li>
-            <li class="mb-2">
-                <strong>Positionne le cube</strong> : Tourne tout le cube pour mettre un des centres 
-                devant toi (celui qui correspond à la couleur sur la face avant de l'arête)
-            </li>
-            <li class="mb-2">
-                <strong>Amène l'arête au bon endroit</strong> : Tourne U jusqu'à ce que l'arête 
-                soit juste au-dessus de sa place
-            </li>
-            <li class="mb-2">
-                <strong>Détermine le cas</strong> : 
-                <ul>
-                    <li>Couleur devant → Cas 1 (droite) : <code>U R U' R' U' F' U F</code></li>
-                    <li>Couleur à droite → Cas 2 (gauche) : <code>U' L' U L U F U' F'</code></li>
-                </ul>
-            </li>
-            <li class="mb-2">
-                <strong>Répète pour les 3 autres arêtes!</strong>
-            </li>
-        </ol>
-    </div>
-
-    <!-- Section Conseils -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">💡 Conseils utiles</h3>
-        <ul class="mt-3">
-            <li>
-                <strong>Ces algorithmes sont plus longs</strong> - ne te décourage pas! 
-                Avec de la pratique, ils deviendront automatiques.
-            </li>
-            <li>
-                <strong>Découpe les algorithmes en morceaux.</strong> Apprends <code>U R U' R'</code> 
-                d'abord, puis ajoute <code>U' F' U F</code>.
-            </li>
-            <li>
-                <strong>Ne panique pas si tu défais la première couche!</strong> Les algorithmes 
-                la remettent automatiquement en place.
-            </li>
-            <li>
-                <strong>Il n'y a que 4 arêtes à placer.</strong> Une fois qu'elles sont toutes en place, 
-                tu as complété les deux tiers du cube! 🎉
-            </li>
-            <li>
-                <strong>Astuce :</strong> Si tu n'es pas sûr de l'orientation, essaie un algorithme. 
-                Si l'arête ne va pas au bon endroit, fais simplement l'autre algorithme.
-            </li>
-        </ul>
-    </div>
-
-    <!-- Bouton de navigation -->
-    <div class="text-center">
-        <a href="{% url 'francontcube:cubienewbie_bottom_corners' %}" class="btn btn-outline-primary">
-            ← Retour : Les coins blancs
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+        <a href="{% url 'francontcube:cubienewbie_bottom_corners' %}" class="btn btn-outline-primary btn-lg">
+            ← Coins blancs
         </a>
-        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
-            Vue d'ensemble
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
+            🏠 Menu
         </a>
-        <a href="{% url 'francontcube:cubienewbie_yellow_cross' %}" class="btn btn-success ms-2">
-            Étape suivante : La croix jaune →
+        <a href="{% url 'francontcube:cubienewbie_yellow_cross' %}" class="btn btn-success btn-lg">
+            Croix jaune →
         </a>
     </div>
 </div>
 
-<!-- Styles CSS pour les cubes -->
+<!-- Styles CSS -->
 <style>
-.cube-small svg {
-    max-width: 275px;
+/* Cubes */
+#cube-before svg,
+#cube-goal svg {
+    max-width: 300px;
     height: auto;
 }
 
-.move-icon { 
-    width: 56px; 
-    height: 75px; 
+#cube-case-front svg,
+#cube-case-back svg {
+    max-width: 200px;
+    height: auto;
 }
 
-
-.cube-case svg {
-    max-width: 220px;
+#cube-edge-yellow svg,
+#cube-edge-stuck svg {
+    max-width: 150px;
     height: auto;
+}
+
+/* Icônes de mouvements */
+.move-icon {
+    width: 50px;
+    height: 67px;
+}
+
+/* Progress des arêtes */
+.edge-progress {
+    font-size: 2rem;
+    display: inline-block;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    min-width: 50px;
+}
+
+/* Case cards */
+.case-card {
+    background: white;
+    transition: transform 0.2s;
+}
+
+.case-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+/* Effet hover */
+.btn-lg:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s;
 }
 
 @media (max-width: 768px) {
-    .cube-small svg {
-        max-width: 200px;
+    #cube-before svg,
+    #cube-goal svg {
+        max-width: 250px;
     }
     
-    .cube-case svg {
+    #cube-case-front svg,
+    #cube-case-back svg {
         max-width: 180px;
+    }
+    
+    #cube-edge-yellow svg,
+    #cube-edge-stuck svg {
+        max-width: 120px;
+    }
+    
+    .move-icon {
+        width: 40px;
+        height: 54px;
+    }
+    
+    .btn-lg {
+        font-size: 1rem;
+    }
+    
+    .display-1 {
+        font-size: 3rem;
+    }
+    
+    .edge-progress {
+        font-size: 1.5rem;
+        min-width: 40px;
     }
 }
 </style>
 
-<!-- Script d'initialisation de la page -->
+<!-- Script JavaScript -->
 <script type="module">
   import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
 
   function mountCube(containerId, state) {
     const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Clear any existing content
+    if (!container) return;
     
-    // If state is missing, show a placeholder
+    container.innerHTML = '';
+
     if (!state) {
       container.innerHTML = `
         <div class="alert alert-secondary text-center py-4">
           <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
-          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
-          <small class="text-muted">Create the CubeState in your admin tool</small>
+          <p class="mb-0 mt-2 text-muted">Cube non disponible</p>
         </div>
       `;
       return;
     }
-    
+
     const template = document.getElementById("cube-template");
     const clone = template.content.cloneNode(true);
     container.appendChild(clone);
@@ -337,15 +352,9 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Mount all cubes
-    mountCube("cube-before", {{ before_state|safe }});
     mountCube("cube-goal", {{ goal_state|safe }});
-    
-    // Algorithm cases
-    mountCube("cube-case-back", {{ case_back_state|safe }});
     mountCube("cube-case-front", {{ case_front_state|safe }});
-    
-    // Special cases
+    mountCube("cube-case-back", {{ case_back_state|safe }});
     mountCube("cube-edge-yellow", {{ edge_yellow_state|safe }});
     mountCube("cube-edge-stuck", {{ edge_stuck_state|safe }});
   });
