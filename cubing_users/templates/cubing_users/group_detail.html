@@ -1,12 +1,308 @@
-{% extends "francontcube/partials/base.html" %}{% block content %}
-<h1 class="text-white">Détails du Groupe</h1>
-<div class="card">
-    <div class="card-body">
-        {% if group %}
-            <h3>{{ group.group_name }}</h3>
-            <p>Code: <code>{{ group.group_code }}</code></p>
-            <p>Membres: {{ memberships.count }}</p>
-        {% endif %}
+{% extends 'cubing_users/base.html' %}
+
+{% block title %}{{ group.group_name }} - Détails{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cuber-card {
+        transition: all 0.3s;
+        border-left: 4px solid transparent;
+    }
+    
+    .cuber-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .cuber-card.color-rouge { border-left-color: #FF0000; }
+    .cuber-card.color-bleu { border-left-color: #0051BA; }
+    .cuber-card.color-vert { border-left-color: #009B48; }
+    .cuber-card.color-jaune { border-left-color: #FFD500; }
+    .cuber-card.color-orange { border-left-color: #FF5800; }
+    .cuber-card.color-blanc { border-left-color: #666; }
+    
+    .color-emoji {
+        font-size: 2rem;
+    }
+    
+    .info-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header du Groupe -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="card-title mb-2">
+                            {{ group.group_name }}
+                        </h1>
+                        <p class="text-muted mb-0">
+                            <span class="badge bg-secondary me-2">{{ group.get_group_type_display }}</span>
+                            <span class="me-3">📅 Créé le {{ group.created_date|date:"d/m/Y" }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="mb-2">
+                            <strong>Code du groupe:</strong>
+                            <code class="fs-3 bg-light p-2 rounded">{{ group.group_code }}</code>
+                        </div>
+                        <small class="text-muted">Partage ce code avec tes étudiants</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques Rapides -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="display-4 fw-bold text-primary">{{ memberships.count }}</div>
+                <small class="text-muted">Membres</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="display-4 fw-bold text-success">{{ stats.active_this_week }}</div>
+                <small class="text-muted">Actifs cette semaine</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="display-4 fw-bold text-info">0%</div>
+                <small class="text-muted">Progression moyenne</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <a href="{% url 'cubing_users:group_statistics' group.group_id %}" class="btn btn-outline-primary btn-cube">
+                    📊 Statistiques
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions Rapides -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">⚡ Actions Rapides</h5>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'cubing_users:group_roster' group.group_id %}" class="btn btn-outline-primary">
+                        📋 Liste Complète
+                    </a>
+                    <a href="{% url 'cubing_users:print_login_cards' group.group_id %}" class="btn btn-outline-secondary">
+                        🖨️ Imprimer Cartes
+                    </a>
+                    <a href="{% url 'cubing_users:group_statistics' group.group_id %}" class="btn btn-outline-info">
+                        📊 Statistiques Détaillées
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des Cubeurs -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="card-title mb-0">
+                        👥 Membres du Groupe ({{ memberships.count }})
+                    </h3>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary active" onclick="viewMode('cards')">
+                            🎴 Cartes
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="viewMode('table')">
+                            📊 Tableau
+                        </button>
+                    </div>
+                </div>
+
+                {% if memberships %}
+                    <!-- Vue Cartes -->
+                    <div id="cardsView" class="row g-3">
+                        {% for membership in memberships %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card cuber-card h-100 color-{{ membership.cuber.color|lower }}">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start">
+                                        <div class="color-emoji me-3">
+                                            {% if membership.cuber.color == "Rouge" %}🟥
+                                            {% elif membership.cuber.color == "Bleu" %}🟦
+                                            {% elif membership.cuber.color == "Vert" %}🟩
+                                            {% elif membership.cuber.color == "Jaune" %}🟨
+                                            {% elif membership.cuber.color == "Orange" %}🟧
+                                            {% elif membership.cuber.color == "Blanc" %}⬜
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h5 class="card-title mb-2">
+                                                {{ membership.cuber.color }} 
+                                                {{ membership.cuber.adjective }} 
+                                                {{ membership.cuber.superhero }}
+                                            </h5>
+                                            
+                                            <div class="mb-2">
+                                                <span class="info-badge bg-light">
+                                                    {{ membership.cuber.avatar_variant }}
+                                                </span>
+                                            </div>
+                                            
+                                            <small class="text-muted d-block mb-2">
+                                                📅 Rejoint le {{ membership.joined_date|date:"d/m/Y" }}
+                                            </small>
+                                            
+                                            <small class="text-muted d-block mb-3">
+                                                🕐 Dernière activité: 
+                                                {% if membership.cuber.last_active_date %}
+                                                    {{ membership.cuber.last_active_date|timesince }} 
+                                                {% else %}
+                                                    Jamais
+                                                {% endif %}
+                                            </small>
+                                            
+                                            <div class="d-grid gap-2">
+                                                <a href="{% url 'cubing_users:student_progress' group.group_id membership.cuber.cuber_id %}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    Voir le Progrès →
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Vue Tableau (cachée par défaut) -->
+                    <div id="tableView" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Identité</th>
+                                        <th>Style</th>
+                                        <th>Membre depuis</th>
+                                        <th>Dernière activité</th>
+                                        <th>Progrès F2L</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for membership in memberships %}
+                                    <tr>
+                                        <td>
+                                            {% if membership.cuber.color == "Rouge" %}🟥
+                                            {% elif membership.cuber.color == "Bleu" %}🟦
+                                            {% elif membership.cuber.color == "Vert" %}🟩
+                                            {% elif membership.cuber.color == "Jaune" %}🟨
+                                            {% elif membership.cuber.color == "Orange" %}🟧
+                                            {% elif membership.cuber.color == "Blanc" %}⬜
+                                            {% endif %}
+                                            <strong>
+                                                {{ membership.cuber.color }} 
+                                                {{ membership.cuber.adjective }} 
+                                                {{ membership.cuber.superhero }}
+                                            </strong>
+                                        </td>
+                                        <td>{{ membership.cuber.avatar_variant }}</td>
+                                        <td>{{ membership.joined_date|date:"d/m/Y" }}</td>
+                                        <td>
+                                            {% if membership.cuber.last_active_date %}
+                                                {{ membership.cuber.last_active_date|timesince }}
+                                            {% else %}
+                                                <span class="text-muted">Jamais</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">0/41</span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'cubing_users:student_progress' group.group_id membership.cuber.cuber_id %}" 
+                                               class="btn btn-sm btn-primary">
+                                                Détails
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <!-- Aucun Membre -->
+                    <div class="text-center py-5">
+                        <div class="display-1 mb-3">😴</div>
+                        <h4 class="text-muted mb-3">Aucun membre pour le moment</h4>
+                        <p class="text-muted mb-4">
+                            Partage le code <code class="fs-4">{{ group.group_code }}</code> avec tes étudiants
+                        </p>
+                        <div class="alert alert-info d-inline-block">
+                            <strong>💡 Astuce:</strong> Les étudiants peuvent rejoindre en allant sur 
+                            <strong>Rejoindre un Groupe</strong> et en entrant ce code.
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bouton Retour -->
+<div class="row mt-4">
+    <div class="col-lg-12">
+        <a href="{% url 'cubing_users:leader_dashboard' %}" class="btn btn-outline-secondary btn-cube">
+            ← Retour au Dashboard
+        </a>
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    function viewMode(mode) {
+        const cardsView = document.getElementById('cardsView');
+        const tableView = document.getElementById('tableView');
+        const buttons = document.querySelectorAll('.btn-group button');
+        
+        if (mode === 'cards') {
+            cardsView.style.display = 'block';
+            tableView.style.display = 'none';
+            buttons[0].classList.add('active');
+            buttons[1].classList.remove('active');
+        } else {
+            cardsView.style.display = 'none';
+            tableView.style.display = 'block';
+            buttons[0].classList.remove('active');
+            buttons[1].classList.add('active');
+        }
+    }
+</script>
+{% endblock %}
+EOF
