@@ -20,7 +20,7 @@ class AboutView(StepView):
     """
     
     template_name = "francontcube/methods/cubienewbie/about.html"
-    step_name = "Le Cube"
+    step_name = "A propos"
     step_icon = "cube"
     
     cube_state_slugs = {

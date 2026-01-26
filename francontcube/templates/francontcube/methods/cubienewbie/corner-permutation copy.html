@@ -1,0 +1,280 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Permutation des coins — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 6 : <span class="brand-green">Permutation des coins</span>
+        </h1>
+        <p class="lead text-muted">
+            Placer les 4 coins jaunes à leur bon emplacement (sans se soucier de leur orientation).
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states (only shown if any are missing) -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+        <p>
+            Maintenant que toute la face jaune est complète, il faut <strong>placer les coins au bon endroit</strong>. 
+            Chaque coin doit avoir ses 3 couleurs qui correspondent aux 3 centres voisins.
+        </p>
+
+        <div class="alert alert-info">
+            <strong>💡 Important :</strong> À cette étape, on ne se préoccupe PAS de l'orientation 
+            des coins - juste de leur <strong>position</strong>. L'orientation sera corrigée automatiquement 
+            à la dernière étape!
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-success">✅ 4 ensembles de phares en place</h5>
+                    <div id="cube-goal" class="cube-small"></div>
+                    <p class="mb-0">Les 3 couleurs du coin correspondent aux 3 centres voisins</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-warning">❌ 4 ensemble de phares mais nécessite une rotation U</h5>
+                    <div id="cube-goal-needsu" class="cube-small"></div>
+                    <p class="mb-0">Au moins une couleur ne correspond pas à son centre</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Section L'algorithme -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 L'algorithme de permutation</h3>
+        <p>
+            Cet algorithme échange les deux coins du derière du cube.
+        </p>
+
+        <div class="text-center p-4 bg-light rounded border border-success border-3 mb-3">
+            <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                <svg class="move-icon"><use href="#R-prime"/></svg>
+                <svg class="move-icon"><use href="#U"/></svg>
+                <svg class="move-icon"><use href="#L-prime"/></svg>
+                <svg class="move-icon"><use href="#U2"/></svg>
+                <svg class="move-icon"><use href="#R"/></svg>
+                <svg class="move-icon"><use href="#U-prime"/></svg>
+                <svg class="move-icon"><use href="#R-prime"/></svg>
+                <svg class="move-icon"><use href="#U2"/></svg>
+                <svg class="move-icon"><use href="#L"/></svg>
+                <svg class="move-icon"><use href="#R"/></svg>
+                
+            </div> 
+        </div>
+
+
+        <div class="alert alert-success mt-3">
+            <strong>✋ Technique de prise :</strong>
+            <ul class="mb-0 mt-2">
+                <li>Main droite : fait R, U, R', U'</li>
+                <li>Main gauche : fait L' et L</li>
+                <li>Les deux mains travaillent ensemble!</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- Section Comment identifier -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">Un peu de lumière sur la situation SVP!</h3>
+        <p>
+            Pour réussir cette étape, on cherche des <strong>phares (headlights) </strong>.  C'est à dire <strong>deux coins</strong> dans la couche du haut de la même couleur sur sa face.
+        </p>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ Votre cube aura 0 phareNe regarde PAS la face jaune!</strong> Regarde les <strong>côtés</strong> du cube. 
+            Les couleurs du coin doivent correspondre aux centres, peu importe où est le jaune.
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-success">✅ Un ensemble de phare</h5>
+                    <div id="cube-one-correct" class="cube-small"></div>
+                    <p class="mb-0">Les 3 couleurs du coin correspondent aux 3 centres voisins</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-danger">❌ Aucun ensemble de phare</h5>
+                    <div id="cube-no-correct" class="cube-small"></div>
+                    <p class="mb-0">Au moins une couleur ne correspond pas à son centre</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- Section Processus complet -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📋 Processus complet</h3>
+        <ol>
+            <li class="mb-2">
+                <strong>Cherche un coin bien placé</strong> : Regarde les côtés du cube, pas la face jaune
+            </li>
+            <li class="mb-2">
+                <strong>Détermine le cas :</strong>
+                <ul>
+                    <li>1 coin correct → Place-le en haut à gauche</li>
+                    <li>0 coins corrects → Fais l'algorithme n'importe comment</li>
+                    <li>Phares visibles → Mets-les derrière</li>
+                </ul>
+            </li>
+            <li class="mb-2">
+                <strong>Fais l'algorithme</strong> : <code>R' U L' U2 R U' R' U2 L R</code>
+            </li>
+            <li class="mb-2">
+                <strong>Vérifie tous les coins</strong> : Chaque coin doit avoir ses couleurs qui correspondent 
+                aux centres voisins
+            </li>
+            <li class="mb-2">
+                <strong>Si pas tous corrects</strong> : Répète le processus (il faudra peut-être faire 
+                l'algorithme 2 fois)
+            </li>
+        </ol>
+    </div>
+
+    <!-- Section Conseils -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">💡 Conseils utiles</h3>
+        <ul class="mt-3">
+            <li>
+                <strong>Prends ton temps pour identifier les coins corrects.</strong> C'est la partie 
+                la plus difficile de cette étape!
+            </li>
+            <li>
+                <strong>Regarde TOUJOURS les côtés du cube, jamais la face jaune.</strong> 
+                Le jaune peut être n'importe où sur le coin.
+            </li>
+            <li>
+                <strong>L'orientation du coin correct est cruciale.</strong> Il DOIT être en haut à gauche 
+                pour que l'algorithme fonctionne.
+            </li>
+            <li>
+                <strong>Ne panique pas si ça ne marche pas du premier coup!</strong> 
+                Vérifie ton orientation et réessaie.
+            </li>
+            <li>
+                <strong>Les phares sont un bon indice.</strong> Si tu vois deux coins identiques 
+                côte à côte, utilise-les comme repère!
+            </li>
+            <li>
+                Une fois tous les coins bien placés, <strong>il ne reste qu'une seule étape!</strong> 
+                Tu es presque au bout! 🎉
+            </li>
+        </ul>
+    </div>
+
+    <!-- Bouton de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:cubienewbie_yellow_face' %}" class="btn btn-outline-primary">
+            ← Retour : La face jaune
+        </a>
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
+            Vue d'ensemble
+        </a>
+        <a href="{% url 'francontcube:cubienewbie_edge_permutation' %}" class="btn btn-success ms-2">
+            Dernière étape : Permutation des arêtes →
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS pour les cubes -->
+<style>
+.cube-small svg {
+    max-width: 275px;
+    height: auto;
+}
+
+.cube-case svg {
+    max-width: 200px;
+    height: auto;
+}
+    
+.move-icon { 
+    width: 56px; 
+    height: 75px; 
+}
+
+@media (max-width: 768px) {
+    .cube-small svg {
+        max-width: 200px;
+    }
+    
+    .cube-case svg {
+        max-width: 150px;
+    }
+}
+</style>
+
+<!-- Script d'initialisation de la page -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
+    
+    // If state is missing, show a placeholder
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+          <small class="text-muted">Create the CubeState in your admin tool</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mount all cubes
+    mountCube("cube-goal", {{ goal_state|safe }});
+    mountCube("cube-goal-needsu", {{ goal_needsu_state|safe }});
+    
+    // Different cases
+    mountCube("cube-one-correct", {{ one_correct_state|safe }});
+    mountCube("cube-no-correct", {{ no_correct_state|safe }});
+    
+  });
+</script>
+
+{% endblock %}

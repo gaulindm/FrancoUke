@@ -6,20 +6,20 @@
 {% block content %}
 <div class="container py-5">
 
-    <!-- Titre principal -->
+    <!-- Titre principal avec emoji -->
     <div class="text-center mb-5">
         <h1 class="hero-title">
-            Étape 5 : <span class="brand-green">La face jaune complète</span>
+            🐟 Étape 6 : <span class="brand-green">La chasse au poisson!</span>
         </h1>
-        <p class="lead text-muted">
-            Orienter les 4 coins jaunes pour compléter toute la face jaune - la chasse au poisson!
+        <p class="lead">
+            Complète toute la face jaune en chassant le poisson
         </p>
     </div>
 
     <!-- Charger le template SVG (caché) -->
     {% include "cube/partials/_cube_svg.html" %}
 
-    <!-- Warning for missing cube states (only shown if any are missing) -->
+    <!-- Warning for missing cube states -->
     {% if missing_slugs %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <h4 class="alert-heading">⚠️ Missing Cube States</h4>
@@ -29,284 +29,307 @@
             <li><code>{{ slug }}</code></li>
             {% endfor %}
         </ul>
-        <hr>
-        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endif %}
 
-    <!-- Section Objectif -->
-         <!-- C'est quoi le but? -->
+    <!-- C'est quoi le but? -->
     <div class="card border-success border-3 shadow-sm mb-4">
         <div class="card-body text-center p-5">
             <h2 class="mb-4">🎯 C'est quoi le but?</h2>
             <div class="d-flex justify-content-center mb-3">
                 <div id="cube-goal"></div>
             </div>
-            <h4 class="brand-green">Une face jaune en haut!</h4>
-            <p class="lead mb-0">Pour l'instant, ignore les couleurs sur les côtés 😊</p>
+            <h4 class="brand-green">Toute la face jaune complète!</h4>
+            <p class="lead mb-0">Tous les coins doivent être jaunes en haut 🟨</p>
         </div>
     </div>
 
-    <!-- Section La chasse au poisson -->
-    <div class="card p-4 mb-4 border-primary">
-        <h3 class="brand-green">🐟 La chasse au poisson</h3>
-        <p>
-            Cette étape s'appelle "la chasse au poisson" parce qu'on cherche un pattern 
-            spécial qui ressemble à un poisson!
-        </p>
-
-        <div class="alert alert-info">
-            <strong>💡 Le principe :</strong>
-            <ol class="mb-0 mt-2">
-                <li>Cherche le "poisson" sur la face jaune</li>
-                <li>Oriente le cube pour que le poisson soit dans la bonne position</li>
-                <li>Fais l'algorithme</li>
-                <li>Répète jusqu'à ce que toute la face soit jaune</li>
-            </ol>
-        </div>
-    </div>
-
-    <!-- Section L'algorithme -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🔄 L'algorithme du poisson</h3>
-        <p>
-            Un seul algorithme pour compléter la face jaune! C'est le même que pour 
-            les coins blancs, mais répété plusieurs fois.
-        </p>
-
-        <div class="text-center p-4 bg-light rounded border border-success border-3 mb-3">
-
-            <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
-
-                <svg class="move-icon"><use href="#R"/></svg>
-                <svg class="move-icon"><use href="#U"/></svg>
-                <svg class="move-icon"><use href="#R-prime"/></svg>
-                <svg class="move-icon"><use href="#U"/></svg>
-                <svg class="move-icon"><use href="#R"/></svg>
-                <svg class="move-icon"><use href="#U2"/></svg>
-                <svg class="move-icon"><use href="#R-prime"/></svg>
-            </div> 
-            <p class="mb-0"><small>L'algorithme du poisson (aussi appelé "Sune")</small></p>
-        </div>
-
-    </div>
-
-
-    <!-- 3 sunes away -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📊 Les motifs suivants neccesite faire le sune 3 fois.</h3>
-
-        <div class="row mt-3">
-            <div class="col-md-4 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5>OLL Superman</h5>
-                    <div id="cube-superman" class="cube-case"></div>
-                </div>
-            </div>
-
-            <div class="col-md-4 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5>OLL Chameleon</h5>
-                    <div id="cube-chameleon" class="cube-case"></div>
-                </div>
-            </div>
-
-            <div class="col-md-4 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5>OLL Bowtie</h5>
-                    <div id="cube-bowtie" class="cube-case"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="alert alert-success mt-3">
-            <strong>✅ Après avoir exécuté l'algorithme une fois, tu devrais voir un des motifs suivants</strong>
-        </div>
-    </div>
-
-    <!-- 2 sunes away -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📊 Les motifs suivants néccesitent faire l'algorithme du poisson 2 fois </h3>
-
-        <div class="row mt-3">
-            <div class="col-md-4 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5>OLL Pi</h5>
-                    <div id="cube-pi" class="cube-case"></div>
-                </div>
-            </div>
-
-            <div class="col-md-4 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5>OLL Double Sune</h5>
-                    <div id="cube-doublesune" class="cube-case"></div>
-
-                </div>
-            </div>
-
-            <div class="col-md-4 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5>OLL AntiSune</h5>
-                    <div id="cube-antisune" class="cube-case"></div>
-                    <p class="mt-2"><small>C'est le mauvais poisson.  Oriente et applique</small></p>
-                    <p>Il deviendra le bon poisson.</small></p>
-                </div>
-            </div>
-        </div>
-
-        <div class="alert alert-success mt-3">
-            <strong>✅ Après avoir excécuté l'algorithme tu devrais voir le poisson :</strong> 
-        </div>
-    </div>
-
-    <!-- 1 sunes away -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📊 Le motif suivant néccesite faire le sune une dernière fois </h3>
-
-        <div class="row mt-3">
+    <!-- L'algorithme du poisson - UNE SEULE FOIS -->
+    <div class="card bg-gradient shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card-body text-center text-white p-5">
+            <h2 class="mb-4">🐟 L'algorithme du poisson!</h2>
+            <p class="lead mb-4">Ton ami <strong>R U R' U'</strong> mais avec U au lieu de U' + R U2 R' à la fin!</p>
             
-            <div class="col-md-4 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5>OLL Sune</h5>
-                    <div id="cube-sune" class="cube-case"></div>
-                    <p class="mt-2"><small>C'est le bon poisson! Oriente et applique</small></p>
+            <div class="p-4 bg-white bg-opacity-25 rounded-3 d-inline-block mb-4">
+                <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+                    <svg class="move-icon-large"><use href="#R"/></svg>
+                    <svg class="move-icon-large"><use href="#U"/></svg>
+                    <svg class="move-icon-large"><use href="#R-prime"/></svg>
+                    <svg class="move-icon-large"><use href="#U"/></svg>
+                    <svg class="move-icon-large"><use href="#R"/></svg>
+                    <svg class="move-icon-large"><use href="#U2"/></svg>
+                    <svg class="move-icon-large"><use href="#R-prime"/></svg>
+                </div>
+            </div>
+           
+            
+            <div class="alert alert-light text-dark">
+                <p class="lead mb-0">Tu vas répéter cet algorithme 1 à 5 fois - c'est normal! 🔄</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Le BON poisson -->
+    <div class="card border-success border-3 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">🐟 Cherche le BON poisson!</h2>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-6 text-center">
+                    <div class="p-4 bg-light rounded">
+                        <h4 class="text-success mb-3">✅ Le BON poisson (Sune)</h4>
+                            <div class="d-flex justify-content-center mb-3">
+                                <img src="{% static 'francontcube/img/sune.png' %}" 
+                                     alt="Sune pattern - Le bon poisson" 
+                                     class="img-fluid rounded shadow"
+                                     style="max-width: 350px;">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info text-center mt-4 mb-0">
+                <strong>💡 Tu ne vois pas le poisson?</strong> Fais l'algo jusqu'a 3 fois!
+            </div>
+        </div>
+    </div>
+
+    <!-- Les autres formes -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">🎮 Les autres formes que tu pourrais voir</h2>
+            <p class="text-center lead mb-4">Fais l'algorithme jusqu'à voir le BON poisson!</p>
+            
+            <!-- Première rangée - 3 Sunes nécessaires -->
+            <h4 class="text-center text-primary mb-3">Ces formes = 3x l'algorithme</h4>
+            <div class="row mb-4">
+                <div class="col-md-4 text-center mb-3">
+                    <div class="pattern-card p-3 border rounded">
+                        <h6>Superman</h6>
+                        <div class="d-flex justify-content-center mb-2">
+                            <div id="cube-superman"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="pattern-card p-3 border rounded">
+                        <h6>Chameleon</h6>
+                        <div class="d-flex justify-content-center mb-2">
+                            <div id="cube-chameleon"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="pattern-card p-3 border rounded">
+                        <h6>Bowtie</h6>
+                        <div class="d-flex justify-content-center mb-2">
+                            <div id="cube-bowtie"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deuxième rangée - 2 Sunes nécessaires -->
+            <h4 class="text-center text-info mb-3">Ces formes = 2x l'algorithme</h4>
+            <div class="row">
+                <div class="col-md-4 text-center mb-3">
+                    <div class="pattern-card p-3 border rounded">
+                        <h6>Pi</h6>
+                        <div class="d-flex justify-content-center mb-2">
+                            <div id="cube-pi"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="pattern-card p-3 border rounded">
+                        <h6>Double Sune</h6>
+                        <div class="d-flex justify-content-center mb-2">
+                            <div id="cube-doublesune"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="pattern-card p-3 border rounded bg-warning bg-opacity-10">
+                        <h6>AntiSune (Mauvais poisson)</h6>
+                        <div class="d-flex justify-content-center mb-2">
+                            <div id="cube-antisune"></div>
+                        </div>
+                        <small class="text-danger">Oriente-le comme le bon poisson!</small>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="alert alert-success mt-3">
-            <strong>✅ Si tous les coins sont déjà jaunes :</strong> 
-            Parfait! Tu peux passer à l'étape suivante!
+    <!-- Comment faire - 3 étapes simples -->
+    <div class="card border-warning border-2 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h3 class="text-center mb-4">📝 Comment faire? (3 étapes!)</h3>
+            
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="display-1 text-primary">1️⃣</div>
+                    <h4 class="mt-3 brand-green">Cherche</h4>
+                    <p class="lead">Trouve le BON poisson ou les autres formes possible</p>
+                </div>
+                
+                <div class="col-md-4 text-center mb-4">
+                    <div class="display-1 text-info">2️⃣</div>
+                    <h4 class="mt-3 brand-green">Oriente</h4>
+                    <p class="lead">Oriente ta face U pour correspondre aux formes</p>
+                </div>
+                
+                <div class="col-md-4 text-center mb-4">
+                    <div class="display-1 text-success">3️⃣</div>
+                    <h4 class="mt-3 brand-green">Répète</h4>
+                    <p class="lead">Fais l'algorithme jusqu'à ce que tout soit jaune!</p>
+                </div>
+            </div>
         </div>
     </div>
 
-
-
-    <!-- Section Processus complet -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">📋 Processus complet</h3>
-        <ol>
-            <li class="mb-2">
-                <strong>Regarde la face du haut</strong> : Compte combien de coins sont déjà jaunes
-            </li>
-            <li class="mb-2">
-                <strong>Cherche le poisson</strong> : 
-                <ul>
-                    <li>Si tu vois un poisson → Passe à l'étape 3</li>
-                    <li>Si tu ne vois pas de poisson → Fais l'algorithme dans n'importe quelle orientation</li>
-                </ul>
-            </li>
-            <li class="mb-2">
-                <strong>Oriente le poisson</strong> : En haut à gauche, bouche vers toi
-            </li>
-            <li class="mb-2">
-                <strong>Fais l'algorithme</strong> : <code>R U R' U R U2 R'</code>
-            </li>
-            <li class="mb-2">
-                <strong>Vérifie le résultat</strong> : 
-                <ul>
-                    <li>Face jaune complète → Bravo! Passe à l'étape suivante</li>
-                    <li>Pas encore complète → Retourne à l'étape 1</li>
-                </ul>
-            </li>
-        </ol>
-
-        <div class="alert alert-info mt-3 mb-0">
-            <strong>💡 Combien de fois ?</strong>
-            <p class="mb-0">Tu devras faire l'algorithme entre 1 et 5 fois. C'est normal! Sois patient.</p>
+    <!-- Encouragement final -->
+    <div class="card bg-success text-white shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-3">🌟 Tu es à 75% du cube résolu!</h2>
+            <p class="lead mb-0">
+                Continue de répéter l'algorithme du poisson!<br>
+                Tu vas y arriver! 🎉
+            </p>
         </div>
     </div>
 
-    <!-- Section Conseils -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">💡 Conseils utiles</h3>
-        <ul class="mt-3">
-            <li>
-                <strong>L'orientation du poisson est essentielle!</strong> Si le poisson n'est pas 
-                en haut à gauche avec la bouche vers toi, ça ne marchera pas correctement.
-            </li>
-            <li>
-                <strong>Ne te décourage pas si ça prend plusieurs répétitions.</strong> 
-                C'est normal de devoir faire l'algorithme 3, 4 ou même 5 fois!
-            </li>
-            <li>
-                <strong>Pratique R U R' U R U2 R' jusqu'à ce que ce soit fluide.</strong> 
-                Plus tu es rapide, moins c'est frustrant de devoir le répéter!
-            </li>
-            <li>
-                <strong>Un truc pour se souvenir :</strong> C'est comme <code>R U R' U'</code> 
-                mais avec U au lieu de U', et on ajoute <code>R U2 R'</code> à la fin.
-            </li>
-            <li>
-                Une fois toute la face jaune terminée, tu es à <strong>75% du cube résolu</strong>! 
-                Plus que 2 étapes! 🎉
-            </li>
-        </ul>
-    </div>
-
-    <!-- Bouton de navigation -->
-    <div class="text-center">
-        <a href="{% url 'francontcube:cubienewbie_yellow_cross' %}" class="btn btn-outline-primary">
-            ← Retour : La croix jaune
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+        <a href="{% url 'francontcube:cubienewbie_yellow_cross' %}" class="btn btn-outline-primary btn-lg">
+            ← Croix jaune
         </a>
-        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
-            Vue d'ensemble
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
+            🏠 Menu
         </a>
-        <a href="{% url 'francontcube:cubienewbie_corner_permutation' %}" class="btn btn-success ms-2">
-            Étape suivante : Permutation des coins →
+        <a href="{% url 'francontcube:cubienewbie_corner_permutation' %}" class="btn btn-success btn-lg">
+            Permutation des coins →
         </a>
     </div>
 </div>
 
-<!-- Styles CSS pour les cubes -->
+<!-- Styles CSS -->
 <style>
-.cube-small svg {
-    max-width: 275px;
+/* Cubes */
+#cube-goal svg {
+    max-width: 350px;
     height: auto;
 }
 
-.move-icon { 
-    width: 56px; 
-    height: 75px; 
+#cube-sune svg {
+    max-width: 250px;
+    height: auto;
 }
 
-.cube-case svg {
-    max-width: 200px;
+#cube-superman svg,
+#cube-chameleon svg,
+#cube-bowtie svg,
+#cube-pi svg,
+#cube-doublesune svg,
+#cube-antisune svg {
+    max-width: 150px;
     height: auto;
+}
+
+/* Icônes de mouvements */
+.move-icon-large {
+    width: 60px;
+    height: 81px;
+}
+
+/* Pattern cards */
+.pattern-card {
+    background: white;
+    transition: transform 0.2s;
+    min-height: 100%;
+}
+
+.pattern-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+/* Effet hover */
+.btn-lg:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s;
 }
 
 @media (max-width: 768px) {
-    .cube-small svg {
+    #cube-goal svg {
+        max-width: 280px;
+    }
+    
+    #cube-sune svg {
         max-width: 200px;
     }
     
-    .cube-case svg {
-        max-width: 150px;
+    #cube-superman svg,
+    #cube-chameleon svg,
+    #cube-bowtie svg,
+    #cube-pi svg,
+    #cube-doublesune svg,
+    #cube-antisune svg {
+        max-width: 130px;
+    }
+    
+    .move-icon-large {
+        width: 50px;
+        height: 67px;
+    }
+    
+    .btn-lg {
+        font-size: 1rem;
+    }
+    
+    .display-1 {
+        font-size: 3rem;
     }
 }
 </style>
 
-<!-- Script d'initialisation de la page -->
+<!-- Script JavaScript -->
 <script type="module">
   import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
 
   function mountCube(containerId, state) {
     const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Clear any existing content
+    if (!container) return;
     
-    // If state is missing, show a placeholder
+    container.innerHTML = '';
+
     if (!state) {
       container.innerHTML = `
         <div class="alert alert-secondary text-center py-4">
           <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
-          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
-          <small class="text-muted">Create the CubeState in your admin tool</small>
+          <p class="mb-0 mt-2 text-muted">Cube non disponible</p>
         </div>
       `;
       return;
     }
-    
+
     const template = document.getElementById("cube-template");
     const clone = template.content.cloneNode(true);
     container.appendChild(clone);
@@ -316,23 +339,18 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Mount all cubes
     mountCube("cube-goal", {{ goal_state|safe }});
+    mountCube("cube-sune", {{ yellow_sune_state|safe }});
     
-
-    // 3 sune away
+    // 3 Sunes
     mountCube("cube-superman", {{ yellow_superman_state|safe }});
     mountCube("cube-chameleon", {{ yellow_chameleon_state|safe }});
-    mountCube("cube-bowtie", {{ yellow_bowtie_state|safe }}); // Same as left, just showing position
+    mountCube("cube-bowtie", {{ yellow_bowtie_state|safe }});
     
-
-    // 2 sune away
-    mountCube("cube-antisune", {{ yellow_antisune_state|safe }});
+    // 2 Sunes
+    mountCube("cube-pi", {{ yellow_pi_state|safe }});
     mountCube("cube-doublesune", {{ yellow_doublesune_state|safe }});
-    mountCube("cube-pi", {{ yellow_pi_state|safe }}); // Same as left, just showing position
-    
-    // 1 sune away
-    mountCube("cube-sune", {{ yellow_sune_state|safe }});
+    mountCube("cube-antisune", {{ yellow_antisune_state|safe }});
   });
 </script>
 

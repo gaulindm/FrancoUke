@@ -1,0 +1,336 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Permutation des arêtes — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 7 : <span class="brand-green">Permutation des arêtes</span>
+        </h1>
+        <p class="lead text-muted">
+            Dernière étape! Permute les 4 arêtes du haut pour résoudre complètement le cube.
+        </p>
+    </div>
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states (only shown if any are missing) -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+        <p>
+            <strong>C'est la dernière étape!</strong> Tous les coins sont bien placés. 
+            Il ne reste qu'à permuter les arêtes de la dernière couche pour <strong>résoudre complètement le cube!</strong>
+        </p>
+
+        <div class="row mt-3">
+            <div class="col-md-6 text-center mb-3">
+                <h5>Arêtes placées nécessite seulement mouvements U</h5>
+                <div id="cube-goal-needsu" class="cube-small"></div>
+                <p><small class="text-muted">Les arêtes ne sont pas encore alignées</small></p>
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <h5>Après : CUBE RÉSOLU! 🎉</h5>
+                <div id="cube-goal" class="cube-small"></div>
+                <p><small class="text-muted">Toutes les faces sont complètes!</small></p>
+            </div>
+        </div>
+
+        <div class="alert alert-success mt-3">
+            <strong>✅ Si ton cube est déjà résolu :</strong> Félicitations! 🎊 Tu as terminé! 
+            Refais-le encore et encore pour améliorer ta vitesse!
+        </div>
+    </div>
+
+    <!-- Section Comment identifier -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔍 Comment identifier les arêtes à permuter ?</h3>
+        <p>
+            Regarde les 4 faces latérales du cube. Certaines arêtes de la dernière couche 
+            ne correspondent pas à leur centre.
+        </p>
+
+        <div class="alert alert-info">
+            <strong>💡 Astuce :</strong> Tourne lentement le cube dans tes mains et regarde 
+            chaque face. Combien d'arêtes du haut sont mal placées?
+        </div>
+    </div>
+
+    <!-- Section L'algorithme -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 L'algorithme de permutation</h3>
+        <p>
+            Cet algorithme échange 3 arêtes ( UL, UF, UR) en cercle. Il est un peu long, mais c'est le dernier!
+        </p>
+
+        <div class="text-center p-4 bg-light rounded border border-success border-3 mb-3">
+            <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                <svg class="move-icon"><use href="#R"/></svg>
+                <svg class="move-icon"><use href="#U-prime"/></svg>
+                <svg class="move-icon"><use href="#R"/></svg>
+                <svg class="move-icon"><use href="#U"/></svg>
+                <svg class="move-icon"><use href="#R"/></svg>
+                <svg class="move-icon"><use href="#U"/></svg>
+                <svg class="move-icon"><use href="#R"/></svg>
+                <svg class="move-icon"><use href="#U-prime"/></svg>
+                <svg class="move-icon"><use href="#R-prime"/></svg>
+                <svg class="move-icon"><use href="#U-prime"/></svg>
+                <svg class="move-icon"><use href="#R2"/></svg>
+            </div> 
+            <p class="mb-0"><small>L'algorithme de permutation des arêtes</small></p>
+        </div>
+
+        <div class="alert alert-success mt-3">
+            <strong>✋ Technique de prise :</strong>
+            <ul class="mb-0 mt-2">
+                <li>Les deux mains travaillent ensemble</li>
+                <li><strong>R2 est très fréquent</strong> - pratique-le jusqu'à ce qu'il soit rapide</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Section Comment identifier -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">Un peu de lumière sur la situation SVP!</h3>
+        <p>
+            Pour réussir cette étape, on cherche des <strong>phares (headlights) </strong>.  C'est à dire <strong>deux coins</strong> dans la couche du haut de la même couleur sur sa face.
+        </p>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ Votre cube aura 0 phareNe regarde PAS la face jaune!</strong> Regarde les <strong>côtés</strong> du cube. 
+            Les couleurs du coin doivent correspondre aux centres, peu importe où est le jaune.
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-success">✅ Un coté resous et en arriere</h5>
+                    <div id="cube-one-good-edge" class="cube-small"></div>
+                    <p class="mb-0">Les 3 couleurs du coin correspondent aux 3 centres voisins</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light text-center">
+                    <h5 class="text-danger">❌ Aucun coté resous</h5>
+                    <div id="cube-no-good-edge" class="cube-small"></div>
+                    <p class="mb-0">Au moins une couleur ne correspond pas à son centre</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- Section Processus complet -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">📋 Processus complet</h3>
+        <ol>
+            <li class="mb-2">
+                <strong>Vérifie ton cube</strong> : Tourne-le dans tes mains et regarde les 4 faces
+            </li>
+            <li class="mb-2">
+                <strong>Compte les arêtes correctes</strong> : Combien d'arêtes du haut correspondent à leur centre?
+                <ul>
+                    <li>4 arêtes → Cube résolu! 🎉</li>
+                    <li>1 arête → Cas 1 (rotation)</li>
+                    <li>0 arêtes → Cas 2 (opposées) ou Cas 3 (adjacentes)</li>
+                </ul>
+            </li>
+            <li class="mb-2">
+                <strong>Oriente le cube correctement</strong> selon le cas identifié
+            </li>
+            <li class="mb-2">
+                <strong>Fais l'algorithme</strong> : <code>F2 U L R' F2 L' R U F2</code>
+            </li>
+            <li class="mb-2">
+                <strong>Vérifie le résultat</strong> : 
+                <ul>
+                    <li>Cube résolu → BRAVO! 🎊</li>
+                    <li>Pas encore → Réoriente et refais l'algorithme</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="alert alert-info mt-3 mb-0">
+            <strong>💡 Nombre de répétitions :</strong>
+            <p class="mb-0">Tu devras faire l'algorithme 1 ou 2 fois maximum. Si après 2 fois le cube n'est pas résolu, vérifie ton orientation!</p>
+        </div>
+    </div>
+
+    <!-- Section Conseils -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">💡 Conseils utiles</h3>
+        <ul class="mt-3">
+            <li>
+                <strong>Cet algorithme est long mais répétitif.</strong> F2 apparaît 3 fois! 
+                Mémorise le pattern plutôt que chaque mouvement.
+            </li>
+            <li>
+                <strong>L R' et L' R sont opposés et simultanés.</strong> Entraîne-toi à faire 
+                les deux mains en même temps - c'est très satisfaisant!
+            </li>
+            <li>
+                <strong>L'orientation est cruciale.</strong> Si tu te trompes d'orientation, 
+                l'algorithme ne résoudra pas le cube mais ne le cassera pas non plus.
+            </li>
+            <li>
+                <strong>Prends ton temps pour identifier le cas.</strong> C'est la dernière étape - 
+                autant bien la faire!
+            </li>
+            <li>
+                <strong>Une fois le cube résolu, célèbre!</strong> 🎉 Tu as accompli quelque chose 
+                que beaucoup de gens pensent impossible!
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section Félicitations -->
+    <div class="card p-4 mb-4 border-success bg-light">
+        <h3 class="brand-green text-center">🎊 FÉLICITATIONS! 🎊</h3>
+        <p class="text-center lead">
+            Tu sais maintenant résoudre un Rubik's Cube 3×3!
+        </p>
+        
+        <div class="row mt-4">
+            <div class="col-md-6 mb-3">
+                <h5>🚀 Prochaines étapes :</h5>
+                <ul>
+                    <li>Pratique jusqu'à pouvoir le faire sans regarder le guide</li>
+                    <li>Chronomètre-toi et essaie d'améliorer ton temps</li>
+                    <li>Apprends des méthodes plus avancées (CFOP, Roux)</li>
+                    <li>Rejoins la communauté des speedcubers!</li>
+                </ul>
+            </div>
+            <div class="col-md-6 mb-3">
+                <h5>📊 Tes statistiques :</h5>
+                <ul>
+                    <li><strong>7 étapes</strong> maîtrisées</li>
+                    <li><strong>~10 algorithmes</strong> appris</li>
+                    <li><strong>Infini</strong> de possibilités de résolution</li>
+                    <li><strong>1</strong> cube résolu = Mission accomplie! ✓</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <p class="mb-2"><strong>Continue de pratiquer et amuse-toi!</strong></p>
+            <p class="mb-0 text-muted"><small>Le Rubik's Cube est un voyage, pas une destination 😊</small></p>
+        </div>
+    </div>
+
+    <!-- Bouton de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:cubienewbie_corner_permutation' %}" class="btn btn-outline-primary">
+            ← Retour : Permutation des coins
+        </a>
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-success ms-2">
+            Retour aux étapes
+        </a>
+        <a href="{% url 'francontcube:home' %}" class="btn btn-outline-secondary ms-2">
+            Accueil
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS pour les cubes -->
+<style>
+.cube-small svg {
+    max-width: 275px;
+    height: auto;
+}
+
+.cube-case svg {
+    max-width: 200px;
+    height: auto;
+}
+
+    
+.move-icon { 
+    width: 56px; 
+    height: 75px; 
+}
+
+@media (max-width: 768px) {
+    .cube-small svg {
+        max-width: 200px;
+    }
+    
+    .cube-case svg {
+        max-width: 150px;
+    }
+}
+
+    
+@media (max-width: 768px) {
+    .cube-small svg {
+        max-width: 200px;
+    }
+    
+    .cube-case svg {
+        max-width: 180px;
+    }
+}
+    </style>
+
+<!-- Script d'initialisation de la page -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
+    
+    // If state is missing, show a placeholder
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+          <small class="text-muted">Create the CubeState in your admin tool</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mount all cubes
+    mountCube("cube-goal-needsu", {{ goal_needsu_state|safe }});
+    mountCube("cube-goal", {{ goal_state|safe }});
+    
+    // Different patterns
+    mountCube("cube-no-good-edge", {{ no_good_edge_state|safe }});
+    mountCube("cube-one-good-edge", {{ one_good_edge_state|safe }});
+    
+  });
+</script>
+
+{% endblock %}

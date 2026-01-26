@@ -36,24 +36,15 @@
     {% endif %}
 
     <!-- Section Objectif -->
-    <div class="card p-4 mb-4">
-        <h3 class="brand-green">🎯 Objectif</h3>
-        <p>
-            Maintenant que tu as la croix jaune, il faut <strong>orienter les 4 coins</strong> 
-            pour que toute la face du haut soit jaune.
-        </p>
-
-        <div class="row mt-3">
-            <div class="col-md-6 text-center mb-3">
-                <h5>Avant : Croix jaune</h5>
-                <div id="cube-before" class="cube-small"></div>
-                <p><small class="text-muted">Croix formée, mais les coins ne sont pas tous jaunes</small></p>
+         <!-- C'est quoi le but? -->
+    <div class="card border-success border-3 shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-4">🎯 C'est quoi le but?</h2>
+            <div class="d-flex justify-content-center mb-3">
+                <div id="cube-goal"></div>
             </div>
-            <div class="col-md-6 text-center mb-3">
-                <h5>Après : Face jaune complète</h5>
-                <div id="cube-goal" class="cube-small"></div>
-                <p><small class="text-muted">Toute la face du haut est jaune!</small></p>
-            </div>
+            <h4 class="brand-green">Une face jaune en haut!</h4>
+            <p class="lead mb-0">Pour l'instant, ignore les couleurs sur les côtés 😊</p>
         </div>
     </div>
 
@@ -73,23 +64,6 @@
                 <li>Fais l'algorithme</li>
                 <li>Répète jusqu'à ce que toute la face soit jaune</li>
             </ol>
-        </div>
-
-        <div class="row mt-3">
-            <div class="col-md-6 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5 class="text-primary">Poisson gauche</h5>
-                    <div id="cube-fish-left" class="cube-case"></div>
-                    <p class="mt-2"><small>Le poisson regarde vers la gauche</small></p>
-                </div>
-            </div>
-            <div class="col-md-6 text-center mb-3">
-                <div class="border rounded p-3 bg-light">
-                    <h5 class="text-success">Poisson droit</h5>
-                    <div id="cube-fish-right" class="cube-case"></div>
-                    <p class="mt-2"><small>Le poisson regarde vers la droite</small></p>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -116,47 +90,8 @@
             <p class="mb-0"><small>L'algorithme du poisson (aussi appelé "Sune")</small></p>
         </div>
 
-
-        <div class="alert alert-success mt-3">
-            <strong>✋ Technique de prise :</strong>
-            <ul class="mb-0 mt-2">
-                <li>Main gauche : tiens le cube fermement</li>
-                <li>Main droite : fait tous les mouvements</li>
-                <li>Pouce droit : R et R'</li>
-                <li>Index droit : U et U2</li>
-            </ul>
-        </div>
     </div>
 
-    <!-- Section Comment orienter -->
-    <div class="card p-4 mb-4 border-warning">
-        <h3 class="brand-green">⚠️ Comment orienter le poisson (CRUCIAL!)</h3>
-
-        <div class="row align-items-center mb-3">
-            <div class="col-md-8">
-                <p>
-                    <strong>Si tu vois un poisson :</strong>
-                </p>
-                <ol>
-                    <li>Le poisson doit être <strong>en haut à gauche</strong></li>
-                    <li>La "bouche" du poisson (le coin jaune isolé) doit pointer vers toi</li>
-                    <li>Le "corps" du poisson (la ligne jaune) doit être sur la gauche</li>
-                </ol>
-            </div>
-            <div class="col-md-4 text-center">
-                <div id="cube-fish-positioned" class="cube-case"></div>
-                <p class="mt-2"><small>Position correcte</small></p>
-            </div>
-        </div>
-
-        <div class="alert alert-warning">
-            <strong>⚠️ Si tu ne vois PAS de poisson :</strong>
-            <p class="mb-0 mt-2">
-                Fais l'algorithme n'importe comment - un poisson va apparaître! 
-                Ensuite, oriente-le correctement et refais l'algorithme.
-            </p>
-        </div>
-    </div>
 
     <!-- 3 sunes away -->
     <div class="card p-4 mb-4">
@@ -167,7 +102,6 @@
                 <div class="border rounded p-3 bg-light">
                     <h5>OLL Superman</h5>
                     <div id="cube-superman" class="cube-case"></div>
-                    <p class="mt-2"><small>Fais l'algorithme 1-3 fois pour voir un poisson</small></p>
                 </div>
             </div>
 
@@ -175,7 +109,6 @@
                 <div class="border rounded p-3 bg-light">
                     <h5>OLL Chameleon</h5>
                     <div id="cube-chameleon" class="cube-case"></div>
-                    <p class="mt-2"><small>C'est un poisson! Oriente et applique</small></p>
                 </div>
             </div>
 
@@ -183,36 +116,32 @@
                 <div class="border rounded p-3 bg-light">
                     <h5>OLL Bowtie</h5>
                     <div id="cube-bowtie" class="cube-case"></div>
-                    <p class="mt-2"><small>C'est aussi un poisson! Oriente et applique</small></p>
                 </div>
             </div>
         </div>
 
         <div class="alert alert-success mt-3">
-            <strong>✅ Après avoir exécuté l'algorithme une fois, tu devrais voir un des motifs suivants</strong> 
-            Parfait! Tu peux passer à l'étape suivante!
+            <strong>✅ Après avoir exécuté l'algorithme une fois, tu devrais voir un des motifs suivants</strong>
         </div>
     </div>
 
     <!-- 2 sunes away -->
     <div class="card p-4 mb-4">
-        <h3 class="brand-green">📊 Les motifs suivant neccesite faire l'algorithme sune fois </h3>
+        <h3 class="brand-green">📊 Les motifs suivants néccesitent faire l'algorithme du poisson 2 fois </h3>
 
         <div class="row mt-3">
             <div class="col-md-4 text-center mb-3">
                 <div class="border rounded p-3 bg-light">
                     <h5>OLL Pi</h5>
                     <div id="cube-pi" class="cube-case"></div>
-                    <p class="mt-2"><small>Ce n'est pas un poisson! Oriente et applique.</p>
-                    <p>Il deviendra le bon poisson.</small></p>                </div>
+                </div>
             </div>
 
             <div class="col-md-4 text-center mb-3">
                 <div class="border rounded p-3 bg-light">
                     <h5>OLL Double Sune</h5>
                     <div id="cube-doublesune" class="cube-case"></div>
-                    <p class="mt-2"><small>Ce n'est pas un poisson! Oriente et applique.</p>
-                    <p>Il deviendra le bon poisson.</small></p>
+
                 </div>
             </div>
 
@@ -227,8 +156,7 @@
         </div>
 
         <div class="alert alert-success mt-3">
-            <strong>✅ Après avoir excécuté le sune une 2e fois tu devrais voir le sune :</strong> 
-            Parfait! Tu peux passer à l'étape suivante!
+            <strong>✅ Après avoir excécuté l'algorithme tu devrais voir le poisson :</strong> 
         </div>
     </div>
 
@@ -389,7 +317,6 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     // Mount all cubes
-    mountCube("cube-before", {{ before_state|safe }});
     mountCube("cube-goal", {{ goal_state|safe }});
     
 

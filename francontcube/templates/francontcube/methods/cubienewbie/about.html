@@ -1,394 +1,185 @@
 {% extends "francontcube/partials/base.html" %}
 {% load static %}
 
-{% block title %}La notation — Francontcube{% endblock %}
+{% block title %}À propos de Cubie Newbie — Francontcube{% endblock %}
 
 {% block content %}
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<div class="container py-5">
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            🎯 <span class="brand-green">La Méthode Cubie Newbie</span>
+        </h1>
+        <p class="lead">
+            Votre première aventure avec le Rubik's Cube
+        </p>
+    </div>
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-            color: white;
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .header .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.95;
-            font-weight: 300;
-        }
-
-        .content {
-            padding: 3rem 2rem;
-        }
-
-        .section {
-            margin-bottom: 3rem;
-        }
-
-        .section h2 {
-            color: #185a9d;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 3px solid #43cea2;
-        }
-
-        .section h3 {
-            color: #43cea2;
-            font-size: 1.3rem;
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .section p {
-            margin-bottom: 1rem;
-            font-size: 1.05rem;
-            text-align: justify;
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .step-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .step-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(67, 206, 162, 0.3);
-        }
-
-        .step-number {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-            color: white;
-            border-radius: 50%;
-            line-height: 50px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .step-card h3 {
-            color: #333;
-            font-size: 1.2rem;
-            margin: 0.5rem 0;
-        }
-
-        .step-card p {
-            color: #666;
-            font-size: 0.95rem;
-            margin: 0;
-        }
-
-        .highlight-box {
-            background: #e8f5f1;
-            border-left: 4px solid #43cea2;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-        }
-
-        .highlight-box strong {
-            color: #185a9d;
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .emoji {
-            font-size: 1.5rem;
-            margin-right: 0.5rem;
-        }
-
-        ul {
-            margin-left: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        li {
-            margin-bottom: 0.5rem;
-            font-size: 1.05rem;
-        }
-
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .comparison-box {
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .comparison-box.newbie {
-            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-            color: white;
-        }
-
-        .comparison-box.other {
-            background: #f8f9fa;
-            border: 2px solid #ddd;
-        }
-
-        .comparison-box h3 {
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .comparison-box ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .comparison-box li {
-            margin-bottom: 0.5rem;
-        }
-
-        .big-quote {
-            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 1.3rem;
-            font-style: italic;
-            margin: 2rem 0;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .content {
-                padding: 2rem 1.5rem;
-            }
-
-            .steps-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .comparison-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎯 La Méthode Cubie Newbie</h1>
-            <p class="subtitle">Votre première aventure avec le Rubik's Cube</p>
+    <!-- Section Bienvenue -->
+    <div class="card border-success border-3 shadow-sm mb-4">
+        <div class="card-body p-5">
+            <h2 class="mb-4">Bienvenue dans le monde du Cubing !</h2>
+            <p>
+                Vous tenez un Rubik's Cube entre vos mains et vous vous demandez par où commencer ? La méthode <strong>Cubie Newbie</strong> a été conçue spécialement pour vous ! C'est une méthode ultra-simple, étape par étape, qui vous permettra de résoudre votre premier cube sans frustration.
+            </p>
+            <p class="mb-0">
+                Contrairement aux méthodes avancées qui demandent de mémoriser des dizaines d'algorithmes complexes, la méthode Cubie Newbie se concentre sur la <strong>compréhension</strong> et la <strong>simplicité</strong>. Vous apprendrez à résoudre le cube couche par couche, avec seulement quelques mouvements faciles à retenir.
+            </p>
         </div>
+    </div>
 
-        <div class="content">
-            <div class="section">
-                <h2>Bienvenue dans le monde du Cubing !</h2>
-                <p>
-                    Vous tenez un Rubik's Cube entre vos mains et vous vous demandez par où commencer ? La méthode <strong>Cubie Newbie</strong> a été conçue spécialement pour vous ! C'est une méthode ultra-simple, étape par étape, qui vous permettra de résoudre votre premier cube sans frustration.
-                </p>
-                <p>
-                    Contrairement aux méthodes avancées qui demandent de mémoriser des dizaines d'algorithmes complexes, la méthode Cubie Newbie se concentre sur la <strong>compréhension</strong> et la <strong>simplicité</strong>. Vous apprendrez à résoudre le cube couche par couche, avec seulement quelques mouvements faciles à retenir.
-                </p>
-            </div>
-
-            <div class="big-quote">
+    <!-- Citation inspirante -->
+    <div class="card bg-gradient shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card-body text-center text-white p-5">
+            <h3 class="mb-0" style="font-style: italic; font-size: 1.3rem;">
                 "Tout expert a déjà été débutant. Commencez simplement, et vous serez étonné de ce que vous pourrez accomplir !"
-            </div>
+            </h3>
+        </div>
+    </div>
 
-            <div class="section">
-                <h2>Les 7 Étapes Simples</h2>
-                <div class="steps-grid">
-                    <div class="step-card">
-                        <div class="step-number">1</div>
-                        <h3>🌼 La Croix Blanche</h3>
-                        <p>Formez une croix blanche sur le dessous du cube. C'est intuitif et vous aide à comprendre comment le cube fonctionne.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">2</div>
-                        <h3>📐 Les Coins Blancs</h3>
-                        <p>Complétez la première couche en plaçant les quatre coins blancs. Un seul algorithme simple à répéter !</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">3</div>
-                        <h3>🔄 La Couche du Milieu</h3>
-                        <p>Insérez les arêtes de la deuxième couche avec deux algorithmes faciles qui se ressemblent.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">4</div>
-                        <h3>💛 La croix jaunes</h3>
-                        <p>Orienter les arêtes jaunes pour créer une croix jaunes.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">5</div>
-                        <h3>🐟 La face jaune</h3>
-                        <p>Orienter les coins jaunes pour finir la face jaune.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">6</div>
-                        <h3>💪 Permutation des coins</h3>
-                        <p>Permuter les coins du haut les placer au bons endroits.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">7</div>
-                        <h3>🏆 Permutation des arêtes</h3>
-                        <p>Permuter les arêtes aux bon endroits.</p>
+
+    <!-- Comparaison -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="brand-green mb-4">Pourquoi la Méthode Cubie Newbie ?</h2>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card h-100 border-success border-2">
+                        <div class="card-body bg-light">
+                            <h4 class="text-success text-center mb-3">✨ Cubie Newbie</h4>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">✅ Seulement 7 algorithmes</li>
+                                <li class="mb-2">✅ Instructions claires</li>
+                                <li class="mb-2">✅ Logique facile à suivre</li>
+                                <li class="mb-2">✅ Utilise surtout des mouvements R et U</li>
+                                <li class="mb-2">✅ Premier cube en 1-2 heures</li>
+                                <li class="mb-0">✅ Aucune expérience requise</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="section">
-                <h2>Pourquoi la Méthode Cubie Newbie ?</h2>
                 
-                <div class="comparison-grid">
-                    <div class="comparison-box newbie">
-                        <h3>✨ Cubie Newbie</h3>
-                        <ul>
-                            <li>✅ Seulement 8 algorithmes</li>
-                            <li>✅ Instructions claires</li>
-                            <li>✅ Logique facile à suivre</li>
-                            <li>✅ Utilise surtout des mouvements R et U</li>
-                            <li>✅ Premier cube en 1-2 heures</li>
-                            <li>✅ Aucune expérience requise</li>
-                        </ul>
-                    </div>
-                    <div class="comparison-box other">
-                        <h3>😰 Méthodes Complexes</h3>
-                        <ul>
-                            <li>❌ 50+ algorithmes</li>
-                            <li>❌ Explications techniques</li>
-                            <li>❌ Courbe d'apprentissage raide</li>
-                            <li>❌ Plusieurs jours d'étude</li>
-                            <li>❌ Peut être décourageant</li>
-                        </ul>
+                <div class="col-md-6">
+                    <div class="card h-100 border-secondary">
+                        <div class="card-body">
+                            <h4 class="text-secondary text-center mb-3">😰 Méthodes Complexes</h4>
+                            <ul class="list-unstyled text-muted">
+                                <li class="mb-2">❌ 50+ algorithmes</li>
+                                <li class="mb-2">❌ Explications techniques</li>
+                                <li class="mb-2">❌ Courbe d'apprentissage raide</li>
+                                <li class="mb-2">❌ Plusieurs jours d'étude</li>
+                                <li class="mb-0">❌ Peut être décourageant</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="section">
-                <h2>Philosophie de la Méthode</h2>
-                
-                <div class="highlight-box">
-                    <strong><span class="emoji">🎓</span>Apprendre, pas mémoriser</strong>
-                    <p>Nous privilégions la compréhension. Vous saurez <em>pourquoi</em> vous faites chaque mouvement, pas seulement comment le faire.</p>
-                </div>
-
-                <div class="highlight-box">
-                    <strong><span class="emoji">🔁</span>Répétition et simplicité</strong>
-                    <p>Les mêmes algorithmes reviennent souvent. Vous les maîtriserez naturellement sans effort de mémorisation intense.</p>
-                </div>
-
-                <div class="highlight-box">
-                    <strong><span class="emoji">🎯</span>Un pas à la fois</strong>
-                    <p>Chaque étape est indépendante. Concentrez-vous sur une chose à la fois, sans vous soucier des étapes suivantes.</p>
-                </div>
-
-                <div class="highlight-box">
-                    <strong><span class="emoji">🚀</span>Évolution progressive</strong>
-                    <p>Une fois à l'aise, vous pourrez passer à des méthodes plus rapides. Cubie Newbie est votre tremplin parfait !</p>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>À quoi s'attendre ?</h2>
-                <ul>
-                    <li><strong>Temps de résolution initial :</strong> 5-10 minutes (c'est normal !)</li>
-                    <li><strong>Avec pratique :</strong> 2-3 minutes après quelques cubes</li>
-                    <li><strong>Mémorisation :</strong> 7-8 algorithmes simples maximum</li>
-                    <li><strong>Difficulté :</strong> Facile - Tout le monde peut y arriver !</li>
-                    <li><strong>Temps d'apprentissage :</strong> 1-2 heures pour votre premier cube complet</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h2>Ce que vous allez gagner</h2>
-                <p>
-                    En maîtrisant la méthode Cubie Newbie, vous ne résoudrez pas seulement un cube. Vous développerez :
-                </p>
-                <ul>
-                    <li><strong>Confiance :</strong> La fierté d'avoir résolu un puzzle considéré comme difficile</li>
-                    <li><strong>Patience :</strong> L'apprentissage étape par étape forge la persévérance</li>
-                    <li><strong>Logique spatiale :</strong> Vous entraînez votre cerveau à visualiser en 3D</li>
-                    <li><strong>Base solide :</strong> Prêt à explorer des méthodes plus avancées si vous le souhaitez</li>
-                    <li><strong>Un talent impressionnant :</strong> Épatez vos amis et votre famille !</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h2>Et après ?</h2>
-                <p>
-                    Une fois que vous maîtrisez Cubie Newbie et que vous pouvez résoudre le cube confortablement en 3-5 minutes, vous aurez plusieurs options :
-                </p>
-                <ul>
-                    <li><strong>Continuez à pratiquer :</strong> Améliorez votre fluidité et votre vitesse avec cette méthode</li>
-                    <li><strong>Explorez d'autres puzzles :</strong> Cube 2x2, 4x4, Pyraminx, et plus encore !</li>
-                    <li><strong>Passez à la méthode CFOP :</strong> La méthode des champions pour aller plus vite</li>
-                    <li><strong>Apprenez d'autres méthodes :</strong> Roux, ZZ, Petrus... Il y a tout un monde à découvrir !</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h2>Prêt à commencer votre aventure ?</h2>
-                <p>
-                    Le Rubik's Cube peut sembler impossible au début, mais avec la méthode Cubie Newbie, vous découvrirez que c'est accessible à tous. Pas besoin d'être un génie ou d'avoir des talents spéciaux - juste un peu de patience et la volonté d'apprendre.
-                </p>
-                <p>
-                    Des millions de personnes dans le monde ont appris à résoudre le Rubik's Cube. Vous êtes sur le point de rejoindre cette communauté passionnante. Allons-y ensemble, un mouvement à la fois !
-                </p>
-            </div>
-
-            <div class="big-quote">
-                "Le secret n'est pas d'être rapide, c'est de ne jamais abandonner. Chaque cube résolu est une victoire !"
             </div>
         </div>
     </div>
+
+    <!-- Philosophie -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="brand-green mb-4">Philosophie de la Méthode</h2>
+            
+            <div class="alert alert-primary">
+                <h5><span class="me-2">🎓</span>Apprendre, pas mémoriser</h5>
+                <p class="mb-0">Nous privilégions la compréhension. Vous saurez <em>pourquoi</em> vous faites chaque mouvement, pas seulement comment le faire.</p>
+            </div>
+
+            <div class="alert alert-info">
+                <h5><span class="me-2">🔁</span>Répétition et simplicité</h5>
+                <p class="mb-0">Les mêmes algorithmes reviennent souvent. Vous les maîtriserez naturellement sans effort de mémorisation intense.</p>
+            </div>
+
+            <div class="alert alert-success">
+                <h5><span class="me-2">🎯</span>Un pas à la fois</h5>
+                <p class="mb-0">Chaque étape est indépendante. Concentrez-vous sur une chose à la fois, sans vous soucier des étapes suivantes.</p>
+            </div>
+
+            <div class="alert alert-warning">
+                <h5><span class="me-2">🚀</span>Évolution progressive</h5>
+                <p class="mb-0">Une fois à l'aise, vous pourrez passer à des méthodes plus rapides. Cubie Newbie est votre tremplin parfait !</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- À quoi s'attendre -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="brand-green mb-4">À quoi s'attendre ?</h2>
+            <ul>
+                <li><strong>Temps de résolution initial :</strong> 5-10 minutes (c'est normal !)</li>
+                <li><strong>Avec pratique :</strong> 2-3 minutes après quelques cubes</li>
+                <li><strong>Mémorisation :</strong> 7-8 algorithmes simples maximum</li>
+                <li><strong>Difficulté :</strong> Facile - Tout le monde peut y arriver !</li>
+                <li><strong>Temps d'apprentissage :</strong> 1-2 heures pour votre premier cube complet</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Ce que vous allez gagner -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="brand-green mb-4">Ce que vous allez gagner</h2>
+            <p>En maîtrisant la méthode Cubie Newbie, vous ne résoudrez pas seulement un cube. Vous développerez :</p>
+            <ul>
+                <li><strong>Confiance :</strong> La fierté d'avoir résolu un puzzle considéré comme difficile</li>
+                <li><strong>Patience :</strong> L'apprentissage étape par étape forge la persévérance</li>
+                <li><strong>Logique spatiale :</strong> Vous entraînez votre cerveau à visualiser en 3D</li>
+                <li><strong>Base solide :</strong> Prêt à explorer des méthodes plus avancées si vous le souhaitez</li>
+                <li><strong>Un talent impressionnant :</strong> Épatez vos amis et votre famille !</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Et après -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="brand-green mb-4">Et après ?</h2>
+            <p>Une fois que vous maîtrisez Cubie Newbie et que vous pouvez résoudre le cube confortablement en 3-5 minutes, vous aurez plusieurs options :</p>
+            <ul>
+                <li><strong>Continuez à pratiquer :</strong> Améliorez votre fluidité et votre vitesse avec cette méthode</li>
+                <li><strong>Explorez d'autres puzzles :</strong> Cube 2x2, 4x4, Pyraminx, et plus encore !</li>
+                <li><strong>Passez à la méthode CFOP :</strong> La méthode des champions pour aller plus vite</li>
+                <li><strong>Apprenez d'autres méthodes :</strong> Roux, ZZ, Petrus... Il y a tout un monde à découvrir !</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Prêt à commencer -->
+    <div class="card bg-success text-white shadow-sm mb-4">
+        <div class="card-body text-center p-5">
+            <h2 class="mb-3">Prêt à commencer votre aventure ?</h2>
+            <p class="mb-3">
+                Le Rubik's Cube peut sembler impossible au début, mais avec la méthode Cubie Newbie, vous découvrirez que c'est accessible à tous. Pas besoin d'être un génie ou d'avoir des talents spéciaux - juste un peu de patience et la volonté d'apprendre.
+            </p>
+            <p class="mb-0">
+                Des millions de personnes dans le monde ont appris à résoudre le Rubik's Cube. Vous êtes sur le point de rejoindre cette communauté passionnante. Allons-y ensemble, un mouvement à la fois !
+            </p>
+        </div>
+    </div>
+
+    <!-- Citation finale -->
+    <div class="card bg-gradient shadow-sm mb-4" style="background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);">
+        <div class="card-body text-center text-white p-4">
+            <h4 class="mb-0" style="font-style: italic;">
+                "Le secret n'est pas d'être rapide, c'est de ne jamais abandonner. Chaque cube résolu est une victoire !"
+            </h4>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
+            ← Retour aux étapes
+        </a>
+        <a href="{% url 'francontcube:cubienewbie_cube_intro' %}" class="btn btn-success btn-lg">
+            Le cube →
+        </a>
+    </div>
+</div>
+
 {% endblock %}

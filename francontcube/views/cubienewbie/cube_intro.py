@@ -16,7 +16,7 @@ class CubeIntroView(StepView):
     - The 6 faces
     - The 3 types of pieces (centers, edges, corners)
     - How the cube mechanism works
-    - Basic vocabulary
+    - Basic vocabulary 
     """
     
     template_name = "francontcube/methods/cubienewbie/cube-intro.html"
@@ -26,10 +26,10 @@ class CubeIntroView(StepView):
     cube_state_slugs = {
         'solved_state': 'cube-intro-solved',
         'scrambled_state': 'cube-intro-scrambled',
-        'faces_state': 'cube-intro-faces',
-        'centers_state': 'cube-intro-centers',
-        'edges_state': 'cube-intro-edges',
-        'corners_state': 'cube-intro-corners',
+        #'faces_state': 'cube-intro-faces',
+        #'centers_state': 'cube-intro-centers',
+        #'edges_state': 'cube-intro-edges',
+        #'corners_state': 'cube-intro-corners',
     }
 
 

@@ -5,7 +5,6 @@
 
 {% block content %}
 <div class="container py-5">
-
     <!-- Titre principal avec emoji -->
     <div class="text-center mb-5">
         <h1 class="hero-title">
@@ -16,92 +15,94 @@
         </p>
     </div>
 
-
     <!-- C'est quoi le but? -->
     <div class="card border-success border-3 shadow-sm mb-4">
         <div class="card-body text-center p-5">
             <h2 class="mb-4">🎯 C'est quoi le but?</h2>
             <div id="cube-goal" class="mb-3"></div>
             <h4 class="brand-green">Faire descendre les 4 pétales blancs en bas!</h4>
-            <p class="lead mb-0">Et les bonnes couleurs doivent être au bon endroit 🌈</p>
+            <p class="lead mb-0">Attaché les sous-pétales aux centres correspondant et les faire descendre pour former une croix blanche🌈</p>
+
+            </p>
         </div>
     </div>
 
     <!-- Section interactive principale -->
     <div class="card shadow-sm mb-4">
         <div class="card-body p-4">
-            <h2 class="text-center mb-4">🎮 Clique sur les boutons pour apprendre!</h2>
+            <h4 class="text-center mb-4"><strong>💡 Comment utiliser:</strong> Clique sur le bouton <strong>+</strong> sous le cube pour avancer étape par étape. <br>Observe le cube et lis l'instruction pour chaque mouvement!</h4>
+                
             
             <div class="cube-container">
                 <div class="roofpig" 
-                     data-config="alg=U' R2 y' U2 R2 y' U' R2 y' R2 | colored=D*/e */m | speed:0.7 canvas:400 | hover=2">
+                    data-config="alg=U' R2 y' U2 R2 y' U' R2 y' R2 | colored=D*/e */m | flags=showalg speed:0.7 canvas:400 | hover=2">
                 </div>
             </div>
-
-
-
-
-
             <!-- Message d'encouragement -->
             <div id="cross-progress-message" class="alert alert-primary text-center py-4" style="display: none;">
                 <h4 class="mb-0"></h4>
             </div>
         </div>
+
+        <div class="steps-container">
+            <div id="step-0" class="step active">
+                <span class="step-number">▶</span>
+                <span class="step-description">Clique sur le bouton <strong>+</strong> sous le cube pour commencer! 👇</span>
+            </div>
+            <div id="step-1" class="step">
+                <span class="step-number">1</span>
+                <span class="step-description">Tourne la face du haut <span class="step-move">U'</span> pour aligner la première arête blanche avec son centre de couleur</span>
+            </div>
+            <div id="step-2" class="step">
+                <span class="step-number">2</span>
+                <span class="step-description">Bascule l'arête dans la croix avec <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-3" class="step">
+                <span class="step-number">3</span>
+                <span class="step-description">Tourne tout le cube <span class="step-move">y'</span> pour voir la prochaine arête</span>
+            </div>
+            <div id="step-4" class="step">
+                <span class="step-number">4</span>
+                <span class="step-description">Aligne la deuxième arête <span class="step-move">U2</span></span>
+            </div>
+            <div id="step-5" class="step">
+                <span class="step-number">5</span>
+                <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-6" class="step">
+                <span class="step-number">6</span>
+                <span class="step-description">Tourne le cube encore <span class="step-move">y'</span></span>
+            </div>
+            <div id="step-7" class="step">
+                <span class="step-number">7</span>
+                <span class="step-description">Aligne la troisième arête <span class="step-move">U'</span></span>
+            </div>
+            <div id="step-8" class="step">
+                <span class="step-number">8</span>
+                <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-9" class="step">
+                <span class="step-number">9</span>
+                <span class="step-description">Tourne le cube une dernière fois <span class="step-move">y'</span></span>
+            </div>
+            <div id="step-10" class="step">
+                <span class="step-number">10</span>
+                <span class="step-description">Bascule la dernière arête <span class="step-move">R2</span></span>
+            </div>
+            <div id="step-complete" class="step-complete">
+                <h3>🎉 Croix Blanche Complète!</h3>
+                <p>Bravo! Les quatre arêtes blanches sont maintenant en place. Clique sur le bouton reset (↩) pour réessayer.</p>
+            </div>
+        </div>
+
+
+
     </div>
 
 
 
-    <div class="steps-container">
-        <div id="step-0" class="step active">
-            <span class="step-number">▶</span>
-            <span class="step-description">Clique sur le bouton <strong>+</strong> sous le cube pour commencer! 👇</span>
-        </div>
-        <div id="step-1" class="step">
-            <span class="step-number">1</span>
-            <span class="step-description">Tourne la face du haut <span class="step-move">U'</span> pour aligner la première arête blanche avec son centre de couleur</span>
-        </div>
-        <div id="step-2" class="step">
-            <span class="step-number">2</span>
-            <span class="step-description">Bascule l'arête dans la croix avec <span class="step-move">R2</span></span>
-        </div>
-        <div id="step-3" class="step">
-            <span class="step-number">3</span>
-            <span class="step-description">Tourne tout le cube aligner le prochain pétale</span>
-        </div>
-        <div id="step-4" class="step">
-            <span class="step-number">4</span>
-            <span class="step-description">Aligne la deuxième arête <span class="step-move">U2</span></span>
-        </div>
-        <div id="step-5" class="step">
-            <span class="step-number">5</span>
-            <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
-        </div>
-        <div id="step-6" class="step">
-            <span class="step-number">6</span>
-            <span class="step-description">Tourne le cube encore </span>
-        </div>
-        <div id="step-7" class="step">
-            <span class="step-number">7</span>
-            <span class="step-description">Aligne la troisième arête <span class="step-move">U'</span></span>
-        </div>
-        <div id="step-8" class="step">
-            <span class="step-number">8</span>
-            <span class="step-description">Bascule dans la croix <span class="step-move">R2</span></span>
-        </div>
-        <div id="step-9" class="step">
-            <span class="step-number">9</span>
-            <span class="step-description">Tourne le cube une dernière fois </span>
-        </div>
-        <div id="step-10" class="step">
-            <span class="step-number">10</span>
-            <span class="step-description">Bascule la dernière arête <span class="step-move">R2</span></span>
-        </div>
-        <div id="step-complete" class="step-complete">
-            <h3>🎉 Croix Blanche Complète!</h3>
-            <p>Bravo! Les quatre arêtes blanches sont maintenant en place. Clique sur le bouton reset (↩) pour réessayer.</p>
-        </div>
-    </div>
 
+        
     <!-- Astuce super importante -->
     <div class="card border-warning border-3 shadow-sm mb-4">
         <div class="card-body p-4">
@@ -116,7 +117,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Encouragement final -->
     <div class="card bg-success text-white shadow-sm mb-4">
@@ -143,192 +143,207 @@
     </div>
 </div>
 
-<!-- Styles CSS -->
+       
+
+    </div>
+
+
+ <!-- Styles CSS -->
 <style>
-.cube-small svg {
-    max-width: 250px;
-    height: auto;
-}
-
-#cube-goal svg,
-#cube-progress svg {
-    max-width: 350px;
-    height: auto;
-}
-
-/* Animation pour les messages */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
+    .cube-small svg {
+        max-width: 250px;
+        height: auto;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    
+    #cube-goal svg,
+    #cube-progress svg {
+        max-width: 350px;
+        height: auto;
     }
-}
-
-.animate-in {
-    animation: slideIn 0.5s ease-out;
-}
-
-/* Effet hover sur les boutons */
-.btn-lg:hover {
-    transform: scale(1.02);
-    transition: transform 0.2s;
-}
-
-/* Badges numériques */
-.badge {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.6rem;
-}
-
-/* Style pour les icônes de mouvement inline */
-.move-icon-inline {
-    display: inline-block;
-    margin-left: 8px;
-    vertical-align: middle;
-}
-
-.move-icon-inline svg {
-    display: block;
-}
-.cube-container {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0;
-            min-height: 250px;
+    
+    /* Animation pour les messages */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
         }
-        
-        .roofpig {
-            border: 3px solid #667eea;
-            border-radius: 10px;
-            overflow: hidden;
-            width: 400px !important;
-            height: 297px !important;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        .roofpig canvas {
-            width: 400px !important;
-            height: 246px !important;
-        }
-        
-        .steps-container {
-            background: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            min-height: 120px;
-            position: relative;
-        }
-        
-        .step {
-            padding: 20px;
-            margin: 0;
-            border-radius: 8px;
-            border-left: 4px solid #2196f3;
-            background: #e3f2fd;
-            display: none;
-            animation: slideIn 0.4s ease-out;
-        }
-        
-        .step.active {
-            display: block;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
+    }
+    
+    .animate-in {
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    /* Effet hover sur les boutons */
+    .btn-lg:hover {
+        transform: scale(1.02);
+        transition: transform 0.2s;
+    }
+    
+    /* Badges numériques */
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    /* Style pour les icônes de mouvement inline */
+    .move-icon-inline {
+        display: inline-block;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+    
+    .move-icon-inline svg {
+        display: block;
+    }
+    .cube-container {
+                display: flex;
+                justify-content: center;
+                margin: 30px 0;
+                min-height: 250px;
             }
-            to {
-                opacity: 1;
-                transform: translateX(0);
+            
+            .roofpig {
+                border: 3px solid #667eea;
+                border-radius: 10px;
+                overflow: hidden;
+                width: 400px !important;
+                height: 295px !important;
             }
-        }
-        
-        .step-number {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            background: #2196f3;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 40px;
-            font-weight: bold;
-            font-size: 18px;
-            margin-right: 15px;
-            animation: pulse 0.5s ease;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-        
-        .step-move {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 20px;
-            color: #2196f3;
-            background: #fff;
-            padding: 4px 12px;
-            border-radius: 4px;
-            margin: 0 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .step-description {
-            font-size: 16px;
-            line-height: 1.8;
-            color: #333;
-        }
-        
-        .step-complete {
-            display: none;
-            text-align: center;
-            padding: 30px;
-            animation: fadeIn 0.6s ease;
-        }
-        
-        .step-complete.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .step-complete h3 {
-            color: #4caf50;
-            font-size: 24px;
-            margin: 0 0 10px 0;
-        }
-        
-        .step-complete p {
-            color: #666;
-            font-size: 16px;
-        }
-        
-        .controls-info {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-        
-        .controls-info strong {
-            color: #1976d2;
-        }
+            
+            .roofpig canvas {
+                width: 400px !important;
+                height: 246px !important;
+            }
+            
+            .steps-container {
+                background: #fff;
+                border-radius: 10px;
+                padding: 20px;
+                margin-top: 20px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                min-height: 120px;
+                position: relative;
+            }
+            
+            .step {
+                padding: 20px;
+                margin: 0;
+                border-radius: 8px;
+                border-left: 4px solid #2196f3;
+                background: #e3f2fd;
+                display: none;
+                animation: slideIn 0.4s ease-out;
+            }
+            
+            .step.active {
+                display: block;
+            }
+            
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            .step-number {
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                background: #2196f3;
+                color: white;
+                border-radius: 50%;
+                text-align: center;
+                line-height: 40px;
+                font-weight: bold;
+                font-size: 18px;
+                margin-right: 15px;
+                animation: pulse 0.5s ease;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.15); }
+            }
+            
+            .step-move {
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                font-size: 20px;
+                color: #2196f3;
+                background: #fff;
+                padding: 4px 12px;
+                border-radius: 4px;
+                margin: 0 5px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .step-description {
+                font-size: 16px;
+                line-height: 1.8;
+                color: #333;
+            }
+            
+            .step-complete {
+                display: none;
+                text-align: center;
+                padding: 30px;
+                animation: fadeIn 0.6s ease;
+            }
+            
+            .step-complete.active {
+                display: block;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.9); }
+                to { opacity: 1; transform: scale(1); }
+            }
+            
+            .step-complete h3 {
+                color: #4caf50;
+                font-size: 24px;
+                margin: 0 0 10px 0;
+            }
+            
+            .step-complete p {
+                color: #666;
+                font-size: 16px;
+            }
+            
+            .controls-info {
+                background: #e3f2fd;
+                border-left: 4px solid #2196f3;
+                padding: 15px;
+                margin-top: 20px;
+                border-radius: 5px;
+            }
+            
+            .roofpig-algtext {
+        display: none !important;
+    }
+    /* Hide only the play and pause buttons */
+    .roofpig-button.roofpig-play,
+    .roofpig-button.roofpig-pause {
+        display: none !important;
+    }
+    
+ 
+            .controls-info strong {
+                color: #1976d2;
+            }
+    
+    </style>
+    
 
-</style>
-
-<!-- Script JavaScript -->
     <!-- Load jQuery first (required by Roofpig) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     
