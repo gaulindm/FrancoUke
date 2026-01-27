@@ -121,6 +121,34 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmTimeModal" tabindex="-1" aria-labelledby="confirmTimeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="confirmTimeModalLabel">
+                    <i class="bi bi-stopwatch"></i> Enregistrer ce temps?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <div class="display-4 fw-bold text-primary" id="modalTimeDisplay">00:00.00</div>
+                </div>
+                <p class="text-muted mb-0">Veux-tu enregistrer ce temps?</p>
+            </div>
+            <div class="modal-footer justify-content-center gap-2">
+                <button type="button" class="btn btn-lg btn-outline-danger" data-bs-dismiss="modal" id="discardBtn">
+                    <i class="bi bi-x-circle"></i> Non, recommencer
+                </button>
+                <button type="button" class="btn btn-lg btn-success" id="saveBtn">
+                    <i class="bi bi-check-circle"></i> Oui, enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 /* ============================================
    Algorithm Display with Move Icons
@@ -136,8 +164,8 @@
 }
 
 .move-icon {
-    width: 48px;
-    height: 48px;
+    width: 72px;
+    height: 72px;
     transition: transform 0.2s;
 }
 
@@ -199,6 +227,12 @@
     animation: pulse 2s infinite;
 }
 
+.timer-tap-zone.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 @keyframes pulse {
     0%, 100% { box-shadow: 0 0 20px rgba(245, 87, 108, 0.5); }
     50% { box-shadow: 0 0 40px rgba(245, 87, 108, 0.8); }
@@ -251,8 +285,29 @@
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
+.start-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .start-button i {
     display: block;
+}
+
+/* Modal Enhancements */
+.modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-footer {
+    border: none;
+    padding: 1.5rem;
 }
 
 /* Mobile/iPad Optimizations */
@@ -269,6 +324,14 @@
         min-height: 100px;
         font-size: 1.75rem;
     }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
 }
 </style>
 
@@ -276,11 +339,16 @@
 let timerInterval;
 let startTime;
 let isRunning = false;
+let pendingTime = null;
 
 const timerDisplay = document.getElementById('timer');
 const timerStatus = document.getElementById('timerStatus');
 const timerTapZone = document.getElementById('timerTapZone');
 const startBtn = document.getElementById('startBtn');
+const confirmModal = new bootstrap.Modal(document.getElementById('confirmTimeModal'));
+const modalTimeDisplay = document.getElementById('modalTimeDisplay');
+const saveBtn = document.getElementById('saveBtn');
+const discardBtn = document.getElementById('discardBtn');
 
 function formatTime(ms) {
     const totalSeconds = Math.floor(ms / 1000);
@@ -290,7 +358,16 @@ function formatTime(ms) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
 }
 
-function updateUI(running) {
+function updateUI(running, disabled = false) {
+    if (disabled) {
+        timerTapZone.classList.add('disabled');
+        startBtn.disabled = true;
+        return;
+    }
+    
+    timerTapZone.classList.remove('disabled');
+    startBtn.disabled = false;
+    
     if (running) {
         timerTapZone.classList.add('running');
         timerStatus.innerHTML = '<i class="bi bi-hand-index-thumb"></i> Touche pour arrêter';
@@ -325,10 +402,21 @@ function stopTimer() {
     clearInterval(timerInterval);
     isRunning = false;
     const finalTime = Date.now() - startTime;
-    updateUI(false);
     
-    // Save time
-    saveTime(finalTime);
+    // Disable timer while modal is open
+    updateUI(false, true);
+    
+    // Show confirmation modal
+    pendingTime = finalTime;
+    modalTimeDisplay.textContent = formatTime(finalTime);
+    confirmModal.show();
+}
+
+function discardTime() {
+    pendingTime = null;
+    timerDisplay.textContent = '00:00.00';
+    confirmModal.hide();
+    updateUI(false, false);
 }
 
 function toggleTimer() {
@@ -353,14 +441,20 @@ async function saveTime(timeMs) {
         const data = await response.json();
         
         if (data.success) {
+            confirmModal.hide();
+            
             if (data.is_new_pb) {
                 showPBNotification();
             }
+            
             // Reload to show new times
             setTimeout(() => location.reload(), 1500);
         }
     } catch (error) {
         console.error('Erreur:', error);
+        alert('Erreur lors de l\'enregistrement du temps. Réessaie.');
+        confirmModal.hide();
+        updateUI(false, false);
     }
 }
 
@@ -381,20 +475,47 @@ function showPBNotification() {
 // Event Listeners
 
 // Tap Zone - Main interaction for iPad
-timerTapZone.addEventListener('click', toggleTimer);
+timerTapZone.addEventListener('click', (e) => {
+    if (!timerTapZone.classList.contains('disabled')) {
+        toggleTimer();
+    }
+});
 
 // Prevent double-tap zoom on iOS
 timerTapZone.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    toggleTimer();
+    if (!timerTapZone.classList.contains('disabled')) {
+        e.preventDefault();
+        toggleTimer();
+    }
 });
 
 // Button - Secondary control
-startBtn.addEventListener('click', toggleTimer);
+startBtn.addEventListener('click', (e) => {
+    if (!startBtn.disabled) {
+        toggleTimer();
+    }
+});
+
+// Modal buttons
+saveBtn.addEventListener('click', () => {
+    if (pendingTime !== null) {
+        saveTime(pendingTime);
+    }
+});
+
+discardBtn.addEventListener('click', discardTime);
+
+// Re-enable timer when modal is closed without saving
+document.getElementById('confirmTimeModal').addEventListener('hidden.bs.modal', () => {
+    if (pendingTime !== null) {
+        // If modal closed without saving, discard the time
+        discardTime();
+    }
+});
 
 // Keyboard - For desktop users
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
+    if (e.code === 'Space' && !timerTapZone.classList.contains('disabled')) {
         e.preventDefault();
         toggleTimer();
     }
