@@ -22,4 +22,11 @@ urlpatterns = [
     
     # API pour sauvegarder un temps (AJAX)
     path('api/<slug:slug>/save/', views.save_training_time, name='save_time'),
+
+    #Moderation des temps du training hub
+    path('moderation/', views.leader_moderation_dashboard, name='leader_moderation'),
+    path('delete-session/<int:session_id>/', views.delete_training_session, name='delete_session'),
+    path('bulk-delete-sessions/', views.bulk_delete_sessions, name='bulk_delete_sessions'),
+    path('cuber-stats/<str:cuber_id>/', views.cuber_detailed_stats, name='cuber_stats'),
+
 ]

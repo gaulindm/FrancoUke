@@ -20,7 +20,7 @@ def home(request):
     menu = [
         {
             'name': 'Training Hub',
-            'desc': 'Practice finger tricks and algorithms to improve your speed',
+            'desc': 'Exercice tes algorithme et compare tes temps',
             'icon': 'bi-stopwatch',
             'logo': None,
             'url': '/training/',

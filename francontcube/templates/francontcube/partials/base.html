@@ -54,6 +54,13 @@
     {# Breadcrumb navigation #}
     {% include "francontcube/partials/breadcrumb.html" %}
 
+    {% if is_leader %}
+    <a href="{% url 'training:leader_moderation' %}" class="nav-link">
+        <i class="bi bi-shield-check"></i> Modération
+    </a>
+    {% endif %}
+
+
     {# Main content #}
     <main class="container py-4">
         {% block content %}
