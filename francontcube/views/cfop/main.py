@@ -29,24 +29,43 @@ def method_cfop(request):
             "desc": "Introduction à la méthode CFOP pour le speedcubing avancé",
             "icon": "bi-info-circle",
             "url": reverse('francontcube:cfop_about'),
-            "available": False,
+            "available": True,
             "step_number": None,
+        },
+        {
+            "name": "🌉 De Débutant à F2L",  # ⬅️ NOUVEAU
+            "desc": "Découvrez comment l'algo de 2e couche est en fait du F2L!",
+            "icon": "bi-lightbulb-fill",
+            "url": reverse('francontcube:beginner_to_f2l'),
+            "available": True,
+            "step_number": None,
+            "highlight": True,  # Pour le mettre en évidence
         },
         {
             "name": "Étape 1 : Cross",
             "desc": "Résoudre la croix blanche en bas (idéalement en moins de 8 mouvements).",
             "icon": "bi-plus-circle",
             "url": reverse('francontcube:cfop_cross'),
-            "available": False,
+            "available": True,
             "step_number": 1,
         },
         {
             "name": "Étape 2 : F2L",
             "desc": "Résoudre les deux premières couches simultanément (4 paires coin-arête).",
             "icon": "bi-layers",
-            "url": reverse('francontcube:cfop_f2l_basic'),
+            "url": reverse('francontcube:cfop_f2l_intro'),  # <-- Changement ici
             "available": True,
             "step_number": 2,
+            "sub_pages": [  # Optionnel: ajouter des sous-pages
+                {
+                    "name": "Introduction F2L",
+                    "url": reverse('francontcube:cfop_f2l_intro'),
+                },
+                {
+                    "name": "Les 41 Cas",
+                    "url": reverse('francontcube:cfop_f2l_basic'),
+                },
+            ],
         },
         {
             "name": "Étape 3 : OLL",

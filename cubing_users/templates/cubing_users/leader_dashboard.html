@@ -1,4 +1,5 @@
 <!-- cubing_users/templates/cubing_users/leader_dashboard.html -->
+<!-- VERSION ALTERNATIVE avec section dédiée -->
 {% extends "francontcube/partials/base.html" %}
 {% block title %}Tableau de Bord Leader - CubingHub{% endblock %}
 
@@ -38,6 +39,63 @@
                 <a href="{% url 'cubing_users:create_group' %}" class="btn btn-primary btn-cube">
                     ➕ Créer un Groupe
                 </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ NOUVEAU: Section Outils Leader -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card border-warning" style="border-width: 2px;">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="bi bi-tools"></i> Outils de Gestion
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Modération des Temps -->
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning bg-opacity-10 p-3 rounded">
+                                    <h1 class="mb-0">🛡️</h1>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="card-title">Modération des Temps</h5>
+                                <p class="card-text text-muted">
+                                    Surveillez et gérez les temps d'entraînement suspects de vos élèves.
+                                    Détection automatique des temps irréalistes.
+                                </p>
+                                <a href="{% url 'training:leader_moderation' %}" class="btn btn-warning">
+                                    <i class="bi bi-shield-check"></i> Accéder à la Modération
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Autres outils futurs -->
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info bg-opacity-10 p-3 rounded">
+                                    <h1 class="mb-0">📊</h1>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="card-title">Statistiques Globales</h5>
+                                <p class="card-text text-muted">
+                                    Analysez les progrès de vos groupes et identifiez les meilleurs performeurs.
+                                </p>
+                                <button class="btn btn-outline-secondary" disabled>
+                                    <i class="bi bi-graph-up"></i> Bientôt disponible
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -102,4 +160,20 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Animation hover pour la section outils */
+.card.border-warning:hover {
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.2);
+    transition: box-shadow 0.3s ease;
+}
+
+.bg-warning.bg-opacity-10 {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+.bg-info.bg-opacity-10 {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+</style>
 {% endblock %}

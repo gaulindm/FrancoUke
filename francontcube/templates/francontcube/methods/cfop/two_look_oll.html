@@ -1,0 +1,391 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_head %}
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+    }
+    
+    .step-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .step-header {
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .case-card {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+    
+    .case-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        border-color: #667eea;
+    }
+    
+    .algorithm-box {
+        background: white;
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 15px 0;
+    }
+    
+    .pattern-visual {
+        width: 100%;
+        max-width: 200px;
+        height: 200px;
+        background: #fff;
+        border: 3px solid #dee2e6;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    
+    .recognition-tip {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 15px;
+    }
+    
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        font-size: 24px;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+    
+    .stats-box {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stat-item {
+        display: inline-block;
+        margin: 0 20px;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        display: block;
+    }
+    
+    .comparison-table {
+        margin: 30px 0;
+    }
+    
+    .comparison-table td {
+        padding: 15px;
+        border: 2px solid #dee2e6;
+    }
+    
+    .badge-custom {
+        padding: 8px 15px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<h1 class="display-3 fw-bold mb-3">
+    <i class="bi bi-brightness-high"></i> 2-Look OLL
+</h1>
+<p class="lead mb-4">{{ page_description }}</p>
+<div class="d-flex justify-content-center gap-3">
+    <span class="badge bg-light text-dark badge-custom">
+        <i class="bi bi-list-check"></i> Seulement {{ total_algorithms }} Algorithmes
+    </span>
+    <span class="badge bg-light text-dark badge-custom">
+        <i class="bi bi-clock"></i> Apprendre en 1-2 Heures
+    </span>
+    <span class="badge bg-light text-dark badge-custom">
+        <i class="bi bi-trophy"></i> Pour Débutants
+    </span>
+</div>
+<div class="container pb-5">
+    
+    <!-- Stats Box -->
+    <h3 class="mb-4">Pourquoi 2-Look OLL?</h3>
+    <div class="row">
+        <div class="col-md-4 stat-item">
+            <span class="stat-number">10</span>
+            <span>Algorithmes vs 57 pour 1-Look</span>
+        </div>
+        <div class="col-md-4 stat-item">
+            <span class="stat-number">~5s</span>
+            <span>Perte de Temps Moyenne vs 1-Look</span>
+        </div>
+        <div class="col-md-4 stat-item">
+            <span class="stat-number">90%</span>
+            <span>Plus Facile à Apprendre</span>
+        </div>
+    </div>
+    
+    <!-- Introduction -->
+<div class="alert alert-info">
+    <h5><i class="bi bi-info-circle"></i> Comment Fonctionne 2-Look OLL</h5>
+    <p class="mb-2">Au lieu de reconnaître les 57 cas OLL, 2-Look OLL le divise en deux étapes simples:</p>
+    <ol class="mb-0">
+        <li><strong>Étape 1:</strong> Faire une croix jaune (orienter les arêtes) - 3 cas</li>
+        <li><strong>Étape 2:</strong> Compléter la face jaune (orienter les coins) - 7 cas</li>
+    </ol>
+</div>
+    
+    <!-- Comparison Table -->
+    <div class="card mb-5">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-table"></i> 2-Look vs 1-Look OLL</h5>
+        </div>
+        <div class="card-body">
+            <table class="table comparison-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th class="text-center">2-Look OLL</th>
+                        <th class="text-center">1-Look OLL (Full)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Algorithmes à Apprendre</strong></td>
+                        <td class="text-center"><span class="badge bg-success">10</span></td>
+                        <td class="text-center"><span class="badge bg-warning">57</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Temps d'Apprentissage</strong></td>
+                        <td class="text-center">1-2 heures</td>
+                        <td class="text-center">1-2 semaines</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reconnaissance</strong></td>
+                        <td class="text-center">Très Facile</td>
+                        <td class="text-center">Demande de la pratique</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vitesse Moyenne</strong></td>
+                        <td class="text-center">Sub-30 possible</td>
+                        <td class="text-center">Sub-20 possible</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best For</strong></td>
+                        <td class="text-center">Débutants, Amateurs</td>
+                        <td class="text-center">Speedcubeurs Avancés</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Step 1: Yellow Cross -->
+    <div class="step-card">
+        <div class="step-header">
+            <div class="d-flex align-items-center">
+                <span class="step-number">1</span>
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi {{ step1.icon }}"></i> {{ step1.name }}
+                    </h2>
+                    <p class="text-muted mb-0">{{ step1.description }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for case in step1.cases %}
+            <div class="col-lg-4">
+                <div class="case-card">
+                    <h4 class="mb-3">{{ case.name }}</h4>
+                    
+                    <!-- Pattern Visual -->
+                    <div class="pattern-visual">
+                        {% if case.pattern_data %}
+                            {% include 'cube/partials/_two_look_oll_svg.html' with pattern=case.pattern_data %}
+                        {% else %}
+                            <div class="text-center">
+                                <i class="bi bi-diagram-3" style="font-size: 4rem; color: #ccc;"></i>
+                                <p class="text-muted small mb-0 mt-2">{{ case.pattern }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Algorithm -->
+                    <div class="algorithm-box">
+                        {{ case.algorithm }}
+                    </div>
+                    
+                    <!-- Recognition -->
+                    <div class="recognition-tip">
+                        <strong><i class="bi bi-eye"></i> Reconnaissance</strong><br>
+                        {{ case.recognition }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="alert alert-success mt-4">
+            <strong><i class="bi bi-lightbulb"></i> Pro Tip:</strong> 
+            Orientez toujours le cube pour que la ligne ou la forme L soit dans la bonne position avant d'appliquer l'algorithme!
+        </div>
+    </div>
+    
+    <!-- Step 2: Yellow Face -->
+    <div class="step-card">
+        <div class="step-header">
+            <div class="d-flex align-items-center">
+                <span class="step-number">2</span>
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi {{ step2.icon }}"></i> {{ step2.name }}
+                    </h2>
+                    <p class="text-muted mb-0">{{ step2.description }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for case in step2.cases %}
+            <div class="col-lg-6">
+                <div class="case-card">
+                    <h4 class="mb-3">{{ case.name }}</h4>
+                    
+                    <!-- Pattern Visual -->
+                    <div class="pattern-visual">
+                        {% if case.pattern_data %}
+                            {% include 'cube/partials/_two_look_oll_svg.html' with pattern=case.pattern_data %}
+                        {% else %}
+                            <div class="text-center">
+                                <i class="bi bi-square" style="font-size: 4rem; color: #ccc;"></i>
+                                <p class="text-muted small mb-0 mt-2">{{ case.pattern }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Algorithm -->
+                    <div class="algorithm-box">
+                        {{ case.algorithm }}
+                    </div>
+                    
+                    <!-- Recognition -->
+                    <div class="recognition-tip">
+                        <strong><i class="bi bi-eye"></i> Recognition:</strong><br>
+                        {{ case.recognition }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="alert alert-info mt-4">
+            <strong><i class="bi bi-star"></i> Concentrez-vous sur Sune d'abord:</strong> 
+            Sune et Anti-Sune sont les plus courants et les plus rapides. Maîtrisez-les d'abord!
+        </div>
+    </div>
+    
+    <!-- Learning Path -->
+    <div class="card mt-5">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="bi bi-map"></i> Parcours d'Apprentissage Recommandé</h4>
+        </div>
+        <div class="card-body">
+            <h5>Semaine 1: Maîtriser les Bases</h5>
+            <ol>
+                <li><strong>Jour 1-2:</strong> Apprendre les 3 algorithmes de croix (Étape 1)</li>
+                <li><strong>Jour 3-4:</strong> Apprendre Sune et Anti-Sune</li>
+                <li><strong>Jour 5-7:</strong> Pratiquer la reconnaissance et la vitesse</li>
+            </ol>
+            
+            <h5 class="mt-4">Semaine 2: Ajouter les Cas Restants</h5>
+            <ol>
+                <li><strong>Jour 1-3:</strong> Apprendre les motifs H, Pi et U</li>
+                <li><strong>Jour 4-5:</strong> Apprendre les motifs T et L</li>
+                <li><strong>Jour 6-7:</strong> Résolutions complètes avec tous les 10 algorithmes</li>
+            </ol>
+            
+            <div class="alert alert-warning mt-3">
+                <strong>⏱️ Conseil de Pratique:</strong> Faites 20 résolutions par jour en vous concentrant uniquement sur la reconnaissance et l'exécution OLL.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Next Steps -->
+    <div class="text-center mt-5">
+        <h3 class="mb-4">Prêt pour Plus?</h3>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{% url 'francontcube:cfop_oll' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-grid-3x3"></i> Voir les 57 Cas OLL
+            </a>
+            <a href="{% url 'francontcube:two_look_pll' %}" class="btn btn-success btn-lg">
+                <i class="bi bi-arrow-repeat"></i> Apprendre 2-Look PLL
+            </a>
+            <a href="{% url 'francontcube:method_cfop' %}" class="btn btn-secondary btn-lg">
+                <i class="bi bi-house"></i> Retour à CFOP
+            </a>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+    // Add some interactivity if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('2-Look OLL page loaded');
+        
+        // Could add algorithm copy functionality
+        document.querySelectorAll('.algorithm-box').forEach(box => {
+            box.style.cursor = 'pointer';
+            box.title = 'Click to copy';
+            box.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.textContent.trim());
+                const original = this.style.background;
+                this.style.background = '#d4edda';
+                setTimeout(() => {
+                    this.style.background = original;
+                }, 500);
+            });
+        });
+    });
+</script>
+{% endblock %}

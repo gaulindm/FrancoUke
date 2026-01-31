@@ -24,12 +24,12 @@ class SecondLayerView(StepView):
     
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
-        'goal_state': 'second-layer-goal',
-        'before_state': 'second-layer-before',
-        'case_back_state': 'second-layer-case-back',
-        'case_front_state': 'second-layer-case-front',
-        'edge_yellow_state': 'second-layer-edge-yellow',
-        'edge_stuck_state': 'second-layer-edge-stuck',
+        'goal_state': 'beg-second-layer-goal',
+        #'before_state': 'second-layer-before',
+        'case_back_state': 'beg-second-layer-case-right',
+        'case_front_state': 'beg-second-layer-case-left',
+        'edge_yellow_state': 'beg-second-layer-edge-yellow',
+        'edge_stuck_state': 'beg-second-layer-edge-stuck',
 
     }
 

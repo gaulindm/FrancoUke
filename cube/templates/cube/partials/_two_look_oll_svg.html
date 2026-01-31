@@ -1,0 +1,71 @@
+<!-- cube/templates/cube/partials/_two_look_oll_svg.html -->
+<!-- Flat 2D view for 2-Look OLL patterns -->
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="two-look-oll-svg">
+    <defs>
+        <style>
+            .oll-sticker {
+                stroke: #222;
+                stroke-width: 2.5;
+                stroke-linejoin: round;
+            }
+            .oll-side-sticker {
+                stroke: #222;
+                stroke-width: 2;
+                stroke-linejoin: round;
+            }
+        </style>
+    </defs>
+    
+    <!-- Background -->
+    <rect width="200" height="200" fill="#f8f9fa"/>
+    
+    <!-- U Face (Top) - 3x3 grid centered -->
+    <g id="u-face">
+        <!-- Row 0 -->
+        <rect class="oll-sticker" x="70" y="70" width="20" height="20" fill="{{ pattern.U.0.0|default:'#FFD700' }}"/>
+        <rect class="oll-sticker" x="92" y="70" width="20" height="20" fill="{{ pattern.U.0.1|default:'#FFD700' }}"/>
+        <rect class="oll-sticker" x="114" y="70" width="20" height="20" fill="{{ pattern.U.0.2|default:'#FFD700' }}"/>
+        
+        <!-- Row 1 -->
+        <rect class="oll-sticker" x="70" y="92" width="20" height="20" fill="{{ pattern.U.1.0|default:'#FFD700' }}"/>
+        <rect class="oll-sticker" x="92" y="92" width="20" height="20" fill="{{ pattern.U.1.1|default:'#FFD700' }}"/>
+        <rect class="oll-sticker" x="114" y="92" width="20" height="20" fill="{{ pattern.U.1.2|default:'#FFD700' }}"/>
+        
+        <!-- Row 2 -->
+        <rect class="oll-sticker" x="70" y="114" width="20" height="20" fill="{{ pattern.U.2.0|default:'#FFD700' }}"/>
+        <rect class="oll-sticker" x="92" y="114" width="20" height="20" fill="{{ pattern.U.2.1|default:'#FFD700' }}"/>
+        <rect class="oll-sticker" x="114" y="114" width="20" height="20" fill="{{ pattern.U.2.2|default:'#FFD700' }}"/>
+    </g>
+    
+    <!-- F Face (Front) - Top row only -->
+    <g id="f-face">
+        <rect class="oll-side-sticker" x="70" y="136" width="20" height="12" fill="{{ pattern.F.0|default:'#00D800' }}"/>
+        <rect class="oll-side-sticker" x="92" y="136" width="20" height="12" fill="{{ pattern.F.1|default:'#00D800' }}"/>
+        <rect class="oll-side-sticker" x="114" y="136" width="20" height="12" fill="{{ pattern.F.2|default:'#00D800' }}"/>
+        <text x="100" y="158" style="font-size: 10px; fill: #666; font-weight: bold;" text-anchor="middle">F</text>
+    </g>
+    
+    <!-- R Face (Right) - Left column only -->
+    <g id="r-face">
+        <rect class="oll-side-sticker" x="136" y="70" width="12" height="20" fill="{{ pattern.R.0|default:'#C41E3A' }}"/>
+        <rect class="oll-side-sticker" x="136" y="92" width="12" height="20" fill="{{ pattern.R.1|default:'#C41E3A' }}"/>
+        <rect class="oll-side-sticker" x="136" y="114" width="12" height="20" fill="{{ pattern.R.2|default:'#C41E3A' }}"/>
+        <text x="154" y="102" style="font-size: 10px; fill: #666; font-weight: bold;" text-anchor="middle">R</text>
+    </g>
+    
+    <!-- B Face (Back) - Bottom row only -->
+    <g id="b-face">
+        <rect class="oll-side-sticker" x="70" y="56" width="20" height="12" fill="{{ pattern.B.0|default:'#0051BA' }}"/>
+        <rect class="oll-side-sticker" x="92" y="56" width="20" height="12" fill="{{ pattern.B.1|default:'#0051BA' }}"/>
+        <rect class="oll-side-sticker" x="114" y="56" width="20" height="12" fill="{{ pattern.B.2|default:'#0051BA' }}"/>
+        <text x="100" y="50" style="font-size: 10px; fill: #666; font-weight: bold;" text-anchor="middle">B</text>
+    </g>
+    
+    <!-- L Face (Left) - Right column only -->
+    <g id="l-face">
+        <rect class="oll-side-sticker" x="56" y="70" width="12" height="20" fill="{{ pattern.L.2|default:'#FF5800' }}"/>
+        <rect class="oll-side-sticker" x="56" y="92" width="12" height="20" fill="{{ pattern.L.1|default:'#FF5800' }}"/>
+        <rect class="oll-side-sticker" x="56" y="114" width="12" height="20" fill="{{ pattern.L.0|default:'#FF5800' }}"/>
+        <text x="46" y="102" style="font-size: 10px; fill: #666; font-weight: bold;" text-anchor="middle">L</text>
+    </g>
+</svg>

@@ -64,6 +64,18 @@ from .cfop.about import about as cfop_about
 from .cfop.cross import cross as cfop_cross
 from .cfop.f2l import cfop, cfop_f2l_basic
 
+# CFOP Introduction Pages (NEW)
+from .cfop.f2l_intro import cfop_f2l_intro
+from .cfop.oll_intro import cfop_oll_intro
+from .cfop.pll_intro import cfop_pll_intro
+
+from .cfop.beginner_to_f2l import beginner_to_f2l_bridge
+
+
+
+# 2-Look OLL
+from .cfop.two_look_oll import two_look_oll_view
+
 # OLL & PLL - New system with categories and filtering
 from .cfop.oll_pll import (
     cfop_oll_view,
@@ -119,9 +131,16 @@ __all__ = [
     'cfop',
     'cfop_f2l_basic',
     
+    # CFOP Introduction Pages (NEW)
+    'cfop_f2l_intro',
+    'cfop_oll_intro',
+    'cfop_pll_intro',
+    'beginner_to_f2l_bridge',
+
     # OLL & PLL - New system
     'cfop_oll_view',
     'cfop_pll_view',
     'oll_case_detail',
     'pll_case_detail',
+    'two_look_oll_view',
 ]

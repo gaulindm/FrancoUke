@@ -1,0 +1,309 @@
+{% extends "francontcube/partials/base.html" %}
+{% block title %}Stats de {{ cuber }} - Leader Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <a href="{% url 'training:leader_moderation' %}" class="btn btn-outline-secondary mb-3">
+            <i class="bi bi-arrow-left"></i> Retour à la modération
+        </a>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="display-1">🎨</div>
+            <div>
+                <h1 class="mb-0">{{ cuber }}</h1>
+                <p class="text-muted mb-0">Statistiques détaillées</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Overview -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Sessions Total</h5>
+                    <h2 class="mb-0">{{ total_sessions }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">🎯 Algorithmes Maîtrisés</h5>
+                    <h2 class="mb-0">{{ total_algorithms }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">⚠️ Temps Suspects</h5>
+                    <h2 class="mb-0">{{ suspicious_sessions|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Temps Suspects -->
+    {% if suspicious_sessions %}
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0">⚠️ Temps Suspects Détectés</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Algorithme</th>
+                            <th>Temps</th>
+                            <th>Raison</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in suspicious_sessions %}
+                        <tr id="session-{{ session.id }}">
+                            <td><code>{{ session.algorithm.name }}</code></td>
+                            <td>
+                                <span class="fs-5 fw-bold text-danger">
+                                    {{ session.time_formatted }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    {{ session.suspicious_reason }}
+                                </span>
+                            </td>
+                            <td class="text-muted">
+                                {{ session.created_at|date:"d/m/Y H:i" }}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteSingleSession({{ session.id }})">
+                                    <i class="bi bi-trash"></i> Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> <strong>Aucun temps suspect détecté</strong> pour ce Cuber.
+    </div>
+    {% endif %}
+    
+    <!-- Progrès par Algorithme -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">🎯 Progrès par Algorithme</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if progress_list %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Algorithme</th>
+                            <th>Meilleur Temps</th>
+                            <th>Tentatives</th>
+                            <th>Dernière Session</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for progress in progress_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <strong>{{ progress.algorithm.name }}</strong><br>
+                                <small class="text-muted">{{ progress.algorithm.notation }}</small>
+                            </td>
+                            <td>
+                                <span class="fs-5 fw-bold text-success">
+                                    {{ progress.best_time_formatted }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">
+                                    {{ progress.total_attempts }} essais
+                                </span>
+                            </td>
+                            <td class="text-muted">
+                                {{ progress.last_practiced|date:"d/m/Y" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                Aucun progrès enregistré pour le moment.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Historique Complet -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">📜 Historique Complet (50 dernières sessions)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Algorithme</th>
+                            <th>Temps</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in all_sessions %}
+                        <tr id="session-{{ session.id }}" {% if session.time_ms < 1000 %}class="table-warning"{% endif %}>
+                            <td class="text-muted">
+                                {{ session.created_at|date:"d/m/Y H:i:s" }}
+                            </td>
+                            <td>
+                                <code>{{ session.algorithm.name }}</code>
+                            </td>
+                            <td>
+                                <span class="fs-5 fw-bold {% if session.time_ms < 1000 %}text-danger{% else %}text-success{% endif %}">
+                                    {{ session.time_formatted }}
+                                </span>
+                                {% if session.time_ms < 1000 %}
+                                    <span class="badge bg-warning text-dark ms-2">⚠️</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteSingleSession({{ session.id }})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                Aucune session enregistrée.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Info -->
+    <div class="alert alert-info mt-4">
+        <h6><i class="bi bi-info-circle"></i> À propos de ce Cuber</h6>
+        <ul class="mb-0">
+            <li><strong>Total sessions:</strong> {{ total_sessions }}</li>
+            <li><strong>Algorithmes pratiqués:</strong> {{ total_algorithms }}</li>
+            <li><strong>Temps suspects:</strong> {{ suspicious_sessions|length }}</li>
+            <li>💡 Les temps en jaune sont suspects (< 1 seconde)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Modal de Confirmation -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">⚠️ Confirmation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce temps?</p>
+                <p class="text-muted mb-0">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteSingleSession(sessionId) {
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    
+    document.getElementById('confirm-delete-btn').onclick = function() {
+        fetch(`/training/delete-session/${sessionId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`session-${sessionId}`).remove();
+                showToast('success', data.message);
+                modal.hide();
+                
+                // Recharger après 1 seconde pour mettre à jour les stats
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('danger', data.error || 'Erreur lors de la suppression');
+            }
+        })
+        .catch(error => {
+            showToast('danger', 'Erreur réseau');
+            console.error(error);
+        });
+    };
+    
+    modal.show();
+}
+
+function showToast(type, message) {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3`;
+    toast.style.zIndex = '9999';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<style>
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    transform: translateX(5px);
+}
+</style>
+{% endblock %}

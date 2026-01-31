@@ -1,0 +1,552 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}De la Méthode Débutant au F2L | CFOP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+        border-radius: 0.5rem;
+    }
+    
+    .algorithm-box {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        border-left: 5px solid var(--bs-success);
+        font-family: 'Courier New', monospace;
+        font-size: 1.5rem;
+        text-align: center;
+        margin: 2rem 0;
+    }
+    
+    .algorithm-parts {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin: 2rem 0;
+    }
+    
+    .algorithm-part {
+        flex: 1;
+        min-width: 250px;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .algorithm-part:hover {
+        transform: translateY(-5px);
+    }
+    
+    .part-pairing {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .part-insertion {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+    
+    .revelation-card {
+        border-left: 4px solid;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .revelation-card:hover {
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        transform: translateX(5px);
+    }
+    
+    .comparison-table {
+        background: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .comparison-header {
+        padding: 1.5rem;
+        text-align: center;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .beginner-header {
+        background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%);
+    }
+    
+    .f2l-header {
+        background: linear-gradient(135deg, #F97794 0%, #623AA2 100%);
+    }
+    
+    .move-analysis {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        border-radius: 0.5rem;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .move-analysis:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .move-pairing {
+        background: #e3d5ff;
+        color: #5a189a;
+    }
+    
+    .move-insertion {
+        background: #ffd5e5;
+        color: #c9184a;
+    }
+    
+    .exercise-box {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        padding: 2rem;
+        border-radius: 0.5rem;
+        border: 3px solid #ff6b6b;
+    }
+    
+    .step-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background: var(--bs-success);
+        color: white;
+        font-weight: bold;
+        margin-right: 1rem;
+    }
+    
+    .highlight-box {
+        background: #fff3cd;
+        border-left: 5px solid #ffc107;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        {% for crumb in breadcrumbs %}
+            {% if crumb.url %}
+                <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.name }}</a></li>
+            {% else %}
+                <li class="breadcrumb-item active">{{ crumb.name }}</li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-lightbulb-fill"></i> Vous Savez Déjà du F2L!
+        </h1>
+        <p class="lead">
+            L'algorithme de la deuxième couche que vous utilisez depuis le début est du F2L déguisé
+        </p>
+    </div>
+</div>
+
+<!-- The Big Revelation -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">
+                        <i class="bi bi-stars text-warning"></i> 
+                        La Grande Révélation
+                    </h2>
+                    
+                    <p class="lead text-center mb-4">
+                        Cet algorithme que vous connaissez par cœur :
+                    </p>
+                    
+                    <div class="algorithm-box pulse">
+                        {{ beginner_algorithm.full }}
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <h4>C'est en fait...</h4>
+                        <h2 class="text-success">
+                            <i class="bi bi-check-circle-fill"></i> Du F2L!
+                        </h2>
+                    </div>
+                    
+                    <div class="algorithm-parts">
+                        <div class="algorithm-part part-pairing">
+                            <div class="fs-2 mb-3">{{ beginner_algorithm.part1.moves }}</div>
+                            <h5>{{ beginner_algorithm.part1.name }}</h5>
+                            <p class="mb-2">{{ beginner_algorithm.part1.description }}</p>
+                            <small>{{ beginner_algorithm.part1.what_happens }}</small>
+                        </div>
+                        
+                        <div class="algorithm-part part-insertion">
+                            <div class="fs-2 mb-3">{{ beginner_algorithm.part2.moves }}</div>
+                            <h5>{{ beginner_algorithm.part2.name }}</h5>
+                            <p class="mb-2">{{ beginner_algorithm.part2.description }}</p>
+                            <small>{{ beginner_algorithm.part2.what_happens }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-box">
+                        <i class="bi bi-info-circle text-warning fs-4"></i>
+                        <strong>Ce que cela signifie :</strong> 
+                        Vous faites déjà du F2L 4 fois à chaque résolution! 
+                        Vous formez des paires (coin+arête) puis vous les insérez dans la deuxième couche.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Revelations -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="bi bi-key"></i> Points Clés à Réaliser
+    </h2>
+    
+    <div class="row g-4">
+        {% for revelation in revelations %}
+        <div class="col-md-6">
+            <div class="card revelation-card h-100 border-{{ revelation.color }}">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start">
+                        <i class="bi {{ revelation.icon }} text-{{ revelation.color }} fs-1 me-3"></i>
+                        <div>
+                            <h5 class="card-title text-{{ revelation.color }}">{{ revelation.title }}</h5>
+                            <p class="card-text">{{ revelation.desc }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Algorithm Breakdown -->
+<div class="container mb-5">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h2 class="card-title mb-4">
+                <i class="bi bi-zoom-in"></i> 
+                {{ algorithm_breakdown.title }}
+            </h2>
+            
+            <div class="text-center mb-4">
+                <div class="fs-4 fw-bold">{{ algorithm_breakdown.full_alg }}</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <h5 class="mb-3">Mouvement par mouvement :</h5>
+                    
+                    <div class="text-center">
+                        {% for move_data in algorithm_breakdown.analysis %}
+                        <div class="move-analysis move-{{ move_data.part }}" 
+                             title="{{ move_data.what_happens }}">
+                            <div class="fw-bold fs-5">{{ move_data.move }}</div>
+                            <div class="small">{{ move_data.purpose }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-4 row">
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <strong>
+                                    <i class="bi bi-1-circle"></i> 
+                                    Partie 1 (mouvements 1-4)
+                                </strong>
+                                <p class="mb-0 mt-2">Formation de la paire coin-arête en haut du cube</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-danger">
+                                <strong>
+                                    <i class="bi bi-2-circle"></i> 
+                                    Partie 2 (mouvements 5-8)
+                                </strong>
+                                <p class="mb-0 mt-2">Insertion de la paire dans le slot de la 2e couche</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comparison: Beginner vs F2L -->
+<div class="container mb-5">
+    <h2 class="text-center mb-4">
+        <i class="bi bi-arrow-left-right"></i> 
+        Méthode Débutant vs CFOP avec F2L
+    </h2>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="comparison-table shadow">
+                <div class="comparison-header beginner-header">
+                    <i class="bi bi-person"></i> Méthode Débutant
+                </div>
+                <div class="p-4">
+                    <h5 class="mb-3">{{ comparison.beginner.total_steps }} Étapes</h5>
+                    <ol class="list-group list-group-numbered">
+                        {% for step in comparison.beginner.steps %}
+                        <li class="list-group-item">{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                    
+                    <div class="mt-4">
+                        <h6 class="text-primary">Deuxième Couche :</h6>
+                        <p class="small">{{ comparison.beginner.second_layer.description }}</p>
+                        <span class="badge bg-secondary">
+                            {{ comparison.beginner.second_layer.repetitions }} fois par cube
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="comparison-table shadow">
+                <div class="comparison-header f2l-header">
+                    <i class="bi bi-lightning"></i> CFOP avec F2L
+                </div>
+                <div class="p-4">
+                    <h5 class="mb-3">{{ comparison.f2l.total_steps }} Étapes</h5>
+                    <ol class="list-group list-group-numbered">
+                        {% for step in comparison.f2l.steps %}
+                        <li class="list-group-item">{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                    
+                    <div class="mt-4">
+                        <h6 class="text-success">F2L (2 premières couches) :</h6>
+                        <p class="small">{{ comparison.f2l.second_layer.description }}</p>
+                        <span class="badge bg-success">
+                            {{ comparison.f2l.second_layer.repetitions }} paires par cube
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert alert-success text-center">
+        <i class="bi bi-check-circle-fill"></i>
+        <strong>La différence ?</strong> 
+        En F2L, vous faites la MÊME CHOSE (résoudre 4 paires), 
+        mais en comprenant le principe au lieu de juste mémoriser un algorithme!
+    </div>
+</div>
+
+<!-- Practical Exercise -->
+<div class="container mb-5">
+    <div class="exercise-box">
+        <h2 class="mb-4">
+            <i class="bi bi-clipboard-check"></i> 
+            {{ exercise.title }}
+        </h2>
+        
+        <p class="lead mb-4">{{ exercise.goal }}</p>
+        
+        <ol class="fs-5">
+            {% for step in exercise.steps %}
+            <li class="mb-3">
+                {% if "ARRÊTEZ-VOUS" in step %}
+                    <strong class="text-danger">{{ step }}</strong>
+                {% else %}
+                    {{ step }}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+        
+        <div class="alert alert-warning mt-4">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Important :</strong> 
+            Faites cet exercice avec un vrai cube en main. 
+            Le moment "Aha!" ne vient qu'en le voyant physiquement!
+        </div>
+    </div>
+</div>
+
+<!-- Learning Path -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="bi bi-signpost"></i> 
+        Votre Parcours d'Apprentissage F2L
+    </h2>
+    
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            {% for path in learning_path %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start">
+                        <span class="step-badge">{{ path.step }}</span>
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">{{ path.title }}</h5>
+                            <p class="card-text text-muted">{{ path.desc }}</p>
+                            <div class="alert alert-light mb-0">
+                                <i class="bi bi-arrow-right-circle"></i>
+                                <strong>Action :</strong> {{ path.action }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Second Layer Cases -->
+<div class="container mb-5">
+    <h2 class="text-center mb-4">
+        <i class="bi bi-grid-3x3"></i> 
+        Les Deux Cas de la Deuxième Couche
+    </h2>
+    
+    <div class="row">
+        {% for case in second_layer_cases %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ case.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="algorithm-box mb-3">
+                        {{ case.beginner_alg }}
+                    </div>
+                    
+                    <p class="text-muted">{{ case.description }}</p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <div class="small text-muted">Pairing :</div>
+                            <div class="fw-bold text-primary">{{ case.pairing }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">Insertion :</div>
+                            <div class="fw-bold text-danger">{{ case.insertion }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <span class="badge bg-secondary">{{ case.f2l_equivalent }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="container mb-5">
+    <div class="card text-white shadow-lg" 
+         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card-body text-center p-5">
+            <h2 class="display-6 fw-bold mb-3">Prêt pour le F2L Complet?</h2>
+            <p class="lead mb-4">
+                Maintenant que vous comprenez le principe, 
+                découvrez les 41 cas F2L et devenez plus rapide!
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{% url 'francontcube:cfop_f2l_intro' %}" 
+                   class="btn btn-light btn-lg">
+                    <i class="bi bi-book"></i> Guide F2L Complet
+                </a>
+                <a href="{% url 'francontcube:cfop_f2l_basic' %}" 
+                   class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-play-circle"></i> Voir les 41 Cas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="container mb-5">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title">
+                <i class="bi bi-journal-check"></i> 
+                Résumé : Ce que Vous Avez Appris
+            </h3>
+            
+            <ul class="list-unstyled mt-4">
+                <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    L'algorithme U' F' U F U R U' R' est composé de 2 parties distinctes
+                </li>
+                <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    U' F' U F = Pairing (formation de la paire coin-arête)
+                </li>
+                <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    U R U' R' = Insertion (le fameux "Sexy Move")
+                </li>
+                <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Vous faites déjà du F2L sans le savoir depuis le début!
+                </li>
+                <li class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    F2L n'est pas 41 algorithmes à mémoriser, c'est comprendre le principe
+                </li>
+            </ul>
+            
+            <div class="alert alert-info mt-4">
+                <strong>
+                    <i class="bi bi-star-fill"></i> Le secret du F2L :
+                </strong>
+                Comprendre POURQUOI les mouvements fonctionnent, 
+                pas juste les mémoriser. Vous avez déjà l'intuition!
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

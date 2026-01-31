@@ -1,0 +1,526 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}F2L - Introduction | CFOP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+        border-radius: 0.5rem;
+    }
+    
+    .category-card {
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 2px solid transparent;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border-color: var(--bs-primary);
+    }
+    
+    .category-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .difficulty-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+    }
+    
+    .learning-step {
+        position: relative;
+        padding-left: 3rem;
+        padding-bottom: 2rem;
+    }
+    
+    .learning-step::before {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--bs-primary), var(--bs-secondary));
+    }
+    
+    .learning-step:last-child::before {
+        background: linear-gradient(to bottom, var(--bs-primary), transparent);
+    }
+    
+    .step-number {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background: var(--bs-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .tip-card {
+        border-left: 4px solid var(--bs-primary);
+        background: #f8f9fa;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--bs-primary);
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .cta-section {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 3rem;
+        border-radius: 0.5rem;
+        text-align: center;
+    }
+    
+    .example-alg {
+        font-family: 'Courier New', monospace;
+        background: rgba(0,0,0,0.05);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        {% for crumb in breadcrumbs %}
+            {% if crumb.url %}
+                <li class="breadcrumb-item">
+                    <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                </li>
+            {% else %}
+                <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-layers"></i> F2L - First Two Layers
+        </h1>
+        <p class="lead mb-4">
+            La partie la plus importante du CFOP : résoudre les deux premières couches simultanément
+        </p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <p class="fs-5">
+                    F2L représente environ <strong>60% du temps total</strong> d'un solve. 
+                    Maîtriser ces 41 cas transformera votre speedcubing!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="container mb-5">
+    <div class="row g-4">
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_cases }}</div>
+                <div class="stat-label">Cas Total</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-number text-success">{{ easy_cases }}</div>
+                <div class="stat-label">Faciles</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-number text-warning">{{ medium_cases }}</div>
+                <div class="stat-label">Moyens</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-number text-danger">{{ hard_cases }}</div>
+                <div class="stat-label">Difficiles</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- What is F2L -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">
+                        <i class="bi bi-question-circle text-primary"></i> 
+                        Qu'est-ce que F2L?
+                    </h2>
+                    <p class="lead">
+                        <strong>F2L (First Two Layers)</strong> consiste à résoudre simultanément 
+                        les deux premières couches du cube en formant et insérant 4 paires coin-arête.
+                    </p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="text-primary">
+                                <i class="bi bi-check-circle"></i> Pourquoi F2L?
+                            </h5>
+                            <ul>
+                                <li><strong>Efficacité</strong> : Moins de mouvements que débutant</li>
+                                <li><strong>Intuitivité</strong> : Compréhension du cube</li>
+                                <li><strong>Look Ahead</strong> : Base du speedcubing avancé</li>
+                                <li><strong>Fluidité</strong> : Pas d'arrêts entre paires</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-primary">
+                                <i class="bi bi-lightbulb"></i> Concept Clé
+                            </h5>
+                            <div class="alert alert-info">
+                                <p class="mb-2">
+                                    <strong>Une paire = Coin + Arête</strong>
+                                </p>
+                                <p class="mb-2">
+                                    1. Identifier les 2 pièces<br>
+                                    2. Les positionner en haut<br>
+                                    3. Les réunir<br>
+                                    4. Les insérer dans le slot
+                                </p>
+                                <p class="mb-0 text-muted">
+                                    × 4 paires = F2L complet!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dans f2l_intro.html, avant les catégories -->
+<div class="container mb-5">
+    <div class="alert alert-info border-info">
+        <h5>
+            <i class="bi bi-lightbulb-fill text-warning"></i>
+            Vous venez de la méthode débutant?
+        </h5>
+        <p class="mb-3">
+            Saviez-vous que l'algorithme de la 2e couche que vous connaissez déjà est du F2L déguisé?
+        </p>
+        <a href="{% url 'francontcube:beginner_to_f2l' %}" class="btn btn-info">
+            <i class="bi bi-arrow-right-circle"></i> Découvrez Comment
+        </a>
+    </div>
+</div>
+
+
+<!-- 8 Categories -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="bi bi-grid-3x3"></i> Les 8 Catégories F2L
+    </h2>
+    
+    <div class="row g-4">
+        {% for category in f2l_categories %}
+        <div class="col-lg-6">
+            <div class="card category-card border-{{ category.color }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="category-icon text-{{ category.color }}">
+                            <i class="bi {{ category.icon }}"></i>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ category.color }} difficulty-badge">
+                                {{ category.difficulty }}
+                            </span>
+                            <div class="text-muted small mt-1">
+                                {{ category.cases_count }} cas
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="card-title text-{{ category.color }}">
+                        {{ category.name }}
+                    </h4>
+                    
+                    <p class="card-text text-muted">
+                        {{ category.description }}
+                    </p>
+                    
+                    <div class="mt-3">
+                        <div class="small text-muted mb-1">Concept clé :</div>
+                        <div class="fw-bold">{{ category.key_concept }}</div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="small text-muted mb-1">Exemple d'algorithme :</div>
+                        <div class="example-alg">{{ category.example_alg }}</div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'francontcube:cfop_f2l_category' category.slug %}" 
+                           class="btn btn-outline-{{ category.color }} btn-sm">
+                            Voir les cas <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Learning Path -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="bi bi-map"></i> Parcours d'Apprentissage Recommandé
+    </h2>
+    
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    {% for path in learning_path %}
+                    <div class="learning-step">
+                        <div class="step-number">{{ path.step }}</div>
+                        <div>
+                            <h5 class="fw-bold">{{ path.title }}</h5>
+                            <p class="text-muted mb-2">{{ path.desc }}</p>
+                            <div class="d-flex gap-3 align-items-center">
+                                <span class="badge bg-primary">{{ path.cases }}</span>
+                                <span class="text-muted small">
+                                    <i class="bi bi-clock"></i> {{ path.time }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="alert alert-success mt-4">
+                        <i class="bi bi-trophy"></i>
+                        <strong>Temps total estimé :</strong> 4-6 semaines de pratique régulière 
+                        pour maîtriser tous les cas F2L.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="bi bi-star"></i> Conseils Essentiels
+    </h2>
+    
+    <div class="row g-4">
+        {% for tip in tips %}
+        <div class="col-md-6">
+            <div class="card tip-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <div class="text-primary fs-2 me-3">
+                            <i class="bi {{ tip.icon }}"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title">{{ tip.title }}</h5>
+                            <p class="card-text text-muted mb-0">{{ tip.desc }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Practice Tips -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="card-title mb-4">
+                        <i class="bi bi-clipboard-check text-primary"></i>
+                        Comment Pratiquer Efficacement
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h5 class="text-success">
+                                <i class="bi bi-check-circle"></i> À Faire
+                            </h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-arrow-right text-success"></i>
+                                    Commencez par 2-3 cas à la fois
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-arrow-right text-success"></i>
+                                    Répétez chaque cas 20-30 fois
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-arrow-right text-success"></i>
+                                    Utilisez un métronome pour la fluidité
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-arrow-right text-success"></i>
+                                    Pratiquez sans regarder vos mains
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-arrow-right text-success"></i>
+                                    Faites des pauses régulières
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <h5 class="text-danger">
+                                <i class="bi bi-x-circle"></i> À Éviter
+                            </h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-x text-danger"></i>
+                                    Apprendre tous les cas en même temps
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-x text-danger"></i>
+                                    Négliger les cas "faciles"
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-x text-danger"></i>
+                                    Tourner le cube à chaque paire
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-x text-danger"></i>
+                                    Se concentrer uniquement sur la vitesse
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-x text-danger"></i>
+                                    Oublier le look ahead
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Important :</strong> La reconnaissance des cas vient avec la pratique. 
+                        Ne vous découragez pas si vous mettez du temps à identifier les cas au début!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container mb-5">
+    <div class="cta-section">
+        <h2 class="display-6 fw-bold mb-3">Prêt à Commencer?</h2>
+        <p class="lead mb-4">
+            Explorez les 41 cas F2L organisés par catégorie et commencez votre apprentissage dès maintenant!
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'francontcube:cfop_f2l_basic' %}" 
+               class="btn btn-light btn-lg">
+                <i class="bi bi-play-circle"></i> Commencer par les Cas de Base
+            </a>
+            <a href="{% url 'francontcube:cfop_f2l_category' 'corner-in-slot' %}" 
+               class="btn btn-outline-light btn-lg">
+                <i class="bi bi-bookmark-star"></i> Voir les Cas Populaires
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Resources -->
+<div class="container mb-5">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title mb-4">
+                <i class="bi bi-book text-primary"></i>
+                Ressources Complémentaires
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-youtube text-danger fs-3 me-3"></i>
+                        <div>
+                            <h5>Vidéos Tutoriels</h5>
+                            <p class="text-muted small mb-0">
+                                Regardez des démonstrations en mouvement lent pour mieux comprendre
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-stopwatch text-warning fs-3 me-3"></i>
+                        <div>
+                            <h5>Entraînement Chronométré</h5>
+                            <p class="text-muted small mb-0">
+                                Pratiquez avec un timer pour suivre vos progrès
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-people text-info fs-3 me-3"></i>
+                        <div>
+                            <h5>Communauté</h5>
+                            <p class="text-muted small mb-0">
+                                Rejoignez des forums pour échanger astuces et conseils
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

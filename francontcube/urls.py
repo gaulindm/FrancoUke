@@ -1,4 +1,9 @@
 from django.urls import path
+
+# Import organized views
+from . import views
+
+# CFOP specific imports (for clarity and organization)
 from francontcube.views.cfop.f2l import cfop, cfop_f2l_basic
 from francontcube.views.cfop.oll_pll import (
     cfop_oll_view,
@@ -6,8 +11,15 @@ from francontcube.views.cfop.oll_pll import (
     oll_case_detail,
     pll_case_detail,
 )
+from francontcube.views.cfop.two_look_oll import two_look_oll_view
+from francontcube.views.cfop.two_look_pll import two_look_pll_view
+from francontcube.views.cfop.beginner_to_f2l import beginner_to_f2l_bridge
 
-from . import views
+# ⚠️ CORRECTION: Les vues d'introduction doivent être importées depuis leurs propres fichiers
+# PAS depuis oll_pll.py
+from francontcube.views.cfop.f2l_intro import cfop_f2l_intro
+from francontcube.views.cfop.oll_intro import cfop_oll_intro
+from francontcube.views.cfop.pll_intro import cfop_pll_intro
 
 app_name = "francontcube"
 
@@ -53,23 +65,65 @@ urlpatterns = [
     # ============================================================
     # CFOP METHOD
     # ============================================================
+    # Main pages
     path('methods/cfop/', views.method_cfop, name='method_cfop'),
     path('methods/cfop/about/', views.cfop_about, name='cfop_about'),
     path('methods/cfop/cross/', views.cfop_cross, name='cfop_cross'),
+    path('methods/cfop/beginner-to-f2l/', beginner_to_f2l_bridge, name='beginner_to_f2l'),
+
+    # ──────────────────────────────────────────────────────────
+    # F2L Routes
+    # ──────────────────────────────────────────────────────────
+    # ⚠️ ORDRE IMPORTANT: Plus spécifique d'abord!
     
-    # F2L
+    # 1. Introduction (plus spécifique)
+    path('methods/cfop/f2l/introduction/', cfop_f2l_intro, name='cfop_f2l_intro'),
+    
+    # 2. Basic cases (spécifique aussi)
     path('methods/cfop/f2l/basic/', views.cfop_f2l_basic, name='cfop_f2l_basic'),
+    
+    # 3. Catégorie générique (moins spécifique, en dernier)
     path('methods/cfop/f2l/<str:category>/', cfop_f2l_basic, name='cfop_f2l_category'),
     
-    # OLL - NEW SYSTEM
-    path('methods/cfop/oll/', cfop_oll_view, name='cfop_oll'),
-    path('methods/cfop/oll/<str:category>/', cfop_oll_view, name='cfop_oll_category'),
+    # ──────────────────────────────────────────────────────────
+    # OLL Routes
+    # ──────────────────────────────────────────────────────────
+    # ⚠️ ORDRE IMPORTANT: Plus spécifique d'abord!
+    
+    # 1. 2-Look OLL (très spécifique)
+    path('methods/cfop/oll/2-look/', two_look_oll_view, name='two_look_oll'),
+    
+    # 2. Introduction (spécifique)
+    path('methods/cfop/oll/introduction/', cfop_oll_intro, name='cfop_oll_intro'),
+    
+    # 3. Cas détaillé avec slug (spécifique avec prefix 'case/')
     path('methods/cfop/oll/case/<slug:slug>/', oll_case_detail, name='oll_case_detail'),
     
-    # PLL - NEW SYSTEM
-    path('methods/cfop/pll/', cfop_pll_view, name='cfop_pll'),
-    path('methods/cfop/pll/<str:category>/', cfop_pll_view, name='cfop_pll_category'),
+    # 4. Vue par catégorie (moins spécifique)
+    path('methods/cfop/oll/<str:category>/', cfop_oll_view, name='cfop_oll_category'),
+    
+    # 5. Vue générale (la moins spécifique, en dernier)
+    path('methods/cfop/oll/', cfop_oll_view, name='cfop_oll'),
+    
+    # ──────────────────────────────────────────────────────────
+    # PLL Routes
+    # ──────────────────────────────────────────────────────────
+    # ⚠️ ORDRE IMPORTANT: Plus spécifique d'abord!
+    
+    # 1. 2-Look PLL (très spécifique)
+    path('methods/cfop/pll/2-look/', two_look_pll_view, name='two_look_pll'),
+    
+    # 2. Introduction (spécifique)
+    path('methods/cfop/pll/introduction/', cfop_pll_intro, name='cfop_pll_intro'),
+    
+    # 3. Cas détaillé avec slug (spécifique avec prefix 'case/')
     path('methods/cfop/pll/case/<slug:slug>/', pll_case_detail, name='pll_case_detail'),
+    
+    # 4. Vue par catégorie (moins spécifique)
+    path('methods/cfop/pll/<str:category>/', cfop_pll_view, name='cfop_pll_category'),
+    
+    # 5. Vue générale (la moins spécifique, en dernier)
+    path('methods/cfop/pll/', cfop_pll_view, name='cfop_pll'),
 
     # ============================================================
     # OTHER METHODS (legacy - to be migrated)

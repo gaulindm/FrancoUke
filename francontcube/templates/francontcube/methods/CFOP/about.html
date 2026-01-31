@@ -1,325 +1,584 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>À propos de la Méthode Débutant (CFOP)</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
+{% block title %}À propos de la méthode CFOP - FrancontCube{% endblock %}
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .header .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            font-weight: 300;
-        }
-
-        .content {
-            padding: 3rem 2rem;
-        }
-
-        .section {
-            margin-bottom: 3rem;
-        }
-
-        .section h2 {
-            color: #667eea;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .section h3 {
-            color: #764ba2;
-            font-size: 1.3rem;
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .section p {
-            margin-bottom: 1rem;
-            font-size: 1.05rem;
-            text-align: justify;
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .step-card {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .step-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .step-number {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            line-height: 50px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .step-card h3 {
-            color: #333;
-            font-size: 1.2rem;
-            margin: 0.5rem 0;
-        }
-
-        .step-card p {
-            color: #666;
-            font-size: 0.95rem;
-            margin: 0;
-        }
-
-        .highlight-box {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-        }
-
-        .highlight-box strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        ul {
-            margin-left: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        li {
-            margin-bottom: 0.5rem;
-            font-size: 1.05rem;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .content {
-                padding: 2rem 1.5rem;
-            }
-
-            .steps-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>La Méthode Débutant (CFOP)</h1>
-            <p class="subtitle">La méthode la plus populaire pour résoudre le Rubik's Cube</p>
+{% block content %}
+<div class="container my-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-lg-12 text-center">
+            <h1 class="display-3 fw-bold mb-3">
+                🎯 La Méthode CFOP
+            </h1>
+            <p class="lead text-muted">
+                La méthode la plus populaire au monde pour résoudre le Rubik's Cube rapidement
+            </p>
         </div>
+    </div>
 
-        <div class="content">
-            <div class="section">
-                <h2>Qu'est-ce que la Méthode CFOP ?</h2>
-                <p>
-                    La méthode CFOP (Cross, F2L, OLL, PLL) est la méthode de résolution la plus utilisée par les speedcubers du monde entier. Développée dans les années 1980, elle est devenue la référence pour résoudre le Rubik's Cube rapidement et efficacement.
-                </p>
-                <p>
-                    Cette méthode est également connue sous le nom de "Méthode Fridrich" en l'honneur de Jessica Fridrich, qui l'a popularisée et systématisée. Elle permet aux cubers débutants d'atteindre des temps de résolution sous les 2 minutes, et aux experts de descendre sous les 10 secondes !
-                </p>
-            </div>
-
-            <div class="section">
-                <h2>Les 4 Étapes de la Méthode</h2>
-                <div class="steps-grid">
-                    <div class="step-card">
-                        <div class="step-number">1</div>
-                        <h3>Cross</h3>
-                        <p>Former une croix blanche sur la face inférieure</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">2</div>
-                        <h3>F2L</h3>
-                        <p>First Two Layers - Compléter les deux premières couches</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">3</div>
-                        <h3>OLL</h3>
-                        <p>Orient Last Layer - Orienter la dernière couche</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">4</div>
-                        <h3>PLL</h3>
-                        <p>Permute Last Layer - Permuter la dernière couche</p>
+    <!-- Introduction -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="mb-4">📖 Qu'est-ce que CFOP ?</h2>
+                    <p class="fs-5">
+                        <strong>CFOP</strong> est l'acronyme de <strong>Cross, F2L, OLL, PLL</strong>, 
+                        les quatre étapes principales de cette méthode de résolution.
+                    </p>
+                    <p>
+                        Développée dans les années 1980, CFOP est devenue la méthode de référence 
+                        pour le speedcubing. Elle est utilisée par la majorité des champions du monde 
+                        et permet d'atteindre des temps de résolution de moins de 10 secondes avec 
+                        suffisamment de pratique !
+                    </p>
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Le saviez-vous ?</strong> CFOP est aussi appelée "méthode Fridrich" 
+                        d'après Jessica Fridrich qui l'a popularisée dans les années 1990.
                     </div>
                 </div>
-            </div>
-
-            <div class="section">
-                <h2>Détails des Étapes</h2>
-                
-                <h3>1. Cross (La Croix)</h3>
-                <p>
-                    La première étape consiste à former une croix blanche sur la face inférieure du cube, en s'assurant que les arêtes correspondent aux centres des faces adjacentes. Cette étape est intuitive et ne nécessite pas de mémorisation d'algorithmes.
-                </p>
-
-                <h3>2. F2L (First Two Layers)</h3>
-                <p>
-                    Cette étape consiste à insérer simultanément les coins et les arêtes pour compléter les deux premières couches du cube. Il existe 41 cas différents de F2L, mais vous pouvez commencer par apprendre les cas de base et développer votre intuition.
-                </p>
-
-                <h3>3. OLL (Orient Last Layer)</h3>
-                <p>
-                    L'objectif est d'orienter tous les cubies de la dernière couche pour que la face supérieure soit entièrement jaune. Il existe 57 cas OLL, mais de nombreux cubers débutants commencent par une approche en deux étapes (OLL en 2-look) qui ne nécessite que 10 algorithmes.
-                </p>
-
-                <h3>4. PLL (Permute Last Layer)</h3>
-                <p>
-                    La dernière étape consiste à permuter les pièces de la dernière couche pour résoudre complètement le cube. Il y a 21 cas PLL. Les débutants peuvent utiliser une approche en 2-look PLL avec seulement 6 algorithmes.
-                </p>
-            </div>
-
-            <div class="section">
-                <h2>Statistiques de la Méthode</h2>
-                <div class="stats">
-                    <div class="stat-box">
-                        <span class="stat-number">119</span>
-                        <span class="stat-label">Algorithmes totaux</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-number">55-60</span>
-                        <span class="stat-label">Mouvements moyens</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-number">#1</span>
-                        <span class="stat-label">Méthode la plus populaire</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Pourquoi choisir la Méthode CFOP ?</h2>
-                <ul>
-                    <li><strong>Populaire :</strong> Utilisée par la majorité des champions du monde</li>
-                    <li><strong>Efficace :</strong> Permet d'atteindre des temps très rapides (sub-10 secondes)</li>
-                    <li><strong>Progressive :</strong> Vous pouvez commencer simplement et améliorer graduellement</li>
-                    <li><strong>Ressources abondantes :</strong> Tutoriels, vidéos et communauté très active</li>
-                    <li><strong>Versatile :</strong> S'adapte à tous les niveaux, du débutant à l'expert</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h2>Progression Recommandée</h2>
-                <div class="highlight-box">
-                    <strong>Étape 1 : Les Bases (1-2 semaines)</strong>
-                    <p>Maîtriser le Cross et la méthode F2L intuitive. Objectif : résoudre en 2-3 minutes.</p>
-                </div>
-                <div class="highlight-box">
-                    <strong>Étape 2 : OLL et PLL Simplifié (2-4 semaines)</strong>
-                    <p>Apprendre le 2-look OLL (10 algorithmes) et 2-look PLL (6 algorithmes). Objectif : sous 1 minute.</p>
-                </div>
-                <div class="highlight-box">
-                    <strong>Étape 3 : F2L Avancé (1-3 mois)</strong>
-                    <p>Apprendre les 41 cas de F2L pour améliorer la fluidité. Objectif : sous 30 secondes.</p>
-                </div>
-                <div class="highlight-box">
-                    <strong>Étape 4 : Full OLL et PLL (3-6 mois)</strong>
-                    <p>Maîtriser tous les algorithmes OLL et PLL. Objectif : sous 20 secondes.</p>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Prêt à Commencer ?</h2>
-                <p>
-                    La méthode CFOP peut sembler intimidante au début avec ses nombreux algorithmes, mais rappelez-vous que tous les champions ont commencé par le début ! L'important est de progresser à votre rythme et de pratiquer régulièrement.
-                </p>
-                <p>
-                    Notre tutoriel vous guidera étape par étape, en commençant par les concepts les plus simples jusqu'aux techniques avancées. Chaque cas est illustré avec des diagrammes clairs et des algorithmes détaillés.
-                </p>
             </div>
         </div>
     </div>
-</body>
-</html>
+
+    <!-- Les 4 Étapes -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <h2 class="text-center mb-5">🔄 Les 4 Étapes de CFOP</h2>
+        </div>
+    </div>
+
+    <!-- Étape 1: Cross -->
+    <div class="row mb-5">
+        <div class="col-lg-6 order-lg-1 order-2">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <span class="badge bg-white text-primary me-2">1</span>
+                        Cross (Croix)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h5>🎯 Objectif</h5>
+                    <p>
+                        Former une croix sur la face du dessous (généralement blanche) en 
+                        plaçant correctement les 4 arêtes de cette face.
+                    </p>
+                    
+                    <h5 class="mt-4">⏱️ Temps moyen</h5>
+                    <ul>
+                        <li><strong>Débutant:</strong> 5-10 secondes</li>
+                        <li><strong>Intermédiaire:</strong> 2-4 secondes</li>
+                        <li><strong>Expert:</strong> &lt; 2 secondes</li>
+                    </ul>
+
+                    <h5 class="mt-4">💡 Conseil</h5>
+                    <p class="mb-0">
+                        Essayez de résoudre la croix en inspection (avant de commencer le chrono) 
+                        ou en moins de 8 mouvements. C'est la clé pour des temps rapides !
+                    </p>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="bi bi-star-fill text-warning"></i> Difficulté: ⭐⭐☆☆☆
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 order-lg-2 order-1 mb-4 mb-lg-0">
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center p-5 bg-light rounded">
+                    <div style="font-size: 120px;">➕</div>
+                    <p class="text-muted mt-3">
+                        Visualisation de la croix<br>
+                        <small>(4 arêtes blanches alignées)</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 2: F2L -->
+    <div class="row mb-5">
+        <div class="col-lg-6 order-2 mb-4 mb-lg-0">
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center p-5 bg-light rounded">
+                    <div style="font-size: 120px;">🔳</div>
+                    <p class="text-muted mt-3">
+                        Paires coin + arête<br>
+                        <small>(4 paires à résoudre)</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 order-1">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <span class="badge bg-white text-success me-2">2</span>
+                        F2L (First Two Layers)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h5>🎯 Objectif</h5>
+                    <p>
+                        Résoudre les deux premières couches du cube en insérant 4 paires 
+                        coin-arête dans leurs emplacements respectifs.
+                    </p>
+                    
+                    <h5 class="mt-4">📊 Nombre de cas</h5>
+                    <p>
+                        <strong>41 cas différents</strong> à apprendre pour maîtriser cette étape. 
+                        Chaque cas représente une configuration différente de la paire coin-arête.
+                    </p>
+
+                    <h5 class="mt-4">⏱️ Temps moyen</h5>
+                    <ul>
+                        <li><strong>Débutant:</strong> 20-40 secondes</li>
+                        <li><strong>Intermédiaire:</strong> 10-15 secondes</li>
+                        <li><strong>Expert:</strong> 5-8 secondes</li>
+                    </ul>
+
+                    <h5 class="mt-4">💡 Conseil</h5>
+                    <p class="mb-0">
+                        F2L représente 50% du temps total de résolution. C'est l'étape 
+                        la plus importante à optimiser !
+                    </p>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="bi bi-star-fill text-warning"></i> Difficulté: ⭐⭐⭐⭐☆
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 3: OLL -->
+    <div class="row mb-5">
+        <div class="col-lg-6 order-lg-1 order-2">
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <span class="badge bg-white text-warning me-2">3</span>
+                        OLL (Orientation Last Layer)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h5>🎯 Objectif</h5>
+                    <p>
+                        Orienter toutes les pièces de la dernière couche pour que la face 
+                        du dessus soit entièrement d'une seule couleur (généralement jaune).
+                    </p>
+                    
+                    <h5 class="mt-4">📊 Nombre de cas</h5>
+                    <p>
+                        <strong>57 cas différents</strong> à apprendre. C'est l'étape avec 
+                        le plus d'algorithmes à mémoriser !
+                    </p>
+
+                    <h5 class="mt-4">⏱️ Temps moyen</h5>
+                    <ul>
+                        <li><strong>Débutant:</strong> 5-8 secondes</li>
+                        <li><strong>Intermédiaire:</strong> 2-4 secondes</li>
+                        <li><strong>Expert:</strong> 1-2 secondes</li>
+                    </ul>
+
+                    <h5 class="mt-4">💡 Conseil</h5>
+                    <p class="mb-0">
+                        Commencez par apprendre les OLL les plus fréquents (environ 20 cas) 
+                        avant de vous attaquer aux 57 complets.
+                    </p>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="bi bi-star-fill text-warning"></i> Difficulté: ⭐⭐⭐⭐⭐
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 order-lg-2 order-1 mb-4 mb-lg-0">
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center p-5 bg-light rounded">
+                    <div style="font-size: 120px;">🟨</div>
+                    <p class="text-muted mt-3">
+                        Face jaune complète<br>
+                        <small>(toutes les pièces orientées)</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 4: PLL -->
+    <div class="row mb-5">
+        <div class="col-lg-6 order-2 mb-4 mb-lg-0">
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center p-5 bg-light rounded">
+                    <div style="font-size: 120px;">✅</div>
+                    <p class="text-muted mt-3">
+                        Cube résolu !<br>
+                        <small>(toutes les pièces à leur place)</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 order-1">
+            <div class="card h-100 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <span class="badge bg-white text-danger me-2">4</span>
+                        PLL (Permutation Last Layer)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h5>🎯 Objectif</h5>
+                    <p>
+                        Permuter (déplacer) les pièces de la dernière couche pour terminer 
+                        complètement le cube. C'est la dernière étape !
+                    </p>
+                    
+                    <h5 class="mt-4">📊 Nombre de cas</h5>
+                    <p>
+                        <strong>21 cas différents</strong> à apprendre. Chaque cas a un nom 
+                        spécifique (T-Perm, Y-Perm, Aa-Perm, etc.).
+                    </p>
+
+                    <h5 class="mt-4">⏱️ Temps moyen</h5>
+                    <ul>
+                        <li><strong>Débutant:</strong> 4-6 secondes</li>
+                        <li><strong>Intermédiaire:</strong> 2-3 secondes</li>
+                        <li><strong>Expert:</strong> &lt; 1.5 seconde</li>
+                    </ul>
+
+                    <h5 class="mt-4">💡 Conseil</h5>
+                    <p class="mb-0">
+                        Les PLL sont généralement rapides à exécuter. Concentrez-vous sur 
+                        la reconnaissance rapide du cas pour gagner du temps !
+                    </p>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="bi bi-star-fill text-warning"></i> Difficulté: ⭐⭐⭐☆☆
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-5">📊 CFOP en Chiffres</h2>
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <div class="display-3 fw-bold">4</div>
+                            <p class="mb-0">Étapes</p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <div class="display-3 fw-bold">119</div>
+                            <p class="mb-0">Algorithmes<br><small>(41 F2L + 57 OLL + 21 PLL)</small></p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <div class="display-3 fw-bold">~50</div>
+                            <p class="mb-0">Mouvements<br><small>(moyenne par résolution)</small></p>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="display-3 fw-bold">90%</div>
+                            <p class="mb-0">Des champions<br><small>(utilisent CFOP)</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progression d'apprentissage -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <h2 class="text-center mb-5">📈 Progression d'Apprentissage</h2>
+            <div class="card">
+                <div class="card-body p-5">
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center p-4 bg-light rounded">
+                                <h3 class="text-primary mb-3">🌱 Débutant</h3>
+                                <div class="display-4 mb-3">30-60s</div>
+                                <ul class="text-start">
+                                    <li>Cross intuitif</li>
+                                    <li>F2L basique (8-10 cas)</li>
+                                    <li>OLL 2-look (10 cas)</li>
+                                    <li>PLL 2-look (7 cas)</li>
+                                </ul>
+                                <p class="text-muted mb-0">
+                                    <small>Temps d'apprentissage: 1-3 mois</small>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center p-4 bg-light rounded">
+                                <h3 class="text-success mb-3">🌿 Intermédiaire</h3>
+                                <div class="display-4 mb-3">15-25s</div>
+                                <ul class="text-start">
+                                    <li>Cross optimisé (&lt;8 moves)</li>
+                                    <li>F2L complet (41 cas)</li>
+                                    <li>OLL complet (57 cas)</li>
+                                    <li>PLL complet (21 cas)</li>
+                                </ul>
+                                <p class="text-muted mb-0">
+                                    <small>Temps d'apprentissage: 6-12 mois</small>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="text-center p-4 bg-light rounded">
+                                <h3 class="text-warning mb-3">🌳 Avancé</h3>
+                                <div class="display-4 mb-3">&lt;12s</div>
+                                <ul class="text-start">
+                                    <li>Cross en inspection</li>
+                                    <li>F2L lookahead</li>
+                                    <li>OLL/PLL sub-1 seconde</li>
+                                    <li>Optimisations avancées</li>
+                                </ul>
+                                <p class="text-muted mb-0">
+                                    <small>Temps d'apprentissage: 1-3 ans</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avantages et Inconvénients -->
+    <div class="row mb-5">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">✅ Avantages de CFOP</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Intuitive au début:</strong> Le Cross et le F2L peuvent 
+                            s'apprendre sans algorithmes
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Très rapide:</strong> Permet d'atteindre des temps 
+                            de moins de 10 secondes
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Populaire:</strong> Beaucoup de ressources et tutoriels 
+                            disponibles
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Éprouvée:</strong> Utilisée par les champions du monde
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Évolutive:</strong> On peut progresser étape par étape
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">⚠️ Défis de CFOP</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            <strong>Beaucoup d'algorithmes:</strong> 119 algorithmes à mémoriser 
+                            pour maîtriser complètement
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            <strong>Temps d'apprentissage:</strong> Plusieurs mois pour devenir 
+                            vraiment rapide
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            <strong>Reconnaissance:</strong> Identifier rapidement les cas OLL/PLL 
+                            demande de la pratique
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            <strong>Lookahead:</strong> Voir la prochaine paire pendant le F2L 
+                            est difficile
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparaison avec d'autres méthodes -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <h2 class="text-center mb-5">⚖️ CFOP vs Autres Méthodes</h2>
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Méthode</th>
+                                    <th>Algorithmes</th>
+                                    <th>Mouvements</th>
+                                    <th>Difficulté</th>
+                                    <th>Vitesse Max</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-success">
+                                    <td><strong>CFOP</strong></td>
+                                    <td>119</td>
+                                    <td>~50-60</td>
+                                    <td><span class="badge bg-warning">Moyen</span></td>
+                                    <td><strong>&lt; 5s</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Roux</td>
+                                    <td>~10</td>
+                                    <td>~45-55</td>
+                                    <td><span class="badge bg-success">Facile</span></td>
+                                    <td>&lt; 6s</td>
+                                </tr>
+                                <tr>
+                                    <td>ZZ</td>
+                                    <td>~80</td>
+                                    <td>~50-55</td>
+                                    <td><span class="badge bg-danger">Difficile</span></td>
+                                    <td>&lt; 7s</td>
+                                </tr>
+                                <tr>
+                                    <td>Débutant (couche par couche)</td>
+                                    <td>~7</td>
+                                    <td>~100+</td>
+                                    <td><span class="badge bg-success">Facile</span></td>
+                                    <td>~30s</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ressources -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card bg-light">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">📚 Ressources pour Apprendre CFOP</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="bi bi-book text-primary"></i> Sur FrancontCube</h5>
+                            <ul>
+                                <li><a href="{% url 'francontcube:cfop_f2l_basic' %}">Apprendre le F2L (41 cas)</a></li>
+                                <li><a href="{% url 'training:hub' %}">S'entraîner avec le chronomètre</a></li>
+                                <li>Suivre sa progression personnelle</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="bi bi-youtube text-danger"></i> Chaînes YouTube</h5>
+                            <ul>
+                                <li>J Perm - Tutoriels en anglais</li>
+                                <li>CubeGraphics - Animations visuelles</li>
+                                <li>SpeedCubeReview - Reviews et tutoriels</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="bi bi-globe text-success"></i> Sites Web</h5>
+                            <ul>
+                                <li>speedcubingtips.com - Guide complet</li>
+                                <li>algdb.net - Base de données d'algorithmes</li>
+                                <li>cubesolv.es - Résoudre n'importe quel cas</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="bi bi-people text-info"></i> Communauté</h5>
+                            <ul>
+                                <li>r/Cubers sur Reddit</li>
+                                <li>Speedsolving.com (forum)</li>
+                                <li>Groupes Facebook locaux</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card text-white text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-5">
+                    <h2 class="mb-4">🚀 Prêt à Commencer ?</h2>
+                    <p class="fs-5 mb-4">
+                        Commence ton apprentissage du CFOP dès maintenant et rejoins 
+                        des millions de cubeurs à travers le monde !
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{% url 'francontcube:cfop_f2l_basic' %}" class="btn btn-light btn-lg">
+                            <i class="bi bi-book"></i> Apprendre le F2L
+                        </a>
+                        <a href="{% url 'training:hub' %}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-stopwatch"></i> S'entraîner maintenant
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.display-3, .display-4 {
+    font-weight: 700;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-3 {
+        font-size: 2.5rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

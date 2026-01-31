@@ -1,0 +1,213 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-3 fw-bold mb-3">
+                <i class="bi bi-arrow-repeat"></i> Mission 2-Look PLL
+            </h1>
+            <p class="lead mb-4">
+                La dernière étape pour finir ton Rubik’s Cube 🧩
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <span class="badge bg-light text-dark badge-custom">
+                    <i class="bi bi-list-check"></i> Seulement {{ total_algorithms }} formules
+                </span>
+                <span class="badge bg-light text-dark badge-custom">
+                    <i class="bi bi-clock"></i> Environ 30 minutes
+                </span>
+                <span class="badge bg-light text-dark badge-custom">
+                    <i class="bi bi-star"></i> La façon la plus facile
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- Stats Box -->
+    <div class="stats-box">
+        <h3 class="mb-4">Pourquoi apprendre le 2-Look PLL ?</h3>
+        <div class="row">
+            <div class="col-md-4 stat-item">
+                <span class="stat-number">6</span>
+                <span>Formules à mémoriser</span>
+            </div>
+            <div class="col-md-4 stat-item">
+                <span class="stat-number">Rapide</span>
+                <span>Le cube se finit vite</span>
+            </div>
+            <div class="col-md-4 stat-item">
+                <span class="stat-number">👍</span>
+                <span>Très facile à apprendre</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Introduction -->
+    <div class="alert alert-success">
+        <h5><i class="bi bi-info-circle"></i> Comment fonctionne le 2-Look PLL</h5>
+        <p class="mb-2">
+            Au lieu d’apprendre 21 cas compliqués, on fait la mission en deux petites étapes :
+        </p>
+        <ol class="mb-0">
+            <li><strong>Étape 1 :</strong> Mettre les coins à la bonne place</li>
+            <li><strong>Étape 2 :</strong> Mettre les arêtes à la bonne place</li>
+        </ol>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step-card">
+        <div class="step-header">
+            <div class="d-flex align-items-center">
+                <span class="step-number">1</span>
+                <div>
+                    <h2 class="mb-1">Étape 1 : Les coins</h2>
+                    <p class="text-muted mb-0">
+                        On commence par placer les coins au bon endroit
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for case in step1.cases %}
+            <div class="col-lg-6">
+                <div class="case-card">
+                    <h4 class="mb-3">{{ case.name }}</h4>
+
+                    <div class="pattern-visual">
+                        {% if case.pattern_data %}
+                            {% include 'cube/partials/_two_look_oll_svg.html' with pattern=case.pattern_data %}
+                        {% endif %}
+                    </div>
+
+                    <div class="algorithm-box">
+                        {{ case.algorithm }}
+                    </div>
+
+                    <div class="recognition-tip">
+                        <strong>👀 Comment le reconnaître :</strong><br>
+                        {{ case.recognition }}
+                    </div>
+
+                    {% if case.note %}
+                    <div class="note-box">
+                        <strong>💡 Astuce :</strong><br>
+                        {{ case.note }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="alert alert-info mt-4">
+            ⭐ Astuce : cherche d’abord les coins déjà bien placés.
+            Mets-les derrière, puis fais la formule.
+        </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+        <div class="step-header">
+            <div class="d-flex align-items-center">
+                <span class="step-number">2</span>
+                <div>
+                    <h2 class="mb-1">Étape 2 : Les arêtes</h2>
+                    <p class="text-muted mb-0">
+                        Maintenant, on déplace les arêtes pour finir le cube
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for case in step2.cases %}
+            <div class="col-lg-6">
+                <div class="case-card">
+                    <h4 class="mb-3">{{ case.name }}</h4>
+
+                    <div class="pattern-visual">
+                        {% if case.pattern_data %}
+                            {% include 'cube/partials/_two_look_oll_svg.html' with pattern=case.pattern_data %}
+                        {% endif %}
+                    </div>
+
+                    {% if case.algorithm %}
+                    <div class="algorithm-box">
+                        {{ case.algorithm }}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        🎉 Bravo ! Le cube est déjà fini !
+                    </div>
+                    {% endif %}
+
+                    <div class="recognition-tip">
+                        <strong>👀 Comment le reconnaître :</strong><br>
+                        {{ case.recognition }}
+                    </div>
+
+                    {% if case.note %}
+                    <div class="note-box">
+                        <strong>💡 Astuce :</strong><br>
+                        {{ case.note }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="alert alert-success mt-4">
+            🏆 À apprendre en premier : la formule Ua.
+            Elle apparaît très souvent !
+        </div>
+    </div>
+
+    <!-- Learning Path -->
+    <div class="card mt-5">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">🗺️ Plan d’entraînement</h4>
+        </div>
+        <div class="card-body">
+            <h5>Jour 1 (15 minutes)</h5>
+            <ul>
+                <li>Apprendre les coins</li>
+                <li>S’entraîner à reconnaître les formes</li>
+            </ul>
+
+            <h5 class="mt-4">Jour 2 (30 minutes)</h5>
+            <ul>
+                <li>Apprendre les arêtes</li>
+                <li>Faire plusieurs cubes complets</li>
+            </ul>
+
+            <div class="alert alert-info mt-3">
+                ⚡ Tu n’as besoin que de quelques formules pour être rapide !
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="text-center mt-5">
+        <h3 class="mb-4">Prochaine mission 🚀</h3>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{% url 'francontcube:two_look_oll' %}" class="btn btn-warning btn-lg">
+                ☀️ Apprendre le 2-Look OLL
+            </a>
+            <a href="{% url 'francontcube:method_cfop' %}" class="btn btn-secondary btn-lg">
+                🏠 Retour au menu CFOP
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
