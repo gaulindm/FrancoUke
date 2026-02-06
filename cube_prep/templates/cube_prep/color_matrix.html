@@ -2,33 +2,168 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cube Mosaic Editor</title>
+
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .controls { margin-bottom: 15px; }
-        .controls label { margin-right: 10px; }
-        #mosaic-container { display: flex; flex-direction: column; }
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        h1 { color: #333; }
+        h3 { color: #555; margin-top: 20px; }
+
+        .controls { 
+            margin-bottom: 15px; 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #mosaic-container { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
         .cube-row { display: flex; }
-        .cube-div { display: grid; grid-template-columns: repeat(3, 30px); grid-gap: 2px; margin: 5px; }
-        .cube-cell { width: 30px; height: 30px; border: 1px solid #000; cursor: pointer; }
-        #mosaic-json { white-space: pre; background: #f0f0f0; padding: 10px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
+
+        .cube-div { 
+            display: grid; 
+            grid-gap: 1px;
+            margin: 2px;
+            border: 1px solid #666;
+            cursor: pointer;
+        }
+
+        .cube-cell { 
+            border: 1px solid #000; 
+        }
+
+        #mosaic-json { 
+            white-space: pre; 
+            background: #f0f0f0; 
+            padding: 10px; 
+            margin-top: 15px; 
+            max-height: 300px; 
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #save-btn {
+            background: #2196F3;
+        }
+
+        select, input[type="text"] {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .size-indicator {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ===============================
+           Cube Preview Modal
+           =============================== */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            width: min(90vw, 360px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .cube-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            justify-items: center;
+        }
+
+        .cube-preview-cell {
+            border: 1px solid #000;
+        }
     </style>
 </head>
+
 <body>
-    <h1>Cube Mosaic Editor</h1>
 
-    <div class="controls">
-        <label for="color-select">Select color:</label>
+<h1>Cube Mosaic Editor</h1>
+
+<div class="controls">
+    <div class="control-group">
+        <label>Color:</label>
         <select id="color-select">
-            <option value="R" style="background:red;color:white;">Red</option>
-            <option value="B" style="background:blue;color:white;">Blue</option>
-            <option value="Y" style="background:yellow;color:black;">Yellow</option>
-            <option value="G" style="background:green;color:white;">Green</option>
-            <option value="O" style="background:orange;color:white;">Orange</option>
-            <option value="W" style="background:white;color:black;">White</option>
+            <option value="R">Red</option>
+            <option value="B">Blue</option>
+            <option value="Y">Yellow</option>
+            <option value="G">Green</option>
+            <option value="O">Orange</option>
+            <option value="W">White</option>
         </select>
+    </div>
 
-        <label for="cubes-per-side">Cubes per side:</label>
+    <div class="control-group">
+        <label>Grid Size:</label>
         <select id="cubes-per-side">
             <option value="1">1×1</option>
             <option value="2">2×2</option>
@@ -36,114 +171,145 @@
             <option value="4">4×4</option>
             <option value="5">5×5</option>
             <option value="6">6×6</option>
+            <option value="7">7×7</option>
+            <option value="8">8×8</option>
+            <option value="9">9×9</option>
+            <option value="10">10×10</option>
         </select>
-
-        <label for="mosaic-name">Mosaic Name:</label>
-        <input id="mosaic-name" type="text" value="My Mosaic" />
-
-        <button id="save-btn">Save Mosaic</button>
+        <span class="size-indicator" id="size-indicator"></span>
     </div>
 
-    <!-- Mosaic grid -->
-    <div id="mosaic-container"></div>
+    <div class="control-group">
+        <label>Mosaic Name:</label>
+        <input id="mosaic-name" type="text" value="My Mosaic">
+    </div>
 
-    <!-- JSON output -->
-    <h3>Mosaic JSON (one cube per line):</h3>
-    <pre id="mosaic-json"></pre>
+    <button id="save-btn">Save Mosaic</button>
+</div>
 
-    <script>
-        const container = document.getElementById("mosaic-container");
-        const jsonOutput = document.getElementById("mosaic-json");
-        const colorSelect = document.getElementById("color-select");
-        const cubesSelect = document.getElementById("cubes-per-side");
-        const mosaicNameInput = document.getElementById("mosaic-name"); // optional input for name
-        const saveBtn = document.getElementById("save-btn");
-        
-        let cubesPerSide = parseInt(cubesSelect.value) || 2; // default 2x2 mosaic
-        let mosaic = []; // array of cubes, each cube is 3x3 squares
-        
-        // Map letters to actual colors
-        const colorMap = {
-            "R": "red",
-            "B": "blue",
-            "Y": "yellow",
-            "G": "green",
-            "O": "orange",
-            "W": "white"
-        };
-        
-        // Initialize the mosaic grid
-        function initMosaic() {
-            mosaic = [];
-            container.innerHTML = "";
-        
-            for (let cy = 0; cy < cubesPerSide; cy++) {
-                const rowDiv = document.createElement("div");
-                rowDiv.style.display = "flex";
-        
-                for (let cx = 0; cx < cubesPerSide; cx++) {
-                    let cube = [];
-                    const cubeDiv = document.createElement("div");
-                    cubeDiv.style.display = "grid";
-                    cubeDiv.style.gridTemplateColumns = "repeat(3, 30px)";
-                    cubeDiv.style.gridGap = "2px";
-                    cubeDiv.style.margin = "5px";
-        
-                    for (let i = 0; i < 3; i++) {
-                        cube[i] = [];
-                        for (let j = 0; j < 3; j++) {
-                            const cell = document.createElement("div");
-                            cell.style.width = "30px";
-                            cell.style.height = "30px";
-                            cell.style.border = "1px solid #000";
-                            cell.style.background = colorMap["W"]; // default white
-                            cell.dataset.i = i;
-                            cell.dataset.j = j;
-        
-                            // click to change color
-                            cell.addEventListener("click", () => {
-                                const colorLetter = colorSelect.value;
-                                cell.style.background = colorMap[colorLetter];
-                                cube[i][j] = colorLetter;
-                                updateJSON();
-                            });
-        
-                            cube[i][j] = "W"; // default color
-                            cubeDiv.appendChild(cell);
-                        }
-                    }
-        
-                    mosaic.push(cube);
-                    rowDiv.appendChild(cubeDiv);
+<div id="mosaic-container"></div>
+
+<h3>Mosaic JSON (one cube per line)</h3>
+<pre id="mosaic-json"></pre>
+
+<!-- ===============================
+     Cube Preview Modal
+     =============================== -->
+
+<div id="cube-preview-overlay" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="cube-preview-title">Cube Preview</h2>
+            <button id="cube-preview-close">✕</button>
+        </div>
+        <div id="cube-preview-grid" class="cube-preview-grid"></div>
+    </div>
+</div>
+
+<script>
+/* ===============================
+   Shared config
+   =============================== */
+
+const colorMap = {
+    R: "red",
+    B: "blue",
+    Y: "yellow",
+    G: "green",
+    O: "orange",
+    W: "white"
+};
+
+/* ===============================
+   Mosaic editor
+   =============================== */
+
+const container = document.getElementById("mosaic-container");
+const jsonOutput = document.getElementById("mosaic-json");
+const colorSelect = document.getElementById("color-select");
+const cubesSelect = document.getElementById("cubes-per-side");
+const mosaicNameInput = document.getElementById("mosaic-name");
+const saveBtn = document.getElementById("save-btn");
+const sizeIndicator = document.getElementById("size-indicator");
+
+let cubesPerSide = parseInt(cubesSelect.value);
+let mosaic = [];
+
+function getCellSize(n) {
+    return n <= 6 ? 30 : n <= 8 ? 28 : 25;
+}
+
+function updateSizeIndicator() {
+    sizeIndicator.textContent = `(${cubesPerSide ** 2} cubes)`;
+}
+
+function initMosaic() {
+    mosaic = [];
+    container.innerHTML = "";
+
+    const cellSize = getCellSize(cubesPerSide);
+
+    for (let y = 0; y < cubesPerSide; y++) {
+        const row = document.createElement("div");
+        row.className = "cube-row";
+
+        for (let x = 0; x < cubesPerSide; x++) {
+            const cube = Array.from({length:3}, () => Array(3).fill("W"));
+            const cubeDiv = document.createElement("div");
+            cubeDiv.className = "cube-div";
+            cubeDiv.style.gridTemplateColumns = `repeat(3, ${cellSize}px)`;
+
+            cubeDiv.addEventListener("dblclick", () => {
+                openCubePreview(cube, {
+                    title: `Cube (${y + 1}, ${x + 1})`,
+                    cellSize: 45
+                });
+            });
+
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    const cell = document.createElement("div");
+                    cell.className = "cube-cell";
+                    cell.style.width = `${cellSize}px`;
+                    cell.style.height = `${cellSize}px`;
+                    cell.style.background = colorMap.W;
+
+                    cell.addEventListener("click", () => {
+                        const c = colorSelect.value;
+                        cube[i][j] = c;
+                        cell.style.background = colorMap[c];
+                        updateJSON();
+                    });
+
+                    cubeDiv.appendChild(cell);
                 }
-        
-                container.appendChild(rowDiv);
             }
-        
-            updateJSON();
+
+            mosaic.push(cube);
+            row.appendChild(cubeDiv);
         }
-        
-        // Update the JSON display: one cube per line
-        function updateJSON() {
-            const lines = mosaic.map(cube => JSON.stringify(cube));
-            jsonOutput.textContent = lines.join("\n");
-        
-            // Log JSON for debugging
-            console.log("Current mosaic JSON:", JSON.stringify(mosaic));
-        }
-        
-        // Change mosaic size
-        cubesSelect.addEventListener("change", () => {
-            cubesPerSide = parseInt(cubesSelect.value);
-            initMosaic();
-        });
-        
-// Save mosaic to backend
+
+        container.appendChild(row);
+    }
+
+    updateSizeIndicator();
+    updateJSON();
+}
+
+function updateJSON() {
+    jsonOutput.textContent = mosaic.map(c => JSON.stringify(c)).join("\n");
+}
+
+cubesSelect.addEventListener("change", () => {
+    cubesPerSide = parseInt(cubesSelect.value);
+    initMosaic();
+});
+
+/* ===============================
+   Save mosaic
+   =============================== */
+
 saveBtn.addEventListener("click", () => {
-    const mosaicName = mosaicNameInput ? mosaicNameInput.value.trim() : "My Mosaic";
-
-    console.log("Sending mosaic JSON:", mosaic);  // Debugging
-
     fetch("/cube_prep/save-mosaic/", {
         method: "POST",
         headers: {
@@ -153,127 +319,51 @@ saveBtn.addEventListener("click", () => {
         body: new URLSearchParams({
             mosaic_json: JSON.stringify(mosaic),
             cubes_per_side: cubesPerSide,
-            mosaic_name: mosaicName
+            mosaic_name: mosaicNameInput.value || "My Mosaic"
         })
     })
-    .then(async (res) => {
-        // Check for HTML error pages (prevents Unexpected '<' errors)
-        const text = await res.text();
-
-        try {
-            return JSON.parse(text);  // Try to parse JSON
-        } catch (err) {
-            console.error("❌ Server returned non-JSON response:", text);
-            alert("Server error — see console for details.");
-            throw err;
-        }
-    })
-    .then(data => {
-        console.log("Server JSON:", data);
-
-        if (data.success) {
-            alert(`Mosaic saved successfully! ID: ${data.mosaic_id}`);
-        } else {
-            alert("Error saving mosaic: " + data.error);
-        }
-    })
-    .catch(err => console.error("Fetch error:", err));
+    .then(r => r.json())
+    .then(d => alert(d.success ? "Saved!" : d.error));
 });
 
-        // CSRF utility
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let c of cookies) {
-                    const cookie = c.trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        
-        // Initialize mosaic on load
-        initMosaic();
-        </script>
-    <script>
-        /* ===========================================================
-           STANDARD MOVE GENERATOR FOR EACH CUBE (simple patterns)
-           =========================================================== */
-        
-        /* Pattern helpers */
-        function isRowUniform(face, row) {
-            return face[row][0] === face[row][1] && face[row][1] === face[row][2];
-        }
-        function isColUniform(face, col) {
-            return face[0][col] === face[1][col] && face[1][col] === face[2][col];
-        }
-        function isSolid(face) {
-            const c = face[1][1];
-            for (let i=0;i<3;i++) for (let j=0;j<3;j++) if (face[i][j] !== c) return false;
-            return true;
-        }
-        function isChecker(face) {
-            const mid = face[1][1];
-            const corners = [face[0][0],face[0][2],face[2][0],face[2][2]];
-            const edges   = [face[0][1],face[1][0],face[1][2],face[2][1]];
-            return corners.every(c=>c===mid) && edges.every(e=>e!==mid);
-        }
-        
-        /* Convert one 3×3 cube face → simple standard Rubik's moves */
-        function computeMovesForFace(face) {
-            if (isSolid(face)) return "";   // nothing needed
-        
-            const moves = [];
-        
-            // uniform rows
-            if (isRowUniform(face,0)) moves.push("U");
-            if (isRowUniform(face,1)) moves.push("E");
-            if (isRowUniform(face,2)) moves.push("D");
-        
-            // uniform columns
-            if (isColUniform(face,0)) moves.push("L");
-            if (isColUniform(face,1)) moves.push("M");
-            if (isColUniform(face,2)) moves.push("R");
-        
-            // fun kid-friendly checker
-            if (moves.length === 0 && isChecker(face)) return "F2 M2";
-        
-            return moves.join(" ");
-        }
-        
-        /* Generate moves for all cubes in the mosaic */
-        function generateMovesForMosaic() {
-            const allMoves = mosaic.map((cube, idx) => computeMovesForFace(cube));
-        
-            // SHOW in JSON box (one cube's moves per line)
-            const out = allMoves.map(m => JSON.stringify(m)).join("\n");
-            jsonOutput.textContent = out;
-        
-            // Also log for debugging
-            console.log("Moves per cube:", allMoves);
-        }
-        
-        /* ---- Add button to UI ---- */
-        (function addMoveButton() {
-            const btn = document.createElement("button");
-            btn.textContent = "Generate Standard Moves";
-            btn.style.marginLeft = "10px";
-            btn.style.background = "#ccc";
-            btn.style.padding = "6px 12px";
-            btn.style.fontWeight = "bold";
-            btn.style.borderRadius = "5px";
-        
-            btn.onclick = generateMovesForMosaic;
-        
-            document.querySelector(".controls").appendChild(btn);
-        })();
-        </script>
-            
-                
+function getCookie(name) {
+    return document.cookie.split("; ")
+        .find(row => row.startsWith(name + "="))
+        ?.split("=")[1];
+}
+
+/* ===============================
+   Cube preview modal
+   =============================== */
+
+const overlay = document.getElementById("cube-preview-overlay");
+const grid = document.getElementById("cube-preview-grid");
+const title = document.getElementById("cube-preview-title");
+const closeBtn = document.getElementById("cube-preview-close");
+
+function openCubePreview(cube, {title: t="Cube Preview", cellSize=40} = {}) {
+    title.textContent = t;
+    grid.innerHTML = "";
+    grid.style.gridTemplateColumns = `repeat(3, ${cellSize}px)`;
+
+    cube.flat().forEach(c => {
+        const cell = document.createElement("div");
+        cell.className = "cube-preview-cell";
+        cell.style.width = `${cellSize}px`;
+        cell.style.height = `${cellSize}px`;
+        cell.style.background = colorMap[c];
+        grid.appendChild(cell);
+    });
+
+    overlay.classList.remove("hidden");
+}
+
+closeBtn.onclick = () => overlay.classList.add("hidden");
+overlay.onclick = e => e.target === overlay && overlay.classList.add("hidden");
+
+/* Init */
+initMosaic();
+</script>
 
 </body>
 </html>

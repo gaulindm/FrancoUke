@@ -13,37 +13,52 @@
         </h1>
         <p class="lead text-muted">{{ page_description }}</p>
         
-        <div class="alert alert-info mt-4" role="alert">
-            <i class="bi bi-lightbulb"></i> <strong>Conseil :</strong> 
-            {% if current_category %}
+        <!-- ✅ AMÉLIORATION: Lien vers la page d'intro -->
+        {% if current_category %}
+            <div class="alert alert-info mt-4" role="alert">
+                <i class="bi bi-lightbulb"></i> <strong>Conseil :</strong> 
                 Explorez les {{ cube_states|length }} cas de cette catégorie. Chaque cas a son animation 3D interactive!
-            {% else %}
-                Commencez par ces cas de base, puis explorez les autres catégories ci-dessous.
-            {% endif %}
-        </div>
+            </div>
+        {% else %}
+            <div class="alert alert-success mt-4" role="alert">
+                <i class="bi bi-book"></i> <strong>Nouveau en F2L?</strong> 
+                <a href="{% url 'francontcube:cfop_f2l_intro' %}" class="alert-link">
+                    Consultez d'abord le guide d'introduction
+                </a> 
+                pour comprendre les concepts de base.
+            </div>
+        {% endif %}
     </div>
 
-    <!-- Category Navigation -->
+    <!-- ✅ SIMPLIFICATION: Navigation catégories compacte -->
     <div class="card mb-5 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0"><i class="bi bi-grid-3x3"></i> Catégories F2L ({{ total_cases }} cas au total)</h4>
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-funnel"></i> Filtrer par Catégorie
+            </h5>
+            <span class="badge bg-light text-primary">{{ total_cases }} cas au total</span>
         </div>
         <div class="card-body">
-            <div class="row g-3">
+            <!-- ✅ VERSION COMPACTE: Boutons au lieu de grandes cartes -->
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
                 {% for cat in categories %}
-                <div class="col-md-6 col-lg-3">
-                    <a href="{{ cat.url }}" class="text-decoration-none">
-                        <div class="card h-100 border-{{ cat.color }} {% if cat.active %}bg-{{ cat.color }} bg-opacity-10{% endif %} hover-lift">
-                            <div class="card-body text-center">
-                                <i class="{{ cat.icon }} text-{{ cat.color }} fs-1 mb-2"></i>
-                                <h6 class="card-title text-dark">{{ cat.name }}</h6>
-                                <p class="card-text small text-muted">{{ cat.description }}</p>
-                                <span class="badge bg-{{ cat.color }}">{{ cat.count }} cas</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+                <a href="{{ cat.url }}" 
+                   class="btn {% if cat.active %}btn-{{ cat.color }}{% else %}btn-outline-{{ cat.color }}{% endif %} btn-sm">
+                    <i class="{{ cat.icon }}"></i> 
+                    {{ cat.name }} 
+                    <span class="badge {% if cat.active %}bg-light text-{{ cat.color }}{% else %}bg-{{ cat.color }}{% endif %}">
+                        {{ cat.count }}
+                    </span>
+                </a>
                 {% endfor %}
+            </div>
+            
+            <!-- ✅ AJOUT: Lien vers explication des catégories -->
+            <div class="text-center mt-3">
+                <a href="{% url 'francontcube:cfop_f2l_intro' %}#categories" 
+                   class="btn btn-link btn-sm text-decoration-none">
+                    <i class="bi bi-question-circle"></i> Qu'est-ce que ces catégories?
+                </a>
             </div>
         </div>
     </div>
@@ -53,89 +68,100 @@
         {% for slug, cube_state in cube_states.items %}
             {% if cube_state %}
             <div class="col-md-6">
-                    <div class="card shadow-sm h-100 f2l-case-card">
-                        <div class="card-header bg-primary text-white">
-                            <h4 class="mb-0">
-                                <i class="bi bi-box"></i> {{ cube_state.name }}
-                            </h4>
-                        </div>
-                        
-                        <div class="card-body">
-                            <!-- Cube Visualization -->
-                            <div class="cube-container mb-4 text-center">
-                                <div id="cube-{{ slug }}" class="cube-visualization"></div>
-                            </div>
+                <div class="card shadow-sm h-100 f2l-case-card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="bi bi-box"></i> {{ cube_state.name }}
                             
-                            <!-- Description -->
-                            {% if cube_state.description %}
-                            <div class="alert alert-light mb-3">
-                                <small class="text-muted">
-                                    <i class="bi bi-info-circle"></i> {{ cube_state.description }}
-                                </small>
-                            </div>
+                            <!-- ✅ AJOUT: Badge de difficulté -->
+                            {% if cube_state.difficulty %}
+                            <span class="badge float-end 
+                                {% if cube_state.difficulty == 'facile' %}bg-success
+                                {% elif cube_state.difficulty == 'moyen' %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ cube_state.difficulty|capfirst }}
+                            </span>
                             {% endif %}
-                            
-                            <!-- Algorithm Section -->
-                            <div class="algorithm-section">
-                                <h5 class="text-secondary mb-3">
-                                    <i class="bi bi-code-square"></i> Algorithme :
-                                </h5>
-                                
-                                <!-- Move Icons -->
-                                <div class="moves-preview d-flex flex-wrap gap-2 justify-content-center p-3 bg-light rounded">
-                                    {{ cube_state.get_algorithm_svg }}
-                                </div>
-                                
-
-                            </div>
+                        </h4>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Cube Visualization -->
+                        <div class="cube-container mb-4 text-center">
+                            <div id="cube-{{ slug }}" class="cube-visualization"></div>
                         </div>
                         
-                        <div class="card-footer text-center bg-light">
-                            <div class="btn-group" role="group">
-                                <a href="{% url 'cube:f2l_case_detail' slug=slug %}" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-info-circle"></i> Détails & Animation
-                                </a>
-                                <a href="{% url 'training:trainer_from_f2l' slug=slug %}?return_url={{ request.path }}" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-play-circle"></i> Pratiquer
-                                </a>
+                        <!-- Description -->
+                        {% if cube_state.description %}
+                        <div class="alert alert-light mb-3">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> {{ cube_state.description }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Algorithm Section -->
+                        <div class="algorithm-section">
+                            <h5 class="text-secondary mb-3">
+                                <i class="bi bi-code-square"></i> Algorithme :
+                            </h5>
+                            
+                            <!-- Move Icons -->
+                            <div class="moves-preview d-flex flex-wrap gap-2 justify-content-center p-3 bg-light rounded">
+                                {{ cube_state.get_algorithm_svg }}
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="card-footer text-center bg-light">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'cube:f2l_case_detail' slug=slug %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-info-circle"></i> Détails & Animation
+                            </a>
+                            <a href="{% url 'training:trainer_from_f2l' slug=slug %}?return_url={{ request.path }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-play-circle"></i> Pratiquer
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                {% endif %}
+            </div>
+            {% endif %}
         {% endfor %}
     </div>
     
-    <!-- Tips Section -->
-    <div class="card mt-5 border-primary">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0"><i class="bi bi-stars"></i> Conseils pour maîtriser ces cas</h4>
-        </div>
+    <!-- ✅ SUPPRIMÉ: Section "Conseils" (déjà dans f2l_intro.html) -->
+    <!-- ✅ REMPLACÉ PAR: Quick Tips + lien vers intro -->
+    
+    <div class="card mt-5 border-info bg-light">
         <div class="card-body">
-            <ul class="mb-0">
-                <li class="mb-2">
-                    <strong>Reconnaissance rapide :</strong> Identifiez rapidement si la paire est déjà formée en regardant les couleurs adjacentes
-                </li>
-                <li class="mb-2">
-                    <strong>Préparation :</strong> Utilisez des mouvements U pour positionner la paire au-dessus du bon slot
-                </li>
-                <li class="mb-2">
-                    <strong>Insertion fluide :</strong> Les mouvements R U R' et L' U' L doivent devenir automatiques
-                </li>
-                <li class="mb-0">
-                    <strong>Pratique :</strong> Répétez chaque cas 10-20 fois jusqu'à ce qu'il devienne naturel
-                </li>
-            </ul>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-2">
+                        <i class="bi bi-lightbulb text-warning"></i> 
+                        Besoin de conseils pour maîtriser ces cas?
+                    </h5>
+                    <p class="mb-0 text-muted">
+                        Découvrez les stratégies d'apprentissage, les astuces de reconnaissance, 
+                        et le parcours recommandé dans notre guide complet.
+                    </p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <a href="{% url 'francontcube:cfop_f2l_intro' %}#tips" 
+                       class="btn btn-info">
+                        <i class="bi bi-book"></i> Voir le Guide Complet
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     
     <!-- Navigation -->
     <div class="text-center mt-5">
-        <a href="{% url 'francontcube:method_cfop' %}" class="btn btn-outline-secondary btn-lg me-2">
-            <i class="bi bi-arrow-left"></i> Retour à CFOP
+        <a href="{% url 'francontcube:cfop_f2l_intro' %}" class="btn btn-outline-secondary btn-lg me-2">
+            <i class="bi bi-arrow-left"></i> Retour au Guide F2L
         </a>
-        <a href="#" class="btn btn-primary btn-lg">
-            Cas suivants <i class="bi bi-arrow-right"></i>
+        <a href="{% url 'francontcube:method_cfop' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-house"></i> Retour à CFOP
         </a>
     </div>
 </div>
@@ -161,7 +187,7 @@
     }
     
     .cube-visualization svg {
-        max-width: 200px;  /* Half of typical size */
+        max-width: 200px;
         height: auto;
     }
     
@@ -179,16 +205,14 @@
         transform: scale(1.1);
     }
     
-    .algorithm-text code {
-        background: #f8f9fa;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        border: 2px solid #dee2e6;
-        display: inline-block;
-    }
-    
     .card-header h4 {
         font-size: 1.25rem;
+    }
+    
+    /* ✅ AJOUT: Style pour les boutons de catégorie */
+    .btn-sm .badge {
+        font-size: 0.7rem;
+        margin-left: 0.25rem;
     }
 </style>
 
@@ -199,9 +223,8 @@
     const container = document.getElementById(containerId);
     if (!container) return;
     
-    container.innerHTML = ''; // Clear any existing content
+    container.innerHTML = '';
 
-    // If state is missing, show a placeholder
     if (!state) {
       container.innerHTML = `
         <div class="alert alert-secondary text-center py-4">
@@ -222,7 +245,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Mount all F2L case cubes
     const cubeStatesStr = '{{ cube_states_json|escapejs }}';
     
     let cubeStates;
@@ -240,6 +262,5 @@
     }
   });
 </script>
-
 
 {% endblock %}

@@ -36,6 +36,16 @@ class CubeState(models.Model):
         choices=METHOD_CHOICES,
         default="beginner",
     )
+    # Nouveau champ
+    hand_orientation = models.CharField(
+        max_length=10,
+        choices=[
+            ('right', 'Main Droite'),
+            ('left', 'Main Gauche'),
+        ],
+        default='right',
+        help_text="Quelle main fait les mouvements (détermine l'orientation du cube)"
+    )
     
     # Category and difficulty
     category = models.CharField(
