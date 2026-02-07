@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cube Mosaic Editor</title>
+    <title>Cube Mosaic Editor - Collaborative</title>
 
     <style>
         body { 
@@ -13,8 +13,296 @@
             overflow-x: hidden;
         }
 
-        h1 { color: #333; }
-        h3 { color: #555; margin-top: 20px; }
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        /* ===============================
+           MOSAIC GALLERY
+           =============================== */
+
+        #mosaic-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .mosaic-thumb {
+            border: 2px solid #999;
+            padding: 10px;
+            cursor: pointer;
+            background: #fafafa;
+            text-align: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .mosaic-thumb:hover {
+            background: #fff;
+            border-color: #2196F3;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+
+        .mosaic-canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 120px;
+            background: #fff;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        .mosaic-thumb canvas {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .mosaic-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .mosaic-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mosaic-meta {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .mosaic-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        .mosaic-actions button {
+            padding: 4px 12px;
+            font-size: 12px;
+            background: #4CAF50;
+        }
+
+        .mosaic-actions button.view-btn {
+            background: #2196F3;
+        }
+
+        /* ===============================
+           MODAL
+           =============================== */
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2196F3;
+        }
+
+        .cube-assignment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .cube-assignment-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        .cube-assignment-card.assigned {
+            border-color: #4CAF50;
+            background: #f1f8f4;
+        }
+
+        .cube-assignment-card.completed {
+            border-color: #2196F3;
+            background: #e3f2fd;
+        }
+
+        .cube-assignment-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .cube-preview-small {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .cube-position {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .cube-student {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .cube-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .cube-status.unassigned {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .cube-status.assigned {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        .cube-status.completed {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .assign-input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .assign-btn {
+            width: 100%;
+            padding: 6px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .assign-btn:hover {
+            background: #45a049;
+        }
+
+        .focus-btn {
+            width: 100%;
+            padding: 6px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .focus-btn:hover {
+            background: #0b7dda;
+        }
+
+        /* Single Cube Focus Modal */
+        .focus-cube-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .focus-cube-canvas {
+            border: 3px solid #333;
+            border-radius: 8px;
+        }
+
+        .focus-instructions {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f57f17;
+            max-width: 400px;
+        }
+
+        .focus-instructions h3 {
+            margin-top: 0;
+            color: #f57f17;
+        }
+
+        /* ===============================
+           CONTROLS
+           =============================== */
 
         .controls { 
             margin-bottom: 15px; 
@@ -30,6 +318,39 @@
             gap: 5px;
         }
 
+        label {
+            font-weight: bold;
+        }
+
+        select, input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0b7dda;
+        }
+
+        .size-indicator {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ===============================
+           MOSAIC GRID
+           =============================== */
+
         #mosaic-container { 
             display: flex; 
             flex-direction: column;
@@ -37,19 +358,40 @@
             margin: 20px 0;
         }
 
-        .cube-row { display: flex; }
+        .cube-row { 
+            display: flex; 
+        }
 
         .cube-div { 
             display: grid; 
             grid-gap: 1px;
             margin: 2px;
             border: 1px solid #666;
-            cursor: pointer;
+            position: relative;
+        }
+
+        .cube-div .cube-label {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2196F3;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
         }
 
         .cube-cell { 
             border: 1px solid #000; 
+            cursor: pointer;
         }
+
+        /* ===============================
+           JSON OUTPUT
+           =============================== */
 
         #mosaic-json { 
             white-space: pre; 
@@ -62,308 +404,754 @@
             font-size: 12px;
         }
 
-        button {
-            padding: 8px 16px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        /* ===============================
+           LOADING STATE
+           =============================== */
 
-        #save-btn {
-            background: #2196F3;
-        }
-
-        select, input[type="text"] {
-            padding: 6px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-
-        .size-indicator {
-            font-size: 12px;
+        .loading {
+            text-align: center;
+            padding: 20px;
             color: #666;
         }
 
-        /* ===============================
-           Cube Preview Modal
-           =============================== */
+        .empty-gallery {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
 
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
+        /* Progress Bar */
+        .progress-container {
+            margin: 20px 0;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
         }
 
-        .modal-overlay.hidden {
-            display: none;
-        }
-
-        .modal-card {
-            background: white;
-            border-radius: 14px;
-            padding: 16px;
-            width: min(90vw, 360px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-        }
-
-        .modal-header {
+        .progress-stats {
+            margin-top: 10px;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
+            font-size: 13px;
+        }
+
+        .progress-stat {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 12px;
         }
 
-        .modal-header h2 {
-            margin: 0;
-            font-size: 18px;
+        .progress-stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
         }
 
-        .modal-header button {
-            background: none;
-            border: none;
-            font-size: 22px;
-            cursor: pointer;
-        }
-
-        .cube-preview-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-            justify-items: center;
-        }
-
-        .cube-preview-cell {
-            border: 1px solid #000;
+        .progress-stat-label {
+            color: #666;
         }
     </style>
 </head>
 
 <body>
 
-<h1>Cube Mosaic Editor</h1>
+    <!-- ===============================
+         MOSAIC GALLERY
+         =============================== -->
 
-<div class="controls">
-    <div class="control-group">
-        <label>Color:</label>
-        <select id="color-select">
-            <option value="R">Red</option>
-            <option value="B">Blue</option>
-            <option value="Y">Yellow</option>
-            <option value="G">Green</option>
-            <option value="O">Orange</option>
-            <option value="W">White</option>
-        </select>
+    <h2>Saved Mosaics</h2>
+    <div id="mosaic-gallery">
+        <div class="loading">Loading mosaics...</div>
     </div>
 
-    <div class="control-group">
-        <label>Grid Size:</label>
-        <select id="cubes-per-side">
-            <option value="1">1×1</option>
-            <option value="2">2×2</option>
-            <option value="3" selected>3×3</option>
-            <option value="4">4×4</option>
-            <option value="5">5×5</option>
-            <option value="6">6×6</option>
-            <option value="7">7×7</option>
-            <option value="8">8×8</option>
-            <option value="9">9×9</option>
-            <option value="10">10×10</option>
-        </select>
-        <span class="size-indicator" id="size-indicator"></span>
-    </div>
+    <hr>
 
-    <div class="control-group">
-        <label>Mosaic Name:</label>
-        <input id="mosaic-name" type="text" value="My Mosaic">
-    </div>
+    <!-- ===============================
+         EDITOR
+         =============================== -->
 
-    <button id="save-btn">Save Mosaic</button>
-</div>
+    <h1>Cube Mosaic Editor</h1>
 
-<div id="mosaic-container"></div>
-
-<h3>Mosaic JSON (one cube per line)</h3>
-<pre id="mosaic-json"></pre>
-
-<!-- ===============================
-     Cube Preview Modal
-     =============================== -->
-
-<div id="cube-preview-overlay" class="modal-overlay hidden">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h2 id="cube-preview-title">Cube Preview</h2>
-            <button id="cube-preview-close">✕</button>
+    <div class="controls">
+        <div class="control-group">
+            <label>Color:</label>
+            <select id="color-select">
+                <option value="R">Red</option>
+                <option value="B">Blue</option>
+                <option value="Y">Yellow</option>
+                <option value="G">Green</option>
+                <option value="O">Orange</option>
+                <option value="W">White</option>
+            </select>
         </div>
-        <div id="cube-preview-grid" class="cube-preview-grid"></div>
+
+        <div class="control-group">
+            <label>Grid Size:</label>
+            <select id="cubes-per-side">
+                <option value="1">1×1</option>
+                <option value="2">2×2</option>
+                <option value="3" selected>3×3</option>
+                <option value="4">4×4</option>
+                <option value="5">5×5</option>
+                <option value="6">6×6</option>
+                <option value="7">7×7</option>
+                <option value="8">8×8</option>
+                <option value="9">9×9</option>
+                <option value="10">10×10</option>
+            </select>
+            <span class="size-indicator" id="size-indicator"></span>
+        </div>
+
+        <div class="control-group">
+            <label>Mosaic Name:</label>
+            <input id="mosaic-name" type="text" value="My Mosaic">
+        </div>
+
+        <button id="save-btn">Save Mosaic</button>
     </div>
-</div>
 
-<script>
-/* ===============================
-   Shared config
-   =============================== */
+    <div id="mosaic-container"></div>
 
-const colorMap = {
-    R: "red",
-    B: "blue",
-    Y: "yellow",
-    G: "green",
-    O: "orange",
-    W: "white"
-};
+    <h3>Mosaic JSON (one cube per line)</h3>
+    <pre id="mosaic-json"></pre>
 
-/* ===============================
-   Mosaic editor
-   =============================== */
+    <!-- ===============================
+         COLLABORATION MODAL
+         =============================== -->
 
-const container = document.getElementById("mosaic-container");
-const jsonOutput = document.getElementById("mosaic-json");
-const colorSelect = document.getElementById("color-select");
-const cubesSelect = document.getElementById("cubes-per-side");
-const mosaicNameInput = document.getElementById("mosaic-name");
-const saveBtn = document.getElementById("save-btn");
-const sizeIndicator = document.getElementById("size-indicator");
+    <div id="collaboration-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeCollaborationModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modal-title">Assign Cubes to Students</h2>
+                <p id="modal-subtitle">Click "Assign" to assign a cube to a student, then they can focus on just their cube.</p>
+            </div>
 
-let cubesPerSide = parseInt(cubesSelect.value);
-let mosaic = [];
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill">0%</div>
+                </div>
+                <div class="progress-stats">
+                    <div class="progress-stat">
+                        <div class="progress-stat-number" id="stat-total">0</div>
+                        <div class="progress-stat-label">Total Cubes</div>
+                    </div>
+                    <div class="progress-stat">
+                        <div class="progress-stat-number" id="stat-assigned">0</div>
+                        <div class="progress-stat-label">Assigned</div>
+                    </div>
+                    <div class="progress-stat">
+                        <div class="progress-stat-number" id="stat-completed">0</div>
+                        <div class="progress-stat-label">Completed</div>
+                    </div>
+                </div>
+            </div>
 
-function getCellSize(n) {
-    return n <= 6 ? 30 : n <= 8 ? 28 : 25;
-}
+            <div id="cube-assignment-grid" class="cube-assignment-grid">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
 
-function updateSizeIndicator() {
-    sizeIndicator.textContent = `(${cubesPerSide ** 2} cubes)`;
-}
+    <!-- ===============================
+         SINGLE CUBE FOCUS MODAL
+         =============================== -->
 
-function initMosaic() {
-    mosaic = [];
-    container.innerHTML = "";
+    <div id="focus-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeFocusModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="focus-modal-title">Cube to Reproduce</h2>
+                <p id="focus-modal-position">Position: Row 0, Column 0</p>
+            </div>
 
-    const cellSize = getCellSize(cubesPerSide);
+            <div class="focus-cube-display">
+                <canvas id="focus-cube-canvas" class="focus-cube-canvas"></canvas>
+                
+                <div class="focus-instructions">
+                    <h3>📋 Instructions</h3>
+                    <p><strong>Student:</strong> <span id="focus-student-name">Not assigned</span></p>
+                    <p>Reproduce this cube face exactly as shown above.</p>
+                    <p><strong>Colors key:</strong></p>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong style="color: #d32f2f;">Red (R)</strong></li>
+                        <li><strong style="color: #1976d2;">Blue (B)</strong></li>
+                        <li><strong style="color: #f57f17;">Yellow (Y)</strong></li>
+                        <li><strong style="color: #388e3c;">Green (G)</strong></li>
+                        <li><strong style="color: #f57c00;">Orange (O)</strong></li>
+                        <li><strong>White (W)</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    for (let y = 0; y < cubesPerSide; y++) {
-        const row = document.createElement("div");
-        row.className = "cube-row";
+    <!-- ===============================
+         SCRIPT
+         =============================== -->
 
-        for (let x = 0; x < cubesPerSide; x++) {
-            const cube = Array.from({length:3}, () => Array(3).fill("W"));
-            const cubeDiv = document.createElement("div");
-            cubeDiv.className = "cube-div";
-            cubeDiv.style.gridTemplateColumns = `repeat(3, ${cellSize}px)`;
+    <script>
+        /* ===============================
+           SHARED COLOR MAP
+           =============================== */
 
-            cubeDiv.addEventListener("dblclick", () => {
-                openCubePreview(cube, {
-                    title: `Cube (${y + 1}, ${x + 1})`,
-                    cellSize: 45
+        const colorMap = {
+            R: "#d32f2f",
+            B: "#1976d2",
+            Y: "#fbc02d",
+            G: "#388e3c",
+            O: "#f57c00",
+            W: "#ffffff"
+        };
+
+        /* ===============================
+           LOCAL STORAGE FOR ASSIGNMENTS
+           =============================== */
+
+        function getAssignments(mosaicId) {
+            const key = `mosaic_${mosaicId}_assignments`;
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function saveAssignments(mosaicId, assignments) {
+            const key = `mosaic_${mosaicId}_assignments`;
+            localStorage.setItem(key, JSON.stringify(assignments));
+        }
+
+        function assignCube(mosaicId, cubeIndex, studentName) {
+            const assignments = getAssignments(mosaicId);
+            assignments[cubeIndex] = {
+                student: studentName,
+                assignedAt: new Date().toISOString(),
+                completed: false
+            };
+            saveAssignments(mosaicId, assignments);
+        }
+
+        function markCubeCompleted(mosaicId, cubeIndex) {
+            const assignments = getAssignments(mosaicId);
+            if (assignments[cubeIndex]) {
+                assignments[cubeIndex].completed = true;
+                assignments[cubeIndex].completedAt = new Date().toISOString();
+                saveAssignments(mosaicId, assignments);
+            }
+        }
+
+        /* ===============================
+           MODAL FUNCTIONS
+           =============================== */
+
+        let currentMosaicData = null;
+
+        function openCollaborationModal(mosaicId) {
+            fetch(`/cube_prep/mosaics/${mosaicId}/`)
+                .then(r => r.json())
+                .then(data => {
+                    currentMosaicData = data;
+                    document.getElementById('modal-title').textContent = 
+                        `Manage Collaboration: ${data.name}`;
+                    
+                    populateAssignmentGrid(data);
+                    updateProgressStats(data);
+                    
+                    document.getElementById('collaboration-modal').classList.add('active');
+                });
+        }
+
+        function closeCollaborationModal() {
+            document.getElementById('collaboration-modal').classList.remove('active');
+            currentMosaicData = null;
+        }
+
+        function populateAssignmentGrid(data) {
+            const grid = document.getElementById('cube-assignment-grid');
+            const assignments = getAssignments(data.id);
+            grid.innerHTML = '';
+
+            data.cubes.forEach((cube, idx) => {
+                const row = Math.floor(idx / data.cubes_per_side);
+                const col = idx % data.cubes_per_side;
+                
+                const assignment = assignments[idx];
+                const isAssigned = assignment && assignment.student;
+                const isCompleted = assignment && assignment.completed;
+
+                const card = document.createElement('div');
+                card.className = 'cube-assignment-card';
+                if (isCompleted) card.classList.add('completed');
+                else if (isAssigned) card.classList.add('assigned');
+
+                // Preview
+                const preview = document.createElement('div');
+                preview.className = 'cube-preview-small';
+                const canvas = renderCubePreview(cube, 60);
+                preview.appendChild(canvas);
+
+                // Position
+                const position = document.createElement('div');
+                position.className = 'cube-position';
+                position.textContent = `Cube (${row}, ${col})`;
+
+                // Status badge
+                const status = document.createElement('div');
+                status.className = 'cube-status';
+                if (isCompleted) {
+                    status.classList.add('completed');
+                    status.textContent = '✓ Completed';
+                } else if (isAssigned) {
+                    status.classList.add('assigned');
+                    status.textContent = '⏳ Assigned';
+                } else {
+                    status.classList.add('unassigned');
+                    status.textContent = '○ Unassigned';
+                }
+
+                // Student name
+                const student = document.createElement('div');
+                student.className = 'cube-student';
+                student.textContent = isAssigned 
+                    ? `Student: ${assignment.student}`
+                    : 'No student assigned';
+
+                // Input and button
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'assign-input';
+                input.placeholder = 'Student name...';
+                input.value = isAssigned ? assignment.student : '';
+
+                const assignBtn = document.createElement('button');
+                assignBtn.className = 'assign-btn';
+                assignBtn.textContent = isAssigned ? 'Update' : 'Assign';
+                assignBtn.onclick = () => {
+                    const name = input.value.trim();
+                    if (name) {
+                        assignCube(data.id, idx, name);
+                        populateAssignmentGrid(data);
+                        updateProgressStats(data);
+                    }
+                };
+
+                // Focus button
+                const focusBtn = document.createElement('button');
+                focusBtn.className = 'focus-btn';
+                focusBtn.textContent = '🔍 View This Cube';
+                focusBtn.onclick = () => showFocusCube(data, idx);
+
+                card.appendChild(preview);
+                card.appendChild(position);
+                card.appendChild(status);
+                card.appendChild(student);
+                card.appendChild(input);
+                card.appendChild(assignBtn);
+                card.appendChild(focusBtn);
+
+                grid.appendChild(card);
+            });
+        }
+
+        function updateProgressStats(data) {
+            const assignments = getAssignments(data.id);
+            const total = data.cubes.length;
+            let assigned = 0;
+            let completed = 0;
+
+            Object.values(assignments).forEach(a => {
+                if (a.student) assigned++;
+                if (a.completed) completed++;
+            });
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-assigned').textContent = assigned;
+            document.getElementById('stat-completed').textContent = completed;
+
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const fill = document.getElementById('progress-fill');
+            fill.style.width = percent + '%';
+            fill.textContent = percent + '%';
+        }
+
+        /* ===============================
+           FOCUS MODAL
+           =============================== */
+
+        function showFocusCube(mosaicData, cubeIndex) {
+            const cube = mosaicData.cubes[cubeIndex];
+            const row = Math.floor(cubeIndex / mosaicData.cubes_per_side);
+            const col = cubeIndex % mosaicData.cubes_per_side;
+            const assignment = getAssignments(mosaicData.id)[cubeIndex];
+
+            document.getElementById('focus-modal-title').textContent = 
+                `${mosaicData.name} - Cube to Reproduce`;
+            document.getElementById('focus-modal-position').textContent = 
+                `Position: Row ${row}, Column ${col}`;
+            document.getElementById('focus-student-name').textContent = 
+                assignment && assignment.student ? assignment.student : 'Not assigned';
+
+            // Render large cube
+            const canvas = document.getElementById('focus-cube-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const stickerSize = 60;
+            canvas.width = stickerSize * 3;
+            canvas.height = stickerSize * 3;
+
+            cube.forEach((row, i) => {
+                row.forEach((color, j) => {
+                    ctx.fillStyle = colorMap[color] || "#ccc";
+                    ctx.fillRect(j * stickerSize, i * stickerSize, stickerSize, stickerSize);
+                    
+                    // Border
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(j * stickerSize, i * stickerSize, stickerSize, stickerSize);
                 });
             });
 
-            for (let i = 0; i < 3; i++) {
-                for (let j = 0; j < 3; j++) {
-                    const cell = document.createElement("div");
-                    cell.className = "cube-cell";
-                    cell.style.width = `${cellSize}px`;
-                    cell.style.height = `${cellSize}px`;
-                    cell.style.background = colorMap.W;
-
-                    cell.addEventListener("click", () => {
-                        const c = colorSelect.value;
-                        cube[i][j] = c;
-                        cell.style.background = colorMap[c];
-                        updateJSON();
-                    });
-
-                    cubeDiv.appendChild(cell);
-                }
-            }
-
-            mosaic.push(cube);
-            row.appendChild(cubeDiv);
+            document.getElementById('focus-modal').classList.add('active');
         }
 
-        container.appendChild(row);
-    }
+        function closeFocusModal() {
+            document.getElementById('focus-modal').classList.remove('active');
+        }
 
-    updateSizeIndicator();
-    updateJSON();
-}
+        /* ===============================
+           RENDER HELPERS
+           =============================== */
 
-function updateJSON() {
-    jsonOutput.textContent = mosaic.map(c => JSON.stringify(c)).join("\n");
-}
+        function renderCubePreview(cube, size) {
+            const canvas = document.createElement('canvas');
+            const stickerSize = Math.floor(size / 3);
+            canvas.width = size;
+            canvas.height = size;
+            canvas.style.border = '1px solid #999';
 
-cubesSelect.addEventListener("change", () => {
-    cubesPerSide = parseInt(cubesSelect.value);
-    initMosaic();
-});
+            const ctx = canvas.getContext('2d');
 
-/* ===============================
-   Save mosaic
-   =============================== */
+            cube.forEach((row, i) => {
+                row.forEach((color, j) => {
+                    ctx.fillStyle = colorMap[color] || "#ccc";
+                    ctx.fillRect(j * stickerSize, i * stickerSize, stickerSize, stickerSize);
+                    
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(j * stickerSize, i * stickerSize, stickerSize, stickerSize);
+                });
+            });
 
-saveBtn.addEventListener("click", () => {
-    fetch("/cube_prep/save-mosaic/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRFToken": getCookie("csrftoken")
-        },
-        body: new URLSearchParams({
-            mosaic_json: JSON.stringify(mosaic),
-            cubes_per_side: cubesPerSide,
-            mosaic_name: mosaicNameInput.value || "My Mosaic"
-        })
-    })
-    .then(r => r.json())
-    .then(d => alert(d.success ? "Saved!" : d.error));
-});
+            return canvas;
+        }
 
-function getCookie(name) {
-    return document.cookie.split("; ")
-        .find(row => row.startsWith(name + "="))
-        ?.split("=")[1];
-}
+        function renderMosaicPreview(data) {
+            const cubesPerSide = data.cubes_per_side;
+            const cubes = data.cubes;
 
-/* ===============================
-   Cube preview modal
-   =============================== */
+            const stickerSize = 2;
+            const cubeSize = 3 * stickerSize;
+            const totalSize = cubesPerSide * cubeSize;
 
-const overlay = document.getElementById("cube-preview-overlay");
-const grid = document.getElementById("cube-preview-grid");
-const title = document.getElementById("cube-preview-title");
-const closeBtn = document.getElementById("cube-preview-close");
+            const scale = Math.max(1, Math.min(3, Math.floor(150 / totalSize)));
+            const displaySize = totalSize * scale;
 
-function openCubePreview(cube, {title: t="Cube Preview", cellSize=40} = {}) {
-    title.textContent = t;
-    grid.innerHTML = "";
-    grid.style.gridTemplateColumns = `repeat(3, ${cellSize}px)`;
+            const canvas = document.createElement("canvas");
+            canvas.width = totalSize;
+            canvas.height = totalSize;
 
-    cube.flat().forEach(c => {
-        const cell = document.createElement("div");
-        cell.className = "cube-preview-cell";
-        cell.style.width = `${cellSize}px`;
-        cell.style.height = `${cellSize}px`;
-        cell.style.background = colorMap[c];
-        grid.appendChild(cell);
-    });
+            const ctx = canvas.getContext("2d");
 
-    overlay.classList.remove("hidden");
-}
+            cubes.forEach((cube, idx) => {
+                const r = Math.floor(idx / cubesPerSide);
+                const c = idx % cubesPerSide;
 
-closeBtn.onclick = () => overlay.classList.add("hidden");
-overlay.onclick = e => e.target === overlay && overlay.classList.add("hidden");
+                cube.forEach((row, i) => {
+                    row.forEach((color, j) => {
+                        ctx.fillStyle = colorMap[color] || "#ccc";
+                        ctx.fillRect(
+                            c * cubeSize + j * stickerSize,
+                            r * cubeSize + i * stickerSize,
+                            stickerSize,
+                            stickerSize
+                        );
+                    });
+                });
+            });
 
-/* Init */
-initMosaic();
-</script>
+            canvas.style.width = displaySize + "px";
+            canvas.style.height = displaySize + "px";
+            canvas.style.imageRendering = "pixelated";
+
+            return canvas;
+        }
+
+        /* ===============================
+           MOSAIC GALLERY
+           =============================== */
+
+        const gallery = document.getElementById("mosaic-gallery");
+
+        function loadMosaicPreviews() {
+            fetch("/cube_prep/mosaics/")
+                .then(r => {
+                    if (!r.ok) {
+                        throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                    }
+                    return r.json();
+                })
+                .then(list => {
+                    if (list.length === 0) {
+                        gallery.innerHTML = '<div class="empty-gallery">No mosaics yet. Create your first one below!</div>';
+                        return;
+                    }
+
+                    gallery.innerHTML = "";
+                    
+                    list.forEach(m => {
+                        fetch(`/cube_prep/mosaics/${m.id}/`)
+                            .then(r => r.json())
+                            .then(data => {
+                                const thumb = document.createElement("div");
+                                thumb.className = "mosaic-thumb";
+
+                                const canvasContainer = document.createElement("div");
+                                canvasContainer.className = "mosaic-canvas-container";
+                                canvasContainer.appendChild(renderMosaicPreview(data));
+                                thumb.appendChild(canvasContainer);
+
+                                const info = document.createElement("div");
+                                info.className = "mosaic-info";
+
+                                const name = document.createElement("div");
+                                name.className = "mosaic-name";
+                                name.textContent = m.name;
+                                name.title = m.name;
+                                info.appendChild(name);
+
+                                const meta = document.createElement("div");
+                                meta.className = "mosaic-meta";
+                                const totalCubes = data.cubes_per_side * data.cubes_per_side;
+                                meta.textContent = `${data.cubes_per_side}×${data.cubes_per_side} (${totalCubes} cubes)`;
+                                info.appendChild(meta);
+
+                                const actions = document.createElement("div");
+                                actions.className = "mosaic-actions";
+
+                                const viewBtn = document.createElement("button");
+                                viewBtn.className = "view-btn";
+                                viewBtn.textContent = "Edit";
+                                viewBtn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    loadMosaic(m.id);
+                                };
+
+                                const assignBtn = document.createElement("button");
+                                assignBtn.textContent = "Manage";
+                                assignBtn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    openCollaborationModal(m.id);
+                                };
+
+                                actions.appendChild(viewBtn);
+                                actions.appendChild(assignBtn);
+                                info.appendChild(actions);
+
+                                thumb.appendChild(info);
+                                gallery.appendChild(thumb);
+                            })
+                            .catch(err => {
+                                console.error(`Failed to load mosaic ${m.id}:`, err);
+                            });
+                    });
+                })
+                .catch(err => {
+                    console.error("Failed to load mosaic list:", err);
+                    gallery.innerHTML = `<div class="empty-gallery">Error loading mosaics: ${err.message}</div>`;
+                });
+        }
+
+        /* ===============================
+           EDITOR
+           =============================== */
+
+        const container = document.getElementById("mosaic-container");
+        const jsonOutput = document.getElementById("mosaic-json");
+        const colorSelect = document.getElementById("color-select");
+        const cubesSelect = document.getElementById("cubes-per-side");
+        const mosaicNameInput = document.getElementById("mosaic-name");
+        const sizeIndicator = document.getElementById("size-indicator");
+        const saveBtn = document.getElementById("save-btn");
+
+        let cubesPerSide = parseInt(cubesSelect.value);
+        let mosaic = [];
+
+        function cellSizeFor(n) {
+            return n <= 6 ? 30 : Math.max(22, 36 - n);
+        }
+
+        function updateSizeIndicator() {
+            sizeIndicator.textContent =
+                `(${cubesPerSide * cubesPerSide} cubes)`;
+        }
+
+        function initMosaic() {
+            mosaic = [];
+            container.innerHTML = "";
+
+            const size = cellSizeFor(cubesPerSide);
+
+            for (let r = 0; r < cubesPerSide; r++) {
+                const row = document.createElement("div");
+                row.className = "cube-row";
+
+                for (let c = 0; c < cubesPerSide; c++) {
+                    const cube = [];
+                    const cubeDiv = document.createElement("div");
+                    cubeDiv.className = "cube-div";
+                    cubeDiv.style.gridTemplateColumns = `repeat(3, ${size}px)`;
+
+                    // Add label
+                    const label = document.createElement("div");
+                    label.className = "cube-label";
+                    label.textContent = `(${r},${c})`;
+                    cubeDiv.appendChild(label);
+
+                    for (let i = 0; i < 3; i++) {
+                        cube[i] = [];
+                        for (let j = 0; j < 3; j++) {
+                            const cell = document.createElement("div");
+                            cell.className = "cube-cell";
+                            cell.style.width = size + "px";
+                            cell.style.height = size + "px";
+                            cell.style.background = colorMap.W;
+
+                            cell.onclick = () => {
+                                const col = colorSelect.value;
+                                cell.style.background = colorMap[col];
+                                cube[i][j] = col;
+                                updateJSON();
+                            };
+
+                            cube[i][j] = "W";
+                            cubeDiv.appendChild(cell);
+                        }
+                    }
+
+                    mosaic.push(cube);
+                    row.appendChild(cubeDiv);
+                }
+
+                container.appendChild(row);
+            }
+
+            updateSizeIndicator();
+            updateJSON();
+        }
+
+        function repaintGrid() {
+            const cubes = container.querySelectorAll(".cube-div");
+            cubes.forEach((div, idx) => {
+                const cube = mosaic[idx];
+                let k = 0;
+                // Skip label
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        k++;
+                        div.children[k].style.background =
+                            colorMap[cube[i][j]];
+                    }
+                }
+            });
+        }
+
+        function updateJSON() {
+            jsonOutput.textContent =
+                mosaic.map(c => JSON.stringify(c)).join("\n");
+        }
+
+        function loadMosaic(id) {
+            if (!confirm("Load this mosaic? Unsaved changes will be lost.")) return;
+
+            fetch(`/cube_prep/mosaics/${id}/`)
+                .then(r => r.json())
+                .then(data => {
+                    cubesPerSide = data.cubes_per_side;
+                    cubesSelect.value = cubesPerSide;
+                    mosaicNameInput.value = data.name;
+
+                    initMosaic();
+                    mosaic = data.cubes;
+                    repaintGrid();
+                    updateJSON();
+                });
+        }
+
+        saveBtn.onclick = () => {
+            fetch("/cube_prep/save-mosaic/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": document.cookie
+                        .split("; ")
+                        .find(r => r.startsWith("csrftoken="))
+                        ?.split("=")[1]
+                },
+                body: new URLSearchParams({
+                    mosaic_name: mosaicNameInput.value || "My Mosaic",
+                    cubes_per_side: cubesPerSide,
+                    mosaic_json: JSON.stringify(mosaic)
+                })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    alert("Saved!");
+                    loadMosaicPreviews();
+                } else {
+                    alert("Error: " + (d.error || "Unknown error"));
+                }
+            })
+            .catch(err => {
+                alert("Failed to save: " + err.message);
+            });
+        };
+
+        cubesSelect.onchange = () => {
+            cubesPerSide = parseInt(cubesSelect.value);
+            initMosaic();
+        };
+
+        // Close modals on outside click
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        };
+
+        initMosaic();
+        loadMosaicPreviews();
+    </script>
 
 </body>
 </html>

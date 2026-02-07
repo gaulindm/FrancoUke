@@ -67,36 +67,55 @@ def color_mosaic_view(request):
     """Render the mosaic editor page."""
     return render(request, "cube_prep/color_mosaic.html")
 
+from .models import Cube, Mosaic, MosaicCube
+
 @csrf_exempt
 def save_mosaic(request):
-    if request.method == "POST":
-        try:
-            mosaic_json = request.POST.get("mosaic_json")
-            mosaic_name = request.POST.get("mosaic_name", "Untitled Mosaic")
-            mosaic_data = json.loads(mosaic_json)
-            mosaic_size = int(len(mosaic_data) ** 0.5)
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "POST required"})
 
-            mosaic = Mosaic.objects.create(name=mosaic_name)
-            letters = "abcdefghijklmnopqrstuvwxyz"
+    try:
+        mosaic_json = request.POST.get("mosaic_json")
+        mosaic_name = request.POST.get("mosaic_name", "Untitled Mosaic")
 
-            for index, cube_data in enumerate(mosaic_data):
-                row = index // mosaic_size
-                col = index % mosaic_size
-                suffix = f"{row+1}{letters[col]}"
+        cubes_data = json.loads(mosaic_json)
+        cubes_per_side = int(len(cubes_data) ** 0.5)
 
-                
-                cube = Cube.objects.create(
-                    name=f"{mosaic_name}-{suffix}",
-                    colors=json.dumps(cube_data),
-                )
-                mosaic.cubes.add(cube)
+        mosaic = Mosaic.objects.create(name=mosaic_name)
 
-            return JsonResponse({"success": True, "mosaic_id": mosaic.id})
+        for idx, cube_colors in enumerate(cubes_data):
+            row = idx // cubes_per_side
+            col = idx % cubes_per_side
 
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
+            cube = Cube.objects.create(
+                name=f"{mosaic_name}-{row}-{col}",
+                colors=cube_colors
+            )
 
-    return JsonResponse({"success": False, "error": "POST request required"})
+            MosaicCube.objects.create(
+                mosaic=mosaic,
+                row=row,
+                col=col,
+                cube=cube
+            )
+
+        return JsonResponse({"success": True, "mosaic_id": mosaic.id})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+def mosaic_list(request):
+    """Return list of all mosaics for the gallery."""
+    mosaics = Mosaic.objects.all().order_by('-created_at')
+    
+    return JsonResponse([
+        {
+            "id": m.id,
+            "name": m.name,
+            "created_at": m.created_at.isoformat()
+        }
+        for m in mosaics
+    ], safe=False)
 
 
 @csrf_exempt
@@ -122,4 +141,22 @@ def cube_face_moves_view(request):
     return JsonResponse({"success": False, "error": "POST request required"})
 
 
+from django.http import JsonResponse
+from .models import Mosaic
+
+def mosaic_detail(request, mosaic_id):
+    mosaic = Mosaic.objects.get(id=mosaic_id)
+
+    cubes = []
+    max_col = mosaic.cube_cols
+
+    for mc in mosaic.mosaiccubes.all().order_by("row", "col"):
+        cubes.append(mc.cube.colors)
+
+    return JsonResponse({
+        "id": mosaic.id,
+        "name": mosaic.name,
+        "cubes_per_side": mosaic.cube_cols,
+        "cubes": cubes,
+    })
 

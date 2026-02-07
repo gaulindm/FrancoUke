@@ -16,14 +16,25 @@ class CubeAdmin(admin.ModelAdmin):
 
 
     def colored_grid(self, obj):
-        """
-        Return an HTML representation of the cube.
-        """
+        """Return an HTML representation of the cube."""
+        
+        # ✅ NOUVELLE VERSION - Gère les deux cas
         try:
-            colors = obj.colors  # assume JSON string
-            import json
-            grid = json.loads(colors)
-        except:
+            colors = obj.colors
+            
+            # Si c'est déjà une liste (cas normal avec JSONField)
+            if isinstance(colors, list):
+                grid = colors
+            # Si c'est une string (double encoding)
+            elif isinstance(colors, str):
+                import json
+                grid = json.loads(colors)
+            else:
+                # Fallback: tout blanc
+                grid = [["W"]*3 for _ in range(3)]
+                
+        except Exception as e:
+            print(f"Erreur colored_grid: {e}")
             grid = [["W"]*3 for _ in range(3)]
 
         color_map = {
@@ -43,9 +54,6 @@ class CubeAdmin(admin.ModelAdmin):
             html += '</div>'
         html += '</div>'
         return format_html(html)
-
-    colored_grid.short_description = "Cube Preview"
-
 # ----------------------
 # MosaicCube Inline
 # ----------------------

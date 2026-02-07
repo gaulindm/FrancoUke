@@ -3,25 +3,15 @@ from django.shortcuts import get_object_or_404
 from .models import Mosaic
 
 
-def load_mosaic_grid(mosaic_id):
-    """
-    Returns:
-        mosaic: Mosaic instance
-        grid: 2D list [row][col] → cube colors (or None)
-    """
+def load_mosaic_data(mosaic_id):
     mosaic = get_object_or_404(Mosaic, id=mosaic_id)
 
     rows = mosaic.cube_rows
     cols = mosaic.cube_cols
 
-    grid = [[None for _ in range(cols)] for _ in range(rows)]
+    cubes = [[None for _ in range(cols)] for _ in range(rows)]
 
-    for cube in mosaic.cubes.all():
-        try:
-            colors = json.loads(cube.colors)
-        except (TypeError, json.JSONDecodeError):
-            colors = None
+    for mc in mosaic.mosaiccubes.select_related("cube"):
+        cubes[mc.row][mc.col] = mc.cube.colors
 
-        grid[cube.cube_row][cube.cube_col] = colors
-
-    return mosaic, grid
+    return mosaic, cubes
