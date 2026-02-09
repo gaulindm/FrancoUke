@@ -69,27 +69,47 @@ def color_mosaic_view(request):
 
 from .models import Cube, Mosaic, MosaicCube
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+from .models import Mosaic, Cube, MosaicCube
+
+
 @csrf_exempt
 def save_mosaic(request):
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "POST required"})
 
     try:
-        mosaic_json = request.POST.get("mosaic_json")
-        mosaic_name = request.POST.get("mosaic_name", "Untitled Mosaic")
+        payload = json.loads(request.body.decode("utf-8"))
 
-        cubes_data = json.loads(mosaic_json)
-        cubes_per_side = int(len(cubes_data) ** 0.5)
+        mosaic_id = payload.get("id")
+        name = payload.get("name", "Untitled Mosaic")
+        cubes = payload["cubes"]
 
-        mosaic = Mosaic.objects.create(name=mosaic_name)
+        cubes_per_side = int(len(cubes) ** 0.5)
 
-        for idx, cube_colors in enumerate(cubes_data):
+        # --- CREATE or UPDATE mosaic ---
+        if mosaic_id:
+            mosaic = Mosaic.objects.get(id=mosaic_id)
+            mosaic.name = name
+            mosaic.save()
+
+            # 🔥 REPLACE STRATEGY
+            mosaic.mosaiccubes.all().delete()
+
+        else:
+            mosaic = Mosaic.objects.create(name=name)
+
+        # --- Recreate cubes ---
+        for idx, colors in enumerate(cubes):
             row = idx // cubes_per_side
             col = idx % cubes_per_side
 
             cube = Cube.objects.create(
-                name=f"{mosaic_name}-{row}-{col}",
-                colors=cube_colors
+                name=f"{mosaic.name} ({row},{col})",
+                colors=colors
             )
 
             MosaicCube.objects.create(
@@ -99,20 +119,26 @@ def save_mosaic(request):
                 cube=cube
             )
 
-        return JsonResponse({"success": True, "mosaic_id": mosaic.id})
+        return JsonResponse({
+            "success": True,
+            "id": mosaic.id
+        })
 
     except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)})
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        })
+
+
 
 def mosaic_list(request):
-    """Return list of all mosaics for the gallery."""
-    mosaics = Mosaic.objects.all().order_by('-created_at')
-    
+    mosaics = Mosaic.objects.all().order_by("-created_at")
+
     return JsonResponse([
         {
             "id": m.id,
             "name": m.name,
-            "created_at": m.created_at.isoformat()
         }
         for m in mosaics
     ], safe=False)

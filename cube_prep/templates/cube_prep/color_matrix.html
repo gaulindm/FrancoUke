@@ -528,6 +528,7 @@
             <label>Mosaic Name:</label>
             <input id="mosaic-name" type="text" value="My Mosaic">
         </div>
+        <button id="duplicate-btn">Duplicate Mosaic</button>
 
         <button id="save-btn">Save Mosaic</button>
     </div>
@@ -995,10 +996,15 @@
            EDITOR
            =============================== */
 
+
+        let currentMosaicId = null;
+
         const container = document.getElementById("mosaic-container");
         const jsonOutput = document.getElementById("mosaic-json");
         const colorSelect = document.getElementById("color-select");
         const cubesSelect = document.getElementById("cubes-per-side");
+        const duplicateBtn = document.getElementById("duplicate-btn");
+
         const mosaicNameInput = document.getElementById("mosaic-name");
         const sizeIndicator = document.getElementById("size-indicator");
         const saveBtn = document.getElementById("save-btn");
@@ -1015,59 +1021,77 @@
                 `(${cubesPerSide * cubesPerSide} cubes)`;
         }
 
-        function initMosaic() {
-            mosaic = [];
-            container.innerHTML = "";
 
-            const size = cellSizeFor(cubesPerSide);
+        function initMosaic(initialData = null) {
+    mosaic = initialData
+        ? JSON.parse(JSON.stringify(initialData))
+        : [];
 
-            for (let r = 0; r < cubesPerSide; r++) {
-                const row = document.createElement("div");
-                row.className = "cube-row";
+    container.innerHTML = "";
 
-                for (let c = 0; c < cubesPerSide; c++) {
-                    const cube = [];
-                    const cubeDiv = document.createElement("div");
-                    cubeDiv.className = "cube-div";
-                    cubeDiv.style.gridTemplateColumns = `repeat(3, ${size}px)`;
+    const size = cellSizeFor(cubesPerSide);
 
-                    // Add label
-                    const label = document.createElement("div");
-                    label.className = "cube-label";
-                    label.textContent = `(${r},${c})`;
-                    cubeDiv.appendChild(label);
+    let cubeIndex = 0;
 
-                    for (let i = 0; i < 3; i++) {
-                        cube[i] = [];
-                        for (let j = 0; j < 3; j++) {
-                            const cell = document.createElement("div");
-                            cell.className = "cube-cell";
-                            cell.style.width = size + "px";
-                            cell.style.height = size + "px";
-                            cell.style.background = colorMap.W;
+    for (let r = 0; r < cubesPerSide; r++) {
+        const row = document.createElement("div");
+        row.className = "cube-row";
 
-                            cell.onclick = () => {
-                                const col = colorSelect.value;
-                                cell.style.background = colorMap[col];
-                                cube[i][j] = col;
-                                updateJSON();
-                            };
+        for (let c = 0; c < cubesPerSide; c++) {
 
-                            cube[i][j] = "W";
-                            cubeDiv.appendChild(cell);
-                        }
-                    }
+            const cube =
+                mosaic[cubeIndex] ||
+                [
+                    ["W","W","W"],
+                    ["W","W","W"],
+                    ["W","W","W"]
+                ];
 
-                    mosaic.push(cube);
-                    row.appendChild(cubeDiv);
+            mosaic[cubeIndex] = cube;
+
+            // 🔑 FREEZE index for this cube
+            const thisCubeIndex = cubeIndex;
+
+            const cubeDiv = document.createElement("div");
+            cubeDiv.className = "cube-div";
+            cubeDiv.style.gridTemplateColumns = `repeat(3, ${size}px)`;
+
+            const label = document.createElement("div");
+            label.className = "cube-label";
+            label.textContent = `(${r},${c})`;
+            cubeDiv.appendChild(label);
+
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    const cell = document.createElement("div");
+                    cell.className = "cube-cell";
+                    cell.style.width = size + "px";
+                    cell.style.height = size + "px";
+                    cell.style.background = colorMap[cube[i][j]];
+
+                    // ✅ SAFE: writes to the correct cube
+                    cell.onclick = () => {
+                        const col = colorSelect.value;
+                        mosaic[thisCubeIndex][i][j] = col;
+                        cell.style.background = colorMap[col];
+                        updateJSON();
+                    };
+
+                    cubeDiv.appendChild(cell);
                 }
-
-                container.appendChild(row);
             }
 
-            updateSizeIndicator();
-            updateJSON();
+            row.appendChild(cubeDiv);
+            cubeIndex++;
         }
+
+        container.appendChild(row);
+    }
+
+    updateSizeIndicator();
+    updateJSON();
+}
+
 
         function repaintGrid() {
             const cubes = container.querySelectorAll(".cube-div");
@@ -1090,53 +1114,114 @@
                 mosaic.map(c => JSON.stringify(c)).join("\n");
         }
 
+
         function loadMosaic(id) {
             if (!confirm("Load this mosaic? Unsaved changes will be lost.")) return;
 
             fetch(`/cube_prep/mosaics/${id}/`)
                 .then(r => r.json())
                 .then(data => {
+                    // 🔑 identity + original state
+                    currentMosaicId = data.id;
+                    originalMosaicName = data.name;
+
                     cubesPerSide = data.cubes_per_side;
                     cubesSelect.value = cubesPerSide;
                     mosaicNameInput.value = data.name;
 
-                    initMosaic();
-                    mosaic = data.cubes;
-                    repaintGrid();
+                    initMosaic(data.cubes);
                     updateJSON();
+                })
+                .catch(err => {
+                    console.error("Failed to load mosaic:", err);
+                    alert("Failed to load mosaic.");
                 });
         }
 
-        saveBtn.onclick = () => {
-            fetch("/cube_prep/save-mosaic/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRFToken": document.cookie
-                        .split("; ")
-                        .find(r => r.startsWith("csrftoken="))
-                        ?.split("=")[1]
-                },
-                body: new URLSearchParams({
-                    mosaic_name: mosaicNameInput.value || "My Mosaic",
-                    cubes_per_side: cubesPerSide,
-                    mosaic_json: JSON.stringify(mosaic)
-                })
-            })
-            .then(r => r.json())
-            .then(d => {
-                if (d.success) {
-                    alert("Saved!");
-                    loadMosaicPreviews();
-                } else {
-                    alert("Error: " + (d.error || "Unknown error"));
-                }
-            })
-            .catch(err => {
-                alert("Failed to save: " + err.message);
-            });
+        duplicateBtn.onclick = () => {
+            if (!mosaic || mosaic.length === 0) {
+                alert("Nothing to duplicate.");
+                return;
+            }
+
+            // 🔥 DEEP COPY the mosaic data
+            mosaic = JSON.parse(JSON.stringify(mosaic));
+
+            const baseName = mosaicNameInput.value || "My Mosaic";
+            const copyName = baseName.endsWith("(copy)")
+                ? baseName
+                : `${baseName} (copy)`;
+
+            // Identity reset → forces CREATE
+            currentMosaicId = null;
+            originalMosaicName = null;
+
+            mosaicNameInput.value = copyName;
+
+            updateJSON();
+
+            alert(
+                "You are now editing a duplicate.\n\n" +
+                "Press Save to create a NEW mosaic."
+            );
         };
 
+
+
+
+        saveBtn.onclick = () => {
+        const name = mosaicNameInput.value.trim() || "My Mosaic";
+
+        // ⚠️ explicit rename warning
+        if (
+            currentMosaicId !== null &&
+            originalMosaicName !== null &&
+            name !== originalMosaicName
+        ) {
+            const ok = confirm(
+                `You changed the mosaic name.\n\n` +
+                `This will RENAME the existing mosaic:\n\n` +
+                `"${originalMosaicName}" → "${name}"\n\n` +
+                `Press OK to rename, or Cancel to go back.`
+            );
+            if (!ok) return;
+        }
+
+        fetch("/cube_prep/save-mosaic/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.cookie
+                    .split("; ")
+                    .find(r => r.startsWith("csrftoken="))
+                    ?.split("=")[1]
+            },
+            body: JSON.stringify({
+                id: currentMosaicId,   // 🔥 controls update vs create
+                name: name,
+                cubes: mosaic
+            })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                // ✅ keep identity in sync
+                currentMosaicId = d.id;
+                originalMosaicName = name;
+
+                alert("Saved!");
+                loadMosaicPreviews();
+            } else {
+                alert("Error: " + (d.error || "Unknown error"));
+            }
+        })
+        .catch(err => {
+            console.error("Save failed:", err);
+            alert("Failed to save mosaic.");
+        });
+    };
+
+       
         cubesSelect.onchange = () => {
             cubesPerSide = parseInt(cubesSelect.value);
             initMosaic();
