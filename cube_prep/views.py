@@ -78,59 +78,104 @@ from .models import Mosaic, Cube, MosaicCube
 
 @csrf_exempt
 def save_mosaic(request):
-    if request.method != "POST":
-        return JsonResponse({"success": False, "error": "POST required"})
-
+    """
+    Save a new mosaic.
+    Supports both square and rectangular grids.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=400)
+    
     try:
-        payload = json.loads(request.body.decode("utf-8"))
-
-        mosaic_id = payload.get("id")
-        name = payload.get("name", "Untitled Mosaic")
-        cubes = payload["cubes"]
-
-        cubes_per_side = int(len(cubes) ** 0.5)
-
-        # --- CREATE or UPDATE mosaic ---
-        if mosaic_id:
-            mosaic = Mosaic.objects.get(id=mosaic_id)
-            mosaic.name = name
-            mosaic.save()
-
-            # 🔥 REPLACE STRATEGY
-            mosaic.mosaiccubes.all().delete()
-
-        else:
-            mosaic = Mosaic.objects.create(name=name)
-
-        # --- Recreate cubes ---
-        for idx, colors in enumerate(cubes):
-            row = idx // cubes_per_side
-            col = idx % cubes_per_side
-
+        # Get POST data
+        mosaic_json = request.POST.get('mosaic_json')
+        mosaic_name = request.POST.get('mosaic_name', 'Untitled Mosaic')
+        cubes_per_side = int(request.POST.get('cubes_per_side', 3))
+        
+        if not mosaic_json:
+            return JsonResponse({
+                'success': False, 
+                'error': 'No mosaic data provided'
+            }, status=400)
+        
+        # Parse JSON
+        try:
+            cubes_data = json.loads(mosaic_json)
+        except json.JSONDecodeError as e:
+            return JsonResponse({
+                'success': False, 
+                'error': f'Invalid JSON: {str(e)}'
+            }, status=400)
+        
+        # Validate cubes_data
+        if not isinstance(cubes_data, list):
+            return JsonResponse({
+                'success': False,
+                'error': 'mosaic_json must be an array'
+            }, status=400)
+        
+        # 🔴 NOUVEAU: Détecte automatiquement les dimensions
+        total_cubes = len(cubes_data)
+        cols = cubes_per_side
+        rows = total_cubes // cols
+        
+        # Valide que c'est bien rectangulaire
+        if rows * cols != total_cubes:
+            return JsonResponse({
+                'success': False,
+                'error': f'Invalid grid: {total_cubes} cubes cannot form a {rows}×{cols} grid'
+            }, status=400)
+        
+        # Create mosaic
+        mosaic = Mosaic.objects.create(
+            name=mosaic_name
+        )
+        
+        # Link to leader if authenticated
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            if hasattr(request.user, 'leader_profile'):
+                mosaic.created_by_leader = request.user.leader_profile
+                mosaic.save()
+        
+        # Create cubes
+        for idx, cube_colors in enumerate(cubes_data):
+            row = idx // cols
+            col = idx % cols
+            
+            # Validate cube_colors format
+            if not isinstance(cube_colors, list) or len(cube_colors) != 3:
+                print(f"Warning: Invalid cube at index {idx}, skipping")
+                continue
+            
             cube = Cube.objects.create(
-                name=f"{mosaic.name} ({row},{col})",
-                colors=colors
+                name=f"{mosaic_name}-{row}-{col}",
+                colors=cube_colors
             )
-
+            
             MosaicCube.objects.create(
                 mosaic=mosaic,
                 row=row,
                 col=col,
                 cube=cube
             )
-
+        
         return JsonResponse({
-            "success": True,
-            "id": mosaic.id
+            'success': True,
+            'mosaic_id': mosaic.id
         })
-
+        
     except Exception as e:
+        # Log error for debugging
+        import traceback
+        print("=" * 60)
+        print("ERROR in save_mosaic:")
+        print(f"Error: {e}")
+        traceback.print_exc()
+        print("=" * 60)
+        
         return JsonResponse({
-            "success": False,
-            "error": str(e)
-        })
-
-
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 def mosaic_list(request):
     mosaics = Mosaic.objects.all().order_by("-created_at")
