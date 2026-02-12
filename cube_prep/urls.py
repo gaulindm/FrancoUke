@@ -6,6 +6,7 @@ app_name = "cube_prep"
 urlpatterns = [
     path('', views.generator_home, name='cube_prep'),
     path('mosaics/', views.mosaic_list, name='mosaic_list'),
+    path("teacher-pdf/", views.teacher_pdf, name="teacher_pdf"),
 
     path('mosaics/<int:mosaic_id>/', views.mosaic_detail, name='mosaic_detail'),
     path('save-mosaic/', views.save_mosaic, name='save_mosaic'),

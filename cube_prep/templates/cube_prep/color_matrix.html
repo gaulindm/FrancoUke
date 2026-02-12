@@ -171,42 +171,6 @@
             color: #2196F3;
         }
 
-        .cube-assignment-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .cube-assignment-card {
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 12px;
-            background: #fff;
-            transition: all 0.2s;
-        }
-
-        .cube-assignment-card.assigned {
-            border-color: #4CAF50;
-            background: #f1f8f4;
-        }
-
-        .cube-assignment-card.completed {
-            border-color: #2196F3;
-            background: #e3f2fd;
-        }
-
-        .cube-assignment-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-
-        .cube-preview-small {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
 
         .cube-position {
             font-weight: bold;
@@ -214,103 +178,54 @@
             color: #333;
         }
 
-        .cube-student {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 8px;
-        }
 
-        .cube-status {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
+   /* ===============================
+   SIMPLE VIEW CUBES MODAL
+   =============================== */
 
-        .cube-status.unassigned {
-            background: #f5f5f5;
-            color: #666;
-        }
+.simple-cubes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
 
-        .cube-status.assigned {
-            background: #fff9c4;
-            color: #f57f17;
-        }
+.simple-cube-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.2s;
+}
 
-        .cube-status.completed {
-            background: #c8e6c9;
-            color: #2e7d32;
-        }
+.simple-cube-card:hover {
+    border-color: #2196F3;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
 
-        .assign-input {
-            width: 100%;
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
+.simple-cube-card canvas {
+    margin: 0 auto 10px;
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
 
-        .assign-btn {
-            width: 100%;
-            padding: 6px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
+.cube-card-number {
+    font-weight: bold;
+    color: #2196F3;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
 
-        .assign-btn:hover {
-            background: #45a049;
-        }
+.cube-card-position {
+    color: #666;
+    font-size: 12px;
+}
 
-        .focus-btn {
-            width: 100%;
-            padding: 6px;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 4px;
-        }
-
-        .focus-btn:hover {
-            background: #0b7dda;
-        }
-
-        /* Single Cube Focus Modal */
-        .focus-cube-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .focus-cube-canvas {
-            border: 3px solid #333;
-            border-radius: 8px;
-        }
-
-        .focus-instructions {
-            background: #fff9c4;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #f57f17;
-            max-width: 400px;
-        }
-
-        .focus-instructions h3 {
-            margin-top: 0;
-            color: #f57f17;
-        }
 
         /* ===============================
            CONTROLS
@@ -441,57 +356,52 @@
             font-style: italic;
         }
 
-        /* Progress Bar */
-        .progress-container {
-            margin: 20px 0;
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-        }
+/* ===============================
+   PRINT STYLES
+   =============================== */
 
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-        }
+   @media print {
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-        }
+body {
+    padding: 0;
+    margin: 0;
+}
 
-        .progress-stats {
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-around;
-            font-size: 13px;
-        }
+/* Hide everything except the mosaic */
+h1, h2, h3,
+.controls,
+#mosaic-gallery,
+#mosaic-json,
+hr {
+    display: none !important;
+}
 
-        .progress-stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+#mosaic-wrapper {
+    display: block !important;
+    margin: 0;
+}
 
-        .progress-stat-number {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-        }
+#mosaic-container {
+    display: block !important;
+    padding: 0;
+    background: none;
+    page-break-inside: auto;
+}
 
-        .progress-stat-label {
-            color: #666;
-        }
+.cube-row {
+    display: flex;
+    page-break-inside: avoid;
+}
+
+.cube-div {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+}
+
+
+
     </style>
 </head>
 
@@ -557,6 +467,8 @@
             <input id="mosaic-name" type="text" value="My Mosaic">
         </div>
 
+        
+
         <button id="save-btn">Save Mosaic</button>
     </div>
 
@@ -567,73 +479,23 @@
     <h3>Mosaic JSON (one cube per line)</h3>
     <pre id="mosaic-json"></pre>
 
-    <!-- ===============================
-         COLLABORATION MODAL
-         =============================== -->
+<!-- ===============================
+     SIMPLE VIEW CUBES MODAL
+     =============================== -->
 
-    <div id="collaboration-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeCollaborationModal()">&times;</span>
+     <div id="view-cubes-modal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <span class="modal-close" onclick="closeViewCubesModal()">&times;</span>
             <div class="modal-header">
-                <h2 id="modal-title">Assign Cubes to Students</h2>
-                <p id="modal-subtitle">Click "Assign" to assign a cube to a student, then they can focus on just their cube.</p>
+                <h2 id="view-cubes-title">Mosaic Cubes</h2>
+                <p id="view-cubes-subtitle">All cubes in this mosaic</p>
+                <button onclick="downloadTeacherPDF()" style="background:#673AB7;">
+                    📄 Download Teacher PDF
+                </button>
             </div>
-
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill">0%</div>
-                </div>
-                <div class="progress-stats">
-                    <div class="progress-stat">
-                        <div class="progress-stat-number" id="stat-total">0</div>
-                        <div class="progress-stat-label">Total Cubes</div>
-                    </div>
-                    <div class="progress-stat">
-                        <div class="progress-stat-number" id="stat-assigned">0</div>
-                        <div class="progress-stat-label">Assigned</div>
-                    </div>
-                    <div class="progress-stat">
-                        <div class="progress-stat-number" id="stat-completed">0</div>
-                        <div class="progress-stat-label">Completed</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="cube-assignment-grid" class="cube-assignment-grid">
+    
+            <div id="simple-cubes-grid" class="simple-cubes-grid">
                 <!-- Populated by JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- ===============================
-         SINGLE CUBE FOCUS MODAL
-         =============================== -->
-
-    <div id="focus-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeFocusModal()">&times;</span>
-            <div class="modal-header">
-                <h2 id="focus-modal-title">Cube to Reproduce</h2>
-                <p id="focus-modal-position">Position: Row 0, Column 0</p>
-            </div>
-
-            <div class="focus-cube-display">
-                <canvas id="focus-cube-canvas" class="focus-cube-canvas"></canvas>
-                
-                <div class="focus-instructions">
-                    <h3>📋 Instructions</h3>
-                    <p><strong>Student:</strong> <span id="focus-student-name">Not assigned</span></p>
-                    <p>Reproduce this cube face exactly as shown above.</p>
-                    <p><strong>Colors key:</strong></p>
-                    <ul style="margin: 10px 0; padding-left: 20px;">
-                        <li><strong style="color: #d32f2f;">Red (R)</strong></li>
-                        <li><strong style="color: #1976d2;">Blue (B)</strong></li>
-                        <li><strong style="color: #f57f17;">Yellow (Y)</strong></li>
-                        <li><strong style="color: #388e3c;">Green (G)</strong></li>
-                        <li><strong style="color: #f57c00;">Orange (O)</strong></li>
-                        <li><strong>White (W)</strong></li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
@@ -656,40 +518,9 @@
             W: "#ffffff"
         };
 
-        /* ===============================
-           LOCAL STORAGE FOR ASSIGNMENTS
-           =============================== */
+        let currentViewMosaic = null;
 
-        function getAssignments(mosaicId) {
-            const key = `mosaic_${mosaicId}_assignments`;
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : {};
-        }
-
-        function saveAssignments(mosaicId, assignments) {
-            const key = `mosaic_${mosaicId}_assignments`;
-            localStorage.setItem(key, JSON.stringify(assignments));
-        }
-
-        function assignCube(mosaicId, cubeIndex, studentName) {
-            const assignments = getAssignments(mosaicId);
-            assignments[cubeIndex] = {
-                student: studentName,
-                assignedAt: new Date().toISOString(),
-                completed: false
-            };
-            saveAssignments(mosaicId, assignments);
-        }
-
-        function markCubeCompleted(mosaicId, cubeIndex) {
-            const assignments = getAssignments(mosaicId);
-            if (assignments[cubeIndex]) {
-                assignments[cubeIndex].completed = true;
-                assignments[cubeIndex].completedAt = new Date().toISOString();
-                saveAssignments(mosaicId, assignments);
-            }
-        }
-
+ 
         /* ===============================
            CSRF TOKEN HELPER
            =============================== */
@@ -721,177 +552,133 @@
    
         let currentMosaicData = null;
 
-        function openCollaborationModal(mosaicId) {
-            fetch(`/cube_prep/mosaics/${mosaicId}/`)
-                .then(r => {
-                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                    return r.json();
-                })
-                .then(data => {
-                    currentMosaicData = data;
-                    document.getElementById('modal-title').textContent = 
-                        `Manage Collaboration: ${data.name}`;
-                    
-                    populateAssignmentGrid(data);
-                    updateProgressStats(data);
-                    
-                    document.getElementById('collaboration-modal').classList.add('active');
-                })
-                .catch(err => {
-                    console.error('Failed to load mosaic:', err);
-                    alert('Failed to load mosaic details');
-                });
-        }
 
-        function closeCollaborationModal() {
-            document.getElementById('collaboration-modal').classList.remove('active');
-            currentMosaicData = null;
-        }
+/* ===============================
+   SIMPLE VIEW CUBES MODAL
+   =============================== */
 
-        function populateAssignmentGrid(data) {
-            const grid = document.getElementById('cube-assignment-grid');
-            const assignments = getAssignments(data.id);
+   function openViewCubesModal(mosaicId) {
+    fetch(`/cube_prep/mosaics/${mosaicId}/`)
+        .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+
+            currentViewMosaic = data;   // 👈 store it
+
+            // Update modal title
+            document.getElementById('view-cubes-title').textContent = 
+                `${data.name}`;
+            document.getElementById('view-cubes-subtitle').textContent = 
+                `${data.cubes.length} cubes total`;
+            
+            // Populate the grid
+            const grid = document.getElementById('simple-cubes-grid');
             grid.innerHTML = '';
-
+            
+            // Calculate columns based on mosaic size
+            const mosaicCols = data.cubes_per_side;
+            let displayCols;
+            
+            if (mosaicCols <= 5) {
+                // Small mosaics: show same number of columns
+                displayCols = mosaicCols;
+            } else {
+                // Large mosaics: show half the columns (rounded up)
+                displayCols = Math.ceil(mosaicCols / 2);
+            }
+            
+            // Set grid columns dynamically
+            grid.style.gridTemplateColumns = `repeat(${displayCols}, minmax(140px, 1fr))`;
+            
             data.cubes.forEach((cube, idx) => {
                 const row = Math.floor(idx / data.cubes_per_side);
                 const col = idx % data.cubes_per_side;
                 
-                const assignment = assignments[idx];
-                const isAssigned = assignment && assignment.student;
-                const isCompleted = assignment && assignment.completed;
-
+                // Create card
                 const card = document.createElement('div');
-                card.className = 'cube-assignment-card';
-                if (isCompleted) card.classList.add('completed');
-                else if (isAssigned) card.classList.add('assigned');
-
-                const preview = document.createElement('div');
-                preview.className = 'cube-preview-small';
-                const canvas = renderCubePreview(cube, 60);
-                preview.appendChild(canvas);
-
+                card.className = 'simple-cube-card';
+                
+                // Render cube preview
+                const canvas = renderCubePreview(cube, 80);
+                card.appendChild(canvas);
+                
+                // Cube number
+                const number = document.createElement('div');
+                number.className = 'cube-card-number';
+                number.textContent = `Cube #${idx + 1}`;
+                card.appendChild(number);
+                
+                // Position
                 const position = document.createElement('div');
-                position.className = 'cube-position';
-                position.textContent = `Cube (${row}, ${col})`;
-
-                const status = document.createElement('div');
-                status.className = 'cube-status';
-                if (isCompleted) {
-                    status.classList.add('completed');
-                    status.textContent = '✓ Completed';
-                } else if (isAssigned) {
-                    status.classList.add('assigned');
-                    status.textContent = '⏳ Assigned';
-                } else {
-                    status.classList.add('unassigned');
-                    status.textContent = '○ Unassigned';
-                }
-
-                const student = document.createElement('div');
-                student.className = 'cube-student';
-                student.textContent = isAssigned 
-                    ? `Student: ${assignment.student}`
-                    : 'No student assigned';
-
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'assign-input';
-                input.placeholder = 'Student name...';
-                input.value = isAssigned ? assignment.student : '';
-
-                const assignBtn = document.createElement('button');
-                assignBtn.className = 'assign-btn';
-                assignBtn.textContent = isAssigned ? 'Update' : 'Assign';
-                assignBtn.onclick = () => {
-                    const name = input.value.trim();
-                    if (name) {
-                        assignCube(data.id, idx, name);
-                        populateAssignmentGrid(data);
-                        updateProgressStats(data);
-                    }
-                };
-
-                const focusBtn = document.createElement('button');
-                focusBtn.className = 'focus-btn';
-                focusBtn.textContent = '🔍 View This Cube';
-                focusBtn.onclick = () => showFocusCube(data, idx);
-
-                card.appendChild(preview);
+                position.className = 'cube-card-position';
+                position.textContent = `Row ${row + 1}, Col ${col + 1}`;
                 card.appendChild(position);
-                card.appendChild(status);
-                card.appendChild(student);
-                card.appendChild(input);
-                card.appendChild(assignBtn);
-                card.appendChild(focusBtn);
-
+                
                 grid.appendChild(card);
             });
-        }
-
-        function updateProgressStats(data) {
-            const assignments = getAssignments(data.id);
-            const total = data.cubes.length;
-            let assigned = 0;
-            let completed = 0;
-
-            Object.values(assignments).forEach(a => {
-                if (a.student) assigned++;
-                if (a.completed) completed++;
-            });
-
-            document.getElementById('stat-total').textContent = total;
-            document.getElementById('stat-assigned').textContent = assigned;
-            document.getElementById('stat-completed').textContent = completed;
-
-            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-            const fill = document.getElementById('progress-fill');
-            fill.style.width = percent + '%';
-            fill.textContent = percent + '%';
-        }
-
-        /* ===============================
-           FOCUS MODAL
-           =============================== */
-
-        function showFocusCube(mosaicData, cubeIndex) {
-            const cube = mosaicData.cubes[cubeIndex];
-            const row = Math.floor(cubeIndex / mosaicData.cubes_per_side);
-            const col = cubeIndex % mosaicData.cubes_per_side;
-            const assignment = getAssignments(mosaicData.id)[cubeIndex];
-
-            document.getElementById('focus-modal-title').textContent = 
-                `${mosaicData.name} - Cube to Reproduce`;
-            document.getElementById('focus-modal-position').textContent = 
-                `Position: Row ${row}, Column ${col}`;
-            document.getElementById('focus-student-name').textContent = 
-                assignment && assignment.student ? assignment.student : 'Not assigned';
-
-            const canvas = document.getElementById('focus-cube-canvas');
-            const ctx = canvas.getContext('2d');
             
-            const stickerSize = 60;
-            canvas.width = stickerSize * 3;
-            canvas.height = stickerSize * 3;
+            // Show modal
+            document.getElementById('view-cubes-modal').classList.add('active');
+        })
+        .catch(err => {
+            console.error('Failed to load mosaic:', err);
+            alert('Failed to load mosaic cubes');
+        });
+}
 
-            cube.forEach((row, i) => {
-                row.forEach((color, j) => {
-                    ctx.fillStyle = colorMap[color] || "#ccc";
-                    ctx.fillRect(j * stickerSize, i * stickerSize, stickerSize, stickerSize);
-                    
-                    ctx.strokeStyle = "#000";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(j * stickerSize, i * stickerSize, stickerSize, stickerSize);
-                });
-            });
+function closeViewCubesModal() {
+    document.getElementById('view-cubes-modal').classList.remove('active');
+}
+function closeViewCubesModal() {
+    document.getElementById('view-cubes-modal').classList.remove('active');
+}
 
-            document.getElementById('focus-modal').classList.add('active');
+// Fixed downloadTeacherPDF function
+function downloadTeacherPDF() {
+    if (!currentViewMosaic) {
+        alert("No mosaic loaded.");
+        return;
+    }
+
+    console.log("Downloading PDF for mosaic:", currentViewMosaic.id, currentViewMosaic.name);
+
+    // Create FormData with mosaic_id
+    const formData = new FormData();
+    formData.append("mosaic_id", currentViewMosaic.id);
+
+    fetch("/cube_prep/teacher-pdf/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        },
+        body: formData  // Send FormData, not JSON
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        return response.blob();
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${currentViewMosaic.name}_teacher.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
 
-        function closeFocusModal() {
-            document.getElementById('focus-modal').classList.remove('active');
-        }
-
+        window.URL.revokeObjectURL(url);
+        console.log("✅ PDF downloaded successfully");
+    })
+    .catch(err => {
+        console.error("PDF error:", err);
+        alert("Failed to generate PDF: " + err.message);
+    });
+}
         /* ===============================
            RENDER HELPERS
            =============================== */
@@ -1018,10 +805,12 @@
                                 const actions = document.createElement("div");
                                 actions.className = "mosaic-actions";
 
-                                const viewBtn = document.createElement("button");
-                                viewBtn.className = "view-btn";
-                                viewBtn.textContent = "Edit";
-                                viewBtn.onclick = (e) => {
+                                const editBtn = document.createElement("button");
+                                editBtn.className = "edit-btn";
+                                editBtn.textContent = "Edit";
+                                editBtn.style.background = "#0000FF";
+
+                                editBtn.onclick = (e) => {
                                     e.stopPropagation();
                                     loadMosaic(m.id);
                                 };
@@ -1035,16 +824,16 @@
                                     duplicateMosaic(m.id);
                                 };
 
-                                const assignBtn = document.createElement("button");
-                                assignBtn.textContent = "Manage";
-                                assignBtn.onclick = (e) => {
+                                const viewBtn = document.createElement("button");
+                                viewBtn.textContent = "View Cubes";
+                                viewBtn.onclick = (e) => {
                                     e.stopPropagation();
-                                    openCollaborationModal(m.id);
+                                    openViewCubesModal(m.id);
                                 };
 
-                                actions.appendChild(viewBtn);
+                                actions.appendChild(editBtn);
                                 actions.appendChild(duplicateBtn);
-                                actions.appendChild(assignBtn);
+                                actions.appendChild(viewBtn);
                                 info.appendChild(actions);
 
                                 thumb.appendChild(info);
@@ -1123,7 +912,7 @@ for (let r = 0; r < rows; r++) {
 
         const label = document.createElement("div");
         label.className = "cube-label";
-        label.textContent = `(${r},${c})`;
+        label.textContent = `(${r+1},${c+1})`;
         cubeDiv.appendChild(label);
 
         for (let i = 0; i < 3; i++) {
@@ -1185,6 +974,7 @@ updateJSON();
             saveBtn.textContent = "💾 Update Mosaic";
         });
 }
+
 
 
 function duplicateMosaic(id) {
@@ -1295,6 +1085,9 @@ fetch("/cube_prep/save-mosaic/", {
         cols = 3;
         initMosaic();
         loadMosaicPreviews();
+
+
+
     </script>
 
 </body>

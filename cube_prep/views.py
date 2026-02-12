@@ -7,8 +7,12 @@ import json
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
+from django.http import HttpResponse
+from io import BytesIO
 from .models import Cube, Mosaic, MosaicCube
+from django.http import HttpResponse
+from .models import Mosaic
+from .pdf_generator import generate_teacher_pdf
 
 
 # --- Views ---
@@ -230,3 +234,85 @@ def cube_face_moves_view(request):
             return JsonResponse({"success": False, "error": str(e)})
 
     return JsonResponse({"success": False, "error": "POST request required"})
+
+from reportlab.graphics.shapes import Drawing, Rect
+
+
+def draw_cube_face(cube, size=70):
+    """
+    Draws a real 3x3 cube face from cube.colors JSON.
+    """
+    square_size = size / 3
+    d = Drawing(size, size)
+
+    for row in range(3):
+        for col in range(3):
+            color_letter = cube.colors[row][col]
+            fill = COLOR_MAP.get(color_letter, rl_colors.grey)
+
+            x = col * square_size
+            y = size - (row + 1) * square_size
+
+            square = Rect(
+                x,
+                y,
+                square_size,
+                square_size,
+                fillColor=fill,
+                strokeColor=rl_colors.black
+            )
+            d.add(square)
+
+    return d
+
+
+@csrf_exempt
+def teacher_pdf(request):
+    """
+    Generate PDF for a mosaic.
+    Accepts both GET and POST with mosaic_id parameter.
+    """
+    print("\n" + "="*70)
+    print("TEACHER_PDF CALLED")
+    print("Method:", request.method)
+    print("GET params:", request.GET)
+    print("POST params:", request.POST)
+    print("="*70)
+    
+    # Get mosaic_id from either POST or GET
+    mosaic_id = None
+    if request.method == "POST":
+        mosaic_id = request.POST.get("mosaic_id")
+    else:
+        mosaic_id = request.GET.get("mosaic_id")
+    
+    print(f"Extracted mosaic_id: {mosaic_id}")
+    
+    if not mosaic_id:
+        print("❌ No mosaic_id provided")
+        return HttpResponse("Missing mosaic_id parameter", status=400)
+    
+    try:
+        # Fetch the mosaic
+        mosaic = Mosaic.objects.prefetch_related("mosaiccubes__cube").get(id=mosaic_id)
+        print(f"✅ Found mosaic: {mosaic.name} (ID: {mosaic.id})")
+        
+        # Generate PDF
+        pdf_buffer = generate_teacher_pdf(mosaic)
+        print(f"✅ PDF generated successfully")
+        print("="*70 + "\n")
+        
+        # Return PDF response
+        response = HttpResponse(pdf_buffer, content_type="application/pdf")
+        response['Content-Disposition'] = f'attachment; filename="{mosaic.name}_teacher.pdf"'
+        return response
+        
+    except Mosaic.DoesNotExist:
+        print(f"❌ Mosaic {mosaic_id} not found")
+        return HttpResponse(f"Mosaic with ID {mosaic_id} not found", status=404)
+    except Exception as e:
+        print(f"❌ ERROR generating PDF: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        print("="*70 + "\n")
+        return HttpResponse(f"Error generating PDF: {str(e)}", status=500)
