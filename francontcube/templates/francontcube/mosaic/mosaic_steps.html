@@ -1,0 +1,258 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Étape – Face solide{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+        <h1 class="display-4">🧩 Préparer une face solide</h1>
+        <p class="lead">
+            Centre → Croix → Coins
+        </p>
+    </div>
+
+
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states (only shown if any are missing) -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+        <p>
+            Pour une mosaïque simple (comme un drapeau),
+            chaque cube doit avoir UNE face d’une seule couleur.
+        </p>
+        <p>
+            Par exemple :
+            rouge, bleu, blanc, vert, jaune ou orange.
+        </p>
+        <p>
+            Puisque le blanc est commun à chaque drapeau ci-dessus, dans cette exemple nous allons préparer une face blanche sans se preoccupé avec le reste du cube.
+        </p>
+        </div>
+    </div>
+
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔍 Étape 1 : Trouve le bon centre</h3>
+        <p>
+            Le centre est la pièce du milieu.
+            Il ne bouge jamais.
+        </p>
+        <p>
+            La couleur du centre sera la couleur de toute ta face.
+        </p>
+        <p>
+            👉 Si ton centre est bleu, ta face sera bleue !
+        </p>
+
+    </div>
+    
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔍 Étape 2 : Faire la croix</h3>
+        <p>
+
+        Maintenant, nous allons placer les 4 arêtes
+        autour du centre.
+    </p>
+    <p>
+        Les arêtes sont les pièces avec 2 couleurs.
+    </p>
+    <p>
+        Place-les pour former une croix autour du centre.
+    </p>
+
+    </div>
+
+    <!-- Section Algorithmes -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🔄 Étape 3 : Insère 4 Coins</h3>
+        <p>Une fois le coin trouvé et positionné dans la couche du haut, utilise l'algorithme approprié.</p>
+
+        <!-- Cas 1: Blanc à droite -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-success">✅ Cas 1 : Le blanc est sur la face de DROITE</h5>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-1"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+                    <pre>
+                        case_1_state = {{ case_1_state }}
+                        case_2_state = {{ case_2_state }}
+                        case_3_state = {{ case_3_state }}
+                        </pre>
+                    <!-- Algorithm: R U R' U' -->
+                    <div class="text-center p-3 bg-white rounded border border-success border-2">
+                        <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                            <svg class="move-icon"><use href="#R"/></svg>
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#R-prime"/></svg>
+                            <svg class="move-icon"><use href="#U-prime"/></svg>
+                        </div>
+                        
+                        <p class="mt-2 mb-0"><small>Pas nécessaire de faire le U' de la fin!</small></p>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Cas 2: Blanc devant -->
+        <div class="border rounded p-3 mb-3 bg-light">
+            <h5 class="text-primary">✅ Cas 2 : Le blanc est sur la face de DEVANT</h5>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-2"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+                    <div class="text-center p-3 bg-white rounded border border-primary border-2">
+                        <div class="d-flex justify-content-center align-items-center gap-2 my-2 flex-wrap">
+                            <svg class="move-icon"><use href="#U"/></svg>
+                            <svg class="move-icon"><use href="#R"/></svg>
+                            <svg class="move-icon"><use href="#U-prime"/></svg>
+                            <svg class="move-icon"><use href="#R-prime"/></svg>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Cas 3: Blanc en haut -->
+        <div class="border rounded p-3 bg-light">
+            <h5 class="text-warning">⚠️ Cas 3 : Le blanc est sur la face du HAUT</h5>
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <div id="cube-case-3"></div>
+                    <p class="mt-2"><small>Position de départ</small></p>
+                </div>
+                <div class="col-md-8">
+                  <div class="text-center p-3 bg-white rounded border border-primary border-2">
+                        <svg class="move-icon"><use href="#R"/></svg>
+                        <svg class="move-icon"><use href="#U2"/></svg>
+                        <svg class="move-icon"><use href="#R-prime"/></svg>
+                        <svg class="move-icon"><use href="#U-prime"/></svg>
+                        <svg class="move-icon"><use href="#R"/></svg>
+                        <svg class="move-icon"><use href="#U"/></svg>
+                        <svg class="move-icon"><use href="#R-prime"/></svg>
+                        <p class="mt-2 mb-0"><small>Remarque bien que le R U2 R' U' change l'oriention du cube pour bien l'insérer avec le R U R'</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+        <h4 class="text-success text-center mt-4">
+            🎉 Bravo ! Ta face solide est terminée !
+        </h4>
+    
+
+   
+
+    <!-- ENCOURAGEMENT -->
+    <div class="text-center mt-5">
+        <h4>
+            🧩 Chaque cube terminé aide à construire le grand dessin !
+        </h4>
+    </div>
+
+</div>
+<style>
+    .cube-small svg { 
+        max-width: 275px; 
+        height: auto; 
+    }
+    
+    #cube-case-1 svg, 
+    #cube-case-2 svg, 
+    #cube-case-3 svg { 
+        max-width: 200px; 
+        height: auto; 
+    }
+    
+    .move-icon { 
+        width: 64px; 
+        height: 86px; 
+    }
+    
+    @media (max-width: 768px) {
+        .cube-small svg { 
+            max-width: 200px; 
+        }
+        
+        #cube-case-1 svg, 
+        #cube-case-2 svg, 
+        #cube-case-3 svg { 
+            max-width: 150px; 
+        }
+        
+        .move-icon { 
+            width: 48px; 
+            height: 64px; 
+        }
+    }
+    </style>
+    <!-- Script d'initialisation de la page -->
+<script type="module">
+    import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+  
+    function mountCube(containerId, state) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = ''; // Clear any existing content
+      
+      // If state is missing, show a placeholder
+      if (!state) {
+        container.innerHTML = `
+          <div class="alert alert-secondary text-center py-4">
+            <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+            <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+            <small class="text-muted">Create the CubeState in your admin tool</small>
+          </div>
+        `;
+        return;
+      }
+      
+      const template = document.getElementById("cube-template");
+      const clone = template.content.cloneNode(true);
+      container.appendChild(clone);
+  
+      const svg = container.querySelector("svg");
+      renderCube(svg, state);
+    }
+  
+    document.addEventListener("DOMContentLoaded", () => {
+      // Mount all cubes
+      //mountCube("cube-goal", {{ goal_state|safe }});
+      
+      // The 3 algorithm cases
+      mountCube("cube-case-1", {{ case_1_state|safe }});
+      mountCube("cube-case-2", {{ case_2_state|safe }});
+      mountCube("cube-case-3", {{ case_3_state|safe }});
+    });
+  </script>
+{% endblock %}

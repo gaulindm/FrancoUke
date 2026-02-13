@@ -4,6 +4,7 @@ Francontcube views module.
 This module organizes views into a clean directory structure:
 - base.py: Reusable utilities and base classes
 - home.py: Home page and legacy views
+- mosaic/: Pages for preparing mosaic  #NEW
 - cubienewbie/: Apprenti Cubi method views (8 step views)
 - beginner/: Beginner method views
 - cfop/: CFOP method views
@@ -17,6 +18,7 @@ All views are exported from this module for easy URL routing.
 # ============================================================
 from .home import (
     home,
+    mosaic,
     method_beginner,
     method_f2l,
     method_roux,
@@ -26,6 +28,16 @@ from .home import (
     ressources3par3,
     tutorial_step,
 )
+
+# ============================================================
+# MOSAIC preparation # NEW
+# ============================================================
+from .mosaic.main import mosaic
+from .mosaic.about import about as about
+from .mosaic.mosaic_steps import mosaic_steps as mosaic_steps
+
+
+
 
 # ============================================================
 # CUBIE NEWBIE METHOD
@@ -98,6 +110,12 @@ __all__ = [
     'videos',
     'ressources3par3',
     'tutorial_step',
+
+    # Mosaic ****** NEW *******
+
+    'mosaic',
+    'about',
+    'mosaic_steps',
     
     # Cubie Newbie
     'method_cubienewbie',

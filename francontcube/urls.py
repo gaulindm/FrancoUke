@@ -34,6 +34,15 @@ urlpatterns = [
     path("ressources3par3/", views.ressources3par3, name="ressources3par3"),
     
     # ============================================================
+    # MOSAIC
+    # ============================================================
+    path('mosaic/', views.mosaic, name='mosaic'),
+    path('mosaic/about/', views.about, name='about'),
+    path('mosaic/mosaic_steps/', views.mosaic_steps, name='mosiac_steps'),
+
+
+
+    # ============================================================
     # CUBIE NEWBIE METHOD
     # ============================================================
     path('methods/cubienewbie/', views.method_cubienewbie, name='method_cubienewbie'),

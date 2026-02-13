@@ -1,4 +1,5 @@
 """
+francontcube/views/home.py
 Home page and legacy views for Francontcube.
 
 Contains:
@@ -19,11 +20,11 @@ def home(request):
     """
     menu = [
         {
-            'name': 'Training Hub',
-            'desc': 'Exercice tes algorithme et compare tes temps',
+            'name': 'Mosaique',
+            'desc': 'Assemble des cubes pour former une mosaique',
             'icon': 'bi-stopwatch',
             'logo': None,
-            'url': '/training/',
+            'url': '/francontcube/mosaic/',
             'available': True,
         },
         {
@@ -48,6 +49,14 @@ def home(request):
             'icon': 'bi-lightning',
             'logo': None,
             'url': '/francontcube/methods/cfop/',
+            'available': True,
+        },
+                {
+            'name': 'Training Hub',
+            'desc': 'Exercice tes algorithme et compare tes temps',
+            'icon': 'bi-stopwatch',
+            'logo': None,
+            'url': '/training/',
             'available': True,
         },
         {
@@ -80,7 +89,22 @@ def home(request):
 
 
 # ============================================================
-# OTHER METHODS (Coming Soon)
+# MOSAIC 
+# ============================================================
+
+def mosaic(request):
+    """
+    A few pages about creating rubik's mosaic.
+    
+    TODO: Add about and steps pages.
+    """
+    return render(request, 'francontcube/mosaic/index.html')
+
+
+
+
+# ============================================================
+# METHODS 
 # ============================================================
 
 def method_beginner(request):

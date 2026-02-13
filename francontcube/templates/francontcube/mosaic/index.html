@@ -1,0 +1,114 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Méthode cubie newbie – Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Load the SVG template -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <h1 class="text-center mb-4">PREPARATION DE MOSAIC</h1>
+    <p class="lead text-center mb-5">
+        Une méthode simple et progressive pour apprendre à résoudre votre premier Rubik's Cube.
+    </p>
+
+    <div class="row g-4">
+
+        {% for step in steps %}
+        <div class="col-md-4">
+            <div class="card cube-card h-100 p-4 text-center">
+
+                <h4>{{ step.name }}</h4>
+                <p class="text-muted">{{ step.desc }}</p>
+
+                <!-- Cube State Display (if available) - NOW ABOVE BUTTON -->
+                {% if step.cube_state %}
+                <div class="mb-3 mt-auto">
+                    <div id="cube-step-{{ forloop.counter }}" class="cube-display"></div>
+                </div>
+                {% else %}
+                <!-- Icon fallback for intro pages -->
+                <div class="mb-3 mt-auto">
+                    {% if step.logo %}
+                        <img src="{% static step.logo %}" class="brand-logo">
+                    {% elif step.icon %}
+                        <i class="bi {{ step.icon }} fs-1 brand-green"></i>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if step.available %}
+                <a href="{{ step.url }}" class="btn btn-outline-primary">Voir</a>
+                {% else %}
+                <button class="btn btn-secondary" disabled>À venir</button>
+                {% endif %}
+
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- Styles CSS -->
+<style>
+.cube-display svg {
+    max-width: 180px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.cube-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.cube-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+/* Push cube/icon to bottom, above button */
+.mt-auto {
+    margin-top: auto !important;
+}
+
+@media (max-width: 768px) {
+    .cube-display svg {
+        max-width: 150px;
+    }
+}
+</style>
+
+<!-- Script JavaScript -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    if (!container || !state) return;
+    
+    container.innerHTML = '';
+
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    {% for step in steps %}
+      {% if step.cube_state %}
+        mountCube("cube-step-{{ forloop.counter }}", {{ step.cube_state|safe }});
+      {% endif %}
+    {% endfor %}
+  });
+</script>
+
+{% endblock %}
