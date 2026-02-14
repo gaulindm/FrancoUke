@@ -54,6 +54,7 @@ def generate_teacher_pdf(mosaic, cols=5, rows=5):
     """
     Generates a PDF for a given Mosaic instance.
     Cubes are numbered sequentially based on their grid position.
+    Each cube shows: Mosaic Name, Cube Number, Row/Col position
     
     Page calculations:
     - Letter: 612 x 792 points
@@ -74,18 +75,32 @@ def generate_teacher_pdf(mosaic, cols=5, rows=5):
     elements = []
     styles = getSampleStyleSheet()
     
-    # Larger text styles now that we have more room
+    # Style for mosaic name (small, subtle)
+    mosaic_name_style = ParagraphStyle(
+        'MosaicName',
+        parent=styles['Normal'],
+        fontSize=7,         # Small
+        alignment=TA_CENTER,
+        spaceAfter=2,       # Minimal space after
+        spaceBefore=1,
+        leading=8,
+        textColor=rl_colors.HexColor('#999999'),  # Light gray
+        fontName='Helvetica-Oblique',  # Italic for distinction
+    )
+    
+    # Style for cube number (larger, bold)
     cube_number_style = ParagraphStyle(
         'CubeNumber',
         parent=styles['Normal'],
         fontSize=10,        # Larger for visibility
         alignment=TA_CENTER,
-        spaceAfter=4,       # More space after
-        spaceBefore=2,
+        spaceAfter=3,       # Space after
+        spaceBefore=0,
         leading=12,
         fontName='Helvetica-Bold',
     )
     
+    # Style for position info
     position_style = ParagraphStyle(
         'Position',
         parent=styles['Normal'],
@@ -109,6 +124,11 @@ def generate_teacher_pdf(mosaic, cols=5, rows=5):
     # Get total columns from mosaic to calculate cube numbers correctly
     total_cols = mosaic.cube_cols
     
+    # Get mosaic name (truncate if too long)
+    mosaic_name = mosaic.name
+    if len(mosaic_name) > 20:
+        mosaic_name = mosaic_name[:17] + "..."
+    
     # Calculate exact dimensions
     usable_width = letter[0] - 40   # 612 - 40 = 572
     usable_height = letter[1] - 40  # 792 - 40 = 752
@@ -118,6 +138,7 @@ def generate_teacher_pdf(mosaic, cols=5, rows=5):
     print(f"\n{'='*60}")
     print(f"PDF Generation - Layout Calculations")
     print(f"{'='*60}")
+    print(f"Mosaic name: {mosaic.name}")
     print(f"Page size: {letter[0]} x {letter[1]} points")
     print(f"Usable area: {usable_width} x {usable_height} points")
     print(f"Grid: {cols} x {rows} ({cubes_per_page} cubes per page)")
@@ -148,9 +169,10 @@ def generate_teacher_pdf(mosaic, cols=5, rows=5):
                     # Cube drawing (48pt)
                     cube_drawing = draw_cube_face(cube, size=48)
 
-                    # Inner table with position-based numbering
+                    # Inner table with mosaic name, cube number, and position
                     inner_table = Table(
                         [
+                            [Paragraph(f"<i>{mosaic_name}</i>", mosaic_name_style)],
                             [Paragraph(f"<b>Cube {cube_number}</b>", cube_number_style)],
                             [Paragraph(f"Row {real_row + 1} : Col {real_col + 1}", position_style)],
                             [cube_drawing],
@@ -160,8 +182,8 @@ def generate_teacher_pdf(mosaic, cols=5, rows=5):
                     inner_table.setStyle(TableStyle([
                         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                        ('TOPPADDING', (0, 0), (-1, -1), 2),
-                        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                        ('TOPPADDING', (0, 0), (-1, -1), 1),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
                         ('LEFTPADDING', (0, 0), (-1, -1), 2),
                         ('RIGHTPADDING', (0, 0), (-1, -1), 2),
                     ]))
@@ -179,7 +201,7 @@ def generate_teacher_pdf(mosaic, cols=5, rows=5):
             rowHeights=[cell_height] * rows,
         )
         table.setStyle(TableStyle([
-            ('GRID', (0, 0), (-1, -1), 10, rl_colors.lightgrey),
+            ('GRID', (0, 0), (-1, -1), 0.5, rl_colors.grey),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('TOPPADDING', (0, 0), (-1, -1), 2),

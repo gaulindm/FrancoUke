@@ -3,8 +3,9 @@
 
 {% block content %}
 
-<!-- Charger le template SVG (caché) -->
-{% include "cube/partials/_cube_svg.html" %}
+<!-- ✅ CHANGEMENT 1: Utilise le nouveau template avec orientations L/R -->
+{% include "cube/partials/_cube_svg_RL.html" %}
+
 <div class="container py-5">
     <!-- Header -->
     <div class="text-center mb-5">
@@ -13,7 +14,6 @@
         </h1>
         <p class="lead text-muted">{{ page_description }}</p>
         
-        <!-- ✅ AMÉLIORATION: Lien vers la page d'intro -->
         {% if current_category %}
             <div class="alert alert-info mt-4" role="alert">
                 <i class="bi bi-lightbulb"></i> <strong>Conseil :</strong> 
@@ -30,7 +30,7 @@
         {% endif %}
     </div>
 
-    <!-- ✅ SIMPLIFICATION: Navigation catégories compacte -->
+    <!-- Navigation catégories -->
     <div class="card mb-5 shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
@@ -39,7 +39,6 @@
             <span class="badge bg-light text-primary">{{ total_cases }} cas au total</span>
         </div>
         <div class="card-body">
-            <!-- ✅ VERSION COMPACTE: Boutons au lieu de grandes cartes -->
             <div class="d-flex flex-wrap gap-2 justify-content-center">
                 {% for cat in categories %}
                 <a href="{{ cat.url }}" 
@@ -53,7 +52,6 @@
                 {% endfor %}
             </div>
             
-            <!-- ✅ AJOUT: Lien vers explication des catégories -->
             <div class="text-center mt-3">
                 <a href="{% url 'francontcube:cfop_f2l_intro' %}#categories" 
                    class="btn btn-link btn-sm text-decoration-none">
@@ -73,7 +71,18 @@
                         <h4 class="mb-0">
                             <i class="bi bi-box"></i> {{ cube_state.name }}
                             
-                            <!-- ✅ AJOUT: Badge de difficulté -->
+                            <!-- ✅ AJOUT: Badge d'orientation (main gauche/droite) -->
+                            {% if cube_state.hand_orientation == 'left' %}
+                            <span class="badge bg-info float-end me-2">
+                                👈 Main Gauche
+                            </span>
+                            {% elif cube_state.hand_orientation == 'right' %}
+                            <span class="badge bg-success float-end me-2">
+                                👉 Main Droite
+                            </span>
+                            {% endif %}
+                            
+                            <!-- Badge de difficulté -->
                             {% if cube_state.difficulty %}
                             <span class="badge float-end 
                                 {% if cube_state.difficulty == 'facile' %}bg-success
@@ -88,7 +97,11 @@
                     <div class="card-body">
                         <!-- Cube Visualization -->
                         <div class="cube-container mb-4 text-center">
-                            <div id="cube-{{ slug }}" class="cube-visualization"></div>
+                            <!-- ✅ CHANGEMENT 2: Ajoute data-orientation pour JavaScript -->
+                            <div id="cube-{{ slug }}" 
+                                 class="cube-visualization"
+                                 data-orientation="{{ cube_state.hand_orientation|default:'right' }}">
+                            </div>
                         </div>
                         
                         <!-- Description -->
@@ -128,9 +141,6 @@
             {% endif %}
         {% endfor %}
     </div>
-    
-    <!-- ✅ SUPPRIMÉ: Section "Conseils" (déjà dans f2l_intro.html) -->
-    <!-- ✅ REMPLACÉ PAR: Quick Tips + lien vers intro -->
     
     <div class="card mt-5 border-info bg-light">
         <div class="card-body">
@@ -186,6 +196,17 @@
         justify-content: center;
     }
     
+    /* ✅ AJOUT: Bordure colorée selon orientation */
+    .cube-container[data-orientation="left"] {
+        background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%);
+        border: 2px solid #3498db;
+    }
+    
+    .cube-container[data-orientation="right"] {
+        background: linear-gradient(135deg, #e8f5e9 0%, #81c784 100%);
+        border: 2px solid #2ecc71;
+    }
+    
     .cube-visualization svg {
         max-width: 200px;
         height: auto;
@@ -209,40 +230,16 @@
         font-size: 1.25rem;
     }
     
-    /* ✅ AJOUT: Style pour les boutons de catégorie */
     .btn-sm .badge {
         font-size: 0.7rem;
         margin-left: 0.25rem;
     }
 </style>
 
+<!-- ✅ CHANGEMENT 3: Nouveau script avec support dual-orientation -->
 <script type="module">
-  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
-
-  function mountCube(containerId, state) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = '';
-
-    if (!state) {
-      container.innerHTML = `
-        <div class="alert alert-secondary text-center py-4">
-          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
-          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
-          <small class="text-muted">Create the CubeState in your admin tool</small>
-        </div>
-      `;
-      return;
-    }
-
-    const template = document.getElementById("cube-template");
-    const clone = template.content.cloneNode(true);
-    container.appendChild(clone);
-
-    const svg = container.querySelector("svg");
-    renderCube(svg, state);
-  }
+  // Import de la nouvelle fonction helper
+  import { mountCube } from "{% static 'cube/js/cube_helpers.js' %}";
 
   document.addEventListener("DOMContentLoaded", () => {
     const cubeStatesStr = '{{ cube_states_json|escapejs }}';
@@ -255,11 +252,19 @@
       return;
     }
     
+    // ✅ CHANGEMENT: Utilise l'orientation de chaque cas
     for (const [slug, state] of Object.entries(cubeStates)) {
       if (state && state.json_state) {
-        mountCube(`cube-${slug}`, state.json_state);
+        // Récupère l'orientation depuis le data-attribute ou utilise 'right' par défaut
+        const container = document.getElementById(`cube-${slug}`);
+        const orientation = container?.dataset.orientation || state.hand_orientation || 'right';
+        
+        // Monte le cube avec la bonne orientation
+        mountCube(`cube-${slug}`, state.json_state, orientation);
       }
     }
+    
+    console.log(`✅ ${Object.keys(cubeStates).length} cubes F2L montés avec orientations L/R`);
   });
 </script>
 
