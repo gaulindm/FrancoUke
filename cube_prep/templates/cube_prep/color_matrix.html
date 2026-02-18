@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cube Mosaic Editor - Collaborative</title>
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}Preparation d'une mosaique{% endblock %}
+
+{% block content %}
 
     <style>
         body { 
@@ -1089,6 +1089,4 @@ fetch("/cube_prep/save-mosaic/", {
 
 
     </script>
-
-</body>
-</html>
+{% endblock %}

@@ -77,18 +77,109 @@ class CubeState(models.Model):
     )
 
     def get_algorithm_svg(self):
-        """Generate SVG icons from algorithm string"""
+        """
+        Generate SVG icons from algorithm string.
+        Supports grouping notation:
+          ( )  → group-paren  → blue
+          [ ]  → group-bracket → orange
+        Moves outside groups render in the default black.
+
+        Example: (R U' R') (U' R U R') [U2 R U' R']
+        """
         if not self.algorithm or self.algorithm.strip() == '':
             return ''
-        
-        moves = self.algorithm.strip().split()
-        svg_list = []
-        
-        for move in moves:
-            svg_id = move.replace("'", "-prime").replace("2", "2")
-            svg_list.append(f'<svg class="move-icon"><use href="#{svg_id}"/></svg>')
-        
-        return mark_safe('\n                            '.join(svg_list))
+
+        import re
+
+        def move_to_svg(move, extra_class=''):
+            svg_id = move.replace("'", "-prime")
+            css = f'move-icon {extra_class}'.strip()
+            return f'<svg class="{css}" aria-label="{move}"><use href="#{svg_id}"/></svg>'
+
+        # Tokenise: split into paren groups, bracket groups, and bare moves.
+        # We walk char by char to handle spaces inside groups gracefully.
+        alg = self.algorithm.strip()
+
+        # Build a flat list of tokens:
+        #   {'type': 'group-paren'|'group-bracket'|'move', 'moves': [...]}
+        tokens = []
+        i = 0
+        while i < len(alg):
+            ch = alg[i]
+
+            if ch == '(':
+                # Collect until matching ')'
+                depth = 1
+                j = i + 1
+                while j < len(alg) and depth:
+                    if alg[j] == '(':
+                        depth += 1
+                    elif alg[j] == ')':
+                        depth -= 1
+                    j += 1
+                inner = alg[i+1:j-1].strip()
+                moves = [m for m in inner.split() if m]
+                tokens.append({'type': 'group-paren', 'moves': moves})
+                i = j
+
+            elif ch == '[':
+                depth = 1
+                j = i + 1
+                while j < len(alg) and depth:
+                    if alg[j] == '[':
+                        depth += 1
+                    elif alg[j] == ']':
+                        depth -= 1
+                    j += 1
+                inner = alg[i+1:j-1].strip()
+                moves = [m for m in inner.split() if m]
+                tokens.append({'type': 'group-bracket', 'moves': moves})
+                i = j
+
+            elif ch == ' ':
+                i += 1
+
+            else:
+                # Bare move — collect the full move token
+                j = i
+                while j < len(alg) and alg[j] not in (' ', '(', ')', '[', ']'):
+                    j += 1
+                move = alg[i:j].strip()
+                if move:
+                    tokens.append({'type': 'move', 'moves': [move]})
+                i = j
+
+        # Render tokens to HTML
+        parts = []
+        for token in tokens:
+            ttype = token['type']
+            moves = token['moves']
+
+            if ttype == 'group-paren':
+                icons = ''.join(move_to_svg(m, 'group-paren') for m in moves)
+                parts.append(
+                    f'<span class="move-group move-group--paren">'
+                    f'<span class="move-bracket">(</span>'
+                    f'{icons}'
+                    f'<span class="move-bracket">)</span>'
+                    f'</span>'
+                )
+
+            elif ttype == 'group-bracket':
+                icons = ''.join(move_to_svg(m, 'group-bracket') for m in moves)
+                parts.append(
+                    f'<span class="move-group move-group--bracket">'
+                    f'<span class="move-bracket">[</span>'
+                    f'{icons}'
+                    f'<span class="move-bracket">]</span>'
+                    f'</span>'
+                )
+
+            else:
+                # Bare move — no wrapper span
+                parts.append(move_to_svg(moves[0]))
+
+        return mark_safe('\n'.join(parts))
     
     
     def get_top_layer_colors(self):

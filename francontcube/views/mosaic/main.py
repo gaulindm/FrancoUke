@@ -38,9 +38,15 @@ def mosaic(request):
             "url": "/francontcube/mosaic/about/",
             "available": True,
             "cube_state": None  # No cube for intro
-        },
-        {
-            "name": "2 — Les mouvements pour preparer votre face",    
+        },{
+            "name": "2 — L'outil de preparation de la mosaique",    
+            "desc": "Desinez avec des points",
+            "icon": "bi-check-circle",
+            "url": "/cube_prep/color-matrix/",
+            "available": True,
+            "cube_state": None  # No cube for intro        
+        },{
+            "name": "3 — Les mouvements pour preparer votre face",    
             "desc": "Sans vous preocupper du reste du cube",
             "icon": "bi-check-circle",
             "url": "/francontcube/mosaic/mosaic_steps/",

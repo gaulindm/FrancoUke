@@ -15,37 +15,37 @@ F2L_CATEGORIES = {
         'icon': 'bi-star-fill',
         'color': 'success'
     },
-    'corner-right-edge-right': {
-        'name': 'Coin Droite, Arête Droite',
-        'description': 'Les deux pièces sur le même côté (droite)',
-        'slug_range': range(5, 9),  # f2l-05 to f2l-08
+    'disconnected-pairs': {
+        'name': 'disconnected-pairs',
+        'description': 'disconnected-pairs',
+        'slug_range': range(5, 14),  # f2l-05 to f2l-08
         'icon': 'bi-arrow-right',
         'color': 'primary'
     },
-    'corner-right-edge-front': {
-        'name': 'Coin Droite, Arête Devant',
-        'description': 'Pièces sur des côtés différents',
-        'slug_range': range(9, 13),  # f2l-09 to f2l-12
+    'corner-in-slot': {
+        'name': 'corner-in-slot',
+        'description': 'corner-in-slot',
+        'slug_range': range(15, 20),  # f2l-09 to f2l-12
         'icon': 'bi-arrows',
         'color': 'info'
     },
-    'corner-left-edge-left': {
-        'name': 'Coin Gauche, Arête Gauche',
-        'description': 'Miroir des cas 5-8 (côté gauche)',
+    'edge-in-slot': {
+        'name': 'edge-in-slot',
+        'description': 'edge-in-slot',
         'slug_range': range(13, 17),  # f2l-13 to f2l-16
         'icon': 'bi-arrow-left',
         'color': 'primary'
     },
-    'corner-left-edge-front': {
-        'name': 'Coin Gauche, Arête Devant',
-        'description': 'Miroir des cas 9-12',
+    'connected-pairs': {
+        'name': 'Connected-pairs',
+        'description': 'Connected-pairs',
         'slug_range': range(17, 21),  # f2l-17 to f2l-20
         'icon': 'bi-arrows',
         'color': 'info'
     },
-    'corner-in-slot': {
-        'name': 'Coin dans le Slot',
-        'description': 'Le coin est déjà inséré (mal orienté)',
+    'pieces_in_slot': {
+        'name': 'pieces_in_slot',
+        'description': 'pieces_in_slot',
         'slug_range': range(21, 29),  # f2l-21 to f2l-28
         'icon': 'bi-box-arrow-down',
         'color': 'warning'
