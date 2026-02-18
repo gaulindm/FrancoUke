@@ -62,10 +62,10 @@
     </div>
 
     <!-- F2L Cases Grid -->
-    <div class="row g-4">
+    <div class="row g-4 g-sm-4 g-2-mobile">
         {% for slug, cube_state in cube_states.items %}
             {% if cube_state %}
-            <div class="col-md-6">
+            <div class="col-6">
                 <div class="card shadow-sm h-100 f2l-case-card">
                     <div class="card-header bg-primary text-white">
                         <h4 class="mb-0">
@@ -196,7 +196,6 @@
         justify-content: center;
     }
     
-    /* ✅ AJOUT: Bordure colorée selon orientation */
     .cube-container[data-orientation="left"] {
         background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%);
         border: 2px solid #3498db;
@@ -211,34 +210,31 @@
         max-width: 200px;
         height: auto;
     }
-    
+
+    /* ─── Move icons ─── */
     .moves-preview {
-        min-height: 60px;
-        gap: 10px;              /* space BETWEEN groups and bare icons */
+        min-height: 50px;
+        gap: 10px;
         align-items: center;
     }
-    
-    /* Individual icon — default near-black */
+
     .move-icon {
-        width: 38px;
+        width: 48px;
         height: 48px;
         transition: transform 0.2s;
         color: #1a1a1a;
         flex-shrink: 0;
     }
-    
-    .move-icon:hover {
-        transform: scale(1.1);
-    }
 
-    /* ─── Group wrapper ─── */
+    .move-icon:hover { transform: scale(1.1); }
+
+    /* ─── Group wrappers ─── */
     .move-group {
         display: inline-flex;
         align-items: center;
-        gap: 1px;               /* tight spacing INSIDE a group */
+        gap: 1px;
     }
 
-    /* Bracket characters emitted by Python */
     .move-bracket {
         font-size: 2.2rem;
         font-weight: 300;
@@ -247,21 +243,78 @@
         user-select: none;
     }
 
-    /* Parenthesis group → Rubik's Blue */
     .move-group--paren .move-bracket { color: #0051A8; }
     .move-group--paren .move-icon    { color: #0051A8; }
-
-    /* Bracket group → Rubik's Red */
     .move-group--bracket .move-bracket { color: #C41E3A; }
     .move-group--bracket .move-icon    { color: #C41E3A; }
     
-    .card-header h4 {
-        font-size: 1.25rem;
-    }
-    
-    .btn-sm .badge {
-        font-size: 0.7rem;
-        margin-left: 0.25rem;
+    .card-header h4 { font-size: 1.25rem; }
+    .btn-sm .badge  { font-size: 0.7rem; margin-left: 0.25rem; }
+
+    /* ═══════════════════════════════════════════
+       MOBILE  — iPhone portrait (< 576px)
+       2 cards per row: everything scales down
+    ════════════════════════════════════════════ */
+    @media (max-width: 575px) {
+
+        /* Tighter row gap */
+        .row { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.5rem; }
+
+        /* Card header — smaller title, hide orientation badge */
+        .card-header h4 {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+        .card-header .badge {
+            font-size: 0.55rem;
+            padding: 0.2em 0.35em;
+        }
+        /* Hide the hand-orientation badge on mobile to save space */
+        .card-header .badge.bg-info,
+        .card-header .badge.bg-success { display: none !important; }
+
+        /* Cube container — tighter padding, shorter */
+        .cube-container {
+            padding: 0.6rem;
+            min-height: 90px;
+            border-radius: 8px;
+            margin-bottom: 0.5rem !important;
+        }
+        .cube-visualization svg { max-width: 110px; }
+
+        /* Hide description block on mobile */
+        .alert.alert-light.mb-3 { display: none !important; }
+
+        /* Algorithm section — hide the "Algorithme :" heading */
+        .algorithm-section h5 { display: none; }
+
+        /* Move icons — scale down */
+        .moves-preview {
+            gap: 4px;
+            padding: 0.4rem !important;
+            min-height: 36px;
+        }
+        .move-icon { width: 32px; height: 32px; }
+        .move-bracket { font-size: 1.5rem; }
+
+        /* Card body — tighter padding */
+        .card-body { padding: 0.5rem; }
+
+        /* Footer buttons — stack vertically, full width */
+        .card-footer { padding: 0.4rem; }
+        .card-footer .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            width: 100%;
+        }
+        .card-footer .btn {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.3rem;
+            width: 100%;
+        }
+        /* Hide button text labels, keep icons only */
+        .card-footer .btn span.d-none-mobile { display: none; }
     }
 </style>
 
