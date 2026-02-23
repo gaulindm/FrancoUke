@@ -17,6 +17,7 @@ class YellowFaceView(StepView):
     """
     
     template_name = "francontcube/methods/cubienewbie/yellow-face.html"
+    method_name = "Débutant"
     step_name = "Face Jaune"
     step_icon = "flower3"   
     

@@ -4,6 +4,9 @@ Beginner method overview page.
 
 from django.shortcuts import render
 from django.urls import reverse
+from cube.models import CubeState
+import json
+
 
 
 def method_beginner(request):
@@ -15,6 +18,16 @@ def method_beginner(request):
         {'name': 'Débutant', 'url': '', 'icon': 'star-fill'},  # Page actuelle, URL vide
     ]
     
+    # Helper function to get cube state safely
+    def get_cube_state(slug):
+        try:
+            state = CubeState.objects.get(slug=slug)
+            # json_state is already a dict (JSONField), just return it as JSON string
+            return json.dumps(state.json_state)
+        except CubeState.DoesNotExist:
+            return None
+
+
     steps = [
         {
             "name": "À propos",
@@ -31,6 +44,8 @@ def method_beginner(request):
             "url": reverse('francontcube:beginner_white_cross'),
             "available": True,
             "step_number": 1,
+            "cube_state": get_cube_state('white-cross-goal')
+
         },
         {
             "name": "Étape 2 : Les coins inférieurs",
@@ -39,6 +54,8 @@ def method_beginner(request):
             "url": reverse('francontcube:beginner_bottom_corners'),
             "available": True,
             "step_number": 2,
+            "cube_state": get_cube_state('bottom-corners-goal')
+
         },
         {
             "name": "Étape 3 : Les bords du milieu",
@@ -47,6 +64,8 @@ def method_beginner(request):
             "url": reverse('francontcube:beginner_second_layer'),
             "available": True,
             "step_number": 3,
+            "cube_state": get_cube_state('second-layer-goal')
+
         },
         {
             "name": "Étape 4 : La croix jaune",
@@ -55,6 +74,8 @@ def method_beginner(request):
             "url": reverse('francontcube:beginner_yellow_cross'),
             "available": True,
             "step_number": 4,
+            "cube_state": get_cube_state('yellow-cross-goal')
+
         },
         {
             "name": "Étape 5 : La face jaune",
@@ -63,6 +84,8 @@ def method_beginner(request):
             "url": reverse('francontcube:beginner_yellow_face'),
             "available": True,
             "step_number": 5,
+            "cube_state": get_cube_state('yellow-face-goal')
+
         },
         {
             "name": "Étape 6 : La permutation des coins",
@@ -71,6 +94,8 @@ def method_beginner(request):
             "url": reverse('francontcube:beginner_corner_permutation'),
             "available": True,
             "step_number": 6,
+            "cube_state": get_cube_state('corner-perm-goal')
+
         },
         {
             "name": "Étape 7 : La permutation des arêtes",    
@@ -79,6 +104,8 @@ def method_beginner(request):
             "url": reverse('francontcube:beginner_edge_permutation'),
             "available": True,
             "step_number": 7,
+            "cube_state": get_cube_state('edge-perm-goal-needsu')  # Final solved cube
+
         },
     ]
     

@@ -44,7 +44,7 @@
         </p>
 
         <div class="text-center mt-3">
-            <div id="cube-goal"></div>
+            <div id="cube-goal" class="cube-small"></div>
             <p class="mt-2"><small class="text-muted">La croix blanche complète avec les bonnes couleurs</small></p>
         </div>
     </div>
@@ -111,13 +111,13 @@
 
     <!-- Bouton de navigation -->
     <div class="text-center">
-        <a href="{% url 'francontcube:cubienewbie_daisy' %}" class="btn btn-outline-primary">
-            ← Retour : La marguerite
+        <a href="{% url 'francontcube:beginner_about' %}" class="btn btn-outline-primary">
+            ← Retour : A propos
         </a>
-        <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary ms-2">
+        <a href="{% url 'francontcube:method_beginner' %}" class="btn btn-outline-secondary ms-2">
             Vue d'ensemble
         </a>
-        <a href="{% url 'francontcube:cubienewbie_bottom_corners' %}" class="btn btn-success ms-2">
+        <a href="{% url 'francontcube:beginner_bottom_corners' %}" class="btn btn-success ms-2">
             Étape suivante : Les coins blancs →
         </a>
     </div>

@@ -16,7 +16,8 @@ class YellowCrossView(StepView):
     Just define the configuration and you're done!
     """
     
-    template_name = "francontcube/methods/cubienewbie/yellow-cross.html"
+    template_name = "francontcube/methods/beginner/yellow-cross.html"
+    method_name = "Débutant"
     step_name = "Croix jaune"
     step_icon = "flower3"
     
