@@ -241,7 +241,7 @@ class SongAdmin(admin.ModelAdmin):
     def get_view_on_site_url(self, obj):
         if obj is None or obj.pk is None:
             return None
-        return reverse("songbook:score_view", kwargs={"pk": obj.pk})
+        return reverse("songbook:chord_sheet", kwargs={"pk": obj.pk})
 
     def get_tags(self, obj):
         return ", ".join(obj.tags.names())

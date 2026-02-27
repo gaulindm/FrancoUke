@@ -112,10 +112,10 @@
                     <tr>
                         <!-- Song Title -->
                         <td>
-                            <a href="{% url 'songbook:score_view' song.id %}" 
+                            <a href="{% url 'songbook:chord_sheet' song.id %}" 
                                class="song-link"
                                title="{{ song.songTitle }}"
-                               aria-label="View score for {{ song.songTitle }}">
+                               aria-label="View chord sheet for {{ song.songTitle }}">
                                 {{ song.songTitle }}
                             </a>
                             

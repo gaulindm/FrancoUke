@@ -88,10 +88,10 @@
             {% for item in song_data %}
             <tr>
                 <td>
-                    <a href="{% url site_namespace|add:':score_view' item.song.id %}" 
+                    <a href="{% url site_namespace|add:':chord_sheet' item.song.id %}" 
                        class="song-link"
                        title="{{ item.song.songTitle }}"
-                       aria-label="View score for {{ item.song.songTitle }}">
+                       aria-label="Chord sheet for {{ item.song.songTitle }}">
                         {{ item.song.songTitle }}
                     </a>
                     

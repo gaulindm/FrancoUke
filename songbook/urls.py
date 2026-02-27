@@ -13,7 +13,7 @@ from songbook.views.pdf_views import (
 )
 
 from songbook.views.song_crud_views import (SongCreateView, SongUpdateView, SongDeleteView, toggle_privacy, clone_song, make_public, make_private,)
-from songbook.views.song_display_views import (LandingView, UserSongListView, ScoreView, SongListView,)
+from songbook.views.song_display_views import (LandingView, UserSongListView, ChordSheetView, SongListView,)
 from songbook.views.chord_views import (chord_dictionary, serve_chords_json, get_chord_definition,)
 
 app_name = "songbook"
@@ -25,7 +25,7 @@ urlpatterns = [
     # 🔹 Songs
     path("songs/", SongListView.as_view(), name="song_list"),
     path("songs/new/", SongCreateView.as_view(), name="song_create"),
-    path("songs/<int:pk>/", ScoreView.as_view(), name="score_view"),
+    path("songs/<int:pk>/", ChordSheetView.as_view(), name="chord_sheet"),
     path("songs/<int:pk>/edit/", SongUpdateView.as_view(), name="song_update"),
     path("songs/<int:pk>/delete/", SongDeleteView.as_view(), name="song_delete"),
 

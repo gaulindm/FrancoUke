@@ -1,4 +1,4 @@
-<!-- songbook/song_simplescore.html -->
+<!-- songbook/song_chord_sheet.html -->
 {% extends base_template|default:"base.html" %}
 {% load static %}
 
@@ -10,7 +10,7 @@
         <!-- Print Preview -->
         <div class="col-md-8 col-12 p-2 bg-light d-flex justify-content-center align-items-center">
             <iframe id="pdf-preview"
-                src="{% url site_namespace|add:':preview_pdf' score.id %}?transpose=0"
+                src="{% url site_namespace|add:':preview_pdf' chord_sheet.id %}?transpose=0"
                 width="100%"
                 height="80%"
                 style="border: none; min-height: 90vh;">

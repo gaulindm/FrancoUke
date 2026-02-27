@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-
+from django.core.exceptions import PermissionDenied
 from songbook.models import Song
 from songbook.context_processors import site_context
 from songbook.parsers import parse_song_data
@@ -60,7 +60,7 @@ class SongCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         site_name = self.object.site_name or site_context(self.request)["site_name"]
-        return reverse(f"{site_name.lower()}:score_view", kwargs={"pk": self.object.pk})
+        return reverse(f"{site_name.lower()}:chord_sheet", kwargs={"pk": self.object.pk})
 
 
 class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -94,6 +94,8 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return DynamicSongForm
 
     def test_func(self):
+        if self.request.user.is_staff:
+            return True
         song = self.get_object()
         return self.request.user == song.contributor
 
@@ -123,12 +125,14 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_success_url(self):
         site_name = self.object.site_name or site_context(self.request)["site_name"]
-        return reverse(f"{site_name.lower()}:score_view", kwargs={"pk": self.object.pk})
+        return reverse(f"{site_name.lower()}:chord_sheet", kwargs={"pk": self.object.pk})
 
 class SongDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Song
 
     def test_func(self):
+        if self.request.user.is_staff:
+            return True
         song = self.get_object()
         return self.request.user == song.contributor
     
@@ -143,8 +147,10 @@ class SongDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @require_POST
 def toggle_privacy(request, song_id):
     """Toggle a song between public and private."""
-    song = get_object_or_404(Song, id=song_id, contributor=request.user)
-    
+    song = get_object_or_404(Song, id=song_id)
+    if not (request.user.is_superuser or song.contributor == request.user):
+        raise PermissionDenied
+        
     song.is_public = not song.is_public
     song.save()
     
@@ -206,7 +212,9 @@ def clone_song(request, song_id):
 @login_required
 def make_public(request, song_id):
     """Quick action to make a song public (GET allowed for convenience)."""
-    song = get_object_or_404(Song, id=song_id, contributor=request.user)
+    song = get_object_or_404(Song, id=song_id)
+    if not (request.user.is_superuser or song.contributor == request.user):
+        raise PermissionDenied
     
     if not song.is_public:
         song.is_public = True
@@ -230,7 +238,9 @@ def make_public(request, song_id):
 @login_required
 def make_private(request, song_id):
     """Quick action to make a song private (GET allowed for convenience)."""
-    song = get_object_or_404(Song, id=song_id, contributor=request.user)
+    song = get_object_or_404(Song, id=song_id)
+    if not (request.user.is_superuser or song.contributor == request.user):
+        raise PermissionDenied
     
     if song.is_public:
         song.is_public = False

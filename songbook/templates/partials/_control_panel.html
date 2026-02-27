@@ -4,11 +4,11 @@
 <div class="content-section">
     {% if user.is_authenticated %}
         <!-- 🔒 Privacy Status & Actions (Leaders/Owner only) -->
-        {% if user == score.contributor or user.is_superuser %}
-        <div class="alert {% if song.is_public %}alert-success{% else %}alert-warning{% endif %} mb-3">
+        {% if user == chord_sheet.contributor or user.is_superuser %}
+        <div class="alert {% if chord_sheet.is_public %}alert-success{% else %}alert-warning{% endif %} mb-3">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                 <div>
-                    {% if song.is_public %}
+                    {% if chord_sheet.is_public %}
                         <strong><i class="bi bi-globe2 me-2"></i>
                             {% if site_name == "FrancoUke" %}
                                 Cette chanson est publique
@@ -41,7 +41,7 @@
                     {% endif %}
                     
                     {# Show if cloned #}
-                    {% if song.cloned_from %}
+                    {% if chord_sheet.cloned_from %}
                         <div class="mt-2">
                             <span class="badge bg-info">
                                 <i class="bi bi-files me-1"></i>
@@ -57,8 +57,8 @@
                                 {% else %}
                                     Based on: 
                                 {% endif %}
-                                <a href="{% url 'songbook:score_view' song.cloned_from.id %}">
-                                    {{ song.cloned_from.songTitle }}
+                                <a href="{% url 'songbook:chord_sheet' chord_sheet.cloned_from.id %}">
+                                    {{ chord_sheet.cloned_from.songTitle }}
                                 </a>
                             </small>
                         </div>
@@ -68,15 +68,15 @@
                 {# Privacy toggle buttons - Leaders only #}
                 {% if user.groups.all|length > 0 and 'Leaders' in user.groups.all|join:',' %}
                 <div class="btn-group-vertical btn-group-sm" role="group">
-                    {% if song.is_public %}
-                        <a href="{% url 'songbook:make_private' song.id %}?next={{ request.path }}" 
+                    {% if chord_sheet.is_public %}
+                        <a href="{% url 'songbook:make_private' chord_sheet.id %}?next={{ request.path }}" 
                            class="btn btn-warning btn-sm"
                            onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson privée?{% else %}Make this song private?{% endif %}');">
                             <i class="bi bi-lock me-1"></i>
                             {% if site_name == "FrancoUke" %}Rendre privée{% else %}Make Private{% endif %}
                         </a>
                     {% else %}
-                        <a href="{% url 'songbook:make_public' song.id %}?next={{ request.path }}" 
+                        <a href="{% url 'songbook:make_public' chord_sheet.id %}?next={{ request.path }}" 
                            class="btn btn-success btn-sm"
                            onclick="return confirm('{% if site_name == 'FrancoUke' %}Rendre cette chanson publique?{% else %}Make this song public?{% endif %}');">
                             <i class="bi bi-unlock me-1"></i>
@@ -97,7 +97,7 @@
         {% endif %}
 
         <div class="d-flex gap-2 flex-wrap">
-            {% if user == score.contributor or user.is_superuser %}
+            {% if user == chord_sheet.contributor or user.is_superuser %}
                 {# Owner/Admin: Show edit and delete buttons #}
                 <p class="text-muted small mb-2 w-100">
                     {% if site_name == "FrancoUke" %}
@@ -107,7 +107,7 @@
                     {% endif %}
                 </p>
                 <a class="btn btn-secondary btn-sm" 
-                   href="{% url site_namespace|add:':song_update' pk=song.pk %}" 
+                   href="{% url site_namespace|add:':song_update' pk=chord_sheet.pk %}" 
                    title="{% if site_name == 'FrancoUke' %}Modifier le fichier Chordpro{% else %}Edit the original ChordPro file{% endif %}">
                     <i class="bi bi-pencil me-1"></i>
                     {% if site_name == "FrancoUke" %}
@@ -118,7 +118,7 @@
                 </a>
                 
                 <a class="btn btn-danger btn-sm" 
-                   href="{% url site_namespace|add:':song_delete' pk=song.pk %}"
+                   href="{% url site_namespace|add:':song_delete' pk=chord_sheet.pk %}"
                    onclick="return confirm('{% if site_name == 'FrancoUke' %}Êtes-vous sûr de vouloir supprimer cette chanson?{% else %}Are you sure you want to delete this song?{% endif %}');">
                     <i class="bi bi-trash me-1"></i>
                     {% if site_name == "FrancoUke" %}
@@ -129,7 +129,7 @@
                 </a>
             {% else %}
                 {# 🆕 Non-owner authenticated user: Show clone button for public songs #}
-                {% if song.is_public %}
+                {% if chord_sheet.is_public %}
                     <div class="alert alert-info mb-0 w-100">
                         <p class="mb-2 small">
                             <i class="bi bi-info-circle me-2"></i>
@@ -139,7 +139,7 @@
                                 <strong>Like this song?</strong> Create your own editable version!
                             {% endif %}
                         </p>
-                        <form method="post" action="{% url 'songbook:clone_song' song.id %}" class="d-inline">
+                        <form method="post" action="{% url 'songbook:clone_song' chord_sheet.id %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-info btn-sm">
                                 <i class="bi bi-files me-1"></i>
@@ -164,7 +164,7 @@
         </div>
     {% else %}
         <!-- Not authenticated - show clone button for public songs -->
-        {% if song.is_public %}
+        {% if chord_sheet.is_public %}
         <div class="alert alert-info mb-3">
             <p class="mb-2">
                 <i class="bi bi-info-circle me-2"></i>
@@ -174,7 +174,7 @@
                     <strong>Tip:</strong> Create your own editable version of this song!
                 {% endif %}
             </p>
-            <form method="post" action="{% url 'songbook:clone_song' song.id %}" class="d-inline">
+            <form method="post" action="{% url 'songbook:clone_song' chord_sheet.id %}" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-info btn-sm">
                     <i class="bi bi-files me-1"></i>
@@ -256,8 +256,8 @@
     <div class="me-3">
         {% if user.is_authenticated %}
             {% with site_namespace|add:':edit_formatting' as edit_url_name %}
-                {% if user.is_superuser or user|has_group:"Power Users" or user == score.contributor %}
-                    <a href="{% url edit_url_name score.id %}" class="btn btn-warning btn-sm">
+                {% if user.is_superuser or user|has_group:"Power Users" or user == chord_sheet.contributor %}
+                    <a href="{% url edit_url_name chord_sheet.id %}" class="btn btn-warning btn-sm">
                         {% if site_name == "FrancoUke" %}
                             Modifier la mise en forme
                         {% else %}
@@ -288,7 +288,7 @@
     <hr>
 
     <!-- 🎥 YouTube Player Section -->
-    {% if score.metadata.youtube %}
+    {% if chord_sheet.metadata.youtube %}
         <div>
             <p>
                 {% if site_name == "FrancoUke" %}
@@ -296,7 +296,7 @@
                 {% else %}
                     YouTube link:
                 {% endif %}
-                <a href="{{ score.metadata.youtube }}" target="_blank">
+                <a href="{{ chord_sheet.metadata.youtube }}" target="_blank">
                     {% if site_name == "FrancoUke" %}
                         Visionner sur YouTube
                     {% else %}
@@ -311,7 +311,7 @@
             {% if site_name == "FrancoUke" %}
                 Pas de clip Youtube de la chanson.
             {% else %}
-                No YouTube video available for this song.
+                No YouTube video available for this chord_sheet.
             {% endif %}
         </p>
     {% endif %}
@@ -319,7 +319,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    let youtubeUrl = "{{ score.metadata.youtube }}";
+    let youtubeUrl = "{{ chord_sheet.metadata.youtube }}";
 
     function extractVideoId(url) {
         if (!url) return null;

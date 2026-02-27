@@ -52,7 +52,7 @@ def edit_song_formatting(request, song_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Formatting updated successfully!")
-            return redirect(f"{context_data['site_namespace']}:score_view", pk=song_id)
+            return redirect(f"{context_data['site_namespace']}:chord_sheet", pk=song_id)
     else:
         form = SongFormattingForm(instance=formatting)
 

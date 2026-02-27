@@ -96,17 +96,17 @@ class UserSongListView(SiteContextMixin, ListView):
 
 
 # -------------------------------------------------------------
-# Score View (detailed view of a single song)
+# ChordSheet View (detailed view of a single song)
 # -------------------------------------------------------------
-class ScoreView(DetailView):
+class ChordSheetView(DetailView):
     """
     Display a single song.
     Public songs: anyone can view
     Private songs: only the owner can view
     """
     model = Song
-    template_name = "songbook/song_simplescore.html"
-    context_object_name = "score"
+    template_name = "songbook/song_chord_sheet.html"
+    context_object_name = "chord_sheet"
 
     def get_queryset(self):
         # 🆕 Privacy filtering for score view
@@ -125,7 +125,8 @@ class ScoreView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["song"] = self.get_object()
+        #context["song"] = self.get_object()
+        
 
         if self.request.user.is_authenticated:
             preferences, _ = UserPreference.objects.get_or_create(user=self.request.user)
@@ -140,8 +141,9 @@ class ScoreView(DetailView):
         context["preferences"] = preferences
         
         # 🆕 Add ownership flag for template
-        context["is_owner"] = (self.request.user == context["song"].contributor)
-        
+        #context["is_owner"] = (self.request.user == context["song"].contributor)
+        context["is_owner"] = (self.request.user == self.object.contributor)
+
         return context
 
 
