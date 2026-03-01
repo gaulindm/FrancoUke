@@ -38,6 +38,37 @@
             <label for="id_is_printing_alternate_chord" class="form-check-label">Show Alternate Chords?</label>
           </div>
 
+          <!-- CHORD DISPLAY PREFERENCES -->
+          <hr>
+          <h6 class="mb-3 text-muted">Chord Display</h6>
+
+          <div class="mb-3">
+            <label for="id_chord_bracket_style" class="form-label">Chord Bracket Style:</label>
+            {{ form.chord_bracket_style }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Chord Color:</label>
+            <div class="d-flex gap-3">
+              {% for value, label in form.chord_color.field.choices %}
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="chord_color"
+                  id="chord_color_{{ value }}"
+                  value="{{ value }}"
+                  {% if form.chord_color.value == value %}checked{% endif %}
+                >
+                <label class="form-check-label fw-bold" for="chord_color_{{ value }}"
+                       style="color: {{ value }};">
+                  {{ label }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
           <!-- FOOTER -->
           <div class="modal-footer d-flex justify-content-between">
             <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>

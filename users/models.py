@@ -30,33 +30,47 @@ def save_user_preference(sender, instance, **kwargs):
 
 
 class UserPreference(models.Model):
+
+    BRACKET_CHOICES = [
+        ("square",      "Square brackets [Am]"),
+        ("parentheses", "Parentheses (Am)"),
+        ("curly",       "Curly braces {Am}"),
+    ]
+
+    CHORD_COLOR_CHOICES = [
+        ("black", "Black"),
+        ("red",   "Red"),
+        ("blue",  "Blue"),
+        ("green", "Green"),
+    ]
+
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name='userpreference'
     )
     transpose_value = models.IntegerField(default=0)
     primary_instrument = models.CharField(
         max_length=20,
         choices=[
-            ("guitar", "Guitar"),
-            ("guitalele", "Guitalele"),
-            ("ukulele", "Ukulele"),
-            ("baritone_ukulele", "Baritone Ukulele"),
-            ("banjo", "Banjo"),
-            ("mandolin", "Mandolin"),
+            ("guitar",          "Guitar"),
+            ("guitalele",       "Guitalele"),
+            ("ukulele",         "Ukulele"),
+            ("baritone_ukulele","Baritone Ukulele"),
+            ("banjo",           "Banjo"),
+            ("mandolin",        "Mandolin"),
         ],
         default="ukulele"
     )
     secondary_instrument = models.CharField(
         max_length=20,
         choices=[
-            ("guitar", "Guitar"),
-            ("guitalele", "Guitalele"),
-            ("ukulele", "Ukulele"),
-            ("baritone_ukulele", "Baritone Ukulele"),
-            ("banjo", "Banjo"),
-            ("mandolin", "Mandolin"),
+            ("guitar",          "Guitar"),
+            ("guitalele",       "Guitalele"),
+            ("ukulele",         "Ukulele"),
+            ("baritone_ukulele","Baritone Ukulele"),
+            ("banjo",           "Banjo"),
+            ("mandolin",        "Mandolin"),
         ],
         null=True,
         blank=True
@@ -65,6 +79,18 @@ class UserPreference(models.Model):
     is_printing_alternate_chord = models.BooleanField(default=False)
     known_chords = models.JSONField(default=list, blank=True)
     use_known_chord_filter = models.BooleanField(default=False)
+
+    # --- Chord display preferences ---
+    chord_bracket_style = models.CharField(
+        max_length=20,
+        choices=BRACKET_CHOICES,
+        default="square",
+    )
+    chord_color = models.CharField(
+        max_length=10,
+        choices=CHORD_COLOR_CHOICES,
+        default="red",
+    )
 
     def __str__(self):
         sec = f", Secondary: {self.secondary_instrument}" if self.secondary_instrument else ""

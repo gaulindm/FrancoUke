@@ -150,11 +150,6 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
 
         forced_list = requested_dict.get(base_name, None)
 
-        # 🐛 DEBUG
-        print(f"  select_variations for '{base_name}':")
-        print(f"    - total variations available: {len(all_variations)}")
-        print(f"    - forced variations from requested_dict: {forced_list}")
-        print(f"    - user_pref_show_alt: {user_pref_show_alt}")
 
         # SONG FORCES VARIATION(S) (from suggested_alternate OR inline [C(1)])
         if forced_list is not None:

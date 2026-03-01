@@ -45,9 +45,7 @@ def prepare_chords(chords: List[Dict[str, Any]], is_printing_alternate_chord: bo
                 "variation_index": idx,
             })
 
-    print("[DEBUG] Prepared diagrams count =", len(diagrams))
-    for d in diagrams:
-        print("   ->", d["name"], "v", d["variation_index"], d["variation"])
+
 
     return diagrams
 

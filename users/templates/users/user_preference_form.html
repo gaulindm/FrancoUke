@@ -56,7 +56,7 @@
           </label>
         </div>
 
-        <!-- Known Chord Filter Switch -->
+        <!-- Known Chord Filter -->
         <hr class="my-4">
 
         <h5 class="fw-semibold">Known Chord Filter</h5>
@@ -79,6 +79,41 @@
           </div>
         </div>
 
+        <!-- Chord Display -->
+        <hr class="my-4">
+
+        <h5 class="fw-semibold">Chord Display</h5>
+
+        <!-- Bracket Style -->
+        <div class="mb-3">
+          <label for="id_chord_bracket_style" class="form-label fw-semibold">
+            Bracket Style
+          </label>
+          {{ form.chord_bracket_style }}
+        </div>
+
+        <!-- Chord Color -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Chord Color</label>
+          <div class="d-flex gap-4">
+            {% for value, label in form.chord_color.field.choices %}
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="chord_color"
+                id="chord_color_{{ value }}"
+                value="{{ value }}"
+                {% if form.chord_color.value == value %}checked{% endif %}
+              >
+              <label class="form-check-label fw-bold" for="chord_color_{{ value }}"
+                     style="color: {{ value }};">
+                {{ label }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
 
         <!-- Buttons -->
         <div class="d-flex justify-content-between mt-4">

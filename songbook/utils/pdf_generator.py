@@ -30,6 +30,8 @@ def get_user_preferences(user):
         "show_alternate_chords": False,
         "use_known_chord_filter": False,
         "known_chords": [],
+        "chord_bracket_style": "square",
+        "chord_color": "black",
     }
 
     if not user or not user.is_authenticated:
@@ -42,8 +44,6 @@ def get_user_preferences(user):
                 "primary_instrument": getattr(user, "primary_instrument", "ukulele"),
             },
         )
-        print("PREF OBJECT:", prefs.__dict__)
-
         # Allow either attribute name on the model: is_lefty or is_left_handed
         lefty_val = None
         if hasattr(prefs, "is_lefty"):
@@ -59,6 +59,8 @@ def get_user_preferences(user):
             "show_alternate_chords": getattr(prefs, "is_printing_alternate_chord", False),
             "use_known_chord_filter": getattr(prefs, "use_known_chord_filter", False),
             "known_chords": getattr(prefs, "known_chords", []),
+            "chord_bracket_style": getattr(prefs, "chord_bracket_style", "square"),
+            "chord_color": getattr(prefs, "chord_color", "black"),
         }
     except Exception:
         return default_prefs
@@ -143,7 +145,8 @@ def get_paragraph_styles(formatting):
 # =======================
 # SONG ELEMENTS
 # =======================
-def build_song_elements(song, styles, styles_dict, site_name):
+def build_song_elements(song, styles, styles_dict, site_name,
+                        chord_bracket_style="square", chord_color="black"):
     elements = []
     metadata = song.metadata or {}
 
@@ -270,16 +273,37 @@ def build_song_elements(song, styles, styles_dict, site_name):
 
     # --- Lyrics ---
     lyrics_elements = build_lyrics_elements(
-        song.lyrics_with_chords, styles_dict, styles['BodyText'], site_name
+        song.lyrics_with_chords, styles_dict, styles['BodyText'], site_name,
+        chord_bracket_style=chord_bracket_style,
+        chord_color=chord_color,
     )
     elements.extend(lyrics_elements)
 
     return elements
 
 # =======================
+# CHORD DISPLAY HELPERS
+# =======================
+def get_chord_brackets(style):
+    """Return (open, close) bracket characters for the given style."""
+    return {
+        "square":      ("[", "]"),
+        "parentheses": ("(", ")"),
+        "curly":       ("{", "}"),
+    }.get(style, ("[", "]"))
+
+
+def render_chord_html(chord, bracket_style="square", chord_color="black"):
+    """Return a ReportLab-compatible HTML string for a styled chord."""
+    open_b, close_b = get_chord_brackets(bracket_style)
+    return f'<b><font color="{chord_color}">{open_b}{chord}{close_b}</font></b>'
+
+
+# =======================
 # LYRICS ELEMENTS
 # =======================
-def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name):
+def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name,
+                          chord_bracket_style="square", chord_color="black"):
     """
     Build a list of reportlab elements (Paragraphs, Tables) from parsed lyrics/chords.
     """
@@ -396,7 +420,16 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                 chord = item.get("chord", "")
                 lyric = item["lyric"]
                 if chord:
-                    line = f" <b>[{chord}]</b>{lyric}" if not lyric.startswith("-") else f"<b>[{chord}]</b>{lyric}"
+                    chord_html = render_chord_html(chord, chord_bracket_style, chord_color)
+                    if lyric and lyric[0].isalpha():
+                        # Mid-word chord: no leading space (e.g. ri[Am]sing)
+                        line = f"{chord_html}{lyric}"
+                    elif lyric.startswith("-"):
+                        # Dash continuation: no leading space
+                        line = f"{chord_html}{lyric}"
+                    else:
+                        # Normal chord before a word or space
+                        line = f" {chord_html}{lyric}"
                 else:
                     line = lyric
                 paragraph_buffer.append(line)
@@ -441,13 +474,10 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     suggested_alternate = None
     if songs and songs[0].metadata:
         suggested_alternate = songs[0].metadata.get('suggested_alternate')
-        print(f"[PDF_GENERATOR] suggested_alternate from metadata: {suggested_alternate}")
 
     relevant_chords = load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate)
 
 
-
-    print("RELEVANT CHORDS BEFORE FILTER:", relevant_chords)
 
     # Apply known-chord filter if enabled
     if user_prefs.get("use_known_chord_filter", False):
@@ -469,7 +499,6 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             if (normalize_chord(chord["name"]).lower() not in known_set or
                 normalize_chord(chord["name"]).lower() in explicitly_requested)
         ]
-        print("RELEVANT CHORDS AFTER FILTER:", relevant_chords)
 
     # Determine spacing based on chord count
     num_chords = len(relevant_chords)
@@ -492,12 +521,12 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
 
     # Build elements for all songs
     for song in songs:
-        elements.extend(build_song_elements(song, styles, styles_dict, site_name))
+        elements.extend(build_song_elements(
+            song, styles, styles_dict, site_name,
+            chord_bracket_style=user_prefs.get("chord_bracket_style", "square"),
+            chord_color=user_prefs.get("chord_color", "black"),
+        ))
         elements.append(PageBreak())
-
-    print("USER:", user)
-    print("AUTHENTICATED:", bool(user and getattr(user, "is_authenticated", False)))
-    print("PDF USER PREFS:", user_prefs)
 
     # Build PDF with footer
     doc.build(

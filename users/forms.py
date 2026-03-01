@@ -65,19 +65,25 @@ class UserPreferenceForm(forms.ModelForm):
             "is_lefty",
             "is_printing_alternate_chord",
             "use_known_chord_filter",
+            "chord_bracket_style",   # ← new
+            "chord_color",           # ← new
         ]
         widgets = {
             "is_lefty": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_printing_alternate_chord": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "use_known_chord_filter": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "chord_bracket_style": forms.Select(attrs={"class": "form-select"}),
+            # chord_color is rendered as custom radio buttons in the template,
+            # so we use a HiddenInput here to avoid a duplicate dropdown.
+            "chord_color": forms.HiddenInput(),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Apply bootstrap classes to non-checkbox fields
+        # Apply bootstrap classes to non-checkbox, non-hidden fields
         for field_name, field in self.fields.items():
-            if not isinstance(field.widget, forms.CheckboxInput):
+            if not isinstance(field.widget, (forms.CheckboxInput, forms.HiddenInput)):
                 field.widget.attrs.update({"class": "form-control"})
 
         # Prefill known_chords_text from JSONField

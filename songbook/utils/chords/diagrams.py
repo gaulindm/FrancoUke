@@ -40,8 +40,8 @@ class ChordDiagram(Flowable):
         barre = self.variation.get("barre")
 
         # Debug prints
-        print(f"[DEBUG] Drawing chord '{self.chord_name}' at scale={self.scale}")
-        print(f"        positions={positions}, baseFret={base_fret}, barre={barre}, is_lefty={self.is_lefty}")
+        #print(f"[DEBUG] Drawing chord '{self.chord_name}' at scale={self.scale}")
+        #print(f"        positions={positions}, baseFret={base_fret}, barre={barre}, is_lefty={self.is_lefty}")
 
         # Mirror for lefties
         if self.is_lefty:
