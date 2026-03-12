@@ -53,26 +53,16 @@ def method_cfop(request):
             "name": "Étape 2 : F2L",
             "desc": "Résoudre les deux premières couches simultanément (4 paires coin-arête).",
             "icon": "bi-layers",
-            "url": reverse('francontcube:cfop_f2l_intro'),  # <-- Changement ici
+            "url": reverse('francontcube:cfop_f2l_basic'),  # <-- Changement ici
             "available": True,
             "step_number": 2,
-            "sub_pages": [  # Optionnel: ajouter des sous-pages
-                {
-                    "name": "Introduction F2L",
-                    "url": reverse('francontcube:cfop_f2l_intro'),
-                },
-                {
-                    "name": "Les 41 Cas",
-                    "url": reverse('francontcube:cfop_f2l_basic'),
-                },
-            ],
         },
         {
             "name": "Étape 3 : OLL",
             "desc": "Orienter la dernière couche pour avoir la face jaune complète (57 cas).",
             "icon": "bi-brightness-high",
             "url": reverse('francontcube:cfop_oll'),
-            "available": False,
+            "available": True,
             "step_number": 3,
         },
         {
@@ -80,7 +70,7 @@ def method_cfop(request):
             "desc": "Permuter la dernière couche pour finir le cube (21 cas).",
             "icon": "bi-shuffle",
             "url": reverse('francontcube:cfop_pll'),
-            "available": False,
+            "available": True,
             "step_number": 4,
         },
     ]

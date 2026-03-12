@@ -9,14 +9,14 @@ import json
 # F2L Categories definition
 F2L_CATEGORIES = {
     'basic': {
-        'name': 'Cas de Base',
+        'name': 'Insertion simple',
         'description': 'Les 4 premiers cas F2L - Paires déjà formées',
         'slug_range': range(1, 5),  # f2l-01 to f2l-04
         'icon': 'bi-star-fill',
         'color': 'success'
     },
     'disconnected-pairs': {
-        'name': 'disconnected-pairs',
+        'name': 'paire déconnectée',
         'description': 'disconnected-pairs',
         'slug_range': range(5, 14),  # f2l-05 to f2l-08
         'icon': 'bi-arrow-right',
