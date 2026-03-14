@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OLL Explorer — 2D + 3D Annotated</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0a0c12;
+      --surf:    #111420;
+      --surf2:   #181c2c;
+      --border:  #222840;
+      --yellow:  #ffd740;
+      --green:   #4cff91;
+      --blue:    #4da6ff;
+      --red:     #ff5252;
+      --orange:  #ff9740;
+      --white:   #e8ecf5;
+      --muted:   #4a5270;
+      --radius:  18px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      padding: 28px 20px 80px;
+    }
+
+    /* subtle dot grid */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(255,215,64,.07) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header { text-align: center; margin-bottom: 28px; }
+    .eyebrow {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--yellow); margin-bottom: 8px;
+    }
+    h1 {
+      font-family: 'Boogaloo', cursive;
+      font-size: clamp(28px, 6vw, 48px); line-height: 1;
+    }
+    h1 em { color: var(--yellow); font-style: normal; }
+    header p { color: var(--muted); font-size: 13.5px; margin-top: 8px; line-height: 1.6; }
+
+    /* ── Group tabs ── */
+    .group-tabs {
+      display: flex; gap: 10px; justify-content: center;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .gtab {
+      background: var(--surf); border: 1.5px solid var(--border);
+      border-radius: 12px; color: var(--muted); cursor: pointer;
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: .08em; padding: 9px 18px;
+      transition: all .2s; display: flex; align-items: center; gap: 7px;
+    }
+    .gtab:hover { border-color: var(--yellow); color: var(--white); }
+    .gtab.active { background: var(--yellow); border-color: var(--yellow); color: #0a0c12; font-weight: 700; }
+    .gtab .gtab-count {
+      background: rgba(0,0,0,.2); border-radius: 10px;
+      font-size: 9px; padding: 1px 6px;
+    }
+    .gtab.active .gtab-count { background: rgba(0,0,0,.25); }
+
+    /* ── Case grid ── */
+    .case-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px; margin-bottom: 22px;
+    }
+    .case-btn {
+      background: var(--surf); border: 1.5px solid var(--border);
+      border-radius: 12px; color: var(--muted); cursor: pointer;
+      padding: 10px 8px; text-align: center;
+      transition: all .2s; display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+    }
+    .case-btn:hover { border-color: var(--yellow); color: var(--white); transform: translateY(-1px); }
+    .case-btn.active {
+      background: rgba(255,215,64,.1);
+      border-color: var(--yellow); color: var(--yellow);
+      box-shadow: 0 0 20px rgba(255,215,64,.12);
+    }
+    .cb-icon { font-size: 20px; line-height: 1; }
+    .cb-name { font-family: 'Space Mono', monospace; font-size: 10.5px; font-weight: 700; }
+    .cb-sub  { font-size: 10px; color: var(--muted); }
+    .case-btn.active .cb-sub { color: rgba(255,215,64,.6); }
+
+    /* ── Dual view ── */
+    .dual-view {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 18px; margin-bottom: 16px;
+    }
+    @media(max-width: 600px) { .dual-view { grid-template-columns: 1fr; } }
+
+    .view-card {
+      background: var(--surf); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 18px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .view-card.is-2d { border-top: 3px solid var(--yellow); }
+    .view-card.is-3d { border-top: 3px solid var(--blue); }
+
+    .view-label {
+      width: 100%; display: flex; align-items: center; gap: 10px;
+    }
+    .view-badge {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .is-2d .view-badge { background: rgba(255,215,64,.12); color: var(--yellow); }
+    .is-3d .view-badge { background: rgba(77,166,255,.12); color: var(--blue); }
+    .view-label small { color: var(--muted); font-size: 12px; }
+
+    twisty-player { border-radius: 12px; }
+    #player2D { width: 280px; height: 280px; }
+    #player3D { width: 280px; height: 280px; }
+
+    /* ── Recognition box ── */
+    .recog-box {
+      width: 100%; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .recog-label {
+      font-family: 'Space Mono', monospace; font-size: 9px;
+      letter-spacing: .15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 5px;
+    }
+    .recog-text { font-size: 12.5px; line-height: 1.5; color: var(--white); }
+    .recog-tip  { font-size: 11.5px; color: var(--yellow); font-weight: 700; margin-top: 5px; }
+
+    /* ── Chips ── */
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 5px;
+      justify-content: center; min-height: 32px;
+    }
+    .chip {
+      font-family: 'Space Mono', monospace; font-size: 11.5px; font-weight: 700;
+      padding: 4px 9px; border-radius: 7px;
+      border: 1.5px solid var(--border); color: var(--muted);
+      background: var(--bg); transition: all .25s ease;
+    }
+    [data-face="R"] { --fc: #ff5252; }
+    [data-face="L"] { --fc: #4da6ff; }
+    [data-face="U"] { --fc: #ffd740; }
+    [data-face="F"] { --fc: #4cff91; }
+    [data-face="B"] { --fc: #ff9740; }
+    [data-face="D"] { --fc: #d8dce8; }
+    [data-face="M"] { --fc: #c084fc; }
+    [data-face="S"] { --fc: #4cff91; }
+    [data-face="E"] { --fc: #d8dce8; }
+    .chip.active {
+      background: var(--fc); color: #0a0c12;
+      border-color: transparent;
+      transform: scale(1.2) translateY(-2px);
+      box-shadow: 0 0 16px var(--fc);
+    }
+    .chip.done { opacity: .25; }
+
+    /* ── Shared controls ── */
+    .controls-row {
+      display: flex; gap: 8px; align-items: center;
+      justify-content: center; flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .pb-btn {
+      background: var(--surf2); border: 1.5px solid var(--border);
+      border-radius: 10px; color: var(--white); cursor: pointer;
+      font-size: 18px; width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .18s;
+    }
+    .pb-btn:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); transform: scale(1.08); }
+    .pb-btn:disabled { opacity: .25; cursor: default; transform: none; }
+    .pb-btn.play { width: 54px; height: 54px; font-size: 22px; }
+    .pb-btn.play.playing { background: rgba(255,215,64,.1); border-color: var(--yellow); color: var(--yellow); }
+
+    .speed-sel {
+      background: var(--surf2); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--white); font-size: 12px;
+      font-family: 'Nunito', sans-serif;
+      padding: 6px 10px; cursor: pointer;
+    }
+
+    /* ── Annotation panel ── */
+    .anno {
+      background: var(--surf); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 22px 26px;
+      margin-bottom: 18px; min-height: 110px;
+    }
+    .anno-idle { text-align: center; color: var(--muted); font-size: 14px; padding: 16px 0; }
+
+    .anno-active { display: none; flex-direction: column; gap: 11px; }
+    .anno-top {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .step-badge {
+      font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted);
+    }
+    .step-badge strong { color: var(--yellow); font-size: 13px; }
+    .progress { flex:1; max-width:160px; height:4px; background:var(--border); border-radius:4px; overflow:hidden; }
+    .progress-fill { height:100%; background:var(--yellow); border-radius:4px; transition:width .2s; width:0%; }
+
+    .anno-body { display: flex; align-items: center; gap: 16px; }
+    .anno-emoji { font-size: 38px; line-height:1; min-width:46px; text-align:center; }
+    .anno-texts { flex: 1; }
+    .anno-name { font-family:'Boogaloo',cursive; font-size: clamp(20px,4vw,30px); line-height:1.1; }
+    .anno-desc { font-size: 13.5px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+    .anno-tip  { font-size: 12px; font-weight:700; margin-top:6px; display:inline-block;
+                 padding:4px 10px; background:var(--surf2); border-radius:8px; color:var(--yellow); }
+
+    .anno-done { display:none; text-align:center; font-family:'Boogaloo',cursive;
+                 font-size:32px; color:var(--green); padding:8px 0; }
+
+    /* ── Settings accordion ── */
+    .settings-wrap {
+      background: var(--surf); border: 1.5px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .settings-toggle {
+      width: 100%; background: none; border: none; color: var(--muted);
+      cursor: pointer; font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: .1em; padding: 14px 20px;
+      text-align: left; display: flex; align-items: center; justify-content: space-between;
+      transition: color .2s;
+    }
+    .settings-toggle:hover { color: var(--white); }
+    .s-arrow { transition: transform .3s; }
+    .settings-toggle.open .s-arrow { transform: rotate(180deg); }
+    .settings-body { display: none; padding: 20px 24px 24px; }
+    .settings-body.open { display: block; }
+
+    .settings-section { margin-bottom: 24px; }
+    .settings-section:last-child { margin-bottom: 0; }
+    .settings-heading {
+      font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing:.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+
+    /* stickering grid */
+    .sticker-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 8px;
+    }
+    .sk-btn {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; color: var(--muted); cursor: pointer;
+      padding: 9px 8px; text-align: center; transition: all .2s;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .sk-btn:hover { border-color: var(--yellow); color: var(--white); }
+    .sk-btn.active { background:rgba(255,215,64,.1); border-color:var(--yellow); color:var(--yellow); }
+    .sk-btn .sk-icon { font-size: 18px; line-height:1; }
+    .sk-btn .sk-label { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; }
+    .sk-btn .sk-desc  { font-size:10px; color:var(--muted); line-height:1.3; }
+    .sk-btn.active .sk-desc { color:rgba(255,215,64,.55); }
+
+    /* camera grid */
+    .cam-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 32px; }
+    @media(max-width:560px){ .cam-grid { grid-template-columns:1fr; } }
+    .ctrl label { display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:8px; }
+    .ctrl label code { font-family:'Space Mono',monospace; font-size:11px; color:var(--yellow); }
+    input[type=range] {
+      width:100%; appearance:none; height:4px; border-radius:4px;
+      background:var(--border); outline:none; cursor:pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      appearance:none; width:16px; height:16px; border-radius:50%;
+      background:var(--yellow); cursor:pointer; transition:transform .15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.25); }
+
+    .presets-row { margin-top:14px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .presets-row strong { font-size:11px; color:var(--muted); }
+    .pre-btn {
+      background:var(--bg); border:1.5px solid var(--border); border-radius:8px;
+      color:var(--white); cursor:pointer; font-size:11.5px; font-family:'Nunito';
+      font-weight:700; padding:5px 12px; transition:all .2s;
+    }
+    .pre-btn:hover { border-color:var(--yellow); color:var(--yellow); }
+
+    .out-box {
+      margin-top:14px; padding:12px 16px; background:var(--bg);
+      border:1px solid var(--border); border-radius:10px;
+      font-family:'Space Mono',monospace; font-size:11px;
+      color:#6a7fa8; line-height:1.9;
+    }
+    .c1 { color: var(--green); }
+    .c2 { color: var(--yellow); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="eyebrow">cubing.js · OLL Explorer · 2D + 3D</div>
+    <h1>Orientate the <em>Last Layer</em></h1>
+    <p>
+      Left: 2D top-down recognition view &nbsp;·&nbsp; Right: 3D animation<br>
+      Both views sync together as you step through each move.
+    </p>
+  </header>
+
+  <!-- Group tabs -->
+  <div class="group-tabs" id="groupTabs">
+    <button class="gtab active" data-group="cross">
+      ✝️ Cross on top <span class="gtab-count">4</span>
+    </button>
+    <button class="gtab" data-group="shapes">
+      📐 Shapes <span class="gtab-count">4</span>
+    </button>
+  </div>
+
+  <!-- Case grid -->
+  <div class="case-grid" id="caseGrid"></div>
+
+  <!-- Dual view -->
+  <div class="dual-view">
+
+    <!-- 2D recognition -->
+    <div class="view-card is-2d">
+      <div class="view-label">
+        <span class="view-badge">2D View</span>
+        <small>Recognition pattern</small>
+      </div>
+      <twisty-player id="player2D"
+        puzzle="3x3x3"
+        visualization="experimental-2D-LL"
+        hint-facelets="none"
+        background="none"
+        control-panel="none"
+        experimental-stickering="OLL">
+      </twisty-player>
+      <div class="recog-box" id="recogBox">
+        <div class="recog-label">Recognition pattern</div>
+        <div class="recog-text" id="recogText">Select a case above to begin.</div>
+        <div class="recog-tip"  id="recogTip"></div>
+      </div>
+    </div>
+
+    <!-- 3D animation -->
+    <div class="view-card is-3d">
+      <div class="view-label">
+        <span class="view-badge">3D View</span>
+        <small>Step-by-step animation</small>
+      </div>
+      <twisty-player id="player3D"
+        puzzle="3x3x3"
+        visualization="3D"
+        hint-facelets="none"
+        background="none"
+        control-panel="none"
+        experimental-stickering="OLL">
+      </twisty-player>
+      <!-- move chips for 3D -->
+      <div class="chips" id="chips3D"></div>
+    </div>
+  </div>
+
+  <!-- Shared playback controls -->
+  <div class="controls-row">
+    <button class="pb-btn" id="btnReset" title="Reset">⏮</button>
+    <button class="pb-btn" id="btnPrev"  title="Previous move">◀</button>
+    <button class="pb-btn play" id="btnPlay" title="Play / Pause">▶</button>
+    <button class="pb-btn" id="btnNext"  title="Next move">▶|</button>
+    <button class="pb-btn" id="btnEnd"   title="End">⏭</button>
+    <select class="speed-sel" id="speedSel">
+      <option value="2000">🐢 Slow</option>
+      <option value="1200" selected>🚶 Normal</option>
+      <option value="700">🏃 Fast</option>
+      <option value="400">⚡ Turbo</option>
+    </select>
+  </div>
+
+  <!-- Annotation panel -->
+  <div class="anno" id="anno">
+    <div class="anno-idle" id="annoIdle">▶ Select a case and press play — or step through move by move</div>
+    <div class="anno-active" id="annoActive">
+      <div class="anno-top">
+        <div class="step-badge" id="stepBadge">Step <strong>1</strong> of 7</div>
+        <div class="progress"><div class="progress-fill" id="progFill"></div></div>
+      </div>
+      <div class="anno-body">
+        <div class="anno-emoji" id="annoEmoji">🟡</div>
+        <div class="anno-texts">
+          <div class="anno-name" id="annoName">U</div>
+          <div class="anno-desc" id="annoDesc">Top layer — slide to the right</div>
+          <div class="anno-tip"  id="annoTip">💡 Right index finger</div>
+        </div>
+      </div>
+    </div>
+    <div class="anno-done" id="annoDone">✅ Last layer oriented! 🎉</div>
+  </div>
+
+  <!-- Settings accordion -->
+  <div class="settings-wrap">
+    <button class="settings-toggle" id="settingsToggle">
+      ⚙️ STICKERING &amp; CAMERA SETTINGS
+      <span class="s-arrow">▼</span>
+    </button>
+    <div class="settings-body" id="settingsBody">
+
+      <!-- Stickering -->
+      <div class="settings-section">
+        <div class="settings-heading">🎨 Focus mask</div>
+        <div class="sticker-grid" id="stickerGrid">
+          <button class="sk-btn" data-s="full">
+            <span class="sk-icon">🌈</span>
+            <span class="sk-label">Full</span>
+            <span class="sk-desc">All colours</span>
+          </button>
+          <button class="sk-btn active" data-s="OLL">
+            <span class="sk-icon">🟡</span>
+            <span class="sk-label">OLL</span>
+            <span class="sk-desc">F2L grey, top coloured</span>
+          </button>
+          <button class="sk-btn" data-s="PLL">
+            <span class="sk-icon">🔄</span>
+            <span class="sk-label">PLL</span>
+            <span class="sk-desc">Permutation view</span>
+          </button>
+          <button class="sk-btn" data-s="LL">
+            <span class="sk-icon">🔲</span>
+            <span class="sk-label">Last Layer</span>
+            <span class="sk-desc">Full LL coloured</span>
+          </button>
+          <button class="sk-btn" data-s="F2L">
+            <span class="sk-icon">⬛</span>
+            <span class="sk-label">F2L</span>
+            <span class="sk-desc">F2L + cross coloured</span>
+          </button>
+          <button class="sk-btn" data-s="Cross">
+            <span class="sk-icon">➕</span>
+            <span class="sk-label">Cross</span>
+            <span class="sk-desc">Cross pieces only</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Camera -->
+      <div class="settings-section">
+        <div class="settings-heading">🎥 3D Camera angle</div>
+        <div class="cam-grid">
+          <div class="ctrl">
+            <label>Longitude <code id="vLon">-30°</code></label>
+            <input type="range" id="camLon" min="-89" max="89" value="-30">
+          </div>
+          <div class="ctrl">
+            <label>Latitude <code id="vLat">28°</code></label>
+            <input type="range" id="camLat" min="0" max="89" value="28">
+          </div>
+        </div>
+        <div class="presets-row">
+          <strong>Presets:</strong>
+          <button class="pre-btn" data-lon="-30" data-lat="28">🎯 Default</button>
+          <button class="pre-btn" data-lon="0"   data-lat="75">⬛ Top-down</button>
+          <button class="pre-btn" data-lon="-45" data-lat="20">📐 Front angle</button>
+          <button class="pre-btn" data-lon="-30" data-lat="45">🔭 High view</button>
+        </div>
+        <div class="out-box">
+          <span class="c1">// Django template values:</span><br>
+          player3D.cameraLongitude = <span class="c2" id="outLon">-30</span>;
+          &nbsp; player3D.cameraLatitude = <span class="c2" id="outLat">28</span>;
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ══════════════════ SCRIPT ══════════════════ -->
+<script type="module">
+import { TwistyPlayer } from "https://cdn.cubing.net/js/cubing/twisty";
+
+// ── Move annotations ──────────────────────────────────
+const MOVES = {
+  "R":  { e:"🔴", name:"R",   desc:"Right face — push top away from you",     tip:"💡 Flick with right thumb" },
+  "R'": { e:"🔴", name:"R'",  desc:"Right face — pull top toward you",         tip:"💡 Hook with right fingers" },
+  "R2": { e:"🔴", name:"R2",  desc:"Right face — turn halfway around",         tip:"💡 Two quick flicks" },
+  "L":  { e:"🔵", name:"L",   desc:"Left face — pull top toward you",          tip:"💡 Flick with left thumb" },
+  "L'": { e:"🔵", name:"L'",  desc:"Left face — push top away from you",       tip:"💡 Hook with left fingers" },
+  "L2": { e:"🔵", name:"L2",  desc:"Left face — turn halfway around",          tip:"💡 Two quick flicks" },
+  "U":  { e:"🟡", name:"U",   desc:"Top layer — rotate to the right",          tip:"💡 Right index finger right" },
+  "U'": { e:"🟡", name:"U'",  desc:"Top layer — rotate to the left",           tip:"💡 Right index finger left" },
+  "U2": { e:"🟡", name:"U2",  desc:"Top layer — turn halfway around",          tip:"💡 Quick double slide" },
+  "F":  { e:"🟢", name:"F",   desc:"Front face — clockwise",                   tip:"💡 Think: winding a clock" },
+  "F'": { e:"🟢", name:"F'",  desc:"Front face — counter-clockwise",           tip:"💡 Think: unwinding a clock" },
+  "F2": { e:"🟢", name:"F2",  desc:"Front face — halfway turn",                tip:"💡 Double turn!" },
+  "f":  { e:"🟢", name:"f",   desc:"Wide front move — F + middle slice",       tip:"💡 Lowercase = wide move (2 layers)" },
+  "f'": { e:"🟢", name:"f'",  desc:"Wide front — counter-clockwise",           tip:"💡 Lowercase = wide move (2 layers)" },
+  "B":  { e:"🟠", name:"B",   desc:"Back face — clockwise (top goes left)",    tip:"💡 Think from behind the cube" },
+  "B'": { e:"🟠", name:"B'",  desc:"Back face — counter-clockwise",            tip:"💡 Think from behind the cube" },
+  "B2": { e:"🟠", name:"B2",  desc:"Back face — halfway turn",                 tip:"💡 Double turn!" },
+  "D":  { e:"⚪", name:"D",   desc:"Bottom layer — rotate right",              tip:"💡 Opposite direction to U" },
+  "D'": { e:"⚪", name:"D'",  desc:"Bottom layer — rotate left",               tip:"💡 Opposite direction to U'" },
+  "M":  { e:"🟣", name:"M",   desc:"Middle slice — same direction as L",       tip:"💡 Tricky slice move — use left hand" },
+  "M'": { e:"🟣", name:"M'",  desc:"Middle slice — same direction as R",       tip:"💡 Tricky slice move — use right hand" },
+  "r":  { e:"🔴", name:"r",   desc:"Wide right move — R + middle slice right", tip:"💡 Lowercase = wide move (2 layers)" },
+  "r'": { e:"🔴", name:"r'",  desc:"Wide right — pull toward you",             tip:"💡 Lowercase = wide move (2 layers)" },
+  "r2": { e:"🔴", name:"r2",  desc:"Wide right — halfway turn",                tip:"💡 Double wide move" },
+};
+const FB = { e:"⬜", name:"?", desc:"Move", tip:"💡 Check notation" };
+
+// ── OLL case data ─────────────────────────────────────
+const GROUPS = {
+  cross: {
+    name: 'Cross on top',
+    cases: [
+      {
+        id: 'sune',
+        name: 'Sune',
+        sub: 'OLL 27',
+        icon: '☀️',
+        alg: "R U R' U R U2 R'",
+        recog: "Cross is done ✅. One yellow corner is already facing up on front-right.",
+        tip:  "🔑 Learn this first — most common OLL!"
+      },
+      {
+        id: 'antisune',
+        name: 'Anti-Sune',
+        sub: 'OLL 26',
+        icon: '🌙',
+        alg: "R U2 R' U' R U' R'",
+        recog: "Cross is done ✅. One yellow corner is facing up on front-left.",
+        tip:  "🔑 Mirror of Sune — same logic, different corner"
+      },
+      {
+        id: 'picase',
+        name: 'Pi Case',
+        sub: 'OLL 22',
+        icon: '🥧',
+        alg: "R U2 R2 U' R2 U' R2 U2 R",
+        recog: "Cross is done ✅. Two headlights face you — bar across the front. 0 corners up.",
+        tip:  "💡 Look for the wide bar + headlights pattern"
+      },
+      {
+        id: 'hcase',
+        name: 'H Case',
+        sub: 'OLL 21',
+        icon: '🏠',
+        alg: "R U2 R' U' R U R' U' R U' R'",
+        recog: "Cross is done ✅. No yellow corners face up. Headlights on all 4 sides.",
+        tip:  "💡 No yellow on top at all — just the cross"
+      },
+    ]
+  },
+  shapes: {
+    name: 'Shapes',
+    cases: [
+      {
+        id: 'tshape1',
+        name: 'T-Shape',
+        sub: 'OLL 33',
+        icon: '🔤',
+        alg: "R U R' U' R' F R F'",
+        recog: "T-shape on top: the front and right edges are oriented, forming a T.",
+        tip:  "💡 Very common — hold the T so it points right"
+      },
+      {
+        id: 'tshape2',
+        name: 'T-Shape 2',
+        sub: 'OLL 45',
+        icon: '📊',
+        alg: "F R U R' U' F'",
+        recog: "Two edges oriented: bar on the front. Looks like a T from above.",
+        tip:  "💡 Bar faces toward you on the front"
+      },
+      {
+        id: 'cshape',
+        name: 'C-Shape',
+        sub: 'OLL 44',
+        icon: '🌓',
+        alg: "f R U R' U' f'",
+        recog: "C-shape: bar on front and one side. Opens toward the right.",
+        tip:  "💡 Note: lowercase f = wide front move (front + M slice)"
+      },
+      {
+        id: 'fish',
+        name: 'Fish',
+        sub: 'OLL 9',
+        icon: '🐟',
+        alg: "R U R' U' R' F R2 U R' U' F'",
+        recog: "Fish shape: one edge oriented + two corners on same side.",
+        tip:  "💡 Hold the 'fish head' on the front-right"
+      },
+    ]
+  }
+};
+
+// ── Invert algorithm ──────────────────────────────────
+function invertAlg(alg) {
+  return alg.trim().split(/\s+/).filter(Boolean)
+    .reverse()
+    .map(m => {
+      if (m.endsWith("'")) return m.slice(0, -1);
+      if (m.endsWith("2")) return m; // R2 inverse is R2
+      return m + "'";
+    })
+    .join(' ');
+}
+
+// ── Parse ─────────────────────────────────────────────
+function parse(alg) {
+  return alg ? alg.trim().split(/\s+/).filter(Boolean) : [];
+}
+
+// ── Shared state ──────────────────────────────────────
+const state = {
+  moves:       [],
+  currentIdx:  -1,
+  isPlaying:   false,
+  playTimer:   null,
+  currentCase: null,
+};
+
+const p2D = document.getElementById('player2D');
+const p3D = document.getElementById('player3D');
+const chips3D = document.getElementById('chips3D');
+
+// ── Seek both players to same step ───────────────────
+function seekPlayer(player, moves, idx) {
+  if (idx < 0) {
+    player.experimentalSetupAlg = '';
+    player.alg = moves.join(' ');
+  } else if (idx >= moves.length) {
+    player.experimentalSetupAlg = moves.join(' ');
+    player.alg = '';
+  } else {
+    player.experimentalSetupAlg = moves.slice(0, idx).join(' ');
+    player.alg = moves[idx];
+  }
+}
+
+function seekBoth(idx) {
+  state.currentIdx = idx;
+  seekPlayer(p2D, state.moves, idx);
+  seekPlayer(p3D, state.moves, idx);
+  syncChips(idx);
+  updateAnno(idx);
+  updateButtons();
+}
+
+// ── Chips ─────────────────────────────────────────────
+function buildChips(moves) {
+  chips3D.innerHTML = '';
+  moves.forEach((m, i) => {
+    const el = document.createElement('span');
+    el.className = 'chip';
+    el.textContent = m;
+    el.dataset.face = m[0].toUpperCase();
+    el.dataset.idx  = i;
+    chips3D.appendChild(el);
+  });
+}
+
+function syncChips(idx) {
+  chips3D.querySelectorAll('.chip').forEach(c => {
+    const ci = parseInt(c.dataset.idx);
+    c.classList.remove('active', 'done');
+    if      (ci === idx) c.classList.add('active');
+    else if (ci < idx)   c.classList.add('done');
+  });
+}
+
+// ── Annotation panel ──────────────────────────────────
+const annoIdle   = document.getElementById('annoIdle');
+const annoActive = document.getElementById('annoActive');
+const annoDone   = document.getElementById('annoDone');
+const stepBadge  = document.getElementById('stepBadge');
+const progFill   = document.getElementById('progFill');
+const annoEmoji  = document.getElementById('annoEmoji');
+const annoName   = document.getElementById('annoName');
+const annoDesc   = document.getElementById('annoDesc');
+const annoTip    = document.getElementById('annoTip');
+
+function updateAnno(idx) {
+  if (!state.currentCase || idx < 0) {
+    annoIdle.style.display   = 'block';
+    annoActive.style.display = 'none';
+    annoDone.style.display   = 'none';
+    return;
+  }
+  const total = state.moves.length;
+  if (idx >= total) {
+    annoIdle.style.display   = 'none';
+    annoActive.style.display = 'none';
+    annoDone.style.display   = 'block';
+    return;
+  }
+  annoIdle.style.display   = 'none';
+  annoDone.style.display   = 'none';
+  annoActive.style.display = 'flex';
+
+  const token = state.moves[idx];
+  const info  = MOVES[token] || FB;
+
+  stepBadge.innerHTML     = `Step <strong>${idx + 1}</strong> of ${total}`;
+  progFill.style.width    = Math.round(((idx+1)/total)*100) + '%';
+  annoEmoji.textContent   = info.e;
+  annoName.textContent    = info.name;
+  annoDesc.textContent    = info.desc;
+  annoTip.textContent     = info.tip;
+}
+
+// ── Load a case ───────────────────────────────────────
+function loadCase(caseData) {
+  clearTimeout(state.playTimer);
+  state.isPlaying  = false;
+  state.currentCase = caseData;
+
+  const setup  = invertAlg(caseData.alg);   // auto-generate setup
+  const moves  = parse(caseData.alg);
+  state.moves  = moves;
+
+  // Both players start showing the OLL pattern (= after setup)
+  p2D.experimentalSetupAlg = setup;
+  p3D.experimentalSetupAlg = setup;
+  p2D.alg = caseData.alg;
+  p3D.alg = caseData.alg;
+  state.currentIdx = -1;
+
+  buildChips(moves);
+  syncChips(-1);
+  updateAnno(-1);
+
+  // Update recognition text
+  document.getElementById('recogText').textContent = caseData.recog;
+  document.getElementById('recogTip').textContent  = caseData.tip;
+
+  // Reset play button
+  const btn = document.getElementById('btnPlay');
+  btn.textContent = '▶';
+  btn.classList.remove('playing');
+
+  applyCamera();
+  updateButtons();
+}
+
+// ── Playback ──────────────────────────────────────────
+function getSpeed() { return parseInt(document.getElementById('speedSel').value); }
+
+function togglePlay() {
+  if (state.isPlaying) {
+    stopPlay();
+  } else {
+    startPlay();
+  }
+}
+
+function startPlay() {
+  if (!state.currentCase) return;
+  // restart if at end
+  if (state.currentIdx >= state.moves.length) {
+    seekBoth(-1);
+    setTimeout(doPlay, 300);
+    return;
+  }
+  doPlay();
+}
+
+function doPlay() {
+  const btn = document.getElementById('btnPlay');
+  state.isPlaying = true;
+  btn.classList.add('playing');
+  btn.textContent = '⏸';
+
+  function advance() {
+    const next = state.currentIdx + 1;
+    seekBoth(next);
+    if (next < state.moves.length) {
+      state.playTimer = setTimeout(advance, getSpeed());
+    } else {
+      stopPlay();
+    }
+  }
+  state.playTimer = setTimeout(advance, 250);
+}
+
+function stopPlay() {
+  clearTimeout(state.playTimer);
+  state.isPlaying = false;
+  const btn = document.getElementById('btnPlay');
+  btn.classList.remove('playing');
+  btn.textContent = '▶';
+}
+
+// ── Buttons ───────────────────────────────────────────
+function updateButtons() {
+  const atStart = state.currentIdx < 0;
+  const atEnd   = state.currentIdx >= state.moves.length;
+  document.getElementById('btnReset').disabled = atStart;
+  document.getElementById('btnPrev').disabled  = atStart;
+  document.getElementById('btnNext').disabled  = atEnd;
+  document.getElementById('btnEnd').disabled   = atEnd;
+}
+
+document.getElementById('btnReset').addEventListener('click', () => { stopPlay(); seekBoth(-1); });
+document.getElementById('btnPrev') .addEventListener('click', () => { if (state.currentIdx > -1) seekBoth(state.currentIdx - 1); });
+document.getElementById('btnPlay') .addEventListener('click', togglePlay);
+document.getElementById('btnNext') .addEventListener('click', () => { if (state.currentIdx < state.moves.length) seekBoth(state.currentIdx + 1); });
+document.getElementById('btnEnd')  .addEventListener('click', () => seekBoth(state.moves.length));
+
+// ── Group tabs ────────────────────────────────────────
+function renderGroup(groupId) {
+  const group = GROUPS[groupId];
+  const grid  = document.getElementById('caseGrid');
+  grid.innerHTML = '';
+
+  group.cases.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'case-btn' + (i === 0 ? ' active' : '');
+    btn.dataset.id = c.id;
+    btn.innerHTML = `
+      <span class="cb-icon">${c.icon}</span>
+      <span class="cb-name">${c.name}</span>
+      <span class="cb-sub">${c.sub}</span>
+    `;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.case-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadCase(c);
+    });
+    grid.appendChild(btn);
+  });
+
+  // auto-load first case
+  loadCase(group.cases[0]);
+}
+
+document.getElementById('groupTabs').addEventListener('click', e => {
+  const tab = e.target.closest('.gtab');
+  if (!tab) return;
+  document.querySelectorAll('.gtab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  renderGroup(tab.dataset.group);
+});
+
+// ── Stickering ────────────────────────────────────────
+document.getElementById('stickerGrid').addEventListener('click', e => {
+  const btn = e.target.closest('.sk-btn');
+  if (!btn) return;
+  document.querySelectorAll('.sk-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  p2D.experimentalStickering = btn.dataset.s;
+  p3D.experimentalStickering = btn.dataset.s;
+});
+
+// ── Camera ────────────────────────────────────────────
+function applyCamera() {
+  const lon = parseFloat(document.getElementById('camLon').value);
+  const lat = parseFloat(document.getElementById('camLat').value);
+  setTimeout(() => {
+    p3D.cameraLongitude = lon;
+    p3D.cameraLatitude  = lat;
+  }, 150);
+  document.getElementById('vLon').textContent  = lon + '°';
+  document.getElementById('vLat').textContent  = lat + '°';
+  document.getElementById('outLon').textContent = lon;
+  document.getElementById('outLat').textContent = lat;
+}
+
+document.getElementById('camLon').addEventListener('input', applyCamera);
+document.getElementById('camLat').addEventListener('input', applyCamera);
+
+document.querySelectorAll('.pre-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('camLon').value = btn.dataset.lon;
+    document.getElementById('camLat').value = btn.dataset.lat;
+    applyCamera();
+  });
+});
+
+// ── Settings accordion ────────────────────────────────
+document.getElementById('settingsToggle').addEventListener('click', () => {
+  document.getElementById('settingsBody').classList.toggle('open');
+  document.getElementById('settingsToggle').classList.toggle('open');
+});
+
+// ── Init ──────────────────────────────────────────────
+renderGroup('cross');
+
+</script>
+</body>
+</html>
