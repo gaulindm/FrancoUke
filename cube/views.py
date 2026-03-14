@@ -130,19 +130,48 @@ def demo_daisy(request):
     })
 
 
+#def f2l_case_detail(request, slug):
+#    """
+#    Display detailed view of a single F2L case with Roofpig animation
+#    """
+#    cube_state = get_object_or_404(CubeState, slug=slug, method='cfop')
+#    
+#    context = {
+#        'cube_state': cube_state,
+#        'page_title': cube_state.name,
+#        'roofpig_config': cube_state.get_roofpig_config(),
+#    }
+#    
+#    return render(request, 'cube/f2l_case_detail.html', context)
+
+
 def f2l_case_detail(request, slug):
     """
-    Display detailed view of a single F2L case with Roofpig animation
+    Display detailed view of a single F2L case with cubing.js animation.
+    roofpig_config kept in context during transition period — safe to remove later.
     """
     cube_state = get_object_or_404(CubeState, slug=slug, method='cfop')
-    
+ 
+    # Build the clean algorithm (brackets stripped) for cubing.js
+    clean_moves = cube_state.get_clean_algorithm()
+    clean_alg   = ' '.join(clean_moves)
+ 
     context = {
-        'cube_state': cube_state,
-        'page_title': cube_state.name,
+        'cube_state':     cube_state,
+        'page_title':     cube_state.name,
+        'method':         'F2L',
+        # cubing.js values
+        'clean_alg':      clean_alg,
+        'setup_alg':      cube_state.get_setup_alg(),
+        'stickering':     'full',
+        'cam_longitude':  cube_state.camera_longitude,
+        'cam_latitude':   cube_state.camera_latitude,
+        # kept for safety during transition — remove after full migration
         'roofpig_config': cube_state.get_roofpig_config(),
     }
-    
+ 
     return render(request, 'cube/f2l_case_detail.html', context)
+
 
 def test_top_layer_svg(request):
     """

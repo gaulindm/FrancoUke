@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F2L Camera POV — cubing.js Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #161a24;
+      --border:    #252a38;
+      --accent-r:  #ff4b4b;
+      --accent-l:  #4b9fff;
+      --accent-y:  #ffd84b;
+      --text:      #e8eaf0;
+      --muted:     #6b7280;
+      --radius:    16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      padding: 32px 24px 64px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent-y);
+      margin-bottom: 10px;
+    }
+    header h1 {
+      font-size: clamp(22px, 4vw, 36px);
+      font-weight: 900;
+      line-height: 1.15;
+    }
+    header h1 span { color: var(--accent-y); }
+    header p {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 540px;
+      margin-inline: auto;
+    }
+
+    /* ── Algorithm picker ── */
+    .alg-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+    .alg-btn {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      padding: 8px 16px;
+      transition: all .2s;
+    }
+    .alg-btn:hover { border-color: var(--accent-y); color: var(--accent-y); }
+    .alg-btn.active {
+      background: var(--accent-y);
+      border-color: var(--accent-y);
+      color: #0d0f14;
+      font-weight: 700;
+    }
+
+    /* ── Two-column cube layout ── */
+    .cube-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto 36px;
+    }
+    @media (max-width: 560px) { .cube-grid { grid-template-columns: 1fr; } }
+
+    .cube-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .cube-card.right { border-top: 3px solid var(--accent-r); }
+    .cube-card.left  { border-top: 3px solid var(--accent-l); }
+
+    .card-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .right .hand-badge { background: rgba(255,75,75,.15); color: var(--accent-r); }
+    .left  .hand-badge { background: rgba(75,159,255,.15); color: var(--accent-l); }
+
+    .card-title {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    twisty-player {
+      width: 280px;
+      height: 280px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .alg-display {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      width: 100%;
+      text-align: center;
+      color: var(--accent-y);
+      word-break: break-all;
+    }
+
+    /* ── Camera controls ── */
+    .controls-panel {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      max-width: 900px;
+      margin: 0 auto 24px;
+    }
+    .controls-panel h2 {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-family: 'Space Mono', monospace;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px 40px;
+    }
+    @media (max-width: 560px) { .controls-grid { grid-template-columns: 1fr; } }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .control-group label span {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--accent-y);
+    }
+
+    input[type=range] {
+      width: 100%;
+      appearance: none;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-y);
+      cursor: pointer;
+      transition: transform .15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    .hint-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-top: 6px;
+    }
+    .hint-row span { font-size: 11px; color: var(--muted); }
+
+    /* ── Preset buttons ── */
+    .presets {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .preset-btn {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+      padding: 7px 14px;
+      transition: all .2s;
+    }
+    .preset-btn:hover { border-color: var(--accent-y); color: var(--accent-y); }
+
+    /* ── Footer note ── */
+    .note {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 216, 75, .06);
+      border: 1px solid rgba(255, 216, 75, .2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .note strong { color: var(--accent-y); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="eyebrow">cubing.js — camera POV test</div>
+    <h1>F2L Hand POV <span>Explorer</span></h1>
+    <p>Tune the camera angle until the cube feels natural for each hand. These values go directly into your Django templates.</p>
+  </header>
+
+  <!-- Algorithm picker -->
+  <div class="alg-picker" id="algPicker">
+    <button class="alg-btn active" data-alg="R U R'" data-mirror="L' U' L" data-setup="" data-label="F2L #1 — Basic insert">F2L #1 · R U R'</button>
+    <button class="alg-btn" data-alg="U R U' R'" data-mirror="U' L' U L" data-setup="" data-label="F2L #3 — U then insert">F2L #3 · U R U' R'</button>
+    <button class="alg-btn" data-alg="U R U' R' U' F' U F" data-mirror="U' L' U L U F U' F'" data-setup="R U' R' F R' F' R" data-label="F2L #5 — Both on top">F2L #5 · Both up</button>
+    <button class="alg-btn" data-alg="R U' R' U R U' R'" data-mirror="L' U L U' L' U L" data-setup="R U R'" data-label="F2L #21 — Corner in slot">F2L #21 · Slot corner</button>
+    <button class="alg-btn" data-alg="R U R' U' R U R' U' R U R'" data-mirror="L' U' L U L' U' L U L' U' L" data-setup="" data-label="F2L Sexy ×3">Sexy ×3</button>
+  </div>
+
+  <!-- Cube grid -->
+  <div class="cube-grid">
+    <div class="cube-card right">
+      <div class="card-header">
+        <span class="hand-badge">Right Hand</span>
+        <span class="card-title">Standard F2L · more right face</span>
+      </div>
+      <twisty-player id="playerRight"
+        puzzle="3x3x3"
+        visualization="3D"
+        hint-facelets="none"
+        background="none"
+        control-panel="bottom-row">
+      </twisty-player>
+      <div class="alg-display" id="algRight">R U R'</div>
+    </div>
+
+    <div class="cube-card left">
+      <div class="card-header">
+        <span class="hand-badge">Left Hand</span>
+        <span class="card-title">Mirror F2L · more left face</span>
+      </div>
+      <twisty-player id="playerLeft"
+        puzzle="3x3x3"
+        visualization="3D"
+        hint-facelets="none"
+        background="none"
+        control-panel="bottom-row">
+      </twisty-player>
+      <div class="alg-display" id="algLeft">L' U' L</div>
+    </div>
+  </div>
+
+  <!-- Camera controls -->
+  <div class="controls-panel">
+    <h2>🎥 Camera Controls — drag to tune</h2>
+    <div class="controls-grid">
+
+      <div class="control-group">
+        <label>Longitude · Right (horizontal rotation) <span id="valLonR">-25°</span></label>
+        <input type="range" id="lonR" min="-89" max="89" value="-25" step="1">
+        <div class="hint-row"><span>← Negative = camera moves left → more front face visible</span></div>
+      </div>
+
+      <div class="control-group">
+        <label>Longitude · Left (horizontal rotation) <span id="valLonL">25°</span></label>
+        <input type="range" id="lonL" min="-89" max="89" value="25" step="1">
+        <div class="hint-row"><span>Positive = camera moves right → more front face visible</span></div>
+      </div>
+
+      <div class="control-group">
+        <label>Latitude · Right (vertical angle) <span id="valLatR">20°</span></label>
+        <input type="range" id="latR" min="0" max="89" value="20" step="1">
+        <div class="hint-row"><span>Higher = looking more from above</span></div>
+      </div>
+
+      <div class="control-group">
+        <label>Latitude · Left (vertical angle) <span id="valLatL">20°</span></label>
+        <input type="range" id="latL" min="0" max="89" value="20" step="1">
+        <div class="hint-row"><span>Higher = looking more from above</span></div>
+      </div>
+    </div>
+
+    <div class="presets">
+      <strong style="font-size:12px; color: var(--muted); align-self:center; margin-right:4px;">Presets:</strong>
+      <button class="preset-btn" data-lonr="-25" data-latr="20" data-lonl="25" data-latl="20">🎯 Balanced (start here)</button>
+      <button class="preset-btn" data-lonr="-40" data-latr="15" data-lonl="40" data-latl="15">📐 Strong front angle</button>
+      <button class="preset-btn" data-lonr="-15" data-latr="30" data-lonl="15" data-latl="30">🔭 High bird's eye</button>
+      <button class="preset-btn" data-lonr="0" data-latr="20" data-lonl="0" data-latl="20">⬛ Dead centre (no lean)</button>
+      <button class="preset-btn" data-lonr="-45" data-latr="35" data-lonl="45" data-latl="35">🤌 Classic Roofpig feel</button>
+    </div>
+  </div>
+
+  <!-- Footer note -->
+  <div class="note">
+    <strong>When you find the right angle</strong> — note the four numbers above. In your Django template you'll set them like:<br>
+    <code style="font-family: monospace; color: #a8b4c8">
+      player.cameraLongitude = -25; &nbsp; player.cameraLatitude = 20;
+    </code><br>
+    One value pair for right-hand algorithms, one for left-hand mirror algorithms.
+  </div>
+
+  <!-- cubing.js -->
+  <script type="module">
+    import { TwistyPlayer } from "https://cdn.cubing.net/js/cubing/twisty";
+
+    const playerRight = document.getElementById('playerRight');
+    const playerLeft  = document.getElementById('playerLeft');
+    const algRight    = document.getElementById('algRight');
+    const algLeft     = document.getElementById('algLeft');
+
+    // Sliders
+    const lonR = document.getElementById('lonR');
+    const lonL = document.getElementById('lonL');
+    const latR = document.getElementById('latR');
+    const latL = document.getElementById('latL');
+
+    const valLonR = document.getElementById('valLonR');
+    const valLonL = document.getElementById('valLonL');
+    const valLatR = document.getElementById('valLatR');
+    const valLatL = document.getElementById('valLatL');
+
+    // Current alg state
+    let currentAlg    = "R U R'";
+    let currentMirror = "L' U' L";
+    let currentSetup  = "";
+
+    // Apply camera after a short wait for player to initialise
+    function applyCameras() {
+      setTimeout(() => {
+        playerRight.cameraLongitude = parseFloat(lonR.value);
+        playerRight.cameraLatitude  = parseFloat(latR.value);
+        playerLeft.cameraLongitude  = parseFloat(lonL.value);
+        playerLeft.cameraLatitude   = parseFloat(latL.value);
+      }, 150);
+    }
+
+    // Load algorithms into both players
+    function loadAlgs(alg, mirror, setup) {
+      playerRight.alg = alg;
+      playerLeft.alg  = mirror;
+
+      if (setup) {
+        playerRight.experimentalSetupAlg = setup;
+        // Build mirror of setup — simple approach: swap R↔L, U dirs same
+        const mirrorSetup = setup
+          .replace(/\bR'/g, '@@LP@@').replace(/\bR\b/g, "L'").replace(/@@LP@@/g, 'L')
+          .replace(/\bL'/g, '@@RP@@').replace(/\bL\b/g, "R'").replace(/@@RP@@/g, 'R');
+        playerLeft.experimentalSetupAlg = mirrorSetup;
+      } else {
+        playerRight.experimentalSetupAlg = "";
+        playerLeft.experimentalSetupAlg  = "";
+      }
+
+      algRight.textContent = setup ? `setup: ${setup} | ${alg}` : alg;
+      algLeft.textContent  = mirror;
+      applyCameras();
+    }
+
+    // Algorithm picker
+    document.getElementById('algPicker').addEventListener('click', e => {
+      const btn = e.target.closest('.alg-btn');
+      if (!btn) return;
+      document.querySelectorAll('.alg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadAlgs(btn.dataset.alg, btn.dataset.mirror, btn.dataset.setup);
+    });
+
+    // Slider listeners
+    lonR.addEventListener('input', () => { valLonR.textContent = lonR.value + '°'; applyCameras(); });
+    lonL.addEventListener('input', () => { valLonL.textContent = lonL.value + '°'; applyCameras(); });
+    latR.addEventListener('input', () => { valLatR.textContent = latR.value + '°'; applyCameras(); });
+    latL.addEventListener('input', () => { valLatL.textContent = latL.value + '°'; applyCameras(); });
+
+    // Preset buttons
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lonR.value = btn.dataset.lonr; valLonR.textContent = btn.dataset.lonr + '°';
+        lonL.value = btn.dataset.lonl; valLonL.textContent = btn.dataset.lonl + '°';
+        latR.value = btn.dataset.latr; valLatR.textContent = btn.dataset.latr + '°';
+        latL.value = btn.dataset.latl; valLatL.textContent = btn.dataset.latl + '°';
+        applyCameras();
+      });
+    });
+
+    // Initial load
+    loadAlgs("R U R'", "L' U' L", "");
+  </script>
+</body>
+</html>

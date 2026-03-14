@@ -37,6 +37,21 @@ class CubeState(models.Model):
     roofpig_setup = models.TextField(blank=True)
     roofpig_colored = models.TextField(blank=True)
     roofpig_flags = models.CharField(max_length=200, blank=True, default='showalg')
+    camera_longitude = models.FloatField(
+        default=-25.0,
+        help_text="cubing.js camera horizontal angle. Negative = more front face visible."
+    )
+    camera_latitude = models.FloatField(
+        default=22.0,
+        help_text="cubing.js camera vertical angle. Higher = more top-down view."
+    )
+    stickering = models.CharField(
+        max_length=30,
+        blank=True,
+        default='full',
+        help_text="cubing.js stickering: full | OLL | PLL | F2L | LL | Cross"
+    )
+ 
 
     # ── Left-hand substitution ─────────────────────────────────────────────
     # Students hold the cube in their right hand and move with their left.
@@ -170,6 +185,50 @@ class CubeState(models.Model):
         config_parts.append("hover=2")
 
         return " | ".join(config_parts)
+    
+    @staticmethod
+    def invert_alg(alg):
+        """
+        Compute the inverse of an algorithm string.
+ 
+        Used to auto-generate the setup position for cubing.js.
+        Strips grouping brackets before inverting.
+ 
+        "R U R'"  →  "R U' R'"  (inverse)
+        """
+        if not alg or not alg.strip():
+            return ''
+        # Strip grouping notation so brackets don't confuse the parser
+        clean = re.sub(r'[(){}\[\]]', '', alg).strip()
+        moves = clean.split()
+        inverted = []
+        for m in reversed(moves):
+            if not m:
+                continue
+            if m.endswith("'"):
+                inverted.append(m[:-1])       # R'  → R
+            elif m.endswith('2'):
+                inverted.append(m)             # R2  → R2  (self-inverse)
+            else:
+                inverted.append(m + "'")       # R   → R'
+        return ' '.join(inverted)
+ 
+    def get_setup_alg(self):
+        """
+        Return the cubing.js setup algorithm.
+ 
+        Priority:
+          1. Use roofpig_setup if it was manually set (backward compat)
+          2. Otherwise auto-invert the main algorithm
+ 
+        This means you never NEED to fill roofpig_setup again —
+        it just works automatically.
+        """
+        if self.roofpig_setup and self.roofpig_setup.strip():
+            return self.roofpig_setup
+        return self.invert_alg(self.algorithm)
+
+
 
     def save(self, *args, **kwargs):
         if not self.slug:
