@@ -300,11 +300,12 @@ const SETUP       = "{{ setup_alg|escapejs }}";
 const ALG         = "{{ clean_alg|escapejs }}";
 
 const HAND        = "{{ cube_state.hand_orientation }}";
-const ORIENTATION = "x2 y";
+//const ORIENTATION = "x2 y";
 const CAM_LON     = HAND === 'right' ? 30 : -30;
 
 setTimeout(() => {
-  player.experimentalSetupAlg = ORIENTATION + (SETUP ? " " + SETUP : "");
+//  player.experimentalSetupAlg = ORIENTATION + (SETUP ? " " + SETUP : "");
+  player.experimentalSetupAlg = SETUP || "";
   player.alg                  = ALG;
   player.cameraLongitude      = CAM_LON;
   player.cameraLatitude       = {{ cam_latitude }};

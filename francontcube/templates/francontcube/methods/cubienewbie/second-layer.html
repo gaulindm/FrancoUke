@@ -46,13 +46,13 @@
 <!-- Trouver la bonne arête - SIMPLIFIÉ -->
 <div class="card border-info border-3 shadow-sm mb-4">
     <div class="card-body p-4">
-        <h3 class="text-center mb-4">🔍 Cherche une arête SANS jaune pour former un T à l'envers sur le côté droit</h3>
+        <h3 class="text-center mb-4">🔍 Cherche une arête SANS blanc pour former un T à l'envers sur le côté droit</h3>
         
         <div class="row justify-content-center">
             <div class="col-md-6 text-center mb-3">
                 <div class="p-4 bg-light rounded">
                     <h4 class="text-danger mb-3">❌ Mauvaise arête</h4>
-                    <p class="lead mb-3">A du jaune =<br><strong>Pas pour maintenant!</strong></p>
+                    <p class="lead mb-3">A du blanc =<br><strong>Pas pour maintenant!</strong></p>
                     <div class="d-flex justify-content-center">
                         <div id="cube-edge-yellow"></div>
                     </div>
@@ -140,7 +140,7 @@
                 <div class="col-md-4 text-center mb-4">
                     <div class="display-1 text-primary">1️⃣</div>
                     <h4 class="mt-3 brand-green">Trouve</h4>
-                    <p class="lead">Cherche une arête SANS jaune en haut</p>
+                    <p class="lead">Cherche une arête SANS blanc en haut</p>
                 </div>
                 
                 <div class="col-md-4 text-center mb-4">
@@ -211,8 +211,8 @@
         <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
             🏠 Menu
         </a>
-        <a href="{% url 'francontcube:cubienewbie_yellow_cross' %}" class="btn btn-success btn-lg">
-            Croix jaune →
+        <a href="{% url 'francontcube:cubienewbie_top_cross' %}" class="btn btn-success btn-lg">
+            Croix supérieur (blanche) →
         </a>
     </div>
 </div>

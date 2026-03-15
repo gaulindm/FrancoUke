@@ -64,10 +64,10 @@ def method_cubienewbie(request):
             "cube_state": get_cube_state('marguerite-goal')
         },
         {
-            "name": "5 — Étape 2 : La croix blanche",
+            "name": "5 — Étape 2 : La croix du bas (jaune)",
             "desc": "Aligner les arêtes blanches avec les centres pour former la croix.",
             "icon": "bi-plus-circle",
-            "url": "/francontcube/methods/cubienewbie/white-cross/",
+            "url": "/francontcube/methods/cubienewbie/bottom-cross/",
             "available": True,
             "cube_state": get_cube_state('white-cross-goal')
         },
@@ -88,18 +88,18 @@ def method_cubienewbie(request):
             "cube_state": get_cube_state('second-layer-goal')
         },
         {
-            "name": "8 — Étape 5 : La croix jaune",
-            "desc": "Former la croix jaune sur la face supérieure.",
+            "name": "8 — Étape 5 : La croix du haut (blanc)",
+            "desc": "Former la croix blanche sur la face supérieure.",
             "icon": "bi-plus-circle",
-            "url": "/francontcube/methods/cubienewbie/yellow-cross/",
+            "url": "/francontcube/methods/cubienewbie/top-cross/",
             "available": True,
             "cube_state": get_cube_state('yellow-cross-goal')
         },
         {
-            "name": "9 — Étape 6 : La face jaune",
+            "name": "9 — Étape 6 : La face du haut (blanche)",
             "desc": "La chasse au poisson.",
             "icon": "bi-brightness-high",
-            "url": "/francontcube/methods/cubienewbie/yellow-face/",
+            "url": "/francontcube/methods/cubienewbie/top-face/",
             "available": True,
             "cube_state": get_cube_state('yellow-face-goal')
         },
@@ -113,7 +113,7 @@ def method_cubienewbie(request):
         },
         {
             "name": "11 — Étape 8 : La permutation des arêtes",    
-            "desc": "La permutation des arêtes de la couche jaune pour finir le cube.",
+            "desc": "La permutation des arêtes de la couche superieur pour finir le cube.",
             "icon": "bi-check-circle",
             "url": "/francontcube/methods/cubienewbie/edge-permutation/",
             "available": True,

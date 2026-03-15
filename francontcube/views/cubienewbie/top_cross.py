@@ -8,7 +8,7 @@ This is the first step in solving the Rubik's Cube using the Cubie Newbie method
 from ..base import StepView
 
 
-class YellowCrossView(StepView):
+class TopCrossView(StepView):
     """
     Step 1a: Build the daisy around yellow center.
     
@@ -16,8 +16,8 @@ class YellowCrossView(StepView):
     Just define the configuration and you're done!
     """
     
-    template_name = "francontcube/methods/cubienewbie/yellow-cross.html"
-    step_name = "Croix jaune"
+    template_name = "francontcube/methods/cubienewbie/top-cross.html"
+    step_name = "Croix du haut"
     step_icon = "flower3"
     
     # Map template context variable names to CubeState slugs
@@ -31,4 +31,4 @@ class YellowCrossView(StepView):
 
 
 # Export the view function for URL routing
-yellow_cross = YellowCrossView.as_view()
+top_cross = TopCrossView.as_view()

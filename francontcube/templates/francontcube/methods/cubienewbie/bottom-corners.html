@@ -9,11 +9,10 @@
     <!-- Titre principal avec emoji -->
     <div class="text-center mb-5">
         <h1 class="hero-title">
-            🔲 Étape 3 : <span class="brand-green">Les coins blancs!</span>
+            🔲 Étape 3 : <span class="brand-green">Les coins inférieurs</span>
         </h1>
         <p class="lead">
-            Complète toute la face blanche avec 4 coins
-        </p>
+            Bien placez les coins du bas pour former une face jaune sur le bas du cube</p>
     </div>
 
     <!-- Charger le template SVG (caché) -->
@@ -38,8 +37,8 @@
         <div class="card-body text-center p-5">
             <h2 class="mb-4">🎯 C'est quoi le but?</h2>
             <div id="cube-goal" class="mb-3"></div>
-            <h4 class="brand-green">Toute la face blanche doit être complète!</h4>
-            <p class="lead mb-0">Croix blanche ✅ + 4 coins blancs = Face complète! 🎉</p>
+            <h4 class="brand-green">Toute la face jaunes doit être complète!</h4>
+            <p class="lead mb-0">Croix jaune ✅ + 4 coins jaunes = Face complète! 🎉</p>
         </div>
     </div>
 
@@ -75,7 +74,7 @@
             <div class="col-md-4 text-center mb-4">
                 <div class="display-1 text-primary">1️⃣</div>
                 <h4 class="mt-3 brand-green">Trouve</h4>
-                <p class="lead">Cherche le coin avec du blanc et les couleurs des centres AVANT et DROIT</p>
+                <p class="lead">Cherche le coin avec du jaune et les couleurs des centres AVANT et DROIT</p>
             </div>
             
             <div class="col-md-4 text-center mb-4">
@@ -104,7 +103,7 @@
                     <div class="case-card p-3 border rounded bg-light">
                         <div id="cube-case-1" class="mb-3"></div>
                         <div class="case-label bg-success text-white p-2 rounded">
-                            Blanc → droite : <strong>1 fois</strong>
+                            Jaune → droite : <strong>1 fois</strong>
                         </div>
                     </div>
                 </div>
@@ -112,7 +111,7 @@
                     <div class="case-card p-3 border rounded bg-light">
                         <div id="cube-case-2" class="mb-3"></div>
                         <div class="case-label bg-info text-white p-2 rounded">
-                            Blanc → haut : <strong>3 fois</strong>
+                            Jaune → haut : <strong>3 fois</strong>
                         </div>
                     </div>
                 </div>
@@ -120,7 +119,7 @@
                     <div class="case-card p-3 border rounded bg-light">
                         <div id="cube-case-3" class="mb-3"></div>
                         <div class="case-label bg-warning text-white p-2 rounded">
-                            Blanc → avant : <strong>5 fois </strong>
+                            Jaune → avant : <strong>5 fois </strong>
                         </div>
                     </div>
                 </div>
@@ -171,8 +170,8 @@
 
     <!-- Navigation -->
     <div class="d-flex justify-content-between flex-wrap gap-2">
-        <a href="{% url 'francontcube:cubienewbie_white_cross' %}" class="btn btn-outline-primary btn-lg">
-            ← Croix blanche
+        <a href="{% url 'francontcube:cubienewbie_bottom_cross' %}" class="btn btn-outline-primary btn-lg">
+            ← Croix du bas (jaune)
         </a>
         <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
             🏠 Menu

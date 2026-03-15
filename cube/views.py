@@ -163,7 +163,7 @@ def f2l_case_detail(request, slug):
         # cubing.js values
         'clean_alg':      clean_alg,
         'setup_alg':      cube_state.get_setup_alg(),
-        'stickering':     'full',
+        'stickering':     'F2L',
         'cam_longitude':  cube_state.camera_longitude,
         'cam_latitude':   cube_state.camera_latitude,
         # kept for safety during transition — remove after full migration

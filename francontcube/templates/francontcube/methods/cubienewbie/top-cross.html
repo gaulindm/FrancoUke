@@ -1,7 +1,7 @@
 {% extends "francontcube/partials/base.html" %}
 {% load static %}
 
-{% block title %}La croix jaune — Francontcube{% endblock %}
+{% block title %}La croix superieur — Francontcube{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -9,10 +9,10 @@
     <!-- Titre principal avec emoji -->
     <div class="text-center mb-5">
         <h1 class="hero-title">
-            ✨ Étape 5 : <span class="brand-green">La croix jaune!</span>
+            ✨ Étape 5 : <span class="brand-green">La croix supérieur en blanc!</span>
         </h1>
         <p class="lead">
-            Fais une croix jaune en haut du cube
+            Fais une croix blanche en haut du cube
         </p>
     </div>
 
@@ -40,7 +40,7 @@
             <div class="d-flex justify-content-center mb-3">
                 <div id="cube-goal"></div>
             </div>
-            <h4 class="brand-green">Une croix jaune en haut!</h4>
+            <h4 class="brand-green">Une croix blanche en haut!</h4>
             <p class="lead mb-0">Pour l'instant, ignore les couleurs sur les côtés 😊</p>
         </div>
     </div>
@@ -68,7 +68,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body p-4">
             <h2 class="text-center mb-4">🎮 Quelle forme vois-tu en haut?</h2>
-            <p class="text-center lead mb-4">Regarde SEULEMENT le jaune sur la face du haut</p>
+            <p class="text-center lead mb-4">Regarde SEULEMENT le blanc sur la face du haut</p>
             
             <div class="row">
                 <!-- Forme 1: Point -->
@@ -108,14 +108,14 @@
                         </div>
                         <div class="p-3 bg-light rounded">
                             <p class="mb-2"><strong>Mets la ligne horizontale</strong></p>
-                            <p class="text-success mb-0">Fais l'algorithme → CROIX JAUNE! 🎉</p>
+                            <p class="text-success mb-0">Fais l'algorithme → CROIX BLANCHE! 🎉</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="alert alert-success text-center mt-4 mb-0">
-                <h5>✅ Tu as déjà une croix jaune?</h5>
+                <h5>✅ Tu as déjà une croix blanche?</h5>
                 <p class="mb-0">Super! Passe directement à l'étape suivante!</p>
             </div>
         </div>
@@ -187,8 +187,8 @@
         <a href="{% url 'francontcube:method_cubienewbie' %}" class="btn btn-outline-secondary btn-lg">
             🏠 Menu
         </a>
-        <a href="{% url 'francontcube:cubienewbie_yellow_face' %}" class="btn btn-success btn-lg">
-            Face jaune →
+        <a href="{% url 'francontcube:cubienewbie_top_face' %}" class="btn btn-success btn-lg">
+            Face superieur en blanc →
         </a>
     </div>
 </div>

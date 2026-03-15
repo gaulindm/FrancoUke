@@ -44,11 +44,11 @@ from .mosaic.mosaic_steps import mosaic_steps as mosaic_steps
 # ============================================================
 from .cubienewbie.main import method_cubienewbie
 from .cubienewbie.daisy import daisy as cubienewbie_daisy
-from .cubienewbie.white_cross import white_cross as cubienewbie_white_cross
+from .cubienewbie.bottom_cross import bottom_cross as cubienewbie_bottom_cross
 from .cubienewbie.bottom_corners import bottom_corners as cubienewbie_bottom_corners
 from .cubienewbie.second_layer import second_layer as cubienewbie_second_layer
-from .cubienewbie.yellow_cross import yellow_cross as cubienewbie_yellow_cross
-from .cubienewbie.yellow_face import yellow_face as cubienewbie_yellow_face
+from .cubienewbie.top_cross import top_cross as cubienewbie_top_cross
+from .cubienewbie.top_face import top_face as cubienewbie_top_face
 from .cubienewbie.corner_permutation import corner_permutation as cubienewbie_corner_permutation
 from .cubienewbie.edge_permutation import edge_permutation as cubienewbie_edge_permutation
 from .cubienewbie.cube_intro import cube_intro as cubienewbie_cube_intro
@@ -123,11 +123,11 @@ __all__ = [
     'cubienewbie_cube_intro',
     'cubienewbie_notation',
     'cubienewbie_daisy',
-    'cubienewbie_white_cross',
+    'cubienewbie_bottom_cross',
     'cubienewbie_bottom_corners',
     'cubienewbie_second_layer',
-    'cubienewbie_yellow_cross',
-    'cubienewbie_yellow_face',
+    'cubienewbie_top_cross',
+    'cubienewbie_top_face',
     'cubienewbie_corner_permutation',
     'cubienewbie_edge_permutation',
     
