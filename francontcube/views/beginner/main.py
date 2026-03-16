@@ -38,8 +38,8 @@ def method_beginner(request):
             "step_number": None,
         },
         {
-            "name": "Étape 1 : La croix blanche",
-            "desc": "Aligner les arêtes blanches avec les centres pour former la croix.",
+            "name": "Étape 1 : La croix jaune",
+            "desc": "Aligner les arêtes jaunes avec les centres pour former la croix.",
             "icon": "bi-plus-circle",
             "url": reverse('francontcube:beginner_bottom_cross'),
             "available": True,
