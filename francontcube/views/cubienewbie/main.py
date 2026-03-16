@@ -93,7 +93,7 @@ def method_cubienewbie(request):
             "icon": "bi-plus-circle",
             "url": "/francontcube/methods/cubienewbie/top-cross/",
             "available": True,
-            "cube_state": get_cube_state('yellow-cross-goal')
+            "cube_state": get_cube_state('top-cross-goal')
         },
         {
             "name": "9 — Étape 6 : La face du haut (blanche)",

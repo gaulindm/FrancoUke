@@ -17,6 +17,7 @@ class EdgePermutationView(StepView):
     """
     
     template_name = "francontcube/methods/cubienewbie/edge-permutation.html"
+    method_name = "Débutant"
     step_name = "Permutation des aretes"
     step_icon = "flower3"
     

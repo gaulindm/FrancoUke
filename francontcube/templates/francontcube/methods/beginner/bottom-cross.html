@@ -1,0 +1,227 @@
+{% extends "francontcube/partials/base.html" %}
+{% load static %}
+
+{% block title %}La croix blanche — Francontcube{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre principal -->
+    <div class="text-center mb-5">
+        <h1 class="hero-title">
+            Étape 1: <span class="brand-green">La croix blanche</span>
+        </h1>
+        <p class="lead text-muted">
+            Vous pouvez maintenant apprendre comment créer la croix blanche sans utiliser la méthode margerite.
+        </p>
+    </div>
+ 
+    <!-- Charger le template SVG (caché) -->
+    {% include "cube/partials/_cube_svg.html" %}
+
+    <!-- Warning for missing cube states (only shown if any are missing) -->
+    {% if missing_slugs %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">⚠️ Missing Cube States</h4>
+        <p>The following CubeState objects need to be created in the database:</p>
+        <ul class="mb-0">
+            {% for slug in missing_slugs %}
+            <li><code>{{ slug }}</code></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <p class="mb-0 small">Use your cube state creation tool to add these. The page will display placeholders until they're created.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Section Objectif -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🎯 Objectif</h3>
+        <p>
+            Amener les 4 arêtes blanches <strong>en bas du cube</strong>, formant une croix.
+            <strong>Important :</strong> Les couleurs des côtés doivent correspondre aux centres !
+        </p>
+
+        <div class="text-center mt-3">
+            <div id="cube-goal" class="cube-small"></div>
+            <p class="mt-2"><small class="text-muted">La croix blanche complète avec les bonnes couleurs</small></p>
+        </div>
+    </div>
+
+    <!-- Section Comment faire -->
+    <div class="card p-4 mb-4">
+        <h3 class="brand-green">🧩 Comment faire ?</h3>
+
+        <p>
+            Tu as certainement plus d'expérience avec le cube pour te permettre de réaliser cette étape par <strong>intuition</strong>
+        </p>
+
+        <ol class="mt-3">
+            <li>
+                <strong>Choisis une arête blanche</strong> sur la face du haut (un « pétale »).
+            </li>
+            <li>
+                <strong>Tourne la face du haut (U)</strong> avec ton index droit pour que la couleur du côté de l'arête
+                soit <strong>au-dessus du centre de droite de la même couleur</strong>.
+            </li>
+            <li>
+                <strong>Fais R2 avec ta main droite</strong> pour faire descendre l'arête au bon endroit.
+            </li>
+            <li>
+                <strong>Répète pour les 3 autres arêtes.</strong>
+            </li>
+        </ol>
+
+        <div class="alert alert-warning mt-3">
+            <strong>🎯 Astuce importante :</strong> Garde toujours le cube dans la même orientation !
+            Ne tourne pas tout le cube dans tes mains. Utilise seulement U (le haut) pour positionner,
+            puis R2 (la droite) pour faire descendre.
+        </div>
+
+  
+    </div>
+
+
+
+    <!-- Section Important -->
+    <div class="card p-4 mb-4 border-warning">
+        <h3 class="brand-green">⚠️ Attention : Les couleurs doivent correspondre !</h3>
+
+        <div class="row mt-3">
+            <div class="col-md-6 text-center mb-3">
+                <h5 class="text-danger">❌ Croix incorrecte</h5>
+                <div id="cube-wrong" class="cube-small"></div>
+                <p><small class="text-muted">Les couleurs ne correspondent pas aux centres</small></p>
+            </div>
+            <div class="col-md-6 text-center mb-3">
+                <h5 class="text-success">✅ Croix correcte</h5>
+                <div id="cube-correct" class="cube-small"></div>
+                <p><small class="text-muted">Chaque couleur correspond à son centre</small></p>
+            </div>
+        </div>
+
+        <p class="mt-3 mb-0">
+            <strong>Astuce :</strong> Avant de faire descendre une arête,
+            <span class="bg-warning px-2">tourne la face du haut (U)</span>
+            pour que la couleur du côté de l'arête soit devant le bon centre de couleur !
+        </p>
+    </div>
+
+
+    <!-- Bouton de navigation -->
+    <div class="text-center">
+        <a href="{% url 'francontcube:beginner_about' %}" class="btn btn-outline-primary">
+            ← Retour : A propos
+        </a>
+        <a href="{% url 'francontcube:method_beginner' %}" class="btn btn-outline-secondary ms-2">
+            Vue d'ensemble
+        </a>
+        <a href="{% url 'francontcube:beginner_bottom_corners' %}" class="btn btn-success ms-2">
+            Étape suivante : Les coins blancs →
+        </a>
+    </div>
+</div>
+
+<!-- Styles CSS pour les cubes -->
+<style>
+/* Cubes réduits */
+.cube-small svg {
+    max-width: 275px;
+    height: auto;
+}
+
+/* Sur mobile, garder les cubes plus petits */
+@media (max-width: 768px) {
+    .cube-small svg {
+        max-width: 200px;
+    }
+
+    #cube-goal svg,
+    #cube-progress svg {
+        max-width: 350px;
+    }
+}
+</style>
+
+<!-- Script d'initialisation de la page -->
+<script type="module">
+  import { renderCube } from "{% static 'cube/js/cube_renderer.js' %}";
+
+  function mountCube(containerId, state) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Clear any existing content
+
+    // If state is missing, show a placeholder
+    if (!state) {
+      container.innerHTML = `
+        <div class="alert alert-secondary text-center py-4">
+          <i class="bi bi-cube text-muted" style="font-size: 3rem;"></i>
+          <p class="mb-0 mt-2 text-muted">Cube state not available</p>
+          <small class="text-muted">Create the CubeState in your admin tool</small>
+        </div>
+      `;
+      return;
+    }
+
+    const template = document.getElementById("cube-template");
+    const clone = template.content.cloneNode(true);
+    container.appendChild(clone);
+
+    const svg = container.querySelector("svg");
+    renderCube(svg, state);
+  }
+
+  // Store progress states for easy access (filter out nulls)
+  const progressStates = {{ progress_states|safe }};
+
+  // Messages d'encouragement pour chaque étape
+  const messages = [
+    "Commence avec la marguerite ! 🌼",
+    "On fait tourner la couche du haut (U) pour aligner le sous-petal avec le centre de la face de droite",
+    "On fait R2.  Le petale sera maintenant à sa place dans la couche du bas",
+    "On tourne le cube vers la droite ou vers la gauche.  Assures-toi d'avoir le centre jaune en haut",
+    "On répète pour toutes les pétales blancs du haut"
+  ];
+
+  // Make updateCrossProgress globally accessible
+  window.updateCrossProgress = function(numEdges) {
+    // Update cube visualization
+    mountCube('cube-progress', progressStates[numEdges]);
+
+    // Feedback visuel sur les boutons
+    const buttons = document.querySelectorAll('.btn-group button');
+    buttons.forEach((btn, index) => {
+      btn.classList.remove('active');
+      if (index === numEdges) {
+        btn.classList.add('active');
+      }
+    });
+
+    // Afficher le message d'encouragement
+    const messageBox = document.getElementById('cross-progress-message');
+    const messageText = messageBox.querySelector('p');
+    messageText.textContent = messages[numEdges];
+    messageBox.style.display = 'block';
+
+    // Animation simple
+    messageBox.classList.add('animate__animated', 'animate__fadeIn');
+    setTimeout(() => {
+      messageBox.classList.remove('animate__animated', 'animate__fadeIn');
+    }, 1000);
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Mount all static cubes
+    mountCube("cube-goal", {{ goal_state|safe }});
+    //mountCube("cube-before", {{ before_state|safe }});
+    //mountCube("cube-after", {{ after_state|safe }});
+    mountCube("cube-wrong", {{ wrong_state|safe }});
+    mountCube("cube-correct", {{ correct_state|safe }});
+
+    // Initialize progress cube with first state
+    updateCrossProgress(0);
+  });
+</script>
+
+{% endblock %}

@@ -41,15 +41,15 @@ def method_beginner(request):
             "name": "Étape 1 : La croix blanche",
             "desc": "Aligner les arêtes blanches avec les centres pour former la croix.",
             "icon": "bi-plus-circle",
-            "url": reverse('francontcube:beginner_white_cross'),
+            "url": reverse('francontcube:beginner_bottom_cross'),
             "available": True,
             "step_number": 1,
-            "cube_state": get_cube_state('white-cross-goal')
+            "cube_state": get_cube_state('bottom-cross-goal')
 
         },
         {
             "name": "Étape 2 : Les coins inférieurs",
-            "desc": "Placer les coins inférieurs blancs pour compléter la première couche.",
+            "desc": "Placer les coins inférieurs jaunes pour compléter la première couche.",
             "icon": "bi-box",
             "url": reverse('francontcube:beginner_bottom_corners'),
             "available": True,
@@ -68,28 +68,28 @@ def method_beginner(request):
 
         },
         {
-            "name": "Étape 4 : La croix jaune",
-            "desc": "Former la croix jaune sur la face supérieure.",
+            "name": "Étape 4 : La croix superieur",
+            "desc": "Former la croix blanche sur la face supérieure.",
             "icon": "bi-plus-circle",
-            "url": reverse('francontcube:beginner_yellow_cross'),
+            "url": reverse('francontcube:beginner_top_cross'),
             "available": True,
             "step_number": 4,
-            "cube_state": get_cube_state('yellow-cross-goal')
+            "cube_state": get_cube_state('top-cross-goal')
 
         },
         {
             "name": "Étape 5 : La face jaune",
-            "desc": "Orienter tous les coins pour compléter la face jaune (la chasse au poisson).",
+            "desc": "Orienter tous les coins pour compléter la face blanche (la chasse au poisson).",
             "icon": "bi-brightness-high",
-            "url": reverse('francontcube:beginner_yellow_face'),
+            "url": reverse('francontcube:beginner_top_face'),
             "available": True,
             "step_number": 5,
-            "cube_state": get_cube_state('yellow-face-goal')
+            "cube_state": get_cube_state('top-face-goal')
 
         },
         {
             "name": "Étape 6 : La permutation des coins",
-            "desc": "Placer les coins jaunes à leur bon emplacement.",
+            "desc": "Placer les coins blancs à leur bon emplacement.",
             "icon": "bi-arrow-repeat",
             "url": reverse('francontcube:beginner_corner_permutation'),
             "available": True,
@@ -99,7 +99,7 @@ def method_beginner(request):
         },
         {
             "name": "Étape 7 : La permutation des arêtes",    
-            "desc": "Permuter les arêtes de la couche jaune pour finir le cube.",
+            "desc": "Permuter les arêtes de la couche du haut pour finir le cube.",
             "icon": "bi-check-circle",
             "url": reverse('francontcube:beginner_edge_permutation'),
             "available": True,

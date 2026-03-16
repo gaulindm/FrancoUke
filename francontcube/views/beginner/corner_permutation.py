@@ -17,6 +17,7 @@ class CornerPermutationView(StepView):
     """
     
     template_name = "francontcube/methods/cubienewbie/corner-permutation.html"
+    method_name = "Débutant"
     step_name = "Permutation des coins"
     step_icon = "flower3"
     

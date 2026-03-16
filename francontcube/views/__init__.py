@@ -59,11 +59,11 @@ from .cubienewbie.about import about as cubienewbie_about
 # BEGINNER METHOD
 # ============================================================
 from .beginner.main import method_beginner as beginner_method
-from .beginner.white_cross import white_cross as beginner_white_cross
+from .beginner.bottom_cross import bottom_cross as beginner_bottom_cross
 from .beginner.bottom_corners import bottom_corners as beginner_bottom_corners
 from .beginner.second_layer import second_layer as beginner_second_layer
-from .beginner.yellow_cross import yellow_cross as beginner_yellow_cross
-from .beginner.yellow_face import yellow_face as beginner_yellow_face
+from .beginner.top_cross import top_cross as beginner_top_cross
+from .beginner.top_face import top_face as beginner_top_face
 from .beginner.corner_permutation import corner_permutation as beginner_corner_permutation
 from .beginner.edge_permutation import edge_permutation as beginner_edge_permutation
 from .beginner.about import about as beginner_about
@@ -134,11 +134,11 @@ __all__ = [
     # Beginner Method
     'beginner_method',
     'beginner_about',
-    'beginner_white_cross',
+    'beginner_bottom_cross',
     'beginner_bottom_corners',
     'beginner_second_layer',
-    'beginner_yellow_cross',
-    'beginner_yellow_face',
+    'beginner_top_cross',
+    'beginner_top_face',
     'beginner_corner_permutation',
     'beginner_edge_permutation',
 

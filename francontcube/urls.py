@@ -63,11 +63,11 @@ urlpatterns = [
     # ============================================================
     path('methods/beginner/', views.beginner_method, name='method_beginner'),
     path('methods/beginner/about/', views.beginner_about, name='beginner_about'),
-    path('methods/beginner/white-cross/', views.beginner_white_cross, name='beginner_white_cross'),
+    path('methods/beginner/bottom-cross/', views.beginner_bottom_cross, name='beginner_bottom_cross'),
     path('methods/beginner/bottom-corners/', views.beginner_bottom_corners, name='beginner_bottom_corners'),
     path('methods/beginner/second-layer/', views.beginner_second_layer, name='beginner_second_layer'),
-    path('methods/beginner/yellow-cross/', views.beginner_yellow_cross, name='beginner_yellow_cross'),
-    path('methods/beginner/yellow-face/', views.beginner_yellow_face, name='beginner_yellow_face'),
+    path('methods/beginner/top-cross/', views.beginner_top_cross, name='beginner_top_cross'),
+    path('methods/beginner/top-face/', views.beginner_top_face, name='beginner_top_face'),
     path('methods/beginner/corner-permutation/', views.beginner_corner_permutation, name='beginner_corner_permutation'),
     path('methods/beginner/edge-permutation/', views.beginner_edge_permutation, name='beginner_edge_permutation'),
     
