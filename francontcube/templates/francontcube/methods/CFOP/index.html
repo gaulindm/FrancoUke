@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
+<div class="container py-5">
     <!-- Header -->
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold text-primary mb-3">
@@ -40,45 +40,40 @@
     <div class="moves-preview">
         {{ cube_state.algorithm|parse_algorithm }}
     </div>
-    <!-- Steps List -->
+
+    <!-- Steps Grid (3 cards per row) -->
     <div class="row g-4">
         {% for step in steps %}
-        <div class="col-12">
+        <div class="col-12 col-md-6 col-lg-4">
             <div class="card shadow-sm h-100 {% if not step.available %}opacity-50{% endif %}">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <!-- Icon -->
-                        <div class="col-auto">
-                            <div class="text-center">
-                                <i class="{{ step.icon }} display-4 {% if step.step_number %}text-primary{% else %}text-secondary{% endif %}"></i>
+                <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                    <!-- Icon -->
+                    <i class="{{ step.icon }} display-4 {% if step.step_number %}text-primary{% else %}text-secondary{% endif %} mb-2"></i>
+                    {% if step.step_number %}
+                        <div class="badge bg-primary mb-3">Étape {{ step.step_number }}</div>
+                    {% else %}
+                        <div class="mb-3"></div>
+                    {% endif %}
+
+                    <!-- Content -->
+                    <h3 class="card-title mb-2">{{ step.name }}</h3>
+                    <p class="card-text text-muted flex-grow-1">{{ step.desc }}</p>
+
+                    <!-- Action Button -->
+                    <div class="mt-3">
+                        {% if step.available %}
+                            <a href="{{ step.url }}" class="btn btn-primary">
                                 {% if step.step_number %}
-                                    <div class="badge bg-primary mt-2">Étape {{ step.step_number }}</div>
+                                    Apprendre <i class="bi bi-arrow-right"></i>
+                                {% else %}
+                                    En savoir plus <i class="bi bi-arrow-right"></i>
                                 {% endif %}
-                            </div>
-                        </div>
-                        
-                        <!-- Content -->
-                        <div class="col">
-                            <h3 class="card-title mb-2">{{ step.name }}</h3>
-                            <p class="card-text text-muted mb-0">{{ step.desc }}</p>
-                        </div>
-                        
-                        <!-- Action Button -->
-                        <div class="col-auto">
-                            {% if step.available %}
-                                <a href="{{ step.url }}" class="btn btn-primary btn-lg">
-                                    {% if step.step_number %}
-                                        Apprendre <i class="bi bi-arrow-right"></i>
-                                    {% else %}
-                                        En savoir plus <i class="bi bi-arrow-right"></i>
-                                    {% endif %}
-                                </a>
-                            {% else %}
-                                <button class="btn btn-secondary btn-lg" disabled>
-                                    Bientôt disponible
-                                </button>
-                            {% endif %}
-                        </div>
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>
+                                Bientôt disponible
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -2,48 +2,412 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
-    <h1>Étape {{ step_number }}: {{ step_name }}</h1>
-    
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i>
-        <strong>Étape CFOP {{ step_number }}/4</strong> - Cross
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-primary fs-6 px-3 py-2 mb-3">Étape CFOP 1 / 4</span>
+        <h1 class="display-4 fw-bold text-primary mb-3">
+            <i class="bi bi-plus-circle-fill"></i> {{ step_name }}
+        </h1>
+        <p class="lead text-muted col-md-8 mx-auto">
+            La croix jaune est la fondation de tout. Une croix efficace libère ton esprit 
+            pour planifier le F2L — c'est ce qui sépare les cubers à 30 secondes de ceux à 15.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
+            <span class="badge bg-success fs-6 px-3 py-2">
+                <i class="bi bi-lightning-charge"></i> 8 mouvements max
+            </span>
+            <span class="badge bg-info fs-6 px-3 py-2">
+                <i class="bi bi-eye"></i> 15 sec d'inspection
+            </span>
+            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                <i class="bi bi-bullseye"></i> 4 arêtes jaunes
+            </span>
+        </div>
     </div>
-    
-    <div class="row">
+
+    <div class="row g-5">
+
+        <!-- ── COLONNE PRINCIPALE ── -->
         <div class="col-md-8">
-            <h2>Introduction</h2>
-            <p>
-                La croix est la première étape de CFOP. L'objectif est de résoudre
-                la croix blanche en bas de manière efficace (idéalement en moins de 8 mouvements)
-                tout en planifiant les paires F2L.
-            </p>
-            
-            <!-- Votre contenu ici -->
-        </div>
-        
+
+            <!-- Objectif -->
+            <div class="alert alert-primary d-flex gap-3 align-items-start mb-5" role="alert">
+                <i class="bi bi-info-circle-fill fs-4 flex-shrink-0 mt-1"></i>
+                <div>
+                    <strong>L'objectif :</strong> Placer les 4 arêtes jaunes sur la face D avec 
+                    leur couleur latérale alignée sur le bon centre — en 8 mouvements ou moins 
+                    et <em>sans regarder</em> pour les 2 premières arêtes (planifiées pendant l'inspection).
+                </div>
+            </div>
+
+            <!-- ─── SECTION : Erreur classique ─── -->
+            <section class="mb-5">
+                <h2 class="fw-bold border-bottom pb-2 mb-4">
+                    <i class="bi bi-x-octagon text-danger"></i> L'erreur classique
+                </h2>
+                <p>La majorité des débutants insèrent les arêtes <strong>une par une de façon isolée</strong>, 
+                souvent en passant par la face U avec des mouvements <code>F</code> / <code>R</code>. 
+                Résultat : chaque insertion risque de défaire les précédentes et le compteur de mouvements explose.</p>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-sm-6">
+                        <div class="card border-danger h-100">
+                            <div class="card-header bg-danger text-white">
+                                <i class="bi bi-x-circle"></i> Approche débutant
+                            </div>
+                            <div class="card-body">
+                                <code class="d-block mb-2 text-danger">F R U R' U' F'</code>
+                                <p class="mb-0 small text-muted">Passe par U, risque de défaire les autres arêtes, ~10-14 mouvements.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card border-success h-100">
+                            <div class="card-header bg-success text-white">
+                                <i class="bi bi-check-circle"></i> Approche efficace
+                            </div>
+                            <div class="card-body">
+                                <code class="d-block mb-2 text-success">D R' D'</code>
+                                <p class="mb-0 small text-muted">Insère directement sur D, préserve le reste, 3 mouvements.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success mt-4 mb-0">
+                    <i class="bi bi-lightbulb-fill"></i>
+                    <strong>Règle d'or :</strong> Résous la croix <strong>directement sur D</strong>.
+                    Utilise <code>D</code> et <code>D'</code> pour repositionner, pas <code>U</code>.
+                </div>
+            </section>
+
+            <!-- ─── SECTION : Ordre des arêtes ─── -->
+            <section class="mb-5">
+                <h2 class="fw-bold border-bottom pb-2 mb-4">
+                    <i class="bi bi-sort-numeric-down text-primary"></i> Stratégie 1 — Ordre logique des arêtes
+                </h2>
+                <p>Ne place pas les arêtes dans n'importe quel ordre. Pense en <strong>paires opposées</strong> : 
+                les arêtes face à face ne s'interfèrent pas, ce qui te permet souvent de les insérer 
+                en 2-3 mouvements chacune.</p>
+
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        <ol class="mb-0">
+                            <li class="mb-3">
+                                <strong>Arête 1 + Arête 2 (opposées)</strong> — ex : jaune-rouge &amp; jaune-orange<br>
+                                <span class="text-muted small">Elles se trouvent sur des faces opposées, pas d'interférence.</span>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Arête 3 + Arête 4 (opposées)</strong> — ex : jaune-bleu &amp; jaune-vert<br>
+                                <span class="text-muted small">Utilise <code>D2</code> pour repositionner la face entre les deux insertions.</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning mt-3 mb-0">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Astuce :</strong> Si une arête est déjà bien placée sur D, <strong>ne la touche pas</strong>
+                    et planifie les autres arêtes en conséquence. C'est un "cadeau" — exploite-le.
+                </div>
+            </section>
+
+            <!-- ─── SECTION : 4 situations types ─── -->
+            <section class="mb-5">
+                <h2 class="fw-bold border-bottom pb-2 mb-4">
+                    <i class="bi bi-grid-3x3 text-primary"></i> Stratégie 2 — Les 4 situations types
+                </h2>
+                <p>Chaque arête de croix se trouve dans <strong>l'une de ces 4 situations</strong>. 
+                Reconnaître rapidement le cas en inspection est la compétence clé.</p>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Situation</th>
+                                <th>Description</th>
+                                <th>Solution efficace</th>
+                                <th>Mouvements</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-success">A</span></td>
+                                <td>Arête sur U, jaune vers le haut</td>
+                                <td><code>U → F2</code> (aligner + insérer)</td>
+                                <td class="text-center"><span class="badge bg-success">2</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-info text-dark">B</span></td>
+                                <td>Arête sur U, jaune vers la face</td>
+                                <td><code>F</code> (insertion directe)</td>
+                                <td class="text-center"><span class="badge bg-info text-dark">1</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning text-dark">C</span></td>
+                                <td>Arête dans la couche du milieu</td>
+                                <td><code>F</code> ou <code>F'</code> selon orientation</td>
+                                <td class="text-center"><span class="badge bg-warning text-dark">1-2</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-danger">D</span></td>
+                                <td>Arête sur D (mauvaise position/sens)</td>
+                                <td><code>D</code> pour repositionner, puis insérer</td>
+                                <td class="text-center"><span class="badge bg-danger">2-3</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ─── SECTION : Inspection ─── -->
+            <section class="mb-5">
+                <h2 class="fw-bold border-bottom pb-2 mb-4">
+                    <i class="bi bi-eye text-primary"></i> Stratégie 3 — Planifier pendant l'inspection
+                </h2>
+                <p>En compétition tu as <strong>15 secondes</strong>. En pratique à la maison, entraîne-toi 
+                à résoudre mentalement avant de toucher le cube. Voici comment structurer ces 15 secondes :</p>
+
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card text-center h-100 border-primary">
+                            <div class="card-body">
+                                <div class="display-6 text-primary mb-2">1</div>
+                                <h6 class="fw-bold">Localise (3-4 sec)</h6>
+                                <p class="small text-muted mb-0">Trouve les 4 arêtes jaunes. Note dans quelle couche chacune se trouve.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card text-center h-100 border-success">
+                            <div class="card-body">
+                                <div class="display-6 text-success mb-2">2</div>
+                                <h6 class="fw-bold">Cadeaux (2-3 sec)</h6>
+                                <p class="small text-muted mb-0">Repère les arêtes à 1-2 mouvements. <strong>Commence par celles-là.</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card text-center h-100 border-warning">
+                            <div class="card-body">
+                                <div class="display-6 text-warning mb-2">3</div>
+                                <h6 class="fw-bold">Planifie 2 (5-6 sec)</h6>
+                                <p class="small text-muted mb-0">Planifie les <strong>2 premières arêtes complètement</strong>. Les 2 suivantes à vue.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card text-center h-100 border-info">
+                            <div class="card-body">
+                                <div class="display-6 text-info mb-2">4</div>
+                                <h6 class="fw-bold">Bonne face (1-2 sec)</h6>
+                                <p class="small text-muted mb-0">Si la croix jaune est complexe, vérifie si une autre couleur est plus simple.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 mb-0">
+                    <i class="bi bi-trophy-fill"></i>
+                    <strong>Niveau avancé :</strong> Les top speedcubers font la croix sur 
+                    <strong>n'importe quelle face</strong> selon ce qui est le plus efficace en inspection. 
+                    Entraîne-toi sur toutes les couleurs, pas seulement le jaune.
+                </div>
+            </section>
+
+            <!-- ─── SECTION : Exercices ─── -->
+            <section class="mb-5">
+                <h2 class="fw-bold border-bottom pb-2 mb-4">
+                    <i class="bi bi-dumbbell text-primary"></i> Exercices d'entraînement
+                </h2>
+
+                <div class="accordion" id="accordionExercices">
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ex1">
+                                <i class="bi bi-1-circle-fill text-primary me-2"></i>
+                                La croix à l'envers — forcer la bonne habitude
+                            </button>
+                        </h2>
+                        <div id="ex1" class="accordion-collapse collapse show" data-bs-parent="#accordionExercices">
+                            <div class="accordion-body">
+                                <p>Résous la croix en tenant le cube avec la <strong>face jaune vers le haut</strong>. 
+                                Cela force ton cerveau à travailler directement sur D, sans pouvoir "tricher" 
+                                avec les mouvements F.</p>
+                                <span class="badge bg-success">Durée : 10-15 min/jour pendant 1 semaine</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ex2">
+                                <i class="bi bi-2-circle-fill text-primary me-2"></i>
+                                Comptage de mouvements — rester sous 8
+                            </button>
+                        </h2>
+                        <div id="ex2" class="accordion-collapse collapse" data-bs-parent="#accordionExercices">
+                            <div class="accordion-body">
+                                <p>Après chaque résolution, <strong>compte le nombre exact de mouvements</strong> 
+                                utilisés pour la croix. Si tu dépasses 8, recommence depuis le même scramble 
+                                et cherche une meilleure solution. Ne passe pas à la suite tant que tu n'es 
+                                pas sous 8.</p>
+                                <span class="badge bg-warning text-dark">Objectif : 6 mouvements en moyenne</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ex3">
+                                <i class="bi bi-3-circle-fill text-primary me-2"></i>
+                                Anticipation — planifier pendant l'exécution
+                            </button>
+                        </h2>
+                        <div id="ex3" class="accordion-collapse collapse" data-bs-parent="#accordionExercices">
+                            <div class="accordion-body">
+                                <p>Pendant que tu insères l'arête <em>actuelle</em>, planifie mentalement 
+                                la <em>suivante</em>. Commence par planifier 1 arête à l'avance, puis vise 
+                                2. C'est ce réflexe d'anticipation qui fera descendre ton temps global.</p>
+                                <span class="badge bg-info text-dark">Vitesse suggérée : lente, sans chrono</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ex4">
+                                <i class="bi bi-4-circle-fill text-primary me-2"></i>
+                                Cross-only timer — cibler 3 secondes
+                            </button>
+                        </h2>
+                        <div id="ex4" class="accordion-collapse collapse" data-bs-parent="#accordionExercices">
+                            <div class="accordion-body">
+                                <p>Sur <a href="https://cstimer.net" target="_blank" rel="noopener">cstimer.net</a>, 
+                                active le mode "Cross only" pour chronométrer uniquement ta croix. 
+                                Vise <strong>moins de 3 secondes</strong> d'exécution (après inspection mentale).</p>
+                                <div class="d-flex gap-2 flex-wrap mt-2">
+                                    <span class="badge bg-danger">Débutant : &lt; 8 sec</span>
+                                    <span class="badge bg-warning text-dark">Intermédiaire : &lt; 5 sec</span>
+                                    <span class="badge bg-success">Avancé : &lt; 3 sec</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div><!-- /col-md-8 -->
+
+        <!-- ── COLONNE LATÉRALE ── -->
         <div class="col-md-4">
-            <!-- Cube states, tips, etc. -->
-        </div>
-    </div>
-    
+
+            <!-- Checklist inspection -->
+            <div class="card border-primary mb-4 sticky-top" style="top: 1rem;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Checklist inspection</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center gap-2 px-0">
+                            <i class="bi bi-search text-primary"></i>
+                            <span>Localiser les 4 arêtes jaunes</span>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center gap-2 px-0">
+                            <i class="bi bi-gift text-success"></i>
+                            <span>Repérer les "cadeaux" (1-2 mvt)</span>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center gap-2 px-0">
+                            <i class="bi bi-diagram-2 text-warning"></i>
+                            <span>Penser en paires opposées</span>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center gap-2 px-0">
+                            <i class="bi bi-layout-text-window text-info"></i>
+                            <span>Planifier 2 arêtes complètement</span>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center gap-2 px-0">
+                            <i class="bi bi-arrow-repeat text-secondary"></i>
+                            <span>Compter : rester sous 8 mouvements</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Objectifs de temps -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-stopwatch"></i> Objectifs par niveau</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span><i class="bi bi-star text-warning"></i> Débutant</span>
+                            <strong>&lt; 8 sec</strong>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: 30%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span><i class="bi bi-star-half text-info"></i> Intermédiaire</span>
+                            <strong>&lt; 5 sec</strong>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span><i class="bi bi-star-fill text-success"></i> Avancé</span>
+                            <strong>&lt; 3 sec</strong>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rappel notation -->
+            <div class="card border-0 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-book"></i> Notation utile</h6>
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-1"><code>D</code> — Face basse, sens horaire</li>
+                        <li class="mb-1"><code>D'</code> — Face basse, sens antihoraire</li>
+                        <li class="mb-1"><code>D2</code> — Face basse, demi-tour</li>
+                        <li class="mb-1"><code>F2</code> — Face avant, demi-tour (±insertion directe)</li>
+                        <li class="mb-1"><code>U</code> — Face haute (à éviter pour la croix)</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div><!-- /col-md-4 -->
+    </div><!-- /row -->
+
     <!-- Navigation -->
-    <div class="d-flex justify-content-between mt-4">
+    <div class="d-flex justify-content-between mt-5 pt-3 border-top">
         {% if prev_step %}
             <a href="{% url prev_step %}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left"></i> Étape précédente
             </a>
         {% else %}
             <a href="{% url 'francontcube:method_cfop' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-list"></i> Vue d'ensemble
+                <i class="bi bi-list"></i> Vue d'ensemble CFOP
             </a>
         {% endif %}
-        
+
         {% if next_step %}
-            <a href="{% url 'francontcube:cfop_f2l_basic' %}" class="btn btn-primary">
-                Étape suivante <i class="bi bi-arrow-right"></i>
+            <a href="{% url 'francontcube:cfop_f2l_basic' %}" class="btn btn-primary btn-lg">
+                Étape suivante : F2L <i class="bi bi-arrow-right"></i>
             </a>
         {% endif %}
     </div>
+
 </div>
 {% endblock %}
