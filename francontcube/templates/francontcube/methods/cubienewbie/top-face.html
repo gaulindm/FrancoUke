@@ -1,7 +1,7 @@
 {% extends "francontcube/partials/base.html" %}
 {% load static %}
 
-{% block title %}La face jaune — Francontcube{% endblock %}
+{% block title %}La face du haut — Francontcube{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -12,7 +12,7 @@
             🐟 Étape 6 : <span class="brand-green">La chasse au poisson!</span>
         </h1>
         <p class="lead">
-            Complète toute la face jaune en chassant le poisson
+            Complète toute la face blanche en chassant le poisson
         </p>
     </div>
 
@@ -40,8 +40,8 @@
             <div class="d-flex justify-content-center mb-3">
                 <div id="cube-goal"></div>
             </div>
-            <h4 class="brand-green">Toute la face jaune complète!</h4>
-            <p class="lead mb-0">Tous les coins doivent être jaunes en haut 🟨</p>
+            <h4 class="brand-green">Toute la face blanche complète!</h4>
+            <p class="lead mb-0">Tous les coins doivent être blanc en haut </p>
         </div>
     </div>
 
@@ -183,7 +183,7 @@
                 <div class="col-md-4 text-center mb-4">
                     <div class="display-1 text-success">3️⃣</div>
                     <h4 class="mt-3 brand-green">Répète</h4>
-                    <p class="lead">Fais l'algorithme jusqu'à ce que tout soit jaune!</p>
+                    <p class="lead">Fais l'algorithme jusqu'à ce que tout soit blanc!</p>
                 </div>
             </div>
         </div>
@@ -342,17 +342,17 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     mountCube("cube-goal", {{ goal_state|safe }});
-    mountCube("cube-sune", {{ yellow_sune_state|safe }});
+    mountCube("cube-sune", {{ sune_state|safe }});
     
     // 3 Sunes
-    mountCube("cube-superman", {{ yellow_superman_state|safe }});
-    mountCube("cube-chameleon", {{ yellow_chameleon_state|safe }});
-    mountCube("cube-bowtie", {{ yellow_bowtie_state|safe }});
+    mountCube("cube-superman", {{ superman_state|safe }});
+    mountCube("cube-chameleon", {{ chameleon_state|safe }});
+    mountCube("cube-bowtie", {{ bowtie_state|safe }});
     
     // 2 Sunes
-    mountCube("cube-pi", {{ yellow_pi_state|safe }});
-    mountCube("cube-doublesune", {{ yellow_doublesune_state|safe }});
-    mountCube("cube-antisune", {{ yellow_antisune_state|safe }});
+    mountCube("cube-pi", {{ pi_state|safe }});
+    mountCube("cube-doublesune", {{ doublesune_state|safe }});
+    mountCube("cube-antisune", {{ antisune_state|safe }});
   });
 </script>
 

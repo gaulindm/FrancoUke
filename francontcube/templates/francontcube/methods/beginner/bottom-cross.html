@@ -214,8 +214,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     // Mount all static cubes
     mountCube("cube-goal", {{ goal_state|safe }});
-    //mountCube("cube-before", {{ before_state|safe }});
-    //mountCube("cube-after", {{ after_state|safe }});
     mountCube("cube-wrong", {{ wrong_state|safe }});
     mountCube("cube-correct", {{ correct_state|safe }});
 

@@ -23,10 +23,9 @@ class TopFaceView(StepView):
     
     # Map template context variable names to CubeState slugs
     cube_state_slugs = {
-        'goal_state': 'top-face-goal',
-        #'before_state': 'yellow-face-before',
+        'goal_state': 'face-goal',
         # 1 sune away
-        #'yellow_sune_state': 'yellow-sune',
+        'sune_state': 'sune',
         # 2 sune away
         'antisune_state': 'antisune',
         'doublesune_state': 'doublesune',
