@@ -25,8 +25,6 @@ class BottomCrossView(StepView):
     # Basic cube states
     cube_state_slugs = {
         'goal_state': 'bottom-cross-goal',
-        'before_state': 'bottom-cross-before',
-        'after_state': 'bottom-cross-after',
         'wrong_state': 'bottom-cross-wrong',
         'correct_state': 'bottom-cross-correct',
     }
