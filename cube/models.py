@@ -100,8 +100,9 @@ class CubeState(models.Model):
             display_move = self._apply_hand_substitution([move])[0]
             svg_id = display_move.replace("'", "-prime")
             css = f'move-icon {extra_class}'.strip()
-            return (f'<svg class="{css}" aria-label="{display_move}">'
-                    f'<use href="#{svg_id}"/></svg>')
+            return (f'<svg class="{css}" aria-label="{display_move}" '
+                f'width="82" height="82" style="width:82px;height:82px;min-width:0">'
+                f'<use href="#{svg_id}"/></svg>')
 
         alg = self.algorithm.strip()
         tokens = []

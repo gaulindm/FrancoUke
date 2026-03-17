@@ -211,19 +211,10 @@
         height: auto;
     }
 
-    /* ─── Move icons ─── */
-    .moves-preview {
-        min-height: 50px;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .move-icon {
-        width: 48px;
-        height: 48px;
-        transition: transform 0.2s;
-        color: #1a1a1a;
-        flex-shrink: 0;
+    /* Réduire de 20% sans changer le modèle */
+    .moves-preview .move-icon {
+        transform: scale(0.8);
+        transform-origin: center;
     }
 
     .move-icon:hover { transform: scale(1.1); }

@@ -4,27 +4,9 @@
 {% block title %}{{ cube_state.name }} - {{ method }}{% endblock %}
 
 {% block extra_head %}
-{# ── cubing.js loads as a module in the body script below ── #}
-{# ── Bootstrap Icons ── #}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
 <style>
-    /* ── Page header ── */
-    .case-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 40px 0;
-        margin-bottom: 40px;
-    }
-
-    /* ── cubing.js player card ── */
-    .cubingjs-wrap {
-        background: white;
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
     twisty-player {
         width: 100%;
         height: 320px;
@@ -32,39 +14,14 @@
         display: block;
     }
 
-    /* ── Algorithm box ── */
-    .algorithm-box {
-        background: #f8f9fa;
-        border-left: 5px solid #0d6efd;
-        padding: 25px;
-        border-radius: 8px;
-        margin: 24px 0;
-    }
     .algorithm-text {
         font-family: 'Courier New', monospace;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
         color: #212529;
         letter-spacing: 3px;
     }
 
-    /* ── Info / tips cards ── */
-    .info-card {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-    }
-    .tips-section {
-        background: #fff3cd;
-        border-left: 5px solid #ffc107;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
-    }
-
-    /* ── Navigation buttons ── */
     .nav-button {
         padding: 12px 25px;
         font-weight: 600;
@@ -75,193 +32,243 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-    .badge-xl { font-size: 1.1rem; padding: 10px 20px; }
+
+    .tips-section {
+        background: #fff3cd;
+        border-left: 5px solid #ffc107;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .moves-preview {
+        gap: 6px;
+    }
+    .moves-preview .move-icon {
+        width: 28px;
+        height: 28px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="container py-5">
 
-{# ── Page header ── #}
-<div class="case-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-4 mb-3">{{ cube_state.name }}</h1>
-                <p class="lead mb-0">{{ cube_state.description }}</p>
-            </div>
-            <div class="col-md-4 text-md-end">
+    {# ── Breadcrumb ── #}
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'francontcube:method_cfop' %}">CFOP</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'francontcube:cfop_f2l_basic' %}">F2L</a>
+            </li>
+            <li class="breadcrumb-item active">{{ cube_state.name }}</li>
+        </ol>
+    </nav>
+
+    {# ══ MAIN CARD — mirrors the f2l_basic card style ══ #}
+    <div class="card shadow-sm f2l-case-card mb-5">
+
+        {# ── Card Header — identical structure to f2l_basic cards ── #}
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-box"></i> {{ cube_state.name }}
+
+                {# Orientation badge #}
+                {% if cube_state.hand_orientation == 'left' %}
+                <span class="badge bg-info float-end me-2">👈 Main Gauche</span>
+                {% elif cube_state.hand_orientation == 'right' %}
+                <span class="badge bg-success float-end me-2">👉 Main Droite</span>
+                {% endif %}
+
+                {# Difficulty badge #}
                 {% if cube_state.difficulty %}
-                <span class="badge badge-xl
+                <span class="badge float-end me-2
                     {% if cube_state.difficulty == 'facile' %}bg-success
                     {% elif cube_state.difficulty == 'moyen' %}bg-warning text-dark
                     {% else %}bg-danger{% endif %}">
-                    <i class="bi bi-speedometer2"></i> {{ cube_state.get_difficulty_display }}
+                    {{ cube_state.difficulty|capfirst }}
                 </span>
                 {% endif %}
+
+                {# Category badge #}
                 {% if cube_state.category %}
-                <div class="mt-3">
-                    <span class="badge bg-light text-dark">
-                        {{ category_info.name|default:cube_state.category }}
-                    </span>
-                </div>
+                <span class="badge bg-light text-dark float-end me-2">
+                    {{ category_info.name|default:cube_state.category }}
+                </span>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container pb-5">
-    <div class="row">
-
-        {# ── Left column: animation ── #}
-        <div class="col-lg-7">
-            <div class="info-card">
-                <h3 class="mb-4">
-                    <i class="bi bi-box"></i> Animation 3D
-                </h3>
-
-                {# ══ cubing.js player ══ #}
-                <div class="cubingjs-wrap">
-
-                    {# The 3D player #}
-                    <twisty-player id="cubingPlayer"
-                        puzzle="3x3x3"
-                        visualization="3D"
-                        hint-facelets="none"
-                        background="none"
-                        control-panel="bottom-row"
-                        experimental-stickering="{{ stickering }}">
-                    </twisty-player>
-
-                </div>{# /cubingjs-wrap #}
-
-                {# ── Algorithm text display ── #}
-                {% if cube_state.algorithm %}
-                <div class="algorithm-box">
-                    <h4 class="mb-3">
-                        <i class="bi bi-code-slash"></i> Algorithme
-                    </h4>
-                    <div class="algorithm-text">{{ cube_state.algorithm }}</div>
-                    <div class="mt-3">
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyAlgorithm()">
-                            <i class="bi bi-clipboard"></i> Copier
-                        </button>
-                    </div>
-                </div>
-                {% else %}
-                <div class="alert alert-success mt-4">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <strong>Ce cas est déjà résolu!</strong> Aucun algorithme nécessaire.
-                </div>
-                {% endif %}
-
-                {# Move icons (SVG) #}
-                {% if cube_state.algorithm %}
-                <div class="mt-3">
-                    <h5 class="text-secondary mb-3">
-                        <i class="bi bi-grid"></i> Mouvements :
-                    </h5>
-                    <div class="moves-preview d-flex flex-wrap justify-content-center p-3 bg-light rounded" style="gap:10px;">
-                        {{ cube_state.get_algorithm_svg }}
-                    </div>
-                </div>
-                {% endif %}
-
-            </div>{# /info-card #}
+            </h4>
         </div>
 
-        {# ── Right column: info & tips ── #}
-        <div class="col-lg-5">
-            <div class="info-card">
-                <h3 class="mb-4">
-                    <i class="bi bi-info-circle"></i> Informations
-                </h3>
-                <div class="mb-3">
-                    <strong>Méthode :</strong>
-                    <span class="badge bg-primary">{{ method }}</span>
-                </div>
-                <div class="mb-3">
-                    <strong>Catégorie :</strong>
-                    <span class="text-muted">{{ category_info.description|default:cube_state.category }}</span>
-                </div>
-                <div class="mb-3">
-                    <strong>Numéro :</strong>
-                    <span class="badge bg-secondary">Cas #{{ cube_state.step_number }}</span>
-                </div>
-                {% if cube_state.algorithm %}
-                <div class="mb-3">
-                    <strong>Longueur :</strong>
-                    <span class="text-muted">{{ cube_state.algorithm|wordcount }} mouvements</span>
-                </div>
-                {% endif %}
-                <div class="mb-3">
-                    <strong>Orientation :</strong>
-                    {% if cube_state.hand_orientation == 'left' %}
-                        <span class="badge bg-info">👈 Main Gauche</span>
-                    {% else %}
-                        <span class="badge bg-success">👉 Main Droite</span>
-                    {% endif %}
-                </div>
-            </div>
+        {# ── Card Body ── #}
+        <div class="card-body">
 
-            {% if method == 'OLL' %}
-            <div class="tips-section">
-                <h5><i class="bi bi-lightbulb-fill"></i> Conseils OLL</h5>
-                <ul class="mb-0">
-                    <li>Reconnaître le pattern avant de chercher l'algorithme</li>
-                    <li>Pratiquer la reconnaissance en regardant seulement 2 faces</li>
-                    <li>Certains OLL ont plusieurs algorithmes — choisissez le vôtre</li>
-                    <li>Les cas symétriques peuvent être résolus avec le miroir</li>
-                </ul>
-            </div>
-            {% elif method == 'PLL' %}
-            <div class="tips-section">
-                <h5><i class="bi bi-lightbulb-fill"></i> Conseils PLL</h5>
-                <ul class="mb-0">
-                    <li>Cherchez les "headlights" (deux stickers identiques côte à côte)</li>
-                    <li>Identifiez les blocs 1x2 formés par les coins</li>
-                    <li>Commencez par les PLL les plus fréquents</li>
-                    <li>Pratiquez l'AUF pour aligner correctement</li>
-                </ul>
-            </div>
-            {% else %}
-            <div class="tips-section">
-                <h5><i class="bi bi-lightbulb-fill"></i> Conseils F2L</h5>
-                <ul class="mb-0">
-                    <li>Repérez la paire coin + arête avant de commencer</li>
-                    <li>Essayez de comprendre le <em>pourquoi</em> de chaque mouvement</li>
-                    <li>Apprenez d'abord les 4 cas de base, puis les variantes</li>
-                    <li>La vitesse vient avec la mémoire musculaire — patience!</li>
-                </ul>
+            {% if cube_state.description %}
+            <div class="alert alert-light mb-4">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> {{ cube_state.description }}
+                </small>
             </div>
             {% endif %}
 
-            <div class="info-card">
-                <h5><i class="bi bi-trophy"></i> Comment pratiquer</h5>
-                <ol class="mb-0">
-                    <li>Regardez l'animation plusieurs fois</li>
-                    <li>Utilisez ▶| pour avancer mouvement par mouvement</li>
-                    <li>Décomposez en groupes de 3–4 mouvements</li>
-                    <li>Pratiquez lentement, augmentez la vitesse progressivement</li>
-                    <li>Faites 20–30 répétitions pour la mémoire musculaire</li>
-                </ol>
-            </div>
+            <div class="row g-4">
 
-            {% if cube_state.algorithm %}
-            <div class="d-grid">
+                {# ── Left: 3D animation + algorithm ── #}
+                <div class="col-lg-7">
+
+                    {# Cube visualization — same wrapper class as f2l_basic #}
+                    <div class="cube-container mb-4 text-center">
+                        <div id="cube-{{ cube_state.slug }}"
+                             class="cube-visualization"
+                             data-orientation="{{ cube_state.hand_orientation|default:'right' }}">
+                            <twisty-player id="cubingPlayer"
+                                puzzle="3x3x3"
+                                visualization="3D"
+                                hint-facelets="none"
+                                background="none"
+                                control-panel="bottom-row"
+                                experimental-stickering="{{ stickering }}">
+                            </twisty-player>
+                        </div>
+                    </div>
+
+                    {# Algorithm section — matches card's algorithm-section #}
+                    <div class="algorithm-section">
+                        <h5 class="text-secondary mb-3">
+                            <i class="bi bi-code-square"></i> Algorithme :
+                        </h5>
+
+                        {% if cube_state.algorithm %}
+                        <div class="bg-light border-start border-primary border-4 rounded p-3 mb-3">
+                            <div class="algorithm-text mb-2">{{ cube_state.algorithm }}</div>
+                            <div class="d-flex align-items-center gap-3">
+                                <small class="text-muted">
+                                    {{ cube_state.algorithm|wordcount }} mouvements
+                                </small>
+                                <button class="btn btn-sm btn-outline-primary" onclick="copyAlgorithm()">
+                                    <i class="bi bi-clipboard"></i> Copier
+                                </button>
+                            </div>
+                        </div>
+
+                        {# Move icons — same as f2l_basic cards #}
+                        <div class="moves-preview d-flex flex-wrap justify-content-center p-3 bg-light rounded">
+                            {{ cube_state.get_algorithm_svg }}
+                        </div>
+
+                        {% else %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <strong>Ce cas est déjà résolu!</strong> Aucun algorithme nécessaire.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                </div>{# /col-lg-7 #}
+
+                {# ── Right: info + tips ── #}
+                <div class="col-lg-5">
+
+                    {# Info block #}
+                    <h5 class="text-secondary mb-3">
+                        <i class="bi bi-info-circle"></i> Informations
+                    </h5>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Méthode</span>
+                            <span class="badge bg-primary">{{ method }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Numéro</span>
+                            <span class="badge bg-secondary">Cas #{{ cube_state.step_number }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Catégorie</span>
+                            <span class="text-end small">{{ category_info.description|default:cube_state.category }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Orientation</span>
+                            {% if cube_state.hand_orientation == 'left' %}
+                                <span class="badge bg-info">👈 Main Gauche</span>
+                            {% else %}
+                                <span class="badge bg-success">👉 Main Droite</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+
+                    {# Tips — method-aware #}
+                    {% if method == 'OLL' %}
+                    <div class="tips-section mb-4">
+                        <h5><i class="bi bi-lightbulb-fill"></i> Conseils OLL</h5>
+                        <ul class="mb-0 small">
+                            <li>Reconnaître le pattern avant de chercher l'algorithme</li>
+                            <li>Pratiquer la reconnaissance en regardant seulement 2 faces</li>
+                            <li>Certains OLL ont plusieurs algorithmes — choisissez le vôtre</li>
+                            <li>Les cas symétriques peuvent être résolus avec le miroir</li>
+                        </ul>
+                    </div>
+                    {% elif method == 'PLL' %}
+                    <div class="tips-section mb-4">
+                        <h5><i class="bi bi-lightbulb-fill"></i> Conseils PLL</h5>
+                        <ul class="mb-0 small">
+                            <li>Cherchez les "headlights" (deux stickers identiques côte à côte)</li>
+                            <li>Identifiez les blocs 1x2 formés par les coins</li>
+                            <li>Commencez par les PLL les plus fréquents</li>
+                            <li>Pratiquez l'AUF pour aligner correctement</li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="tips-section mb-4">
+                        <h5><i class="bi bi-lightbulb-fill"></i> Conseils F2L</h5>
+                        <ul class="mb-0 small">
+                            <li>Repérez la paire coin + arête avant de commencer</li>
+                            <li>Essayez de comprendre le <em>pourquoi</em> de chaque mouvement</li>
+                            <li>Apprenez d'abord les 4 cas de base, puis les variantes</li>
+                            <li>La vitesse vient avec la mémoire musculaire — patience!</li>
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {# How to practice #}
+                    <div class="mb-4">
+                        <h5 class="text-secondary mb-3">
+                            <i class="bi bi-trophy"></i> Comment pratiquer
+                        </h5>
+                        <ol class="small mb-0">
+                            <li>Regardez l'animation plusieurs fois</li>
+                            <li>Utilisez ▶| pour avancer mouvement par mouvement</li>
+                            <li>Décomposez en groupes de 3–4 mouvements</li>
+                            <li>Pratiquez lentement, augmentez la vitesse progressivement</li>
+                            <li>Faites 20–30 répétitions pour la mémoire musculaire</li>
+                        </ol>
+                    </div>
+
+                </div>{# /col-lg-5 #}
+
+            </div>{# /row #}
+        </div>{# /card-body #}
+
+        {# ── Card Footer — same as f2l_basic cards ── #}
+        <div class="card-footer text-center bg-light py-3">
+            <div class="btn-group" role="group">
+                {% if cube_state.algorithm %}
                 <a href="{% url 'training:trainer_from_f2l' slug=cube_state.slug %}?return_url={{ request.path }}"
-                   class="btn btn-success btn-lg">
+                   class="btn btn-success">
                     <i class="bi bi-play-circle"></i> Pratiquer cet algorithme
                 </a>
+                {% endif %}
+                <a href="{% url 'francontcube:cfop_f2l_basic' %}"
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-grid"></i> Tous les cas F2L
+                </a>
             </div>
-            {% endif %}
         </div>
 
-    </div>{# /row #}
+    </div>{# /card #}
 
-    {# ── Navigation ── #}
-    <div class="row mt-5">
-        <div class="col-md-4">
+    {# ── Navigation prev/next ── #}
+    <div class="row">
+        <div class="col-4">
             {% if prev_case %}
             <a href="{% url 'cube:f2l_case_detail' prev_case.slug %}"
                class="btn btn-outline-primary nav-button w-100">
@@ -270,13 +277,13 @@
             </a>
             {% endif %}
         </div>
-        <div class="col-md-4 text-center">
+        <div class="col-4 text-center">
             <a href="{% url 'francontcube:method_cfop' %}"
                class="btn btn-secondary nav-button w-100">
-                <i class="bi bi-house"></i> Retour à CFOP
+                <i class="bi bi-house"></i> CFOP
             </a>
         </div>
-        <div class="col-md-4">
+        <div class="col-4 text-end">
             {% if next_case %}
             <a href="{% url 'cube:f2l_case_detail' next_case.slug %}"
                class="btn btn-outline-primary nav-button w-100">
@@ -289,28 +296,22 @@
 
 </div>{# /container #}
 
-{# ══════════════════════════════════════════════
-   cubing.js — module script (must be in body)
-══════════════════════════════════════════════ #}
+{# ══ cubing.js ══ #}
 <script type="module">
 import { TwistyPlayer } from "https://cdn.cubing.net/js/cubing/twisty";
 
-const player      = document.getElementById('cubingPlayer');
-const SETUP       = "{{ setup_alg|escapejs }}";
-const ALG         = "{{ clean_alg|escapejs }}";
-
-const HAND        = "{{ cube_state.hand_orientation }}";
-//const ORIENTATION = "x2 y";
-const CAM_LON     = HAND === 'right' ? 30 : -30;
+const player  = document.getElementById('cubingPlayer');
+const SETUP   = "{{ setup_alg|escapejs }}";
+const ALG     = "{{ clean_alg|escapejs }}";
+const HAND    = "{{ cube_state.hand_orientation }}";
+const CAM_LON = HAND === 'right' ? 30 : -30;
 
 setTimeout(() => {
-//  player.experimentalSetupAlg = ORIENTATION + (SETUP ? " " + SETUP : "");
-  player.experimentalSetupAlg = SETUP || "";
-  player.alg                  = ALG;
-  player.cameraLongitude      = CAM_LON;
-  player.cameraLatitude       = {{ cam_latitude }};
+    player.experimentalSetupAlg = SETUP || "";
+    player.alg                  = ALG;
+    player.cameraLongitude      = CAM_LON;
+    player.cameraLatitude       = {{ cam_latitude }};
 }, 200);
-
 </script>
 
 <script>
