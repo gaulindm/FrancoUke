@@ -101,7 +101,7 @@ class CubeState(models.Model):
             svg_id = display_move.replace("'", "-prime")
             css = f'move-icon {extra_class}'.strip()
             return (f'<svg class="{css}" aria-label="{display_move}" '
-                f'width="82" height="82" style="width:82px;height:82px;min-width:0">'
+                f'width="52" height="52" style="width:52px;height:52px;min-width:0">'
                 f'<use href="#{svg_id}"/></svg>')
 
         alg = self.algorithm.strip()

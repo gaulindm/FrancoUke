@@ -41,12 +41,37 @@
     }
 
     .moves-preview {
-        gap: 6px;
+        gap: 2px;
+        align-items: center;
     }
+
     .moves-preview .move-icon {
-        width: 28px;
-        height: 28px;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
     }
+
+    .move-icon:hover { transform: scale(1.1); }
+
+    /* ─── Group wrappers ─── */
+    .move-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 1px;
+    }
+
+    .move-bracket {
+        font-size: 3rem;
+        font-weight: 300;
+        line-height: 48px;
+        opacity: 0.9;
+        user-select: none;
+    }
+
+    .move-group--paren .move-bracket   { color: #0051A8; }
+    .move-group--paren .move-icon      { color: #0051A8; }
+    .move-group--bracket .move-bracket { color: #C41E3A; }
+    .move-group--bracket .move-icon    { color: #C41E3A; }
 </style>
 {% endblock %}
 
