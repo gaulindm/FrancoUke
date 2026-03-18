@@ -3,18 +3,22 @@
 2-Look OLL - Beginner-friendly approach to OLL
 Only 10 cases to learn instead of 57!
 
-Step 1: Orient Edges (Yellow Cross) - 3 cases
-Step 2: Orient Corners (Yellow Face) - 7 cases
+Step 1: Orient Edges (White Cross) - 3 cases
+Step 2: Orient Corners (White Face) - 7 cases
 """
 
 from django.shortcuts import render
 from cube.models import CubeState
 
+# Couleur de la face du haut = BLANC
+U_ORIENTED   = '#FFFFFF'  # sticker blanc = bien orienté
+U_UNORIENTED = '#AAAAAA'  # sticker gris  = mal orienté (à corriger)
+
 # 2-Look OLL Case Groups
 TWO_LOOK_OLL_CASES = {
     'step1': {
-        'name': 'Étape 1 : Croix Jaune',
-        'description': 'Orienter les arêtes pour former une croix jaune sur le dessus. Seulement 3 motifs à apprendre!',
+        'name': 'Étape 1 : Croix Blanche',
+        'description': 'Orienter les arêtes pour former une croix blanche sur le dessus. Seulement 3 motifs à apprendre!',
         'icon': 'bi-plus-lg',
         'color': 'warning',
         'cases': [
@@ -23,27 +27,27 @@ TWO_LOOK_OLL_CASES = {
                 'name': 'Point → Croix',
                 'pattern': 'Aucune arête orientée',
                 'algorithm': "F R U R' U' F'",
-                'recognition': 'Aucune arête jaune sur le dessus',
+                'recognition': 'Aucune arête blanche sur le dessus',
             },
             {
                 'slug': 'oll-line-cross', 
                 'name': 'Ligne → Croix',
                 'pattern': 'Ligne de 2 arêtes',
                 'algorithm': "F R U R' U' F'",
-                'recognition': 'Ligne horizontale de jaune',
+                'recognition': 'Ligne horizontale blanche',
             },
             {
                 'slug': 'oll-l-cross',
                 'name': 'Forme L → Croix', 
                 'pattern': 'Forme L de 2 arêtes',
                 'algorithm': "F U R U' R' F'",
-                'recognition': 'Forme L à gauche',
+                'recognition': 'Forme L blanche à gauche',
             },
         ]
     },
     'step2': {
-        'name': 'Étape 2 : Face Jaune',
-        'description': 'Orienter tous les coins pour completer la face jaune. 7 cas basés sur Sune et Anti-Sune.',
+        'name': 'Étape 2 : Face Blanche',
+        'description': 'Orienter tous les coins pour compléter la face blanche. 7 cas basés sur Sune et Anti-Sune.',
         'icon': 'bi-square-fill',
         'color': 'success',
         'cases': [
@@ -111,7 +115,6 @@ def two_look_oll_view(request):
     step1_cases = TWO_LOOK_OLL_CASES['step1']['cases']
     step2_cases = TWO_LOOK_OLL_CASES['step2']['cases']
     
-    # Convert patterns to template format for each case
     for case in step1_cases:
         pattern_key = case['slug'].replace('oll-', '').replace('-cross', '-cross')
         raw_pattern = get_two_look_oll_pattern(pattern_key)
@@ -138,33 +141,35 @@ def two_look_oll_view(request):
 def _convert_pattern_to_template_format(pattern):
     """
     Convert pattern dict to template-friendly format.
-    
-    Args:
-        pattern: Raw pattern from two_look_oll_patterns.py
-    
-    Returns:
-        dict: Template-formatted pattern with nested dicts
+    Remplace toutes les couleurs jaunes (#FFD700) par blanc (#FFFFFF)
+    sur la face U — notre cube a la face blanche sur le dessus.
     """
+    def fix_u(color):
+        """Remplace jaune par blanc, garde gris pour les non-orientés."""
+        if color in ('#FFD700', '#FFFF00', '#FFC200', 'yellow'):
+            return U_ORIENTED    # '#FFFFFF'
+        return color
+
     return {
         'U': {
             '0': {
-                '0': pattern['U'][0][0],
-                '1': pattern['U'][0][1],
-                '2': pattern['U'][0][2],
+                '0': fix_u(pattern['U'][0][0]),
+                '1': fix_u(pattern['U'][0][1]),
+                '2': fix_u(pattern['U'][0][2]),
             },
             '1': {
-                '0': pattern['U'][1][0],
-                '1': pattern['U'][1][1],
-                '2': pattern['U'][1][2],
+                '0': fix_u(pattern['U'][1][0]),
+                '1': fix_u(pattern['U'][1][1]),
+                '2': fix_u(pattern['U'][1][2]),
             },
             '2': {
-                '0': pattern['U'][2][0],
-                '1': pattern['U'][2][1],
-                '2': pattern['U'][2][2],
+                '0': fix_u(pattern['U'][2][0]),
+                '1': fix_u(pattern['U'][2][1]),
+                '2': fix_u(pattern['U'][2][2]),
             },
         },
         'F': {
-            '0': pattern.get('F', ['#00D800'] * 3)[0],
+            '0': pattern.get('F', ['#000D80'] * 3)[0],
             '1': pattern.get('F', ['#00D800'] * 3)[1],
             '2': pattern.get('F', ['#00D800'] * 3)[2],
         },

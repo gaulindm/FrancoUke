@@ -53,6 +53,7 @@
         font-size: 18px;
         font-weight: bold;
         margin: 15px 0;
+        cursor: pointer;
     }
     
     .pattern-visual {
@@ -69,8 +70,8 @@
     }
     
     .recognition-tip {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
+        background: #f0f4ff;
+        border-left: 4px solid #667eea;
         padding: 12px;
         border-radius: 6px;
         margin-top: 15px;
@@ -88,6 +89,7 @@
         font-size: 24px;
         font-weight: bold;
         margin-right: 15px;
+        flex-shrink: 0;
     }
     
     .stats-box {
@@ -124,6 +126,15 @@
         font-size: 14px;
         font-weight: 600;
     }
+
+    /* ── Couleur de la couche du haut = BLANC ── */
+    .top-layer-color {
+        color: #ffffff;
+        background-color: #333;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
 </style>
 {% endblock %}
 
@@ -144,34 +155,39 @@
         <i class="bi bi-trophy"></i> Pour Débutants
     </span>
 </div>
+
 <div class="container pb-5">
     
     <!-- Stats Box -->
-    <h3 class="mb-4">Pourquoi 2-Look OLL?</h3>
-    <div class="row">
-        <div class="col-md-4 stat-item">
+    <h3 class="mb-4 mt-4">Pourquoi 2-Look OLL?</h3>
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
             <span class="stat-number">10</span>
             <span>Algorithmes vs 57 pour 1-Look</span>
         </div>
-        <div class="col-md-4 stat-item">
+        <div class="col-md-4">
             <span class="stat-number">~5s</span>
             <span>Perte de Temps Moyenne vs 1-Look</span>
         </div>
-        <div class="col-md-4 stat-item">
+        <div class="col-md-4">
             <span class="stat-number">90%</span>
             <span>Plus Facile à Apprendre</span>
         </div>
     </div>
     
     <!-- Introduction -->
-<div class="alert alert-info">
-    <h5><i class="bi bi-info-circle"></i> Comment Fonctionne 2-Look OLL</h5>
-    <p class="mb-2">Au lieu de reconnaître les 57 cas OLL, 2-Look OLL le divise en deux étapes simples:</p>
-    <ol class="mb-0">
-        <li><strong>Étape 1:</strong> Faire une croix jaune (orienter les arêtes) - 3 cas</li>
-        <li><strong>Étape 2:</strong> Compléter la face jaune (orienter les coins) - 7 cas</li>
-    </ol>
-</div>
+    <div class="alert alert-info">
+        <h5><i class="bi bi-info-circle"></i> Comment Fonctionne 2-Look OLL</h5>
+        <p class="mb-2">
+            L'OLL s'effectue sur la couche du <strong>haut</strong> — la face 
+            <span class="top-layer-color">blanche</span>. 
+            Au lieu de reconnaître les 57 cas OLL, 2-Look OLL divise le problème en deux étapes simples :
+        </p>
+        <ol class="mb-0">
+            <li><strong>Étape 1 :</strong> Faire une croix blanche sur le dessus (orienter les arêtes) — 3 cas</li>
+            <li><strong>Étape 2 :</strong> Compléter la face blanche (orienter les coins) — 7 cas</li>
+        </ol>
+    </div>
     
     <!-- Comparison Table -->
     <div class="card mb-5">
@@ -218,7 +234,7 @@
         </div>
     </div>
     
-    <!-- Step 1: Yellow Cross -->
+    <!-- Step 1: White Cross -->
     <div class="step-card">
         <div class="step-header">
             <div class="d-flex align-items-center">
@@ -266,12 +282,12 @@
         </div>
         
         <div class="alert alert-success mt-4">
-            <strong><i class="bi bi-lightbulb"></i> Pro Tip:</strong> 
-            Orientez toujours le cube pour que la ligne ou la forme L soit dans la bonne position avant d'appliquer l'algorithme!
+            <strong><i class="bi bi-lightbulb"></i> Pro Tip :</strong> 
+            Orientez toujours le cube pour que la ligne ou la forme L blanche soit dans la bonne position avant d'appliquer l'algorithme !
         </div>
     </div>
     
-    <!-- Step 2: Yellow Face -->
+    <!-- Step 2: White Face -->
     <div class="step-card">
         <div class="step-header">
             <div class="d-flex align-items-center">
@@ -310,7 +326,7 @@
                     
                     <!-- Recognition -->
                     <div class="recognition-tip">
-                        <strong><i class="bi bi-eye"></i> Recognition:</strong><br>
+                        <strong><i class="bi bi-eye"></i> Reconnaissance :</strong><br>
                         {{ case.recognition }}
                     </div>
                 </div>
@@ -319,8 +335,8 @@
         </div>
         
         <div class="alert alert-info mt-4">
-            <strong><i class="bi bi-star"></i> Concentrez-vous sur Sune d'abord:</strong> 
-            Sune et Anti-Sune sont les plus courants et les plus rapides. Maîtrisez-les d'abord!
+            <strong><i class="bi bi-star"></i> Concentrez-vous sur Sune d'abord :</strong> 
+            Sune et Anti-Sune sont les plus courants et les plus rapides. Maîtrisez-les d'abord !
         </div>
     </div>
     
@@ -330,29 +346,29 @@
             <h4 class="mb-0"><i class="bi bi-map"></i> Parcours d'Apprentissage Recommandé</h4>
         </div>
         <div class="card-body">
-            <h5>Semaine 1: Maîtriser les Bases</h5>
+            <h5>Semaine 1 : Maîtriser les Bases</h5>
             <ol>
-                <li><strong>Jour 1-2:</strong> Apprendre les 3 algorithmes de croix (Étape 1)</li>
-                <li><strong>Jour 3-4:</strong> Apprendre Sune et Anti-Sune</li>
-                <li><strong>Jour 5-7:</strong> Pratiquer la reconnaissance et la vitesse</li>
+                <li><strong>Jour 1-2 :</strong> Apprendre les 3 algorithmes de croix blanche (Étape 1)</li>
+                <li><strong>Jour 3-4 :</strong> Apprendre Sune et Anti-Sune</li>
+                <li><strong>Jour 5-7 :</strong> Pratiquer la reconnaissance et la vitesse</li>
             </ol>
             
-            <h5 class="mt-4">Semaine 2: Ajouter les Cas Restants</h5>
+            <h5 class="mt-4">Semaine 2 : Ajouter les Cas Restants</h5>
             <ol>
-                <li><strong>Jour 1-3:</strong> Apprendre les motifs H, Pi et U</li>
-                <li><strong>Jour 4-5:</strong> Apprendre les motifs T et L</li>
-                <li><strong>Jour 6-7:</strong> Résolutions complètes avec tous les 10 algorithmes</li>
+                <li><strong>Jour 1-3 :</strong> Apprendre les motifs H, Pi et U</li>
+                <li><strong>Jour 4-5 :</strong> Apprendre les motifs T et L</li>
+                <li><strong>Jour 6-7 :</strong> Résolutions complètes avec les 10 algorithmes</li>
             </ol>
             
             <div class="alert alert-warning mt-3">
-                <strong>⏱️ Conseil de Pratique:</strong> Faites 20 résolutions par jour en vous concentrant uniquement sur la reconnaissance et l'exécution OLL.
+                <strong>⏱️ Conseil de Pratique :</strong> Faites 20 résolutions par jour en vous concentrant uniquement sur la reconnaissance et l'exécution OLL.
             </div>
         </div>
     </div>
     
     <!-- Next Steps -->
     <div class="text-center mt-5">
-        <h3 class="mb-4">Prêt pour Plus?</h3>
+        <h3 class="mb-4">Prêt pour Plus ?</h3>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
             <a href="{% url 'francontcube:cfop_oll' %}" class="btn btn-primary btn-lg">
                 <i class="bi bi-grid-3x3"></i> Voir les 57 Cas OLL
@@ -369,21 +385,14 @@
 </div>
 
 <script>
-    // Add some interactivity if needed
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('2-Look OLL page loaded');
-        
-        // Could add algorithm copy functionality
         document.querySelectorAll('.algorithm-box').forEach(box => {
-            box.style.cursor = 'pointer';
-            box.title = 'Click to copy';
+            box.title = 'Cliquer pour copier';
             box.addEventListener('click', function() {
                 navigator.clipboard.writeText(this.textContent.trim());
                 const original = this.style.background;
                 this.style.background = '#d4edda';
-                setTimeout(() => {
-                    this.style.background = original;
-                }, 500);
+                setTimeout(() => { this.style.background = original; }, 500);
             });
         });
     });

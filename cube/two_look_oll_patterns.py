@@ -9,11 +9,11 @@ These use simplified patterns for teaching purposes.
 """
 
 # Color constants
-YELLOW = '#FFD700'  # Oriented
-GRAY = '#808080'    # Not oriented
-GREEN = '#00D800'   # Front (default)
-RED = '#C41E3A'     # Right (default)
-BLUE = '#0051BA'    # Back (default)
+WHITE  = '#FFFFFF'  # Oriented (face du haut = blanc)
+GRAY   = '#808080'  # Not oriented
+GREEN  = '#00D800'  # Front (default)
+RED    = '#C41E3A'  # Right (default)
+BLUE   = '#0051BA'  # Back (default)
 ORANGE = '#FF5800'  # Left (default)
 
 # ============================================================================
@@ -22,162 +22,162 @@ ORANGE = '#FF5800'  # Left (default)
 
 TWO_LOOK_OLL_PATTERNS = {
     # ========================================
-    # STEP 1: Yellow Cross (Edge Orientation)
+    # STEP 1: White Cross (Edge Orientation)
     # ========================================
     
     'dot-cross': {
-        'name': 'Dot → Cross',
+        'name': 'Point → Croix',
         'step': 1,
-        'description': 'No edges oriented - make a yellow cross',
+        'description': 'Aucune arête orientée - faire une croix blanche',
         'U': [
-            [GRAY, GRAY, GRAY],
-            [GRAY, YELLOW, GRAY],
-            [GRAY, GRAY, GRAY],
+            [GRAY,  GRAY,  GRAY],
+            [GRAY,  WHITE, GRAY],
+            [GRAY,  GRAY,  GRAY],
         ],
-        'F': [GRAY, YELLOW, GRAY],
-        'R': [GRAY, YELLOW, GRAY],
-        'B': [GRAY, YELLOW, GRAY],
-        'L': [GRAY, YELLOW, GRAY],
+        'F': [GRAY, WHITE, GRAY],
+        'R': [GRAY, WHITE, GRAY],
+        'B': [GRAY, WHITE, GRAY],
+        'L': [GRAY, WHITE, GRAY],
     },
     
     'line-cross': {
-        'name': 'Line → Cross',
+        'name': 'Ligne → Croix',
         'step': 1,
-        'description': 'Horizontal line of 2 edges',
+        'description': 'Ligne horizontale de 2 arêtes',
         'U': [
-            [GRAY, GRAY, GRAY],
-            [YELLOW, YELLOW, YELLOW],
-            [GRAY, GRAY, GRAY],
+            [GRAY,  GRAY,  GRAY],
+            [WHITE, WHITE, WHITE],
+            [GRAY,  GRAY,  GRAY],
         ],
-        'F': [GRAY, YELLOW, GRAY],
-        'R': [GRAY, GRAY, GRAY],
-        'B': [GRAY, YELLOW, GRAY],
-        'L': [GRAY, GRAY, GRAY],
+        'F': [GRAY, WHITE, GRAY],
+        'R': [GRAY, GRAY,  GRAY],
+        'B': [GRAY, WHITE, GRAY],
+        'L': [GRAY, GRAY,  GRAY],
     },
     
     'l-cross': {
-        'name': 'L-Shape → Cross',
+        'name': 'Forme L → Croix',
         'step': 1,
-        'description': 'L-shape of 2 edges on left',
+        'description': 'Forme L blanche à gauche',
         'U': [
-            [GRAY, GRAY, GRAY],
-            [GRAY, YELLOW, YELLOW],
-            [GRAY, YELLOW, GRAY],
+            [GRAY, GRAY,  GRAY],
+            [GRAY, WHITE, WHITE],
+            [GRAY, WHITE, GRAY],
         ],
-        'F': [GRAY, GRAY, GRAY],
-        'R': [GRAY, GRAY, GRAY],
-        'B': [GRAY, YELLOW, GRAY],
-        'L': [GRAY, YELLOW, GRAY],
+        'F': [GRAY, GRAY,  GRAY],
+        'R': [GRAY, GRAY,  GRAY],
+        'B': [GRAY, WHITE, GRAY],
+        'L': [GRAY, WHITE, GRAY],
     },
     
     # ========================================
-    # STEP 2: Yellow Face (Corner Orientation)
-    # After cross is done, U face edges are all yellow
+    # STEP 2: White Face (Corner Orientation)
+    # After cross is done, U face edges are all white
     # ========================================
     
     'sune': {
         'name': 'Sune',
         'step': 2,
-        'description': 'Fish pattern - headlights on right',
+        'description': 'Motif poisson - phares à droite',
         'U': [
-            [GRAY, YELLOW, GRAY],
-            [YELLOW, YELLOW, YELLOW],
-            [YELLOW, YELLOW, GRAY],
+            [GRAY,  WHITE, GRAY],
+            [WHITE, WHITE, WHITE],
+            [WHITE, WHITE, GRAY],
         ],
-        'F': [GRAY, GRAY, YELLOW],
-        'R': [YELLOW, GRAY, GRAY ],
-        'B': [YELLOW, GRAY, GRAY],
-        'L': [GRAY, GRAY, GRAY],
+        'F': [GRAY,  GRAY, WHITE],
+        'R': [WHITE, GRAY, GRAY],
+        'B': [WHITE, GRAY, GRAY],
+        'L': [GRAY,  GRAY, GRAY],
     },
     
     'antisune': {
         'name': 'Anti-Sune',
         'step': 2,
-        'description': 'Fish pattern - headlights on left',
+        'description': 'Motif poisson - phares à gauche',
         'U': [
-            [GRAY, YELLOW, GRAY],
-            [YELLOW, YELLOW, YELLOW],
-            [GRAY, YELLOW, YELLOW],
+            [GRAY,  WHITE, GRAY],
+            [WHITE, WHITE, WHITE],
+            [GRAY,  WHITE, WHITE],
         ],
-        'F': [YELLOW, GRAY, GRAY],
-        'R': [GRAY, GRAY, GRAY],
-        'B': [GRAY, GRAY, YELLOW],
-        'L': [YELLOW, GRAY, GRAY],
+        'F': [WHITE, GRAY, GRAY],
+        'R': [GRAY,  GRAY, GRAY],
+        'B': [GRAY,  GRAY, WHITE],
+        'L': [WHITE, GRAY, GRAY],
     },
     
     'h-pattern': {
-        'name': 'H Pattern',
+        'name': 'Motif H',
         'step': 2,
-        'description': 'Checkerboard pattern - 2 opposite corners',
+        'description': 'Motif damier - 2 coins opposés',
         'U': [
-            [GRAY, YELLOW, GRAY],
-            [YELLOW, YELLOW, YELLOW],
-            [GRAY, YELLOW, GRAY],
+            [GRAY,  WHITE, GRAY],
+            [WHITE, WHITE, WHITE],
+            [GRAY,  WHITE, GRAY],
         ],
-        'F': [GRAY, GRAY, GRAY],
-        'R': [YELLOW, GRAY, YELLOW],
-        'B': [GRAY, GRAY, GRAY],
-        'L': [YELLOW, GRAY, YELLOW],
+        'F': [GRAY,  GRAY, GRAY],
+        'R': [WHITE, GRAY, WHITE],
+        'B': [GRAY,  GRAY, GRAY],
+        'L': [WHITE, GRAY, WHITE],
     },
     
     'pi-pattern': {
-        'name': 'Pi Pattern',
+        'name': 'Motif Pi',
         'step': 2,
-        'description': 'Two headlights in front',
+        'description': 'Deux phares devant',
         'U': [
-            [GRAY, YELLOW, GRAY],
-            [YELLOW, YELLOW, YELLOW],
-            [GRAY, YELLOW, GRAY]
+            [GRAY,  WHITE, GRAY],
+            [WHITE, WHITE, WHITE],
+            [GRAY,  WHITE, GRAY],
         ],
-        'F': [GRAY, GRAY, YELLOW],
-        'R': [GRAY, GRAY, GRAY],
-        'B': [GRAY, GRAY, YELLOW],
-        'L': [YELLOW, GRAY, YELLOW],
+        'F': [GRAY,  GRAY, WHITE],
+        'R': [GRAY,  GRAY, GRAY],
+        'B': [GRAY,  GRAY, WHITE],
+        'L': [WHITE, GRAY, WHITE],
     },
     
     'u-pattern': {
-        'name': 'U Pattern',
+        'name': 'Motif U',
         'step': 2,
-        'description': 'U-shape facing front',
+        'description': 'Forme U face à vous',
         'U': [
-            [YELLOW, YELLOW, YELLOW],
-            [YELLOW, YELLOW, YELLOW],
-            [GRAY, YELLOW, GRAY],
+            [WHITE, WHITE, WHITE],
+            [WHITE, WHITE, WHITE],
+            [GRAY,  WHITE, GRAY],
         ],
-        'F': [YELLOW, GRAY, YELLOW],
-        'R': [GRAY, GRAY, GRAY],
-        'B': [GRAY, GRAY, GRAY],
-        'L': [GRAY, GRAY, GRAY],
+        'F': [WHITE, GRAY, WHITE],
+        'R': [GRAY,  GRAY, GRAY],
+        'B': [GRAY,  GRAY, GRAY],
+        'L': [GRAY,  GRAY, GRAY],
     },
     
     't-pattern': {
-        'name': 'T Pattern',
+        'name': 'Motif T',
         'step': 2,
-        'description': 'T-shape at front',
+        'description': 'Forme T devant',
         'U': [
-            [GRAY, YELLOW, YELLOW],
-            [YELLOW, YELLOW, YELLOW],
-            [GRAY, YELLOW, YELLOW],
+            [GRAY,  WHITE, WHITE],
+            [WHITE, WHITE, WHITE],
+            [GRAY,  WHITE, WHITE],
         ],
-        'F': [YELLOW, GRAY, GRAY],
-        'R': [GRAY, GRAY, GRAY],
-        'B': [YELLOW, GRAY, GRAY],
-        'L': [GRAY, GRAY, GRAY],
+        'F': [WHITE, GRAY, GRAY],
+        'R': [GRAY,  GRAY, GRAY],
+        'B': [WHITE, GRAY, GRAY],
+        'L': [GRAY,  GRAY, GRAY],
     },
     
     'Bowtie': {
-        'name': 'Bowtie',
+        'name': 'Motif L',
         'step': 2,
-        'description': 'L-shape in corner',
+        'description': 'Forme L dans le coin',
         'U': [
-            [GRAY, YELLOW, YELLOW],
-            [YELLOW, YELLOW, YELLOW],
-            [YELLOW, YELLOW, GRAY],
+            [GRAY,  WHITE, WHITE],
+            [WHITE, WHITE, WHITE],
+            [WHITE, WHITE, GRAY],
         ],
-        'F': [GRAY, GRAY, YELLOW],
-        'R': [GRAY, GRAY, GRAY],
-        'B': [GRAY, GRAY, GRAY],
-        'L': [YELLOW, GRAY, GRAY],
+        'F': [GRAY,  GRAY, WHITE],
+        'R': [GRAY,  GRAY, GRAY],
+        'B': [GRAY,  GRAY, GRAY],
+        'L': [WHITE, GRAY, GRAY],
     },
 }
 
@@ -185,12 +185,6 @@ TWO_LOOK_OLL_PATTERNS = {
 def get_two_look_oll_pattern(pattern_key):
     """
     Get 2-Look OLL pattern by key.
-    
-    Args:
-        pattern_key: Pattern identifier (e.g., 'dot-cross', 'sune')
-    
-    Returns:
-        dict: Pattern dict with 'U', 'F', 'R', 'B', 'L' keys, or None if not found
     """
     return TWO_LOOK_OLL_PATTERNS.get(pattern_key)
 
@@ -198,12 +192,6 @@ def get_two_look_oll_pattern(pattern_key):
 def get_step_patterns(step_number):
     """
     Get all patterns for a specific step.
-    
-    Args:
-        step_number: 1 for cross, 2 for corners
-    
-    Returns:
-        dict: Dictionary of patterns for that step
     """
     return {
         key: pattern 

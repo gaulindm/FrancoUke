@@ -79,6 +79,7 @@ urlpatterns = [
     path('methods/cfop/about/', views.cfop_about, name='cfop_about'),
     path('methods/cfop/cross/', views.cfop_cross, name='cfop_cross'),
     path('methods/cfop/beginner-to-f2l/', beginner_to_f2l_bridge, name='beginner_to_f2l'),
+    
 
     # ──────────────────────────────────────────────────────────
     # F2L Routes

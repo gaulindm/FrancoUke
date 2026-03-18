@@ -6,22 +6,22 @@ Step 1: Corner Permutation (2 cases)
 Step 2: Edge Permutation (4 cases)
 
 These use simplified patterns for teaching purposes.
-For PLL, the U face is always all yellow (everything oriented),
+For PLL, the U face is always all white (everything oriented),
 but the side colors show which pieces are swapped.
 """
 
 # Color constants
-YELLOW = '#FFD700'  # Top face (always yellow for PLL)
-GREEN = '#00D800'   # Front face
-RED = '#C41E3A'     # Right face
-BLUE = '#0051BA'    # Back face
+WHITE  = '#FFFFFF'  # Top face (toujours blanc pour PLL)
+GREEN  = '#00D800'  # Front face
+RED    = '#C41E3A'  # Right face
+BLUE   = '#0051BA'  # Back face
 ORANGE = '#FF5800'  # Left face
 
-# All yellow top face (used in all PLL cases)
-ALL_YELLOW = [
-    [YELLOW, YELLOW, YELLOW],
-    [YELLOW, YELLOW, YELLOW],
-    [YELLOW, YELLOW, YELLOW],
+# All white top face (used in all PLL cases)
+ALL_WHITE = [
+    [WHITE, WHITE, WHITE],
+    [WHITE, WHITE, WHITE],
+    [WHITE, WHITE, WHITE],
 ]
 
 # ============================================================================
@@ -34,24 +34,24 @@ TWO_LOOK_PLL_PATTERNS = {
     # ========================================
     
     'adjacent-corners': {
-        'name': 'Adjacent Corners (Aa/Ab)',
+        'name': 'Coins Adjacents (Aa/Ab)',
         'step': 1,
-        'description': 'Swap two adjacent corners - use Aa or Ab perm',
-        'U': ALL_YELLOW,
-        'F': [GREEN, GREEN, ORANGE],   # One corner swapped
-        'R': [RED, RED, RED],
-        'B': [BLUE, BLUE, BLUE],
-        'L': [GREEN, ORANGE, ORANGE],  # Swapped corner visible
+        'description': 'Échanger deux coins adjacents - utiliser Aa ou Ab perm',
+        'U': ALL_WHITE,
+        'F': [GREEN,  GREEN,  ORANGE],
+        'R': [RED,    RED,    RED],
+        'B': [BLUE,   BLUE,   BLUE],
+        'L': [GREEN,  ORANGE, ORANGE],
     },
     
     'diagonal-corners': {
-        'name': 'Diagonal Corners (Y/E)',
+        'name': 'Coins Diagonaux (Y/E)',
         'step': 1,
-        'description': 'Swap two diagonal corners - use Y perm or E perm',
-        'U': ALL_YELLOW,
-        'F': [GREEN, GREEN, ORANGE],   # Diagonal swap
-        'R': [RED, RED, RED],
-        'B': [GREEN, BLUE, BLUE],      # Diagonal swap
+        'description': 'Échanger deux coins diagonaux - utiliser Y perm ou E perm',
+        'U': ALL_WHITE,
+        'F': [GREEN,  GREEN,  ORANGE],
+        'R': [RED,    RED,    RED],
+        'B': [GREEN,  BLUE,   BLUE],
         'L': [ORANGE, ORANGE, ORANGE],
     },
     
@@ -60,46 +60,46 @@ TWO_LOOK_PLL_PATTERNS = {
     # ========================================
     
     'three-edge-cycle': {
-        'name': '3-Edge Cycle (Ua/Ub)',
+        'name': 'Cycle de 3 Arêtes (Ua/Ub)',
         'step': 2,
-        'description': 'Cycle 3 edges - use Ua or Ub perm',
-        'U': ALL_YELLOW,
-        'F': [GREEN, RED, GREEN],      # 3-cycle visible
-        'R': [RED, BLUE, RED],
-        'B': [BLUE, GREEN, BLUE],
-        'L': [ORANGE, ORANGE, ORANGE], # One side solved
+        'description': 'Cycler 3 arêtes - utiliser Ua ou Ub perm',
+        'U': ALL_WHITE,
+        'F': [GREEN,  RED,    GREEN],
+        'R': [RED,    BLUE,   RED],
+        'B': [BLUE,   GREEN,  BLUE],
+        'L': [ORANGE, ORANGE, ORANGE],
     },
     
     'opposite-edges': {
-        'name': 'Opposite Edges (H)',
+        'name': 'Arêtes Opposées (H)',
         'step': 2,
-        'description': 'Swap opposite edge pairs - use H perm',
-        'U': ALL_YELLOW,
-        'F': [GREEN, BLUE, GREEN],     # Opposite swaps
-        'R': [RED, ORANGE, RED],
-        'B': [BLUE, GREEN, BLUE],
-        'L': [ORANGE, RED, ORANGE],
+        'description': 'Échanger les paires opposées - utiliser H perm',
+        'U': ALL_WHITE,
+        'F': [GREEN,  BLUE,   GREEN],
+        'R': [RED,    ORANGE, RED],
+        'B': [BLUE,   GREEN,  BLUE],
+        'L': [ORANGE, RED,    ORANGE],
     },
     
     'adjacent-edges': {
-        'name': 'Adjacent Edges (Z)',
+        'name': 'Arêtes Adjacentes (Z)',
         'step': 2,
-        'description': 'Swap adjacent edge pairs - use Z perm',
-        'U': ALL_YELLOW,
-        'F': [GREEN, RED, GREEN],      # Adjacent swaps
-        'R': [RED, GREEN, RED],
-        'B': [BLUE, ORANGE, BLUE],
-        'L': [ORANGE, BLUE, ORANGE],
+        'description': 'Échanger les paires adjacentes - utiliser Z perm',
+        'U': ALL_WHITE,
+        'F': [GREEN,  RED,    GREEN],
+        'R': [RED,    GREEN,  RED],
+        'B': [BLUE,   ORANGE, BLUE],
+        'L': [ORANGE, BLUE,   ORANGE],
     },
     
     'solved': {
-        'name': 'Solved',
+        'name': 'Résolu !',
         'step': 2,
-        'description': 'All pieces in correct position - cube solved!',
-        'U': ALL_YELLOW,
-        'F': [GREEN, GREEN, GREEN],    # All correct
-        'R': [RED, RED, RED],
-        'B': [BLUE, BLUE, BLUE],
+        'description': 'Toutes les pièces au bon endroit - cube résolu !',
+        'U': ALL_WHITE,
+        'F': [GREEN,  GREEN,  GREEN],
+        'R': [RED,    RED,    RED],
+        'B': [BLUE,   BLUE,   BLUE],
         'L': [ORANGE, ORANGE, ORANGE],
     },
 }
@@ -108,12 +108,6 @@ TWO_LOOK_PLL_PATTERNS = {
 def get_two_look_pll_pattern(pattern_key):
     """
     Get 2-Look PLL pattern by key.
-    
-    Args:
-        pattern_key: Pattern identifier (e.g., 'adjacent-corners', 'three-edge-cycle')
-    
-    Returns:
-        dict: Pattern dict with 'U', 'F', 'R', 'B', 'L' keys, or None if not found
     """
     return TWO_LOOK_PLL_PATTERNS.get(pattern_key)
 
@@ -121,12 +115,6 @@ def get_two_look_pll_pattern(pattern_key):
 def get_step_patterns(step_number):
     """
     Get all patterns for a specific step.
-    
-    Args:
-        step_number: 1 for corners, 2 for edges
-    
-    Returns:
-        dict: Dictionary of patterns for that step
     """
     return {
         key: pattern 

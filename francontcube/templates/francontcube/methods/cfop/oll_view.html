@@ -1,15 +1,12 @@
 {% extends "francontcube/partials/base.html" %}
 {% load static %}
 
-{% block title %}{{ page_title }} - CFOP Method{% endblock %}
+{% block title %}{{ page_title }} - CFOP{% endblock %}
 
 {% block extra_head %}
-<!-- Roofpig for 3D cube animations -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/roofpig@1.0.0/roofpig.min.css">
-<script src="https://cdn.jsdelivr.net/npm/roofpig@1.0.0/roofpig.min.js"></script>
-
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+{# cubing.js chargé via module script en bas de page #}
 
 <style>
     .category-card {
@@ -21,63 +18,55 @@
         height: 100%;
         background: white;
     }
-    
     .category-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         border-color: #0d6efd;
     }
-    
     .category-card.active {
         border-color: #0d6efd;
         background: #e7f1ff;
         box-shadow: 0 4px 12px rgba(13,110,253,0.2);
     }
-    
-    .category-icon {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-    }
-    
+    .category-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
     .case-card {
         border: 2px solid #e9ecef;
         border-radius: 10px;
-        padding: 20px;
         transition: all 0.3s;
         background: white;
         height: 100%;
     }
-    
     .case-card:hover {
         box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         transform: translateY(-3px);
     }
-    
+
     .roofpig-container {
-        min-height: 250px;
+        min-height: 220px;
         display: flex;
         align-items: center;
         justify-content: center;
         background: #f8f9fa;
         border-radius: 8px;
         margin-bottom: 15px;
+        padding: 10px;
     }
-    
+    .roofpig-container twisty-player {
+        width: 200px;
+        height: 200px;
+    }
+
     .algorithm-display {
         background: #f8f9fa;
         border-left: 4px solid #0d6efd;
         padding: 12px;
         border-radius: 4px;
         font-family: 'Courier New', monospace;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
     }
-    
-    .difficulty-badge {
-        font-size: 0.85rem;
-        padding: 6px 12px;
-    }
-    
+
     .stats-box {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -85,58 +74,74 @@
         border-radius: 12px;
         margin-bottom: 30px;
     }
-    
-    .stat-item {
-        text-align: center;
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 2.5rem; font-weight: bold; display: block; }
+    .stat-label  { font-size: 0.9rem; opacity: 0.9; }
+
+    /* Move icons */
+    .moves-preview {
+        gap: 2px;
+        align-items: center;
     }
-    
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        display: block;
+    .moves-preview .move-icon {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
     }
-    
-    .stat-label {
-        font-size: 0.9rem;
+    .move-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 1px;
+    }
+    .move-bracket {
+        font-size: 3rem;
+        font-weight: 300;
+        line-height: 48px;
         opacity: 0.9;
+        user-select: none;
     }
+    .move-group--paren .move-bracket   { color: #0051A8; }
+    .move-group--paren .move-icon      { color: #0051A8; }
+    .move-group--bracket .move-bracket { color: #C41E3A; }
+    .move-group--bracket .move-icon    { color: #C41E3A; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-5">
+
     <!-- Header -->
     <div class="text-center mb-4">
-        <h1 class="display-4 fw-bold">{{ method }} - {{ method_full }}</h1>
+        <h1 class="display-4 fw-bold">{{ method }} — {{ method_full }}</h1>
         <p class="lead text-muted">{{ page_description }}</p>
     </div>
-    
+
     <!-- Statistics Box -->
-    <div class="stats-box">
+    <div class="stats-box mb-5">
         <div class="row">
-            <div class="col-md-3 stat-item">
+            <div class="col-6 col-md-3 stat-item mb-3 mb-md-0">
                 <span class="stat-number">{{ total_cases }}</span>
                 <span class="stat-label">Cas Total</span>
             </div>
-            <div class="col-md-3 stat-item">
+            <div class="col-6 col-md-3 stat-item mb-3 mb-md-0">
                 <span class="stat-number">{{ easy_cases }}</span>
                 <span class="stat-label">Faciles</span>
             </div>
-            <div class="col-md-3 stat-item">
+            <div class="col-6 col-md-3 stat-item">
                 <span class="stat-number">{{ medium_cases }}</span>
                 <span class="stat-label">Moyens</span>
             </div>
-            <div class="col-md-3 stat-item">
+            <div class="col-6 col-md-3 stat-item">
                 <span class="stat-number">{{ hard_cases }}</span>
                 <span class="stat-label">Difficiles</span>
             </div>
         </div>
     </div>
-    
+
     <!-- Category Navigation -->
     <div class="mb-5">
         <h2 class="h4 mb-3">
-            <i class="bi bi-grid-3x3"></i> Catégories OLL
+            <i class="bi bi-grid-3x3"></i> Catégories {{ method }}
         </h2>
         <div class="row g-3">
             {% for cat_key, cat_info in categories.items %}
@@ -157,95 +162,127 @@
             {% endfor %}
         </div>
     </div>
-    
+
     <!-- Cases Grid -->
     {% if cases %}
-    <div class="mb-4">
-        <h2 class="h4 mb-3">
-            <i class="bi bi-cube-fill"></i> 
+    <div class="mb-4 d-flex align-items-center justify-content-between">
+        <h2 class="h4 mb-0">
+            <i class="bi bi-cube-fill"></i>
             {% if current_category %}
                 {% for cat_key, cat_info in categories.items %}
-                    {% if cat_key == current_category %}
-                        {{ cat_info.name }}
-                    {% endif %}
+                    {% if cat_key == current_category %}{{ cat_info.name }}{% endif %}
                 {% endfor %}
             {% else %}
                 Tous les cas
             {% endif %}
-            <span class="badge bg-primary">{{ cases.count }} cas</span>
         </h2>
-
-
-
-
-
-            <span class="badge bg-primary">{{ cases.count }} cas</span>
-        </h2>
+        <span class="badge bg-primary fs-6">{{ cases.count }} cas</span>
     </div>
-    
+
     <div class="row g-4">
         {% for case in cases %}
         <div class="col-md-6 col-lg-4">
             <div class="case-card">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="mb-0">{{ case.name }}</h5>
-                    {% if case.difficulty %}
-                    <span class="badge difficulty-badge 
-                        {% if case.difficulty == 'facile' %}bg-success
-                        {% elif case.difficulty == 'moyen' %}bg-warning
-                        {% else %}bg-danger{% endif %}">
-                        {{ case.get_difficulty_display }}
-                    </span>
-                    {% endif %}
-                </div>
-                
-                <!-- Roofpig Animation -->
-                <div class="roofpig-container">
-                    <div class="roofpig" 
-                         data-config="{{ case.get_roofpig_config }}">
+
+                {# ── Card Header ── #}
+                <div class="card-header bg-primary text-white rounded-top px-3 py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fs-6">
+                            <i class="bi bi-box"></i> {{ case.name }}
+                        </h5>
+                        {% if case.difficulty %}
+                        <span class="badge
+                            {% if case.difficulty == 'facile' %}bg-success
+                            {% elif case.difficulty == 'moyen' %}bg-warning text-dark
+                            {% else %}bg-danger{% endif %}">
+                            {{ case.get_difficulty_display }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
-                
-                <!-- Algorithm -->
-                {% if case.algorithm %}
-                <div class="algorithm-display mb-3">
-                    {{ case.algorithm }}
+
+                <div class="p-3">
+                    {# ── cubing.js Animation ── #}
+                    <div class="roofpig-container">
+                        <twisty-player
+                            id="player-{{ case.slug }}"
+                            puzzle="3x3x3"
+                            visualization="3D"
+                            hint-facelets="none"
+                            background="none"
+                            control-panel="bottom-row"
+                            experimental-stickering="{{ case.stickering|default:'OLL' }}"
+                            data-setup="{{ case.get_setup_alg|escapejs }}"
+                            data-alg="{{ case.algorithm|escapejs }}"
+                            data-hand="{{ case.hand_orientation|default:'right' }}">
+                        </twisty-player>
+                    </div>
+
+                    {# ── Algorithm text ── #}
+                    {% if case.algorithm %}
+                    <div class="algorithm-display mb-3">
+                        {{ case.algorithm }}
+                    </div>
+
+                    {# ── Move icons ── #}
+                    <div class="moves-preview d-flex flex-wrap justify-content-center p-2 bg-light rounded mb-3">
+                        {{ case.get_algorithm_svg }}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-check-circle"></i> Déjà résolu !
+                    </div>
+                    {% endif %}
+
+                    {# ── Description ── #}
+                    {% if case.description %}
+                    <p class="text-muted small mb-3">{{ case.description }}</p>
+                    {% endif %}
+
+                    {# ── Action Button ── #}
+                    <a href="{% url 'francontcube:oll_case_detail' case.slug %}"
+                       class="btn btn-outline-primary w-100">
+                        <i class="bi bi-eye"></i> Voir les détails
+                    </a>
                 </div>
-                {% else %}
-                <div class="alert alert-success mb-3">
-                    <i class="bi bi-check-circle"></i> Déjà résolu!
-                </div>
-                {% endif %}
-                
-                <!-- Description -->
-                {% if case.description %}
-                <p class="text-muted small mb-3">{{ case.description }}</p>
-                {% endif %}
-                
-                <!-- Action Button -->
-                <a href="{% url 'francontcube:oll_case_detail' case.slug %}" 
-                   class="btn btn-outline-primary w-100">
-                    <i class="bi bi-eye"></i> Voir les détails
-                </a>
+
             </div>
         </div>
         {% endfor %}
     </div>
+
     {% else %}
     <div class="alert alert-info text-center py-5">
         <i class="bi bi-info-circle" style="font-size: 3rem;"></i>
         <h4 class="mt-3">Aucun cas trouvé</h4>
-        <p>Sélectionnez une catégorie ci-dessus pour voir les cas OLL.</p>
+        <p>Sélectionnez une catégorie ci-dessus pour voir les cas {{ method }}.</p>
     </div>
     {% endif %}
-    
 
+    <!-- Navigation -->
+    <div class="text-center mt-5 pt-3 border-top">
+        <a href="{% url 'francontcube:method_cfop' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left"></i> Retour à CFOP
+        </a>
+    </div>
 
-<!-- Initialize Roofpig -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Roofpig should auto-initialize from data-config attributes
-        console.log('Roofpig initialized for OLL cases');
-    });
+</div>
+
+{# ══ cubing.js — init all players on the page ══ #}
+<script type="module">
+import { TwistyPlayer } from "https://cdn.cubing.net/js/cubing/twisty";
+
+document.querySelectorAll('twisty-player[data-alg]').forEach(player => {
+    const setup = player.dataset.setup || '';
+    const alg   = player.dataset.alg   || '';
+    const hand  = player.dataset.hand  || 'right';
+
+    setTimeout(() => {
+        player.experimentalSetupAlg = setup;
+        player.alg                  = alg;
+        player.cameraLongitude      = hand === 'right' ? 30 : -30;
+        player.cameraLatitude       = 22;
+    }, 200);
+});
 </script>
 {% endblock %}
