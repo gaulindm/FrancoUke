@@ -211,10 +211,11 @@
                             hint-facelets="none"
                             background="none"
                             control-panel="bottom-row"
-                            experimental-stickering="{{ case.stickering|default:'OLL' }}"
-                            data-setup="{{ case.get_setup_alg|escapejs }}"
-                            data-alg="{{ case.algorithm|escapejs }}"
-                            data-hand="{{ case.hand_orientation|default:'right' }}">
+                            experimental-stickering="OLL"
+                            experimental-setup-alg="{{ case.get_setup_alg }}"
+                            alg="{{ case.algorithm }}"
+                            camera-longitude="{% if case.hand_orientation == 'left' %}-30{% else %}30{% endif %}"
+                            camera-latitude="25">
                         </twisty-player>
                     </div>
 
@@ -268,21 +269,8 @@
 
 </div>
 
-{# ══ cubing.js — init all players on the page ══ #}
+{# cubing.js — chargé automatiquement via les attributs HTML du twisty-player #}
 <script type="module">
-import { TwistyPlayer } from "https://cdn.cubing.net/js/cubing/twisty";
-
-document.querySelectorAll('twisty-player[data-alg]').forEach(player => {
-    const setup = player.dataset.setup || '';
-    const alg   = player.dataset.alg   || '';
-    const hand  = player.dataset.hand  || 'right';
-
-    setTimeout(() => {
-        player.experimentalSetupAlg = setup;
-        player.alg                  = alg;
-        player.cameraLongitude      = hand === 'right' ? 30 : -30;
-        player.cameraLatitude       = 22;
-    }, 200);
-});
+import "https://cdn.cubing.net/js/cubing/twisty";
 </script>
 {% endblock %}

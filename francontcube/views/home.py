@@ -51,7 +51,7 @@ def home(request):
             'url': '/francontcube/methods/cfop/',
             'available': True,
         },
-                {
+        {
             'name': 'Training Hub',
             'desc': 'Exercice tes algorithme et compare tes temps',
             'icon': 'bi-stopwatch',
@@ -59,6 +59,16 @@ def home(request):
             'url': '/training/',
             'available': True,
         },
+        {
+            'name': 'Other puzzles',
+            'desc': 'Autres casse-têtes (2x2, 4x4 et 5x5)',
+            'icon': 'bi-stopwatch',
+            'logo': None,
+            'url': '/francontcube/puzzles/',
+            'available': True,
+        },
+
+        
         {
             'name': 'Algorithmes',
             'desc': 'Collection complète d\'algorithmes OLL et PLL',

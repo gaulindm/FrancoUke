@@ -4,12 +4,8 @@
 {% block title %}{{ cube_state.name }} - {{ method }}{% endblock %}
 
 {% block extra_head %}
-<!-- Roofpig for 3D cube animations -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/roofpig@1.0.0/roofpig.min.css">
-<script src="https://cdn.jsdelivr.net/npm/roofpig@1.0.0/roofpig.min.js"></script>
-
-<!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+{# cubing.js chargé via module script en bas de page #}
 
 <style>
     .case-header {
@@ -18,18 +14,23 @@
         padding: 40px 0;
         margin-bottom: 40px;
     }
-    
-    .roofpig-main {
+
+    .cubingjs-main {
         background: white;
         border-radius: 12px;
         padding: 30px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        min-height: 400px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    
+    .cubingjs-main twisty-player {
+        width: 100%;
+        height: 350px;
+        border-radius: 10px;
+        display: block;
+    }
+
     .algorithm-box {
         background: #f8f9fa;
         border-left: 5px solid #0d6efd;
@@ -37,7 +38,6 @@
         border-radius: 8px;
         margin: 30px 0;
     }
-    
     .algorithm-text {
         font-family: 'Courier New', monospace;
         font-size: 24px;
@@ -45,7 +45,7 @@
         color: #212529;
         letter-spacing: 3px;
     }
-    
+
     .info-card {
         background: white;
         border-radius: 12px;
@@ -53,19 +53,18 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         margin-bottom: 20px;
     }
-    
+
     .nav-button {
         padding: 12px 25px;
         font-weight: 600;
         border-radius: 8px;
         transition: all 0.3s;
     }
-    
     .nav-button:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-    
+
     .tips-section {
         background: #fff3cd;
         border-left: 5px solid #ffc107;
@@ -73,38 +72,41 @@
         border-radius: 8px;
         margin: 20px 0;
     }
-    
-    .related-cases {
-        display: flex;
-        gap: 15px;
-        margin-top: 30px;
+
+    .badge-xl { font-size: 1.1rem; padding: 10px 20px; }
+
+    /* Move icons */
+    .moves-preview {
+        gap: 2px;
+        align-items: center;
     }
-    
-    .related-card {
-        flex: 1;
-        padding: 15px;
-        background: white;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: all 0.3s;
+    .moves-preview .move-icon {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
     }
-    
-    .related-card:hover {
-        border-color: #0d6efd;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    .move-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 1px;
     }
-    
-    .badge-xl {
-        font-size: 1.1rem;
-        padding: 10px 20px;
+    .move-bracket {
+        font-size: 3rem;
+        font-weight: 300;
+        line-height: 48px;
+        opacity: 0.9;
+        user-select: none;
     }
+    .move-group--paren .move-bracket   { color: #0051A8; }
+    .move-group--paren .move-icon      { color: #0051A8; }
+    .move-group--bracket .move-bracket { color: #C41E3A; }
+    .move-group--bracket .move-icon    { color: #C41E3A; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Header -->
+
+{# ── Page Header ── #}
 <div class="case-header">
     <div class="container">
         <div class="row align-items-center">
@@ -116,12 +118,11 @@
                 {% if cube_state.difficulty %}
                 <span class="badge badge-xl
                     {% if cube_state.difficulty == 'facile' %}bg-success
-                    {% elif cube_state.difficulty == 'moyen' %}bg-warning
+                    {% elif cube_state.difficulty == 'moyen' %}bg-warning text-dark
                     {% else %}bg-danger{% endif %}">
                     <i class="bi bi-speedometer2"></i> {{ cube_state.get_difficulty_display }}
                 </span>
                 {% endif %}
-                
                 {% if cube_state.category %}
                 <div class="mt-3">
                     <span class="badge bg-light text-dark">
@@ -136,132 +137,146 @@
 
 <div class="container pb-5">
     <div class="row">
-        <!-- Left Column: 3D Animation -->
+
+        {# ── Left Column: Animation ── #}
         <div class="col-lg-7">
             <div class="info-card">
                 <h3 class="mb-4">
                     <i class="bi bi-box"></i> Animation 3D
                 </h3>
-                <div class="roofpig-main">
-                    <div class="roofpig" 
-                         data-config="{{ roofpig_config }}"
-                         style="width: 100%; height: 350px;">
-                    </div>
+
+                {# ── cubing.js player ── #}
+                <div class="cubingjs-main">
+                    <twisty-player id="cubingPlayer"
+                        puzzle="3x3x3"
+                        visualization="3D"
+                        hint-facelets="none"
+                        background="none"
+                        control-panel="bottom-row"
+                        experimental-stickering="{{ cube_state.stickering|default:'full' }}">
+                    </twisty-player>
                 </div>
-                
-                <!-- Algorithm Display -->
+
+                {# ── Algorithm ── #}
                 {% if cube_state.algorithm %}
                 <div class="algorithm-box">
                     <h4 class="mb-3">
                         <i class="bi bi-code-slash"></i> Algorithme
                     </h4>
-                    <div class="algorithm-text">
-                        {{ cube_state.algorithm }}
-                    </div>
+                    <div class="algorithm-text">{{ cube_state.algorithm }}</div>
                     <div class="mt-3">
                         <button class="btn btn-sm btn-outline-primary" onclick="copyAlgorithm()">
                             <i class="bi bi-clipboard"></i> Copier
                         </button>
                     </div>
                 </div>
+
+                {# ── Move icons ── #}
+                <div class="mt-3">
+                    <h5 class="text-secondary mb-3">
+                        <i class="bi bi-grid"></i> Mouvements :
+                    </h5>
+                    <div class="moves-preview d-flex flex-wrap justify-content-center p-3 bg-light rounded">
+                        {{ cube_state.get_algorithm_svg }}
+                    </div>
+                </div>
+
                 {% else %}
                 <div class="alert alert-success mt-4">
                     <i class="bi bi-check-circle-fill"></i>
-                    <strong>Ce cas est déjà résolu!</strong> Aucun algorithme nécessaire.
+                    <strong>Ce cas est déjà résolu !</strong> Aucun algorithme nécessaire.
                 </div>
                 {% endif %}
+
             </div>
         </div>
-        
-        <!-- Right Column: Info & Tips -->
+
+        {# ── Right Column: Info & Tips ── #}
         <div class="col-lg-5">
-            <!-- Case Info -->
+
             <div class="info-card">
                 <h3 class="mb-4">
                     <i class="bi bi-info-circle"></i> Informations
                 </h3>
-                
-                <div class="mb-3">
-                    <strong>Méthode:</strong> 
-                    <span class="badge bg-primary">{{ method }}</span>
-                </div>
-                
-                <div class="mb-3">
-                    <strong>Catégorie:</strong> 
-                    <span class="text-muted">{{ category_info.description|default:cube_state.category }}</span>
-                </div>
-                
-                <div class="mb-3">
-                    <strong>Numéro:</strong> 
-                    <span class="badge bg-secondary">Cas #{{ cube_state.step_number }}</span>
-                </div>
-                
-                {% if cube_state.algorithm %}
-                <div class="mb-3">
-                    <strong>Longueur:</strong> 
-                    <span class="text-muted">{{ cube_state.algorithm|wordcount }} mouvements</span>
-                </div>
-                {% endif %}
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span class="text-muted">Méthode</span>
+                        <span class="badge bg-primary">{{ method }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span class="text-muted">Numéro</span>
+                        <span class="badge bg-secondary">Cas #{{ cube_state.step_number }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span class="text-muted">Catégorie</span>
+                        <span class="text-end small">{{ category_info.description|default:cube_state.category }}</span>
+                    </li>
+                    {% if cube_state.algorithm %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span class="text-muted">Longueur</span>
+                        <span class="text-muted">{{ cube_state.algorithm|wordcount }} mouvements</span>
+                    </li>
+                    {% endif %}
+                </ul>
             </div>
-            
-            <!-- Tips Section -->
+
+            {# ── Tips ── #}
             {% if method == 'OLL' %}
             <div class="tips-section">
                 <h5><i class="bi bi-lightbulb-fill"></i> Conseils OLL</h5>
-                <ul class="mb-0">
+                <ul class="mb-0 small">
                     <li>Reconnaître le pattern avant de chercher l'algorithme</li>
                     <li>Pratiquer la reconnaissance en regardant seulement 2 faces</li>
-                    <li>Certains OLL ont plusieurs algorithmes - choisissez celui qui vous convient</li>
-                    <li>Les cas symétriques peuvent être résolus avec l'algorithme miroir</li>
+                    <li>Certains OLL ont plusieurs algorithmes — choisissez le vôtre</li>
+                    <li>Les cas symétriques peuvent être résolus avec le miroir</li>
                 </ul>
             </div>
             {% elif method == 'PLL' %}
             <div class="tips-section">
                 <h5><i class="bi bi-lightbulb-fill"></i> Conseils PLL</h5>
-                <ul class="mb-0">
+                <ul class="mb-0 small">
                     <li>Cherchez les "headlights" (deux stickers identiques côte à côte)</li>
                     <li>Identifiez les blocs 1x2 formés par les coins</li>
-                    <li>Commencez par apprendre les PLL les plus fréquents</li>
-                    <li>Pratiquez l'AUF (Adjust U Face) pour aligner correctement</li>
+                    <li>Commencez par les PLL les plus fréquents</li>
+                    <li>Pratiquez l'AUF pour aligner correctement</li>
                 </ul>
             </div>
             {% endif %}
-            
-            <!-- Practice Tips -->
+
             <div class="info-card">
                 <h5><i class="bi bi-trophy"></i> Comment pratiquer</h5>
-                <ol class="mb-0">
+                <ol class="mb-0 small">
                     <li>Regardez l'animation plusieurs fois</li>
-                    <li>Décomposez l'algorithme en groupes de 3-4 mouvements</li>
-                    <li>Pratiquez lentement en augmentant progressivement la vitesse</li>
-                    <li>Faites 20-30 répétitions pour la mémoire musculaire</li>
+                    <li>Utilisez ▶| pour avancer mouvement par mouvement</li>
+                    <li>Décomposez en groupes de 3–4 mouvements</li>
+                    <li>Pratiquez lentement, augmentez la vitesse progressivement</li>
+                    <li>Faites 20–30 répétitions pour la mémoire musculaire</li>
                 </ol>
             </div>
+
         </div>
     </div>
-    
-    <!-- Navigation -->
+
+    {# ── Navigation prev/next ── #}
     <div class="row mt-5">
         <div class="col-md-4">
             {% if prev_case %}
-            <a href="{% if method == 'OLL' %}{% url 'oll_case_detail' prev_case.slug %}{% else %}{% url 'pll_case_detail' prev_case.slug %}{% endif %}" 
+            <a href="{% if method == 'OLL' %}{% url 'francontcube:oll_case_detail' prev_case.slug %}{% else %}{% url 'francontcube:pll_case_detail' prev_case.slug %}{% endif %}"
                class="btn btn-outline-primary nav-button w-100">
                 <i class="bi bi-arrow-left"></i> Cas précédent
                 <br><small class="text-muted">{{ prev_case.name }}</small>
             </a>
             {% endif %}
         </div>
-        
         <div class="col-md-4 text-center">
-            <a href="{% if method == 'OLL' %}{% url 'francontcube:cfop_oll' %}{% else %}{% url 'francontcube:cfop_pll' %}{% endif %}" 
+            <a href="{% if method == 'OLL' %}{% url 'francontcube:cfop_oll' %}{% else %}{% url 'francontcube:cfop_pll' %}{% endif %}"
                class="btn btn-secondary nav-button w-100">
                 <i class="bi bi-grid-3x3"></i> Retour à {{ method }}
             </a>
         </div>
-        
-        <div class="col-md-4">
+        <div class="col-md-4 text-end">
             {% if next_case %}
-            <a href="{% if method == 'OLL' %}{% url 'francontcube:oll_case_detail' next_case.slug %}{% else %}{% url 'francontcube:pll_case_detail' next_case.slug %}{% endif %}" 
+            <a href="{% if method == 'OLL' %}{% url 'francontcube:oll_case_detail' next_case.slug %}{% else %}{% url 'francontcube:pll_case_detail' next_case.slug %}{% endif %}"
                class="btn btn-outline-primary nav-button w-100">
                 Cas suivant <i class="bi bi-arrow-right"></i>
                 <br><small class="text-muted">{{ next_case.name }}</small>
@@ -269,30 +284,41 @@
             {% endif %}
         </div>
     </div>
+
 </div>
 
-<script>
-    function copyAlgorithm() {
-        const algorithm = "{{ cube_state.algorithm|escapejs }}";
-        navigator.clipboard.writeText(algorithm).then(() => {
-            // Show feedback
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="bi bi-check"></i> Copié!';
-            btn.classList.add('btn-success');
-            btn.classList.remove('btn-outline-primary');
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.classList.remove('btn-success');
-                btn.classList.add('btn-outline-primary');
-            }, 2000);
-        });
-    }
-    
-    // Initialize Roofpig
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Roofpig case detail initialized');
-    });
+{# ══ cubing.js ══ #}
+<script type="module">
+import { TwistyPlayer } from "https://cdn.cubing.net/js/cubing/twisty";
+
+const player  = document.getElementById('cubingPlayer');
+const SETUP   = "{{ cube_state.get_setup_alg|escapejs }}";
+const ALG     = "{{ cube_state.algorithm|escapejs }}";
+const HAND    = "{{ cube_state.hand_orientation|default:'right' }}";
+const CAM_LON = HAND === 'right' ? 30 : -30;
+
+setTimeout(() => {
+    player.experimentalSetupAlg = SETUP || "";
+    player.alg                  = ALG;
+    player.cameraLongitude      = CAM_LON;
+    player.cameraLatitude       = 25;
+}, 200);
 </script>
+
+<script>
+function copyAlgorithm() {
+    const algorithm = "{{ cube_state.algorithm|escapejs }}";
+    navigator.clipboard.writeText(algorithm).then(() => {
+        const btn = event.target.closest('button');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copié !';
+        btn.classList.replace('btn-outline-primary', 'btn-success');
+        setTimeout(() => {
+            btn.innerHTML = orig;
+            btn.classList.replace('btn-success', 'btn-outline-primary');
+        }, 2000);
+    });
+}
+</script>
+
 {% endblock %}
