@@ -9,6 +9,7 @@ This module organizes views into a clean directory structure:
 - beginner/: Beginner method views
 - cfop/: CFOP method views
 - roux/: Roux method views (coming soon)
+- puzzles/: Other puzzles (2x2, 4x4, 5x5)
 
 All views are exported from this module for easy URL routing.
 """
@@ -97,6 +98,22 @@ from .cfop.oll_pll import (
 )
 
 # ============================================================
+# OTHER PUZZLES (2x2, 4x4, 5x5)
+# ============================================================
+from .puzzles.home import puzzles_home
+from .puzzles.puzzle_2x2 import (
+    puzzle_2x2_home,
+    puzzle_2x2_method,
+    puzzle_2x2_step,
+)
+from .puzzles.puzzle_big_cubes import (
+    puzzle_4x4_home,
+    puzzle_4x4_step,
+    puzzle_5x5_home,
+    puzzle_5x5_step,
+)
+
+# ============================================================
 # EXPORTS
 # ============================================================
 __all__ = [
@@ -112,7 +129,6 @@ __all__ = [
     'tutorial_step',
 
     # Mosaic ****** NEW *******
-
     'mosaic',
     'about',
     'mosaic_steps',
@@ -161,4 +177,14 @@ __all__ = [
     'oll_case_detail',
     'pll_case_detail',
     'two_look_oll_view',
+
+    # Other puzzles
+    'puzzles_home',
+    'puzzle_2x2_home',
+    'puzzle_2x2_method',
+    'puzzle_2x2_step',
+    'puzzle_4x4_home',
+    'puzzle_4x4_step',
+    'puzzle_5x5_home',
+    'puzzle_5x5_step',
 ]

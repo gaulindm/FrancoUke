@@ -4,6 +4,110 @@ from django.utils.safestring import mark_safe
 import re
 
 
+# cube/models.py  — ajouter sous CubeState
+
+class PuzzleCase(models.Model):
+
+    # ── Identification ─────────────────────────────────────────────────────
+    PUZZLE_CHOICES = [
+        ('2x2', '2x2'),
+        ('3x3', '3x3'),   # Prévu pour la migration future de CubeState
+        ('4x4', '4x4'),
+        ('5x5', '5x5'),
+    ]
+
+    DIFFICULTY_CHOICES = [
+        ('facile',    'Facile'),
+        ('moyen',     'Moyen'),
+        ('difficile', 'Difficile'),
+    ]
+
+    puzzle_type = models.CharField(max_length=10, choices=PUZZLE_CHOICES)
+    method      = models.CharField(max_length=50)   # 'ortega', 'reduction', 'cfop'...
+    category    = models.CharField(max_length=50, blank=True)  # 'pbl', 'centers', 'edges'...
+    step_number = models.PositiveIntegerField(default=1)
+
+    name        = models.CharField(max_length=100)
+    slug        = models.SlugField(unique=True, blank=True)
+    algorithm   = models.TextField(blank=True)
+    setup       = models.TextField(blank=True)  # remplace roofpig_setup
+    description = models.TextField(blank=True)
+    tip         = models.TextField(blank=True)  # conseil pratique, absent dans CubeState
+    difficulty  = models.CharField(max_length=20, blank=True, choices=DIFFICULTY_CHOICES)
+
+    # ── cubing.js ──────────────────────────────────────────────────────────
+    # Mêmes champs que CubeState — migration directe possible
+    camera_longitude = models.FloatField(
+        default=-25.0,
+        help_text="Angle horizontal caméra. Négatif = face avant plus visible."
+    )
+    camera_latitude = models.FloatField(
+        default=22.0,
+        help_text="Angle vertical caméra. Plus élevé = vue de dessus."
+    )
+    stickering = models.CharField(
+        max_length=30,
+        blank=True,
+        default='full',
+        help_text="cubing.js stickering: full | OLL | PLL | F2L | LL | Cross"
+    )
+
+    # ── Méthodes ───────────────────────────────────────────────────────────
+    # Copiées de CubeState — identiques, aucune dépendance au 3x3
+
+    def get_clean_algorithm(self):
+        """Retourne l'algorithme sans notation de groupe."""
+        return re.sub(r'[(){}\[\]]', '', self.algorithm).split()
+
+    @staticmethod
+    def invert_alg(alg):
+        """Calcule l'inverse d'un algorithme. R U R' → R U' R'"""
+        if not alg or not alg.strip():
+            return ''
+        clean = re.sub(r'[(){}\[\]]', '', alg).strip()
+        moves = clean.split()
+        inverted = []
+        for m in reversed(moves):
+            if not m:
+                continue
+            if m.endswith("'"):
+                inverted.append(m[:-1])
+            elif m.endswith('2'):
+                inverted.append(m)
+            else:
+                inverted.append(m + "'")
+        return ' '.join(inverted)
+
+    def get_setup_alg(self):
+        """
+        Retourne le setup pour cubing.js.
+        Priorité:
+          1. Champ setup si rempli manuellement
+          2. Sinon, inverse automatique de l'algorithme
+        """
+        if self.setup and self.setup.strip():
+            return self.setup
+        return self.invert_alg(self.algorithm)
+
+    # ── Django boilerplate ────────────────────────────────────────────────
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"[{self.puzzle_type}] {self.name}"
+
+    class Meta:
+        ordering = ['puzzle_type', 'method', 'category', 'step_number']
+        unique_together = [['puzzle_type', 'method', 'category', 'step_number']]
+        verbose_name = 'Puzzle Case'
+        verbose_name_plural = 'Puzzle Cases'
+
+
+
+
 class CubeState(models.Model):
     METHOD_CHOICES = [
         ("cubienewbie", "CubieNewbie"),

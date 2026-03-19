@@ -1,0 +1,119 @@
+{# templates/francontcube/puzzles/big_cube/step.html #}
+{% extends "francontcube/base.html" %}
+
+{% block extra_head %}
+{# cubing.js — un seul script pour tous les puzzles #}
+<script src="https://cdn.cubing.net/js/cubing/twisty" type="module"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  {# Fil d'Ariane #}
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'puzzles_home' %}">Puzzles</a></li>
+      <li class="breadcrumb-item">
+        <a href="{% url puzzle_type|add:'_home' %}">{{ config.name }}</a>
+      </li>
+      <li class="breadcrumb-item active">{{ step.name }}</li>
+    </ol>
+  </nav>
+
+  {# En-tête de l'étape #}
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <i class="{{ step.icon }} fs-2 text-primary"></i>
+    <div>
+      <h1 class="h3 mb-0">{{ step.name }}</h1>
+      <p class="text-muted mb-0">{{ step.desc }}</p>
+    </div>
+  </div>
+
+  {# Conseil pratique #}
+  {% if step.tip %}
+  <div class="alert alert-info d-flex gap-2 mb-4">
+    <i class="bi-lightbulb-fill mt-1"></i>
+    <span>{{ step.tip }}</span>
+  </div>
+  {% endif %}
+
+  {# Cas / Algorithmes #}
+  {% if cases %}
+  <div class="row g-4">
+    {% for case in cases %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body text-center">
+
+          {# Cube animé #}
+          {% include "francontcube/puzzles/_twisty_player.html" with case=case animated=True size="180px" %}
+
+          <h5 class="card-title mt-3 mb-1">{{ case.name }}</h5>
+
+          {% if case.description %}
+          <p class="text-muted small mb-2">{{ case.description }}</p>
+          {% endif %}
+
+          {# Algorithme #}
+          {% if case.algorithm %}
+          <code class="d-block bg-light rounded px-2 py-1 small">
+            {{ case.algorithm }}
+          </code>
+          {% endif %}
+
+          {# Conseil spécifique au cas #}
+          {% if case.tip %}
+          <p class="text-info small mt-2 mb-0">
+            <i class="bi-lightbulb"></i> {{ case.tip }}
+          </p>
+          {% endif %}
+
+        </div>
+
+        {# Badge difficulté #}
+        {% if case.difficulty %}
+        <div class="card-footer text-end">
+          <span class="badge
+            {% if case.difficulty == 'facile' %}bg-success
+            {% elif case.difficulty == 'moyen' %}bg-warning text-dark
+            {% else %}bg-danger{% endif %}">
+            {{ case.get_difficulty_display }}
+          </span>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  {# Aucun cas en BD — placeholder pendant la construction #}
+  <div class="alert alert-secondary text-center py-5">
+    <i class="bi-hourglass-split fs-1 d-block mb-2"></i>
+    <strong>Contenu à venir</strong>
+    <p class="mb-0 text-muted">Les algorithmes pour cette étape seront ajoutés prochainement.</p>
+  </div>
+  {% endif %}
+
+  {# Navigation précédent / suivant #}
+  <div class="d-flex justify-content-between mt-5">
+    {% if prev_step %}
+    <a href="{% url puzzle_type|add:'_step' prev_step.slug %}"
+       class="btn btn-outline-secondary">
+      <i class="bi-arrow-left"></i> {{ prev_step.name }}
+    </a>
+    {% else %}
+    <div></div>
+    {% endif %}
+
+    {% if next_step %}
+    <a href="{% url puzzle_type|add:'_step' next_step.slug %}"
+       class="btn btn-primary">
+      {{ next_step.name }} <i class="bi-arrow-right"></i>
+    </a>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{# templates/francontcube/puzzles/_twisty_player.html #}
+{#                                                      #}
+{# Paramètres attendus dans le contexte :              #}
+{#   case        — objet PuzzleCase                    #}
+{#   animated    — True/False (défaut: True)           #}
+{#   size        — ex: "200px" (défaut: "180px")       #}
+
+{% with size=size|default:"180px" %}
+<twisty-player
+  puzzle="{{ case.puzzle_type }}x{{ case.puzzle_type }}"
+  alg="{{ case.algorithm }}"
+  experimental-setup-alg="{{ case.get_setup_alg }}"
+  stickering="{{ case.stickering|default:'full' }}"
+  visualization="3D"
+  background="none"
+  {% if animated != False %}
+  control-panel="bottom-row"
+  {% else %}
+  control-panel="none"
+  hint-facelets="none"
+  {% endif %}
+  camera-longitude="{{ case.camera_longitude|default:'-25' }}"
+  camera-latitude="{{ case.camera_latitude|default:'22' }}"
+  style="width:{{ size }};height:{{ size }};">
+</twisty-player>
+{% endwith %}

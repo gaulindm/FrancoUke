@@ -51,3 +51,43 @@ class CubeStateAdmin(admin.ModelAdmin):
         )
 
     duplicate_cube_states.short_description = "Duplicate selected cube states"
+
+# cube/admin.py  — ajouter ces classes sous l'admin existant de CubeState
+
+from django.contrib import admin
+from .models import PuzzleCase
+
+
+@admin.register(PuzzleCase)
+class PuzzleCaseAdmin(admin.ModelAdmin):
+
+    # ── Liste ──────────────────────────────────────────────────────────────
+    list_display  = ('puzzle_type', 'method', 'category', 'step_number', 'name', 'difficulty', 'slug')
+    list_filter   = ('puzzle_type', 'method', 'category', 'difficulty')
+    search_fields = ('name', 'slug', 'algorithm', 'description')
+    ordering      = ('puzzle_type', 'method', 'category', 'step_number')
+
+    # ── Formulaire ─────────────────────────────────────────────────────────
+    prepopulated_fields = {'slug': ('name',)}
+
+    fieldsets = (
+        ('Identification', {
+            'fields': ('puzzle_type', 'method', 'category', 'step_number', 'name', 'slug', 'difficulty')
+        }),
+        ('Contenu', {
+            'fields': ('algorithm', 'setup', 'description', 'tip')
+        }),
+        ('cubing.js', {
+            'fields': ('stickering', 'camera_longitude', 'camera_latitude'),
+            'classes': ('collapse',),   # réduit par défaut — rarement modifié
+        }),
+    )
+
+    # ── Readonly ───────────────────────────────────────────────────────────
+    readonly_fields = ('slug',)   # généré automatiquement au save
+
+    def get_readonly_fields(self, request, obj=None):
+        """Slug readonly seulement après création."""
+        if obj:  # modification d'un objet existant
+            return ('slug',)
+        return ()  # création : slug est pré-rempli mais modifiable
