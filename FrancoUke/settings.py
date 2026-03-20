@@ -54,13 +54,8 @@ INSTALLED_APPS = [
     "rest_framework",
     'public',
     'assets',
-    'francontcube',
-    'training',
-    'cube',
-    'cube_prep',
     'teleprompter',
     'setlists',
-    'cubing_users',
 ]
 
 SITE_ID = 1
@@ -74,7 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'cubing_users.middleware.CuberSessionMiddleware',
+  #  'g_users.middleware.CuberSessionMiddleware',
 
 ]
 

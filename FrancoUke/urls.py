@@ -35,14 +35,14 @@ urlpatterns = [
     path("contact/", public_views.contact, name="contact"),
 
    #nouvel application pour le cube mosaic
-    path('cube_prep/', include('cube_prep.urls')),  # 👈 new line
+    #path('cube_prep/', include('cube_prep.urls')),  # 👈 new line
 
     #nouvel application pour le site francontcube
-    path("francontcube/", include("francontcube.urls")),
-    path('training/', include('training.urls')),   # ← Ajouter ici
+    #path("francontcube/", include("francontcube.urls")),
+    #path('training/', include('training.urls')),   # ← Ajouter ici
 
-    path('cube/', include('cube.urls')),  # ← Ajouter cette ligne
-    path('cuber/', include('cubing_users.urls')),
+    #path('cube/', include('cube.urls')),  # ← Ajouter cette ligne
+    #path('cuber/', include('cubing_users.urls')),
 
 
 ]
