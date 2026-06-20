@@ -10,8 +10,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('board', '0019_remove_boardmessage_equipment_status_and_more'),
-        ('songbook', '0005_alter_song_options_remove_song_setlist_order'),
+        ('board', '0018_remove_boardmessage_equipment_status_and_more'),
+        ('songbook', '0004_alter_song_options_remove_song_setlist_order'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

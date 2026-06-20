@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('board', '0023_alter_rehearsaldetails_options'),
+        ('board', '0022_alter_rehearsaldetails_options'),
         ('setlists', '0004_remove_setlistsong_scroll_speed'),
     ]
 
