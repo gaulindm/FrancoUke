@@ -121,8 +121,8 @@ def get_paragraph_styles(formatting):
                 else "Helvetica"
             ),
             leading=config.get("line_spacing", 1.2) * config.get("font_size", 13),
-            spaceBefore=config.get("spacing_before", 12),
-            spaceAfter=config.get("spacing_after", 12),
+            spaceBefore=config.get("spaceBefore", 12),
+            spaceAfter=config.get("spaceAfter", 12),
             alignment={
                 "left": TA_LEFT,
                 "center": TA_CENTER,
