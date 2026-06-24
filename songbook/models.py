@@ -21,6 +21,8 @@ from taggit.managers import TaggableManager
 from django.conf import settings
 from .parsers import parse_song_data
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
+from songbook.utils.transposer import extract_chords
+
 
 
 class Song(models.Model):
@@ -72,6 +74,13 @@ class Song(models.Model):
         help_text="Original song if this is a personalized copy."
     )
 
+    # Replace the JSONField with TextField
+    chords_used = models.TextField(
+        blank=True,
+        default="",
+        help_text="Comma-separated list of unique chords used in this song"
+    )
+
     def save(self, *args, **kwargs):
         if self.pk:
             old_song = Song.objects.get(pk=self.pk)
@@ -84,15 +93,18 @@ class Song(models.Model):
             else:
                 _, self.metadata = self.parse_metadata_from_chordpro()
             self.lyrics_with_chords = parse_song_data(self.songChordPro)
+            # 🆕 Populate chords_used
+            self.chords_used = ",".join(extract_chords(self.lyrics_with_chords, unique=True))
         else:
             self.metadata = {}
             self.lyrics_with_chords = []
+            self.chords_used = []  # 🆕
+
         if self.lyrics_with_chords and self.metadata.get("suggested_alternate"):
             suggested = self.metadata["suggested_alternate"]
             for chord_dict in self.lyrics_with_chords:
                 if isinstance(chord_dict, dict):
                     chord_dict["suggested_alternate"] = suggested
-
 
         super().save(*args, **kwargs)
 

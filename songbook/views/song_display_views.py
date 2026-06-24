@@ -162,18 +162,19 @@ class SongListView(SiteContextMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
+        chord_filter = self.request.GET.get("chords", "").strip()
+        print(f"DEBUG chord_filter: '{chord_filter}'")
+
         qs = super().get_queryset()
         site_name = self.get_site_name()
         qs = qs.filter(site_name=site_name)
 
-        # 🆕 Privacy filter
+        # Privacy filter
         if self.request.user.is_authenticated:
-            # Show: public songs + user's own songs (public or private)
             qs = qs.filter(
                 Q(is_public=True) | Q(contributor=self.request.user)
             )
         else:
-            # Anonymous users: only public songs
             qs = qs.filter(is_public=True)
 
         # Existing filters
@@ -197,7 +198,20 @@ class SongListView(SiteContextMixin, ListView):
         if artist_name:
             qs = qs.filter(metadata__artist__iexact=artist_name)
 
-        return qs.distinct()  # 🆕 Important: avoid duplicates from Q objects
+        # Chord filter — show only songs playable with the selected chords
+        if chord_filter:
+            requested_chords = {c.strip().lower() for c in chord_filter.split(",") if c.strip()}
+            
+            matching_pks = []
+            for pk, chords_used in qs.values_list("pk", "chords_used"):
+                if chords_used:
+                    song_chords = {c.strip().lower() for c in chords_used.split(",")}
+                    if song_chords.issubset(requested_chords):
+                        matching_pks.append(pk)
+            
+            qs = qs.filter(pk__in=matching_pks)
+
+        return qs.distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -206,36 +220,41 @@ class SongListView(SiteContextMixin, ListView):
         context["selected_artist"] = self.kwargs.get("artist_name")
         context["search_query"] = self.request.GET.get("q", "")
         context["selected_tag"] = self.request.GET.get("tag", "")
+        context["show_formatted"] = self.request.GET.get("formatted") == "1"
+        # 🆕
+        context["chord_filter"] = self.request.GET.get("chords", "")
 
-        # Tags available for that site (only from public songs for consistency)
+        # Tags
         if self.request.user.is_authenticated:
-            site_songs = Song.objects.filter(
-                site_name=site_name
-            ).filter(
+            site_songs = Song.objects.filter(site_name=site_name).filter(
                 Q(is_public=True) | Q(contributor=self.request.user)
             )
         else:
             site_songs = Song.objects.filter(site_name=site_name, is_public=True)
-            
+
         all_tags = Tag.objects.filter(song__in=site_songs).distinct().values_list("name", flat=True)
         context["all_tags"] = all_tags
 
-        # Precomputed data for list rendering
+        # 🆕 All unique chords across the site for the clickable buttons
+        all_chords = set()
+        for song in site_songs:
+            if song.chords_used:
+                all_chords.update(song.chords_used.split(","))
+        context["all_chords"] = sorted(all_chords)
+
+        # Song data
         song_data = []
         for song in context["songs"]:
             parsed_data = song.lyrics_with_chords or ""
             chords = extract_chords(parsed_data, unique=True) if parsed_data else []
             tags = [tag.name for tag in song.tags.all()]
             is_formatted = SongFormatting.objects.filter(song=song).exists()
-
-            song_data.append(
-                {
-                    "song": song,
-                    "chords": ", ".join(chords),
-                    "tags": ", ".join(tags),
-                    "is_formatted": is_formatted,
-                }
-            )
+            song_data.append({
+                "song": song,
+                "chords": ", ".join(chords),
+                "tags": ", ".join(tags),
+                "is_formatted": is_formatted,
+            })
 
         context["song_data"] = song_data
         return context
