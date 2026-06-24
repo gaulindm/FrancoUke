@@ -35,9 +35,12 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm me-1" 
                         data-bs-toggle="modal" data-bs-target="#chordFilterModal">
                     🎸 {% if site_name == 'FrancoUke' %}Filtrer par accords{% else %}Filter by Chords{% endif %}
-                    {% if chord_filter %}
-                        <span class="badge bg-success ms-1">{{ chord_filter }}</span>
-                    {% endif %}
+                {% if chord_filter %}
+                    <span class="badge bg-success ms-1">
+                        {{ chord_filter }} 
+                        {% if chord_mode == "playable" %}(playable){% else %}(contains){% endif %}
+                    </span>
+                {% endif %}
                 </button>
                 <a href="{% url site_namespace|add:':song_list' %}" class="btn btn-danger btn-sm">
                     {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
@@ -216,33 +219,35 @@
 
 <!-- 🔄 Pagination -->
 {% if is_paginated %}
+    {% with base_query="q="|add:search_query|add:"&tag="|add:selected_tag|add:"&chords="|add:chord_filter|add:"&chord_mode="|add:chord_mode %}
     <div class="pagination d-flex gap-2 mb-0">
         {% if page_obj.has_previous %}
             <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page=1&q={{ search_query }}&tag={{ selected_tag }}{% if request.GET.formatted %}&formatted=1{% endif %}">First</a>
+               href="?page=1&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">First</a>
             <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&tag={{ selected_tag }}{% if request.GET.formatted %}&formatted=1{% endif %}">Previous</a>
+               href="?page={{ page_obj.previous_page_number }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Previous</a>
         {% endif %}
 
         {% for num in page_obj.paginator.page_range %}
             {% if num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
                 {% if page_obj.number == num %}
                     <a class="btn {% if site_name == 'FrancoUke' %}btn-success{% else %}btn-primary{% endif %}" 
-                       href="?page={{ num }}&q={{ search_query }}&tag={{ selected_tag }}{% if request.GET.formatted %}&formatted=1{% endif %}">{{ num }}</a>
+                       href="?page={{ num }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">{{ num }}</a>
                 {% else %}
                     <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-                       href="?page={{ num }}&q={{ search_query }}&tag={{ selected_tag }}{% if request.GET.formatted %}&formatted=1{% endif %}">{{ num }}</a>
+                       href="?page={{ num }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">{{ num }}</a>
                 {% endif %}
             {% endif %}
         {% endfor %}
 
         {% if page_obj.has_next %}
             <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&tag={{ selected_tag }}{% if request.GET.formatted %}&formatted=1{% endif %}">Next</a>
+               href="?page={{ page_obj.next_page_number }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Next</a>
             <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page={{ page_obj.paginator.num_pages }}&q={{ search_query }}&tag={{ selected_tag }}{% if request.GET.formatted %}&formatted=1{% endif %}">Last</a>
+               href="?page={{ page_obj.paginator.num_pages }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Last</a>
         {% endif %}
     </div>
+    {% endwith %}
 {% endif %}
 <!-- 🎸 Chord Filter Modal -->
 <div class="modal fade" id="chordFilterModal" tabindex="-1" 
@@ -263,7 +268,38 @@
                         Select chords — only songs containing ALL selected chords will be shown.
                     {% endif %}
                 </p>
-
+                <!-- Toggle -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        {% if site_name == 'FrancoUke' %}Mode de filtre{% else %}Filter Mode{% endif %}
+                    </label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="chordMode" 
+                                id="modePlayable" value="playable"
+                                {% if chord_mode != "contains" %}checked{% endif %}>
+                            <label class="form-check-label" for="modePlayable">
+                                {% if site_name == 'FrancoUke' %}
+                                    Chansons jouables avec ces accords seulement
+                                {% else %}
+                                    Songs playable with ONLY these chords
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="chordMode" 
+                                id="modeContains" value="contains"
+                                {% if chord_mode == "contains" %}checked{% endif %}>
+                            <label class="form-check-label" for="modeContains">
+                                {% if site_name == 'FrancoUke' %}
+                                    Chansons contenant TOUS ces accords
+                                {% else %}
+                                    Songs containing ALL selected chords
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 <!-- Text input -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">
@@ -395,14 +431,16 @@
 
     // Apply button — redirect with chords param
     document.getElementById("applyChordFilter").addEventListener("click", function () {
-        const chords = [...selectedChords].join(",");
-        const params = new URLSearchParams({
-            q: "{{ search_query }}",
-            tag: "{{ selected_tag }}",
-            chords: chords,
-            {% if show_formatted %}formatted: "1",{% endif %}
-        });
-        window.location.href = "?" + params.toString();
+    const chords = [...selectedChords].join(",");
+    const mode = document.querySelector('input[name="chordMode"]:checked').value;
+    const params = new URLSearchParams({
+        q: "{{ search_query }}",
+        tag: "{{ selected_tag }}",
+        chords: chords,
+        chord_mode: mode,
+        {% if show_formatted %}formatted: "1",{% endif %}
     });
+    window.location.href = "?" + params.toString();
+});
 </script>
 {% endblock content %}

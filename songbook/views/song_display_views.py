@@ -5,6 +5,7 @@ from django.views.generic import TemplateView, ListView, DetailView
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from types import SimpleNamespace
+import re
 
 from songbook.mixins import SiteContextMixin
 from songbook.context_processors import site_context
@@ -37,6 +38,13 @@ class LandingView(TemplateView):
 # -------------------------------------------------------------
 # List of Songs by a User
 # -------------------------------------------------------------
+def is_valid_chord(chord):
+        """Only accept strings that look like real chord names."""
+        chord = chord.strip()
+        pattern = r'^[A-G][#b]?(m|M|maj|min|dim|aug|sus|add|o)?\d*(\(.*?\))?(/[A-G][#b]?)?$'
+        return bool(re.match(pattern, chord))
+
+
 class UserSongListView(SiteContextMixin, ListView):
     """
     Display all songs contributed by a specific user, filtered by site.
@@ -198,20 +206,35 @@ class SongListView(SiteContextMixin, ListView):
         if artist_name:
             qs = qs.filter(metadata__artist__iexact=artist_name)
 
-        # Chord filter — show only songs playable with the selected chords
+        chord_filter = self.request.GET.get("chords", "").strip()
+        chord_mode = self.request.GET.get("chord_mode", "playable")  # 🆕 move this outside
+
         if chord_filter:
             requested_chords = {c.strip().lower() for c in chord_filter.split(",") if c.strip()}
-            
-            matching_pks = []
-            for pk, chords_used in qs.values_list("pk", "chords_used"):
-                if chords_used:
-                    song_chords = {c.strip().lower() for c in chords_used.split(",")}
-                    if song_chords.issubset(requested_chords):
-                        matching_pks.append(pk)
-            
-            qs = qs.filter(pk__in=matching_pks)
+
+            if chord_mode == "playable":
+                matching_pks = []
+                for pk, chords_used in qs.values_list("pk", "chords_used"):
+                    if chords_used:
+                        song_chords = {c.strip().lower() for c in chords_used.split(",")}
+                        if song_chords.issubset(requested_chords):
+                            matching_pks.append(pk)
+                qs = qs.filter(pk__in=matching_pks)
+
+            else:  # contains
+                matching_pks = []
+                for pk, chords_used in qs.values_list("pk", "chords_used"):
+                    if chords_used:
+                        song_chords = {c.strip().lower() for c in chords_used.split(",")}
+                        if requested_chords.issubset(song_chords):
+                            matching_pks.append(pk)
+                qs = qs.filter(pk__in=matching_pks)
+
+
 
         return qs.distinct()
+    
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -236,11 +259,17 @@ class SongListView(SiteContextMixin, ListView):
         context["all_tags"] = all_tags
 
         # 🆕 All unique chords across the site for the clickable buttons
+        # In get_context_data():
         all_chords = set()
         for song in site_songs:
             if song.chords_used:
-                all_chords.update(song.chords_used.split(","))
+                for chord in song.chords_used.split(","):
+                    chord = chord.strip()
+                    if is_valid_chord(chord):
+                        all_chords.add(chord)
         context["all_chords"] = sorted(all_chords)
+        context["chord_filter"] = self.request.GET.get("chords", "")
+        context["chord_mode"] = self.request.GET.get("chord_mode", "playable")
 
         # Song data
         song_data = []
