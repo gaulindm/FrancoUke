@@ -454,6 +454,17 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.styles import getSampleStyleSheet
 
+    # Build a PDF title from the song(s) being included, so that the browser's
+    # built-in "Save"/"Save to Drive" buttons use a sensible filename instead
+    # of falling back to a generic default.
+    if songs:
+        if len(songs) == 1:
+            pdf_title = songs[0].songTitle or "Untitled Song"
+        else:
+            pdf_title = f"{songs[0].songTitle} and {len(songs) - 1} more" if songs[0].songTitle else "Songbook"
+    else:
+        pdf_title = "Songbook"
+
     # Prepare PDF document
     doc = SimpleDocTemplate(
         response,
@@ -461,7 +472,8 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
         topMargin=2,
         bottomMargin=80,
         leftMargin=20,
-        rightMargin=20
+        rightMargin=20,
+        title=pdf_title,
     )
     styles = getSampleStyleSheet()
     elements = []

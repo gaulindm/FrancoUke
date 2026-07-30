@@ -33,5 +33,15 @@
             debugEl.innerText = pdfEl.src;
         }
         console.log("PDF preview iframe source:", pdfEl.src);
+
+        // Override the page title with the song's name. Some browser
+        // extensions (e.g. "Save to Google Drive") read the outer page's
+        // <title> rather than the embedded PDF's own metadata when the PDF
+        // is shown inside an iframe, so without this they fall back to the
+        // site's default title instead of the song name.
+        const songTitle = "{{ chord_sheet.songTitle|default:"Song"|escapejs }}";
+        if (songTitle) {
+            document.title = songTitle;
+        }
     </script>
 {% endblock %}
