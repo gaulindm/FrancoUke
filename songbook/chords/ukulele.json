@@ -134,6 +134,9 @@
     {"positions":[5,5,5,3],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":5}}]},
 {"name":"Daug","variations":[
     {"positions":[2,1,1,0],"baseFret":1}]},
+{"name":"Ddim","variations":[
+        {"positions":[1,2,1,-1],"baseFret":1}]},
+    
 {"name":"Ddim7","variations":[
     {"positions":[1,2,1,2],"baseFret":1}]},
 {"name":"D7","variations":[
@@ -200,9 +203,6 @@
 {"name":"Dsus4","variations":[
     {"positions":[0,2,3,0],"baseFret":1},
     {"positions":[3,2,3,0],"baseFret":1}]},
-{"name":"Ddim7","variations":[
-    {"positions":[1,2,1,2],"baseFret":1},
-    {"positions":[3,4,3,4],"baseFret":1}]},
 {"name":"Daug","variations":[
     {"positions":[3,2,2,1],"baseFret":1,"barre":{"fromString":2,"toString":3,"fret":2}},
     {"positions":[2,2,2,3],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":2}}]},
@@ -233,6 +233,8 @@
     {"positions":[3,3,2,1],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":3}}]},
 {"name":"Ebaug","variations":[
     {"positions":[0,3,3,2],"baseFret":1}]},
+{"name":"Ebdim","variations":[
+        {"positions":[2,3,2,-1],"baseFret":1}]},
 {"name":"Ebdim7","variations":[
     {"positions":[2,3,2,3],"baseFret":1}]},
 {"name":"Eb7","variations":[
@@ -304,6 +306,8 @@
 {"name":"Esus4","variations":[
     {"positions":[2,4,5,2],"baseFret":1},
     {"positions":[5,4,5,2],"baseFret":1}]},
+{"name":"Edim","variations":[
+        {"positions":[0,4,0,1],"baseFret":1}]},    
 {"name":"Edim7","variations":[
     {"positions":[0,1,0,1],"baseFret":1},
     {"positions":[6,7,6,7],"baseFret":6}]},
@@ -355,6 +359,8 @@
 {"name":"Fsus4","variations":[
     {"positions":[3,0,1,1],"baseFret":1,"barre":{"fromString":3,"toString":4,"fret":1}},
     {"positions":[0,0,1,3],"baseFret":1}]},
+{"name":"Fdim","variations":[
+        {"positions":[1,-1,1,2],"baseFret":1}]},    
 {"name":"Fdim7","variations":[
     {"positions":[1,2,1,2],"baseFret":1},
     {"positions":[4,5,4,5],"baseFret":4}]},
@@ -403,9 +409,10 @@
 {"name":"F#sus4","variations":[
     {"positions":[1,1,2,4],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":1}},
     {"positions":[4,4,2,1],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":4}}]},
+{"name":"F#dim","variations":[
+        {"positions":[-1,4,3,1],"baseFret":1}]},    
 {"name":"F#dim7","variations":[
-    {"positions":[1,2,1,2],"baseFret":1},
-    {"positions":[3,4,3,4],"baseFret":1}]},
+            {"positions":[2,3,2,3],"baseFret":1}]},  
 {"name":"F#aug","variations":[
     {"positions":[3,2,2,1],"baseFret":1,"barre":{"fromString":2,"toString":3,"fret":2}},
     {"positions":[4,4,1,2],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":4}}]},
@@ -452,6 +459,8 @@
 {"name":"Gsus4","variations":[
     {"positions":[0,2,3,3],"baseFret":1,"barre":{"fromString":3,"toString":4,"fret":3}},
     {"positions":[3,3,3,0],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":3}}]},
+{"name":"Gdim","variations":[
+        {"positions":[0,1,3,1],"baseFret":1}]},
 {"name":"Gdim7","variations":[
     {"positions":[0,1,0,1],"baseFret":1},
     {"positions":[6,7,6,7],"baseFret":6}]},
@@ -500,6 +509,9 @@
 {"name":"Absus4","variations":[
     {"positions":[3,4,5,1],"baseFret":1},
     {"positions":[6,5,5,1],"baseFret":1,"barre":{"fromString":2,"toString":3,"fret":5}}]},
+{"name":"Abdim","variations":[
+        {"positions":[1,2,-1,3],"baseFret":1}]},
+
 {"name":"Abdim7","variations":[
     {"positions":[1,2,1,2],"baseFret":1},
     {"positions":[4,5,4,5],"baseFret":4}]},
@@ -547,6 +559,8 @@
 {"name":"Asus4","variations":[
     {"positions":[2,2,3,0],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":2}},
     {"positions":[0,0,3,0],"baseFret":1}]},
+{"name":"Adim","variations":[
+        {"positions":[2,3,5,3],"baseFret":1}]},    
 {"name":"Adim7","variations":[
     {"positions":[2,3,2,3],"baseFret":1},
     {"positions":[5,6,5,6],"baseFret":5}]},
@@ -594,6 +608,9 @@
 {"name":"Bbsus4","variations":[
     {"positions":[1,1,3,3],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":1}},
     {"positions":[3,3,3,1],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":3}}]},
+{"name":"Bbdim","variations":[
+        {"positions":[3,1,0,1],"baseFret":1}]},
+
 {"name":"Bbdim7","variations":[
     {"positions":[0,1,0,1],"baseFret":1},
     {"positions":[6,7,6,7],"baseFret":6}]},
@@ -641,6 +658,9 @@
 {"name":"Bsus4","variations":[
     {"positions":[2,2,4,4],"baseFret":1,"barre":{"fromString":1,"toString":2,"fret":2}},
     {"positions":[4,4,4,2],"baseFret":1,"barre":{"fromString":1,"toString":3,"fret":4}}]},
+{"name":"Bdim","variations":[
+        {"positions":[4,2,1,2],"baseFret":1}]},
+
 {"name":"Bdim7","variations":[
     {"positions":[1,2,1,2],"baseFret":1},
     {"positions":[4,5,4,5],"baseFret":4}]},

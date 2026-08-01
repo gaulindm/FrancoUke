@@ -218,9 +218,9 @@ python manage.py import_songbook_pdf path/to/folder/ --to-db --contributor-id=1 
 - Use `--site-name=StrumSphere` or `--site-name=FrancoUke`
 - If omitted, the song will remain hidden (site_name = None)
 
-FOR Pythonanywhere with Gaulinbackup use
+FOR Pythonanywhere with the songs in the to_import folder use
 
-python manage.py import_songbook_pdf path/to/folder/ --to-db --contributor-id=3 --site-name=StrumSphere
+python manage.py import_songbook_pdf to_import/ --to-db --contributor-id=1 --site-name=StrumSphere
 
 
 ------------------------------------------------------------

@@ -43,6 +43,18 @@ def canonicalize_enharmonic(chord_name: str) -> str:
 
     return f"{root_canonical}{rest}"
 
+
+# ------------------------------------------------------------
+# Helper: extract just the root (letter + accidental) from a
+# canonicalized chord name, so we can confirm two chords share
+# the same root before treating them as naming-convention
+# equivalents (e.g. "Cdim" vs "Cdim7").
+# ------------------------------------------------------------
+def extract_root(chord_name: str):
+    m = re.match(r'^([A-G][#b]?)', chord_name)
+    return m.group(1) if m else None
+
+
 # ------------------------------------------------------------
 # Main comparison function
 # ------------------------------------------------------------
@@ -70,10 +82,18 @@ def chord_equivalent(a: str, b: str) -> bool:
     if a_can == b_can:
         return True
 
-    # dim vs dim7
-    if re.match(r'^[A-G][#]?[dD]im$', a_can) and re.match(r'^[A-G][#]?[dD]im7$', b_can):
-        return True
-    if re.match(r'^[A-G][#]?[dD]im7$', a_can) and re.match(r'^[A-G][#]?[dD]im$', b_can):
-        return True
+    # dim vs dim7 — only treat these as equivalent when they share
+    # the same root. Diminished chords are conventionally written
+    # either way ("Cdim" == "Cdim7"), but without this root check
+    # ANY bare "dim" chord would match ANY "dim7" chord regardless
+    # of root, collapsing all diminished-7th chords together.
+    a_root = extract_root(a_can)
+    b_root = extract_root(b_can)
+
+    if a_root and b_root and a_root == b_root:
+        if re.match(r'^[A-G][#]?[dD]im$', a_can) and re.match(r'^[A-G][#]?[dD]im7$', b_can):
+            return True
+        if re.match(r'^[A-G][#]?[dD]im7$', a_can) and re.match(r'^[A-G][#]?[dD]im$', b_can):
+            return True
 
     return a_can == b_can

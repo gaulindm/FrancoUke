@@ -19,7 +19,7 @@ ROOTS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 
 CHORD_TABS = {
     "triads": ["", "m", "aug", "dim"],
-    "sevenths": ["7", "m7", "M7", "aug7", "m7b5", "mMaj7"],
+    "sevenths": ["7", "m7", "M7","dim7", "aug7", "m7b5", "mMaj7"],
     "suspended": ["sus2", "sus4", "7sus2", "7sus4"],
     "extended": ["9", "m9", "M9", "11", "m11", "13", "m13"],
     "added": ["5", "6", "m6", "add9", "madd9"],
