@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 from types import SimpleNamespace
 import re
+import string
 
 from songbook.mixins import SiteContextMixin
 from songbook.context_processors import site_context
@@ -206,6 +207,15 @@ class SongListView(SiteContextMixin, ListView):
         if artist_name:
             qs = qs.filter(metadata__artist__iexact=artist_name)
 
+        # 🆕 Filter by starting letter (A-Z) or number/symbol ("#")
+        letter_filter = self.request.GET.get("letter", "").strip().upper()
+        if letter_filter:
+            if letter_filter == "#":
+                # Titles that DON'T start with a letter (numbers, symbols, etc.)
+                qs = qs.exclude(songTitle__iregex=r"^[A-Za-z]")
+            else:
+                qs = qs.filter(songTitle__istartswith=letter_filter)
+
         chord_filter = self.request.GET.get("chords", "").strip()
         chord_mode = self.request.GET.get("chord_mode", "playable")  # 🆕 move this outside
 
@@ -247,6 +257,10 @@ class SongListView(SiteContextMixin, ListView):
         # 🆕
         context["chord_filter"] = self.request.GET.get("chords", "")
 
+        # 🆕 Alphabet filter (A-Z + # for numbers/symbols)
+        context["alphabet_filter"] = list(string.ascii_uppercase) + ["#"]
+        context["selected_letter"] = self.request.GET.get("letter", "").strip().upper()
+
         # Tags
         if self.request.user.is_authenticated:
             site_songs = Song.objects.filter(site_name=site_name).filter(
@@ -276,6 +290,7 @@ class SongListView(SiteContextMixin, ListView):
         for song in context["songs"]:
             parsed_data = song.lyrics_with_chords or ""
             chords = extract_chords(parsed_data, unique=True) if parsed_data else []
+            chords = [c for c in chords if is_valid_chord(c)]  # 🆕 drop N.C. and other non-chord tokens
             tags = [tag.name for tag in song.tags.all()]
             is_formatted = SongFormatting.objects.filter(song=song).exists()
             song_data.append({

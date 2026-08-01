@@ -68,6 +68,25 @@
                 {% endif %}
             </div>
         </div>
+
+        <!-- 🔤 Alphabet Filter -->
+        <div class="row mt-2">
+            <div class="col">
+                <strong>{% if site_name == 'FrancoUke' %}Lettre :{% else %}Letter:{% endif %}</strong>
+                {% for letter in alphabet_filter %}
+                    <a href="?letter={{ letter }}&q={{ search_query }}&tag={{ selected_tag }}&chords={{ chord_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if selected_letter == letter %}active{% endif %}">
+                        {{ letter }}
+                    </a>
+                {% endfor %}
+
+                {% if selected_letter %}
+                    <a href="{% url site_namespace|add:':song_list' %}" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </form>
     
 </div>
