@@ -240,6 +240,31 @@ class SongListView(SiteContextMixin, ListView):
                             matching_pks.append(pk)
                 qs = qs.filter(pk__in=matching_pks)
 
+        # 🆕 Filter by NUMBER of chords used (2, 3, 4, or "5+")
+        chord_count_filter = self.request.GET.get("chord_count", "").strip()
+        if chord_count_filter:
+            matching_pks = []
+            for pk, chords_used in qs.values_list("pk", "chords_used"):
+                # Only count real chords - excludes [N.C.] and any junk tokens
+                valid_chords = {
+                    c.strip() for c in (chords_used or "").split(",")
+                    if is_valid_chord(c.strip())
+                }
+                count = len(valid_chords)
+
+                if chord_count_filter == "5+":
+                    if count >= 5:
+                        matching_pks.append(pk)
+                else:
+                    try:
+                        target = int(chord_count_filter)
+                    except ValueError:
+                        target = None
+                    if target is not None and count == target:
+                        matching_pks.append(pk)
+
+            qs = qs.filter(pk__in=matching_pks)
+
 
 
         return qs.distinct()
@@ -284,6 +309,10 @@ class SongListView(SiteContextMixin, ListView):
         context["all_chords"] = sorted(all_chords)
         context["chord_filter"] = self.request.GET.get("chords", "")
         context["chord_mode"] = self.request.GET.get("chord_mode", "playable")
+
+        # 🆕 Chord-count filter
+        context["chord_count_choices"] = ["2", "3", "4", "5+"]
+        context["chord_count_filter"] = self.request.GET.get("chord_count", "")
 
         # Song data
         song_data = []

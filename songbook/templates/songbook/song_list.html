@@ -87,6 +87,25 @@
                 {% endif %}
             </div>
         </div>
+
+        <!-- 🎸 Number of Chords Filter -->
+        <div class="row mt-2">
+            <div class="col">
+                <strong>{% if site_name == 'FrancoUke' %}Nombre d'accords :{% else %}Number of Chords:{% endif %}</strong>
+                {% for choice in chord_count_choices %}
+                    <a href="?chord_count={{ choice }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if chord_count_filter == choice %}active{% endif %}">
+                        {{ choice }}
+                    </a>
+                {% endfor %}
+
+                {% if chord_count_filter %}
+                    <a href="{% url site_namespace|add:':song_list' %}" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </form>
     
 </div>

@@ -324,6 +324,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             "{soo}": "Outro",
             "{sod}": "Interlude",
             "{sos}": "Centered",
+            "{page}": "PAGEBREAK",
             "{eoi}": None,
             "{eoc}": None,
             "{eov}": None,
@@ -340,6 +341,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             "{soo}": "Outro",
             "{sod}": "Interlude",
             "{sos}": "Centered",
+            "{page}": "PAGEBREAK",
             "{eoi}": None,
             "{eoc}": None,
             "{eov}": None,
@@ -409,7 +411,12 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
 
                 if directive in selected_map:
                     flush_buffer()
-                    section_type = selected_map[directive]
+                    mapped = selected_map[directive]
+                    if mapped == "PAGEBREAK":
+                        elements.append(PageBreak())
+                        section_type = None
+                    else:
+                        section_type = mapped
                     continue
 
             elif "instruction" in item:

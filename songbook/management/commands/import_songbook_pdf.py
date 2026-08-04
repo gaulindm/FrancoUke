@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand, CommandError
 from songbook.models import Song  # adjust app name
 
+ACKNOWLEDGEMENT_TEXT = "Contribution of Heather J. Topps of the North Bay Ukulele Club"
 
 def pdf_to_chordpro_text(pdf_path: Path) -> str:
     """Extract text from PDF and convert into ChordPro string."""
@@ -131,6 +132,7 @@ class Command(BaseCommand):
                         date_posted=timezone.now(),
                         contributor_id=contributor_id,
                         site_name=options["site_name"],  # can be None
+                        acknowledgement=ACKNOWLEDGEMENT_TEXT,
                     )
                     self.stdout.write(
                         self.style.SUCCESS(f"Saved to DB: {song.songTitle}")
