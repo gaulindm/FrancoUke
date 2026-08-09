@@ -1,5 +1,22 @@
 import re
 
+# Internal-use-only marker. Chosen to be something that can never appear in
+# real chord text (chords are letters/digits/#/b/parentheses/slash), so it's
+# safe to smuggle through the existing chord-scanning loop below.
+_OPT_MARKER = "\x00OPT\x00"
+
+# Matches <opt>[ChordName]</opt> (case-insensitive on the tag itself),
+# e.g. <opt>[Em]</opt> or <OPT>[F#m7]</OPT>
+_OPT_CHORD_RE = re.compile(r'<opt>\s*\[(.*?)\]\s*</opt>', re.IGNORECASE)
+
+
+def _mark_optional_chords(line):
+    """Replace <opt>[Chord]</chord> with [Chord<marker>] so the existing
+    bracket scanner picks it up unchanged, but we can detect it was optional
+    once we've extracted the chord name."""
+    return _OPT_CHORD_RE.sub(lambda m: f"[{m.group(1)}{_OPT_MARKER}]", line)
+
+
 def parse_song_data(chordpro_text):
     paragraphs = chordpro_text.strip().split("\n\n")
     result = []
@@ -40,6 +57,11 @@ def parse_song_data(chordpro_text):
                 continue
 
             # 🎯 Lyrics/chords parsing
+            # Pre-process <opt>[Chord]</opt> -> [Chord<marker>] so the
+            # bracket scanner below handles it like any other chord, and we
+            # can flag it as optional once extracted.
+            line = _mark_optional_chords(line)
+
             i = 0
             buffer = ""
             group = []
@@ -48,10 +70,16 @@ def parse_song_data(chordpro_text):
                     end = line.find("]", i)
                     if end != -1:
                         chord = line[i+1:end]
+                        is_optional = chord.endswith(_OPT_MARKER)
+                        if is_optional:
+                            chord = chord[:-len(_OPT_MARKER)]
                         if buffer:
                             group.append({"lyric": buffer})
                             buffer = ""
-                        group.append({"chord": chord, "lyric": ""})
+                        chord_item = {"chord": chord, "lyric": ""}
+                        if is_optional:
+                            chord_item["optional"] = True
+                        group.append(chord_item)
                         i = end + 1
                     else:
                         i += 1

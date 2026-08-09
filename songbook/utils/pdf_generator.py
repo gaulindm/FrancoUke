@@ -73,6 +73,7 @@ def get_user_preferences(user):
 def apply_color_markup(text):
     color_map = {
         'red': 'red',
+        'grey': 'grey',
         'blue': 'blue',
         'green': 'green',
         'yellow': 'gold',
@@ -293,9 +294,16 @@ def get_chord_brackets(style):
     }.get(style, ("[", "]"))
 
 
-def render_chord_html(chord, bracket_style="square", chord_color="black"):
-    """Return a ReportLab-compatible HTML string for a styled chord."""
+def render_chord_html(chord, bracket_style="square", chord_color="black", optional=False):
+    """Return a ReportLab-compatible HTML string for a styled chord.
+
+    Optional chords (e.g. wrapped in <opt>...</opt> in the source lyrics)
+    always render grey, regardless of the user's chosen chord_color, so
+    they read as "can skip this" at a glance.
+    """
     open_b, close_b = get_chord_brackets(bracket_style)
+    if optional:
+        return f'<font color="grey"><i>{open_b}{chord}{close_b}</i></font>'
     return f'<b><font color="{chord_color}">{open_b}{chord}{close_b}</font></b>'
 
 
@@ -427,7 +435,8 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                 chord = item.get("chord", "")
                 lyric = item["lyric"]
                 if chord:
-                    chord_html = render_chord_html(chord, chord_bracket_style, chord_color)
+                    is_optional = item.get("optional", False)
+                    chord_html = render_chord_html(chord, chord_bracket_style, chord_color, optional=is_optional)
                     if lyric and lyric[0].isalpha():
                         # Mid-word chord: no leading space (e.g. ri[Am]sing)
                         line = f"{chord_html}{lyric}"

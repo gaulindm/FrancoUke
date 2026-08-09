@@ -222,7 +222,7 @@ python manage.py import_songbook_pdf path/to/folder/ --to-db --contributor-id=1 
 
 FOR Pythonanywhere with the songs in the to_import folder use
 
-python manage.py import_songbook_pdf to_import/ --to-db --contributor-id=1 --site-name=StrumSphere
+    python manage.py import_songbook_pdf to_import/Y/ --to-db --contributor-id=1 --site-name=StrumSphere
 
 
 ------------------------------------------------------------
