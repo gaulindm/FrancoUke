@@ -265,7 +265,27 @@ class SongListView(SiteContextMixin, ListView):
 
             qs = qs.filter(pk__in=matching_pks)
 
+        # 🆕 Filter by decade (e.g. "1980" means 1980-1989)
+        decade_filter = self.request.GET.get("decade", "").strip()
+        if decade_filter:
+            try:
+                decade_start = int(decade_filter)
+            except ValueError:
+                decade_start = None
 
+            if decade_start is not None:
+                decade_end = decade_start + 9
+                matching_pks = []
+                for pk, metadata in qs.values_list("pk", "metadata"):
+                    year_str = (metadata or {}).get("year")
+                    if year_str:
+                        try:
+                            year = int(year_str)
+                        except (ValueError, TypeError):
+                            continue
+                        if decade_start <= year <= decade_end:
+                            matching_pks.append(pk)
+                qs = qs.filter(pk__in=matching_pks)
 
         return qs.distinct()
     
@@ -313,6 +333,19 @@ class SongListView(SiteContextMixin, ListView):
         # 🆕 Chord-count filter
         context["chord_count_choices"] = ["2", "3", "4", "5+"]
         context["chord_count_filter"] = self.request.GET.get("chord_count", "")
+
+        # 🆕 Decade filter — only offer decades that actually have songs
+        all_decades = set()
+        for song in site_songs:
+            year_str = (song.metadata or {}).get("year")
+            if year_str:
+                try:
+                    year = int(year_str)
+                    all_decades.add((year // 10) * 10)
+                except (ValueError, TypeError):
+                    pass
+        context["all_decades"] = sorted(all_decades)
+        context["decade_filter"] = self.request.GET.get("decade", "")
 
         # Song data
         song_data = []

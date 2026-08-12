@@ -422,6 +422,8 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                     mapped = selected_map[directive]
                     if mapped == "PAGEBREAK":
                         elements.append(PageBreak())
+                        elements.append(Spacer(1, 3 * 14))  # ~3 blank lines at 14pt each
+
                         section_type = None
                     else:
                         section_type = mapped
