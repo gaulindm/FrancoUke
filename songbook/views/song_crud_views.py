@@ -199,6 +199,7 @@ def clone_song(request, song_id):
         lyrics_with_chords=original.lyrics_with_chords,
         metadata=original.metadata,
         scroll_speed=original.scroll_speed,
+        default_strumming_pattern=original.default_strumming_pattern,
     )
     
     # Copy tags

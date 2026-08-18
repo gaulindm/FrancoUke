@@ -32,6 +32,7 @@ def get_user_preferences(user):
         "known_chords": [],
         "chord_bracket_style": "square",
         "chord_color": "black",
+        "show_strumming_pattern": True,
     }
 
     if not user or not user.is_authenticated:
@@ -61,6 +62,7 @@ def get_user_preferences(user):
             "known_chords": getattr(prefs, "known_chords", []),
             "chord_bracket_style": getattr(prefs, "chord_bracket_style", "square"),
             "chord_color": getattr(prefs, "chord_color", "black"),
+            "show_strumming_pattern": getattr(prefs, "show_strumming_pattern", True),
         }
     except Exception:
         return default_prefs
@@ -147,7 +149,8 @@ def get_paragraph_styles(formatting):
 # SONG ELEMENTS
 # =======================
 def build_song_elements(song, styles, styles_dict, site_name,
-                        chord_bracket_style="square", chord_color="black"):
+                        chord_bracket_style="square", chord_color="black",
+                        show_strumming=True):
     elements = []
     metadata = song.metadata or {}
 
@@ -231,13 +234,22 @@ def build_song_elements(song, styles, styles_dict, site_name,
         if value is None:
             metadata[key] = ""
 
+    # --- Strumming pattern (row 0, right) ---
+    strumming_pattern = (getattr(song, 'default_strumming_pattern', '') or '').strip()
+    top_right_html = f"<b>{strumming_pattern}</b>" if (show_strumming and strumming_pattern) else ""
+
+    # --- Row 1, right: short_instruction_1 takes priority; slash-chord note is a fallback ---
+    short_instruction_1 = metadata.get('short_instruction_1', '')
+    slash_note = "(/ = one strum)" if has_slash_chord else ""
+    row1_right_text = short_instruction_1 if short_instruction_1 else slash_note
+
     # --- Header table content ---
     header_data = [
         [
             Paragraph(f"{metadata.get('timeSignature', '')}", first_vocal_note_style),
             Paragraph(f"<b>{song.songTitle or 'Untitled Song'}</b>", styles['Title']),
-            Paragraph("(/ = one strum)", header_instruction_style)
-            if has_slash_chord else Paragraph("", styles['Normal']),
+            Paragraph(top_right_html, header_instruction_style)
+            if top_right_html else Paragraph("", header_instruction_style),
         ],
         [
             Paragraph(
@@ -245,7 +257,8 @@ def build_song_elements(song, styles, styles_dict, site_name,
                 first_vocal_note_style
             ) if metadata.get('1stnote') else Paragraph("", first_vocal_note_style),
             Paragraph(f"{metadata.get('songwriter', '')}", songwriter_style),
-            Paragraph(f"{metadata.get('short_instruction_1', '')}", header_instruction_style),
+            Paragraph(row1_right_text, header_instruction_style)
+            if row1_right_text else Paragraph("", header_instruction_style),
         ],
         [
             Paragraph(
@@ -555,6 +568,7 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             song, styles, styles_dict, site_name,
             chord_bracket_style=user_prefs.get("chord_bracket_style", "square"),
             chord_color=user_prefs.get("chord_color", "black"),
+            show_strumming=user_prefs.get("show_strumming_pattern", True),
         ))
         elements.append(PageBreak())
 

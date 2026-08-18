@@ -24,6 +24,28 @@ from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 from songbook.utils.transposer import extract_chords
 
 
+def normalize_strumming_pattern(raw):
+    """
+    Normalize a strumming pattern into a consistent campfire-friendly format.
+
+    - Uppercases letters (d -> D, u -> U, x -> X)
+    - Collapses any whitespace into a single '-' group separator
+    - Strips anything that isn't D, U, X, '.' (rest), or '-' (group separator)
+    - Collapses repeated dashes and trims leading/trailing dashes
+
+    Examples:
+        "d du udu"   -> "D-DU-UDU"
+        "D--DU-UDU-" -> "D-DU-UDU"
+        "d.du udu!!" -> "D.DU-UDU"
+    """
+    if not raw:
+        return ""
+    pattern = raw.strip().upper()
+    pattern = re.sub(r'\s+', '-', pattern)
+    pattern = re.sub(r'[^DUX.\-]', '', pattern)
+    pattern = re.sub(r'-{2,}', '-', pattern).strip('-')
+    return pattern
+
 
 class Song(models.Model):
     SITE_CHOICES = [
@@ -81,6 +103,19 @@ class Song(models.Model):
         help_text="Comma-separated list of unique chords used in this song"
     )
 
+    # 🆕 Default strumming pattern for the whole song (campfire-simple, one pattern per song).
+    # Section-specific overrides can still be tagged inline in the ChordPro as {x_strumming: ...}.
+    default_strumming_pattern = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+        help_text=(
+            "e.g. D-DU-UDU. Letters: D (down), U (up), X (mute/chuck), "
+            "'.' (rest), '-' (separator between beat-groups). "
+            "Leave blank if the song doesn't use a fixed strum (e.g. fingerpicked)."
+        ),
+    )
+
     def save(self, *args, **kwargs):
         if self.pk:
             old_song = Song.objects.get(pk=self.pk)
@@ -95,16 +130,22 @@ class Song(models.Model):
             self.lyrics_with_chords = parse_song_data(self.songChordPro)
             # 🆕 Populate chords_used
             self.chords_used = ",".join(extract_chords(self.lyrics_with_chords, unique=True))
+            # 🆕 Derive the strumming pattern from the {strumming: ...} tag, same as artist/songwriter
+            strumming_raw = self.metadata.get("strumming") or ""
         else:
             self.metadata = {}
             self.lyrics_with_chords = []
             self.chords_used = []  # 🆕
+            strumming_raw = ""
 
         if self.lyrics_with_chords and self.metadata.get("suggested_alternate"):
             suggested = self.metadata["suggested_alternate"]
             for chord_dict in self.lyrics_with_chords:
                 if isinstance(chord_dict, dict):
                     chord_dict["suggested_alternate"] = suggested
+
+        # 🆕 Normalize the strumming pattern before saving
+        self.default_strumming_pattern = normalize_strumming_pattern(strumming_raw)
 
         super().save(*args, **kwargs)
 
@@ -122,6 +163,8 @@ class Song(models.Model):
             "tempo": re.search(r'{tempo:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
             "timeSignature": re.search(r'{timeSignature:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
             "youtube": re.search(r'{youtube:\s*(https?://[^\s\}]+)}', self.songChordPro, re.IGNORECASE),
+            # 🆕 Default strumming pattern for the whole song, e.g. {strumming: D-DU-UDU}
+            "strumming": re.search(r'{strumming:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             # 🆕 NEW TAGS for header short notes
             "count_in": re.search(r'{count_in:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
             "short_instruction_1": re.search(r'{short_instruction_1:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
@@ -129,6 +172,8 @@ class Song(models.Model):
             # NEW TAG  for alternate chord
             "suggested_alternate": re.search(r'{suggested_alternate:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE
 ),
+            # 🆕 Optional section-specific strumming override, e.g. {x_strumming: D-DU-UDU}
+            "x_strumming": re.search(r'{x_strumming:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
 
         }
         metadata = {tag: match.group(1) if match else None for tag, match in tags.items()}
