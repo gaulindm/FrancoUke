@@ -105,15 +105,21 @@ def extract_used_chords(lyrics_with_chords: Any) -> list[str]:
 # =======================
 def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate=None):
     """
-    Load chords for the primary instrument ONLY, including requested alternates
-    from chordpro syntax such as [C(1)], and optionally showing default alternates
-    based on user preference.
+    Load chords for the primary instrument, and for the secondary instrument
+    (if the user has one set in preferences), including requested alternates
+    from chordpro syntax such as [C(1)], and optionally showing default
+    alternates based on user preference.
 
     Rules:
     - Always include primary variation (v0).
     - If chordpro requests a variation N via [C(N)], ALWAYS include it.
     - If suggested_alternate is specified, ALWAYS include that variation.
     - If user preference for alternates is ON, include v1 unless overridden.
+
+    Each returned chord dict is tagged with an "instrument" key so the PDF
+    footer drawer can group/filter diagrams by instrument. When a secondary
+    instrument is set, chords for both instruments are included in the same
+    flat list (mirroring how load_chords() already tags each entry).
     """
 
     import re
@@ -181,16 +187,57 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
 
         print(f"    - Final variations: {len(result)} variations")
         return result
+
     # ------------------------------------------------------------
-    # Load primary instrument dictionary
+    # Helper: build the relevant-chord entries for ONE instrument
+    # ------------------------------------------------------------
+    def build_chords_for_instrument(instrument, transposed_chords, requested_variations,
+                                     show_alternates, added_keys):
+        chord_defs = load_chords(instrument)
+        for c in chord_defs:
+            c["instrument"] = instrument
+
+        chords_out = []
+
+        for t_chord in transposed_chords:
+            if not t_chord:
+                continue
+
+            # Extract base name again AFTER transposition
+            base, _ = parse_requested_variation(t_chord)
+
+            for chord_def in chord_defs:
+                if chord_equivalent(chord_def.get("name", ""), base):
+                    key = (chord_def.get("name", "").lower(), instrument)
+                    if key in added_keys:
+                        break
+
+                    # Copy and override variations intelligently
+                    chord_copy = dict(chord_def)
+
+                    # Pick the correct variations (forced > user preference > default v0)
+                    chord_copy["variations"] = select_variations(
+                        base,
+                        chord_def.get("variations", []),
+                        show_alternates,
+                        requested_variations
+                    )
+
+                    chord_copy["requested_name"] = base
+                    chord_copy["instrument"] = instrument
+
+                    chords_out.append(chord_copy)
+                    added_keys.add(key)
+                    break
+
+        return chords_out
+
+    # ------------------------------------------------------------
+    # Determine primary + secondary instrument
     # ------------------------------------------------------------
     primary_inst = user_prefs.get("primary_instrument") or "ukulele"
+    secondary_inst = user_prefs.get("secondary_instrument") or None
     show_alternates = user_prefs.get("show_alternate_chords", False)
-
-    chords_primary = load_chords(primary_inst)
-
-    for c in chords_primary:
-        c["instrument"] = primary_inst
 
     # ------------------------------------------------------------
     # Extract raw chords from the song
@@ -199,6 +246,7 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
     
     # 🐛 DEBUG
     print(f"Raw chords extracted: {raw_used}")
+    print(f"Primary instrument: {primary_inst} | Secondary instrument: {secondary_inst}")
 
     # MAP: {base_name -> LIST of forced_variation_indices}
     requested_variations = {}
@@ -250,41 +298,21 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
     print(f"Transposed chords: {transposed_chords}")
 
     # ------------------------------------------------------------
-    # Build final relevant chord list
+    # Build final relevant chord list (primary, then secondary if set)
     # ------------------------------------------------------------
-    relevant_chords = []
     added_keys = set()
 
-    for t_chord in transposed_chords:
-        if not t_chord:
-            continue
+    relevant_chords = build_chords_for_instrument(
+        primary_inst, transposed_chords, requested_variations, show_alternates, added_keys
+    )
 
-        # Extract base name again AFTER transposition
-        base, _ = parse_requested_variation(t_chord)
-
-        for chord_def in chords_primary:
-            if chord_equivalent(chord_def.get("name", ""), base):
-                key = (chord_def.get("name", "").lower(), primary_inst)
-                if key in added_keys:
-                    break
-
-                # Copy and override variations intelligently
-                chord_copy = dict(chord_def)
-
-                # Pick the correct variations (forced > user preference > default v0)
-                chord_copy["variations"] = select_variations(
-                    base,
-                    chord_def.get("variations", []),
-                    show_alternates,
-                    requested_variations
-                )
-
-                chord_copy["requested_name"] = base
-                chord_copy["instrument"] = primary_inst
-
-                relevant_chords.append(chord_copy)
-                added_keys.add(key)
-                break
+    if secondary_inst and secondary_inst != primary_inst:
+        print(f"Building secondary instrument chords for: {secondary_inst}")
+        relevant_chords.extend(
+            build_chords_for_instrument(
+                secondary_inst, transposed_chords, requested_variations, show_alternates, added_keys
+            )
+        )
 
     print(f"Final relevant_chords count: {len(relevant_chords)}")
     print("=" * 60)

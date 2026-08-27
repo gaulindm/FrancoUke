@@ -70,6 +70,31 @@ def transpose_up_1(modeladmin, request, queryset):
         song.save()
     messages.success(request, f"{queryset.count()} song(s) transposed UP 1 semitone.")
 
+# 🆕 Duplicate Action
+@admin.action(description="📋 Duplicate selected songs (as PUBLIC copies)")
+def duplicate_songs(modeladmin, request, queryset):
+    duplicated_count = 0
+    for song in queryset:
+        original_pk = song.pk
+        original_tags = list(song.tags.names())
+
+        song.pk = None
+        song.id = None
+        song._state.adding = True
+
+        song.songTitle = f"{song.songTitle} (Copy)"
+        song.is_public = True
+        song.cloned_from_id = original_pk
+        song.save()
+
+        if original_tags:
+            song.tags.set(*original_tags)
+
+        duplicated_count += 1
+
+    messages.success(request, f"{duplicated_count} song(s) duplicated as PUBLIC copies.")
+
+
 
 @admin.action(description="Transpose songChordPro DOWN 1 semitone")
 def transpose_down_1(modeladmin, request, queryset):
@@ -172,6 +197,7 @@ class SongAdmin(admin.ModelAdmin):
     actions = [
         make_public,             # 🆕 Make public
         make_private,            # 🆕 Make private
+        duplicate_songs,
         transpose_up_1,
         transpose_down_1,
         mark_hidden,

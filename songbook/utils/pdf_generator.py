@@ -12,7 +12,7 @@ from users.models import UserPreference
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from songbook.utils.chords.loader import extract_used_chords, load_relevant_chords
-from songbook.utils.chords.drawer import draw_footer
+from songbook.utils.chords.drawer import draw_footer, compute_footer_min_bottom_margin
 
 
 import json
@@ -26,6 +26,7 @@ import re
 def get_user_preferences(user):
     default_prefs = {
         "primary_instrument": "ukulele",
+        "secondary_instrument": None,
         "is_lefty": False,
         "show_alternate_chords": False,
         "use_known_chord_filter": False,
@@ -56,6 +57,7 @@ def get_user_preferences(user):
 
         return {
             "primary_instrument": prefs.primary_instrument,
+            "secondary_instrument": getattr(prefs, "secondary_instrument", None) or None,
             "is_lefty": lefty_val,
             "show_alternate_chords": getattr(prefs, "is_printing_alternate_chord", False),
             "use_known_chord_filter": getattr(prefs, "use_known_chord_filter", False),
@@ -496,21 +498,15 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     else:
         pdf_title = "Songbook"
 
-    # Prepare PDF document
-    doc = SimpleDocTemplate(
-        response,
-        pagesize=letter,
-        topMargin=2,
-        bottomMargin=80,
-        leftMargin=20,
-        rightMargin=20,
-        title=pdf_title,
-    )
     styles = getSampleStyleSheet()
     elements = []
 
-    # Load user preferences and chords
-    # Load user preferences and chords
+    # Load user preferences and chords. This has to happen BEFORE the
+    # SimpleDocTemplate is created below, because we need to know how tall
+    # the footer's chord diagrams will be (one row vs. two, one instrument
+    # vs. two side-by-side columns) in order to size bottomMargin correctly.
+    # bottomMargin can't be adjusted after the doc starts laying out
+    # flowables, so getting this order right matters.
     user_prefs = get_user_preferences(user)
 
     # Get suggested_alternate from first song's metadata
@@ -556,6 +552,31 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
         chord_spacing = 36
     row_spacing = 70
 
+    # Now that we know how many chord rows the footer will need (accounting
+    # for one instrument or two side-by-side columns), size the page's
+    # bottom margin to fit — otherwise a 2-row footer paints over lyrics
+    # that were laid out assuming the old fixed 80pt margin.
+    bottom_margin = compute_footer_min_bottom_margin(
+        relevant_chords,
+        instrument=user_prefs["primary_instrument"],
+        secondary_instrument=user_prefs.get("secondary_instrument"),
+        chord_spacing=chord_spacing,
+        row_spacing=row_spacing,
+        page_width=letter[0],
+        is_printing_alternate_chord=bool(user_prefs.get("show_alternate_chords", False)),
+    )
+
+    # Prepare PDF document
+    doc = SimpleDocTemplate(
+        response,
+        pagesize=letter,
+        topMargin=2,
+        bottomMargin=bottom_margin,
+        leftMargin=20,
+        rightMargin=20,
+        title=pdf_title,
+    )
+
     # Load formatting
     formatting = formatting or SongFormatting.objects.filter(user=user, song=songs[0]).first()
     if not formatting:
@@ -572,6 +593,12 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
         ))
         elements.append(PageBreak())
 
+    # Format the revision date once, if the song has one. Kept as a plain
+    # string here (rather than passing the raw date into draw_footer) so
+    # drawer.py stays free of date-formatting concerns.
+    revised_on = getattr(songs[0], "revised_on", None)
+    revision_date = revised_on.strftime("%b %d, %Y") if revised_on else ""
+
     # Build PDF with footer
     doc.build(
         elements,
@@ -582,9 +609,10 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             row_spacing=row_spacing,
             is_lefty=user_prefs.get("is_lefty", False),
             instrument=user_prefs["primary_instrument"],
-            secondary_instrument=None,
+            secondary_instrument=user_prefs.get("secondary_instrument"),
             is_printing_alternate_chord=bool(user_prefs.get("show_alternate_chords", False)),
-            acknowledgement=getattr(songs[0], "acknowledgement", "")
+            acknowledgement=getattr(songs[0], "acknowledgement", ""),
+            revision_date=revision_date,
         ),
         onLaterPages=lambda c, d: draw_footer(
             c, d,
@@ -593,8 +621,9 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             row_spacing=row_spacing,
             is_lefty=user_prefs.get("is_lefty", False),
             instrument=user_prefs["primary_instrument"],
-            secondary_instrument=None,
+            secondary_instrument=user_prefs.get("secondary_instrument"),
             is_printing_alternate_chord=bool(user_prefs.get("show_alternate_chords", False)),
-            acknowledgement=getattr(songs[0], "acknowledgement", "")
+            acknowledgement=getattr(songs[0], "acknowledgement", ""),
+            revision_date=revision_date,
         )
     )
