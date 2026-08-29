@@ -240,7 +240,7 @@ class SongListView(SiteContextMixin, ListView):
                             matching_pks.append(pk)
                 qs = qs.filter(pk__in=matching_pks)
 
-        # 🆕 Filter by NUMBER of chords used (2, 3, 4, or "5+")
+        # 🆕 Filter by NUMBER of chords used (2, 3, 4, 5, or "gt5" meaning >5)
         chord_count_filter = self.request.GET.get("chord_count", "").strip()
         if chord_count_filter:
             matching_pks = []
@@ -252,8 +252,8 @@ class SongListView(SiteContextMixin, ListView):
                 }
                 count = len(valid_chords)
 
-                if chord_count_filter == "5+":
-                    if count >= 5:
+                if chord_count_filter == "gt5":
+                    if count > 5:
                         matching_pks.append(pk)
                 else:
                     try:
@@ -286,6 +286,17 @@ class SongListView(SiteContextMixin, ListView):
                         if decade_start <= year <= decade_end:
                             matching_pks.append(pk)
                 qs = qs.filter(pk__in=matching_pks)
+
+        # 🆕 Filter by musical key (manual {key:} tag if set, else auto-detected)
+        key_filter = self.request.GET.get("key", "").strip()
+        if key_filter:
+            matching_pks = []
+            for pk, metadata, detected_key in qs.values_list("pk", "metadata", "detected_key"):
+                manual_key = (metadata or {}).get("key")
+                effective_key = manual_key if manual_key else detected_key
+                if effective_key == key_filter:
+                    matching_pks.append(pk)
+            qs = qs.filter(pk__in=matching_pks)
 
         return qs.distinct()
     
@@ -331,7 +342,13 @@ class SongListView(SiteContextMixin, ListView):
         context["chord_mode"] = self.request.GET.get("chord_mode", "playable")
 
         # 🆕 Chord-count filter
-        context["chord_count_choices"] = ["2", "3", "4", "5+"]
+        context["chord_count_choices"] = [
+            {"value": "2", "label": "2"},
+            {"value": "3", "label": "3"},
+            {"value": "4", "label": "4"},
+            {"value": "5", "label": "5"},
+            {"value": "gt5", "label": ">5"},
+        ]
         context["chord_count_filter"] = self.request.GET.get("chord_count", "")
 
         # 🆕 Decade filter — only offer decades that actually have songs
@@ -346,6 +363,15 @@ class SongListView(SiteContextMixin, ListView):
                     pass
         context["all_decades"] = sorted(all_decades)
         context["decade_filter"] = self.request.GET.get("decade", "")
+
+        # 🆕 Key filter — only offer keys that actually appear (using effective_key:
+        # manual {key:} tag if set, else the auto-detected key)
+        all_keys = set()
+        for song in site_songs:
+            if song.effective_key:
+                all_keys.add(song.effective_key)
+        context["all_keys"] = sorted(all_keys)
+        context["key_filter"] = self.request.GET.get("key", "")
 
         # Song data
         song_data = []

@@ -116,6 +116,14 @@ class Song(models.Model):
         ),
     )
 
+    # 🆕 Auto-computed musical key (from chord analysis, not manual entry)
+    detected_key = models.CharField(
+        max_length=5,
+        blank=True,
+        null=True,
+        help_text="Automatically detected from the song's chords on save. Not user-entered."
+    )
+
     def save(self, *args, **kwargs):
         if self.pk:
             old_song = Song.objects.get(pk=self.pk)
@@ -132,11 +140,18 @@ class Song(models.Model):
             self.chords_used = ",".join(extract_chords(self.lyrics_with_chords, unique=True))
             # 🆕 Derive the strumming pattern from the {strumming: ...} tag, same as artist/songwriter
             strumming_raw = self.metadata.get("strumming") or ""
+            # 🆕 Auto-detect key from the chords actually used.
+            # Guard against detect_key() defaulting to "C" when there are no
+            # chords at all (its scoring dict is all-zero and max() just
+            # picks the first key in that case, which isn't a real detection).
+            all_chords = extract_chords(self.lyrics_with_chords, unique=False)
+            self.detected_key = detect_key(self.lyrics_with_chords) if all_chords else None
         else:
             self.metadata = {}
             self.lyrics_with_chords = []
             self.chords_used = []  # 🆕
             strumming_raw = ""
+            self.detected_key = None
 
         if self.lyrics_with_chords and self.metadata.get("suggested_alternate"):
             suggested = self.metadata["suggested_alternate"]
@@ -193,6 +208,15 @@ class Song(models.Model):
     
     def get_absolute_url(self):
         return reverse("songbook:score-view", kwargs={"pk": self.pk})
+
+    @property
+    def effective_key(self):
+        """
+        The key to display/filter by: the manually-entered {key:} tag if the
+        contributor bothered to set one, otherwise the auto-detected key.
+        """
+        manual_key = (self.metadata or {}).get("key")
+        return manual_key if manual_key else self.detected_key
 
     def get_used_chords(self):
         def flatten_lyrics(lyrics):
