@@ -1,6 +1,7 @@
 # songbook/views/song_display_views.py
 
 from django.shortcuts import get_object_or_404
+from django.http import QueryDict
 from django.views.generic import TemplateView, ListView, DetailView
 from django.db.models import Q
 from django.contrib.auth import get_user_model
@@ -171,11 +172,32 @@ class SongListView(SiteContextMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        chord_filter = self.request.GET.get("chords", "").strip()
-        print(f"DEBUG chord_filter: '{chord_filter}'")
+        # -------------------------------------------------------------
+        # 🆕 Filter persistence: remember the last filters used on this
+        # site so returning to the bare song_list URL (clicking a song,
+        # clicking the nav link, browser back, etc.) restores them.
+        #
+        # Three cases:
+        #   1. ?reset=1        -> explicit "Clear Filter" click: wipe the
+        #                          saved filters and show everything.
+        #   2. any other GET   -> the user just changed a filter/search/
+        #                          page: save it as the new "last used".
+        #   3. no GET at all   -> bare visit: fall back to whatever was
+        #                          last saved for this site (or nothing).
+        # -------------------------------------------------------------
+        site_name = self.get_site_name()
+        session_key = f"song_list_filters:{site_name}"
+
+        if self.request.GET.get("reset") == "1":
+            self.request.session.pop(session_key, None)
+            self.filter_params = QueryDict("")
+        elif self.request.GET:
+            self.request.session[session_key] = self.request.GET.urlencode()
+            self.filter_params = self.request.GET
+        else:
+            self.filter_params = QueryDict(self.request.session.get(session_key, ""))
 
         qs = super().get_queryset()
-        site_name = self.get_site_name()
         qs = qs.filter(site_name=site_name)
 
         # Privacy filter
@@ -187,11 +209,11 @@ class SongListView(SiteContextMixin, ListView):
             qs = qs.filter(is_public=True)
 
         # Existing filters
-        if self.request.GET.get("formatted") == "1":
+        if self.filter_params.get("formatted") == "1":
             qs = qs.filter(songformatting__isnull=False)
 
-        search_query = self.request.GET.get("q", "").strip()
-        selected_tag = self.request.GET.get("tag", "").strip()
+        search_query = self.filter_params.get("q", "").strip()
+        selected_tag = self.filter_params.get("tag", "").strip()
         artist_name = self.kwargs.get("artist_name")
 
         if search_query:
@@ -208,7 +230,7 @@ class SongListView(SiteContextMixin, ListView):
             qs = qs.filter(metadata__artist__iexact=artist_name)
 
         # 🆕 Filter by starting letter (A-Z) or number/symbol ("#")
-        letter_filter = self.request.GET.get("letter", "").strip().upper()
+        letter_filter = self.filter_params.get("letter", "").strip().upper()
         if letter_filter:
             if letter_filter == "#":
                 # Titles that DON'T start with a letter (numbers, symbols, etc.)
@@ -216,8 +238,8 @@ class SongListView(SiteContextMixin, ListView):
             else:
                 qs = qs.filter(songTitle__istartswith=letter_filter)
 
-        chord_filter = self.request.GET.get("chords", "").strip()
-        chord_mode = self.request.GET.get("chord_mode", "playable")  # 🆕 move this outside
+        chord_filter = self.filter_params.get("chords", "").strip()
+        chord_mode = self.filter_params.get("chord_mode", "playable")
 
         if chord_filter:
             requested_chords = {c.strip().lower() for c in chord_filter.split(",") if c.strip()}
@@ -241,7 +263,7 @@ class SongListView(SiteContextMixin, ListView):
                 qs = qs.filter(pk__in=matching_pks)
 
         # 🆕 Filter by NUMBER of chords used (2, 3, 4, 5, or "gt5" meaning >5)
-        chord_count_filter = self.request.GET.get("chord_count", "").strip()
+        chord_count_filter = self.filter_params.get("chord_count", "").strip()
         if chord_count_filter:
             matching_pks = []
             for pk, chords_used in qs.values_list("pk", "chords_used"):
@@ -266,7 +288,7 @@ class SongListView(SiteContextMixin, ListView):
             qs = qs.filter(pk__in=matching_pks)
 
         # 🆕 Filter by decade (e.g. "1980" means 1980-1989)
-        decade_filter = self.request.GET.get("decade", "").strip()
+        decade_filter = self.filter_params.get("decade", "").strip()
         if decade_filter:
             try:
                 decade_start = int(decade_filter)
@@ -288,7 +310,7 @@ class SongListView(SiteContextMixin, ListView):
                 qs = qs.filter(pk__in=matching_pks)
 
         # 🆕 Filter by musical key (manual {key:} tag if set, else auto-detected)
-        key_filter = self.request.GET.get("key", "").strip()
+        key_filter = self.filter_params.get("key", "").strip()
         if key_filter:
             matching_pks = []
             for pk, metadata, detected_key in qs.values_list("pk", "metadata", "detected_key"):
@@ -307,15 +329,13 @@ class SongListView(SiteContextMixin, ListView):
 
         site_name = self.get_site_name()
         context["selected_artist"] = self.kwargs.get("artist_name")
-        context["search_query"] = self.request.GET.get("q", "")
-        context["selected_tag"] = self.request.GET.get("tag", "")
-        context["show_formatted"] = self.request.GET.get("formatted") == "1"
-        # 🆕
-        context["chord_filter"] = self.request.GET.get("chords", "")
+        context["search_query"] = self.filter_params.get("q", "")
+        context["selected_tag"] = self.filter_params.get("tag", "")
+        context["show_formatted"] = self.filter_params.get("formatted") == "1"
 
         # 🆕 Alphabet filter (A-Z + # for numbers/symbols)
         context["alphabet_filter"] = list(string.ascii_uppercase) + ["#"]
-        context["selected_letter"] = self.request.GET.get("letter", "").strip().upper()
+        context["selected_letter"] = self.filter_params.get("letter", "").strip().upper()
 
         # Tags
         if self.request.user.is_authenticated:
@@ -338,8 +358,8 @@ class SongListView(SiteContextMixin, ListView):
                     if is_valid_chord(chord):
                         all_chords.add(chord)
         context["all_chords"] = sorted(all_chords)
-        context["chord_filter"] = self.request.GET.get("chords", "")
-        context["chord_mode"] = self.request.GET.get("chord_mode", "playable")
+        context["chord_filter"] = self.filter_params.get("chords", "")
+        context["chord_mode"] = self.filter_params.get("chord_mode", "playable")
 
         # 🆕 Chord-count filter
         context["chord_count_choices"] = [
@@ -349,7 +369,7 @@ class SongListView(SiteContextMixin, ListView):
             {"value": "5", "label": "5"},
             {"value": "gt5", "label": ">5"},
         ]
-        context["chord_count_filter"] = self.request.GET.get("chord_count", "")
+        context["chord_count_filter"] = self.filter_params.get("chord_count", "")
 
         # 🆕 Decade filter — only offer decades that actually have songs
         all_decades = set()
@@ -362,7 +382,7 @@ class SongListView(SiteContextMixin, ListView):
                 except (ValueError, TypeError):
                     pass
         context["all_decades"] = sorted(all_decades)
-        context["decade_filter"] = self.request.GET.get("decade", "")
+        context["decade_filter"] = self.filter_params.get("decade", "")
 
         # 🆕 Key filter — only offer keys that actually appear (using effective_key:
         # manual {key:} tag if set, else the auto-detected key)
@@ -371,7 +391,7 @@ class SongListView(SiteContextMixin, ListView):
             if song.effective_key:
                 all_keys.add(song.effective_key)
         context["all_keys"] = sorted(all_keys)
-        context["key_filter"] = self.request.GET.get("key", "")
+        context["key_filter"] = self.filter_params.get("key", "")
 
         # Song data
         song_data = []

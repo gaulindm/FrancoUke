@@ -21,6 +21,27 @@ CHORD_REGEX = re.compile(
 )
 
 
+def _chord_root_for_key_matching(chord):
+    """
+    Reduce a chord down to just its root + major/minor quality so it can be
+    compared against the plain triads in key_chords below.
+
+    key_chords only lists plain major/minor triads (e.g. 'C', 'Am'), but real
+    songs commonly use extended chords like 'A7', 'Em7', 'Dsus4', 'G/B'. Without
+    this normalization those never match anything, every key scores 0, and the
+    old code silently fell back to whichever key happened to be first in the
+    dict - not a real detection.
+
+    Examples: 'A7' -> 'A', 'Em7' -> 'Em', 'Dsus4' -> 'D', 'G/B' -> 'G'
+    """
+    chord = chord.strip()
+    match = re.match(r'^([A-G][#b]?)(m(?!aj))?', chord)
+    if not match:
+        return chord
+    root, minor = match.groups()
+    return f"{root}{'m' if minor else ''}"
+
+
 def detect_key(parsed_data):
     key_chords = {
         'C': ['C', 'Dm', 'Em', 'F', 'G', 'Am'],
@@ -42,9 +63,15 @@ def detect_key(parsed_data):
     }
 
     chords = extract_chords(parsed_data, unique=False)
-    chord_counts = Counter(chords)
+    normalized_chords = [_chord_root_for_key_matching(c) for c in chords]
+    chord_counts = Counter(normalized_chords)
     key_scores = {key: sum(chord_counts[chord] for chord in chords) for key, chords in key_chords.items()}
     detected_key = max(key_scores, key=key_scores.get)
+
+    # If nothing actually matched any key's triads (all scores tied at 0),
+    # don't pretend we detected something - report "unknown" instead.
+    if key_scores[detected_key] == 0:
+        return None
 
     return detected_key
 
