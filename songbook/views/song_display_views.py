@@ -5,6 +5,7 @@ from django.http import QueryDict
 from django.views.generic import TemplateView, ListView, DetailView
 from django.db.models import Q
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from types import SimpleNamespace
 import re
 import string
@@ -171,6 +172,14 @@ class SongListView(SiteContextMixin, ListView):
     ordering = ["songTitle"]
     paginate_by = 25
 
+    # 🆕 Seasonal tag: hidden from the main list except during its month,
+    # unless the user explicitly filters by this tag (any time of year).
+    SEASONAL_TAG = "Xmas"
+    SEASONAL_MONTH = 12  # December
+
+    def _in_season(self):
+        return timezone.now().month == self.SEASONAL_MONTH
+
     def get_queryset(self):
         # -------------------------------------------------------------
         # 🆕 Filter persistence: remember the last filters used on this
@@ -225,6 +234,12 @@ class SongListView(SiteContextMixin, ListView):
 
         if selected_tag:
             qs = qs.filter(tags__name=selected_tag)
+
+        # 🆕 Hide seasonal (Xmas) songs from the general list outside their
+        # month — but never hide them if the user is specifically browsing
+        # that tag (the "Xmas" button in the tag filter still works any time).
+        if selected_tag.lower() != self.SEASONAL_TAG.lower() and not self._in_season():
+            qs = qs.exclude(tags__name__iexact=self.SEASONAL_TAG)
 
         if artist_name:
             qs = qs.filter(metadata__artist__iexact=artist_name)
