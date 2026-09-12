@@ -80,7 +80,7 @@ def apply_html_color_markup(text):
     text = re.sub(r'<h>(.*?)</h>', r"<span style='background-color:yellow'>\1</span>", text, flags=re.IGNORECASE | re.DOTALL)
     
     # Clean up any nested closing tags
-    text = re.sub(r'</span>\s*</span>', '</span>', text)
+    text = re.sub(r'</span></span>', '</span>', text)
     
     return text
 
@@ -88,7 +88,7 @@ def apply_html_color_markup(text):
 # -----------------------------
 # 🎵 Main Teleprompter View (WITH COLOR MARKUP SUPPORT)
 # -----------------------------
-def teleprompter_view(request, song_id):
+def teleprompter_view(request, song_id, beginner=False):
     song = get_object_or_404(Song, pk=song_id)
 
     # -----------------------------
@@ -168,7 +168,8 @@ def teleprompter_view(request, song_id):
     # -----------------------------
     lyrics_html, metadata = render_lyrics_with_chords_html(
         song.lyrics_with_chords,
-        site_name
+        site_name,
+        chord_position="above" if beginner else "inline"
     )
 
     # -----------------------------
@@ -245,167 +246,8 @@ def teleprompter_view(request, song_id):
         **context_data,
     }
 
-    return render(request, "songbook/teleprompter.html", context)
-
-
-# -----------------------------
-# 🎵 Main Teleprompter View (WITH COLOR MARKUP SUPPORT)
-# -----------------------------
-def teleprompter_view(request, song_id):
-    song = get_object_or_404(Song, pk=song_id)
-
-    # -----------------------------
-    # 👤 User preference (get first!)
-    # -----------------------------
-    user_pref = getattr(request.user, "userpreference", None)
-
-    # -----------------------------
-    # 🎸 Determine instrument
-    # -----------------------------
-    instrument = request.GET.get("instrument")
-
-    if not instrument and user_pref:
-        instrument = getattr(user_pref, "primary_instrument", "ukulele")
-
-    instrument = instrument or "ukulele"
-    chord_library = load_chord_dict(instrument)
-
-    # -----------------------------
-    # 📝 Convert lyrics_with_chords JSON to raw lyric-text with [chords]
-    # -----------------------------
-    raw_lines = []
-    for block in song.lyrics_with_chords:
-        if isinstance(block, list):
-            for item in block:
-                if "chord" in item:
-                    raw_lines.append(f"[{item['chord']}]")
-                if "lyric" in item:
-                    raw_lines.append(item["lyric"])
-            raw_lines.append("\n")
-
-    raw_lyrics = "".join(raw_lines)
-
-    # -----------------------------
-    # 🎸 Extract chords
-    # -----------------------------
-    chord_pattern = re.compile(
-        r"\[([A-G][#b]?(?:m|min|maj7|maj9|maj|sus2|sus4|dim|aug|\d)*(?:/[A-G#b]*)*/*)\]"
+    template_name = (
+        "songbook/teleprompter_beginner.html" if beginner
+        else "songbook/teleprompter.html"
     )
-    found_chords = chord_pattern.findall(raw_lyrics)
-
-    # Normalize BEFORE deduplication
-    normalized_map = {raw: clean_chord_name(raw) for raw in found_chords}
-    normalized_unique = sorted(set(normalized_map.values()))
-
-    # -----------------------------
-    # 📚 Match chords to chord dictionary
-    # -----------------------------
-    relevant_chords = []
-    for name in normalized_unique:
-        if name in chord_library:
-            relevant_chords.append({
-                "name": name,
-                "variations": chord_library[name]["variations"],
-            })
-
-    # -----------------------------
-    # 🎯 Known-chord filtering
-    # -----------------------------
-    if user_pref and getattr(user_pref, "use_known_chord_filter", False):
-        known_chords = getattr(user_pref, "known_chords", []) or []
-        known_clean = set(clean_chord_name(ch).lower() for ch in known_chords)
-
-        relevant_chords = [
-            chord for chord in relevant_chords
-            if clean_chord_name(chord["name"]).lower() not in known_clean
-        ]
-
-    # -----------------------------
-    # 🌐 Site context
-    # -----------------------------
-    context_data = site_context(request)
-    site_name = context_data["site_name"]
-
-    # -----------------------------
-    # 🧾 Render lyrics HTML
-    # -----------------------------
-    lyrics_html, metadata = render_lyrics_with_chords_html(
-        song.lyrics_with_chords,
-        site_name
-    )
-
-    # -----------------------------
-    # 🐛 DEBUG: Check for color tags
-    # -----------------------------
-    print("\n" + "=" * 80)
-    print(f"🎵 SONG: {song.songTitle}")
-    print("=" * 80)
-    print("📝 BEFORE apply_html_color_markup (first 400 chars):")
-    print(lyrics_html[:400])
-    
-    # Check if color tags exist in the raw output
-    color_tags = ['<r>', '<g>', '<y>', '<red>', '<blue>', '<green>', '<pink>', '<orange>', '<purple>', '<h>']
-    has_color_tags = any(tag in lyrics_html for tag in color_tags)
-    print(f"\n🎨 Contains color tags? {has_color_tags}")
-    
-    if has_color_tags:
-        print("✅ Color tags found in lyrics_html")
-        for tag in color_tags:
-            if tag in lyrics_html:
-                print(f"   - Found: {tag}")
-    else:
-        print("❌ NO color tags found - checking raw JSON...")
-        # Check the raw JSON
-        if song.lyrics_with_chords:
-            print("\n📋 Sample from lyrics_with_chords JSON:")
-            for i, block in enumerate(song.lyrics_with_chords[:3]):  # First 3 blocks
-                print(f"Block {i}: {block}")
-
-    # -----------------------------
-    # 🎨 Apply color markup transformations
-    # -----------------------------
-    lyrics_html = apply_html_color_markup(lyrics_html)
-    
-    # -----------------------------
-    # 🐛 DEBUG: Verify transformation
-    # -----------------------------
-    print("\n" + "=" * 80)
-    print("📝 AFTER apply_html_color_markup (first 400 chars):")
-    print(lyrics_html[:400])
-    
-    # Check if span tags were created
-    has_span_tags = '<span style=' in lyrics_html
-    print(f"\n🎨 Contains <span style=> tags? {has_span_tags}")
-    
-    if has_span_tags:
-        print("✅ Color markup successfully converted to HTML spans")
-    else:
-        print("⚠️ No span tags found - color markup may not have been applied")
-    
-    print("=" * 80 + "\n")
-
-    # -----------------------------
-    # 🛠 User prefs (sent to JS)
-    # -----------------------------
-    user_preferences = {
-        "instrument": instrument,
-        "isLefty": getattr(user_pref, "is_lefty", False),
-        "showAlternate": getattr(user_pref, "is_printing_alternate_chord", False),
-        "useKnownChordFilter": getattr(user_pref, "use_known_chord_filter", False),
-        "knownChords": getattr(user_pref, "known_chords", []),
-    }
-
-    # -----------------------------
-    # 🧩 Final context
-    # -----------------------------
-    context = {
-        "song": song,
-        "lyrics_with_chords": lyrics_html,
-        "metadata": metadata,
-        "relevant_chords_json": json.dumps(relevant_chords),
-        "user_preferences_json": json.dumps(user_preferences),
-        "initial_scroll_speed": song.scroll_speed or 40,
-        **context_data,
-    }
-
-    return render(request, "songbook/teleprompter.html", context)
+    return render(request, template_name, context)

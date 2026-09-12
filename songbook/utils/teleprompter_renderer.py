@@ -1,8 +1,15 @@
-def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
+def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", chord_position="inline"):
     """
     Render parsed lyrics_with_chords (list of groups) into HTML,
     while extracting metadata directives (title, artist, year, etc.).
     Preserves color markup tags like <r>, <g>, <y>, <b>, <i>, <u>, etc.
+
+    chord_position:
+        "inline" (default) - existing behavior, chord name printed in the
+            reading line itself, e.g. "[C] sunshine"
+        "above" - chord name is placed in a positioned span above the
+            lyric fragment (via CSS), for beginner-friendly ChordPro-style
+            display: no brackets in the reading line.
     """
 
     directive_map = {
@@ -83,17 +90,40 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere"):
                     flush_buffer()
                     section_type = selected_map[directive]
 
-            elif "lyric" in item:
+            elif "lyric" in item or "chord" in item:
                 chord = item.get("chord", "")
-                lyric = item["lyric"]  # This contains color markup tags
+                lyric = item.get("lyric", "")  # This contains color markup tags
                 
                 # 🎨 Preserve color markup tags - don't escape them
                 if chord:
-                    current_buffer.append(f"<b>[{chord}]</b>{lyric}")
+                    if chord_position == "above":
+                        current_buffer.append(
+                            f'<span class="chord-word">'
+                            f'<span class="chord-label" data-chord="{chord}">{chord}</span>'
+                            f'{lyric}</span>'
+                        )
+                    else:
+                        current_buffer.append(f"<b>[{chord}]</b>{lyric}")
+                elif lyric.strip() == "" and lyric != "":
+                    # 🆕 Blank-line divider convention: an item with no chord
+                    # whose lyric is ONLY whitespace (e.g. a single space)
+                    # exists purely to pair with the following LINEBREAK and
+                    # create a blank line — it isn't real text. Emitting the
+                    # literal space character here caused browsers to render
+                    # it as a stray leading space on the next line (visible
+                    # as an unwanted indent). Skip it; the LINEBREAK item
+                    # still fires normally and produces the blank line.
+                    pass
                 else:
                     current_buffer.append(lyric)
 
-            elif "format" in item:
+            # 🆕 Checked independently (not elif) — an item can carry
+            # "lyric" (or "chord") AND "format" together, e.g. a chord
+            # sitting at the very end of a line with no trailing lyric
+            # text. Making this an elif previously meant that item's
+            # LINEBREAK/PARAGRAPHBREAK was silently skipped, causing the
+            # next line's lyrics to run on after it.
+            if "format" in item:
                 if item["format"] == "LINEBREAK":
                     current_buffer.append("<br/>")
                 elif item["format"] == "PARAGRAPHBREAK":

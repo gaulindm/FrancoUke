@@ -1,0 +1,270 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ song.title }}</title>
+  <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+
+  <!-- Diagram renderer -->
+  <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+
+  <!-- Scoped layout for the beginner "diagrams-on-top" arrangement.
+       Kept local to this template so the experienced-player
+       teleprompter.css / layout is untouched. -->
+  <style>
+    #chord-section.chord-section-top {
+      display: none; /* hidden for now — remove this line to bring it back */
+      order: -1;                 /* just in case flex is used on a parent */
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.15);
+      background: rgba(0,0,0,0.03);
+    }
+    #chord-section.chord-section-top h2 {
+      margin: 0 0 8px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.7;
+    }
+    #chord-section.chord-section-top #chord-diagrams {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+    /* Give each rendered diagram a bit of breathing room and a fixed-ish
+       width so 3-5 chords wrap cleanly on a phone/tablet screen. */
+    #chord-section.chord-section-top #chord-diagrams > * {
+      flex: 0 0 auto;
+      max-width: 120px;
+    }
+
+    /* Chord-above-lyric rendering (matches chord_position="above"
+       in render_lyrics_with_chords_html). Extra line-height on the
+       reading lines leaves room for the floating chord labels.
+       NOTE: teleprompter.css sets body font-size to 2em (~32px) with
+       no override for .verse/.lyrics text, so these values are tuned
+       against a 32px line, not a typical ~16-18px one — a smaller
+       multiplier here looked fine on paper but wasn't enough headroom
+       in practice and let labels bleed into the line above. */
+    .lyrics .verse,
+    .lyrics .section-body,
+    .lyrics .centered {
+      line-height: 3.6;
+    }
+    .chord-word {
+      position: relative;
+      display: inline-block;
+    }
+    .chord-label {
+      position: absolute;
+      top: -1.3em;
+      left: 0;
+      font-weight: 700;
+      font-size: 0.85em;
+      color: #2a6f97;
+      white-space: nowrap;
+    }
+
+    /* When diagram mode is toggled on, labels hold a small SVG
+       instead of text, so they need more headroom. */
+    .lyrics.diagram-mode .verse,
+    .lyrics.diagram-mode .section-body,
+    .lyrics.diagram-mode .centered {
+      line-height: 9.5;
+    }
+    .lyrics.diagram-mode .chord-label {
+      top: -4.4em;
+    }
+    .chord-label .chord-outer-wrapper,
+    .chord-label .chord-wrapper {
+      display: inline-block;
+      line-height: 0;
+    }
+    .chord-label svg {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Controls -->
+  <div class="controls">
+    <div class="left">
+      <span class="song-title">{{ song.title }}</span>
+      <button id="toggle-chords">Hide Chords</button>
+    </div>
+    <div class="center">
+      <button id="scroll-toggle">▶️ Start</button>
+      <div class="control-inline">
+        <button id="speed-down">−</button>
+        <span id="speed-value">3</span>
+        <button id="speed-up">+</button>
+      </div>
+    </div>
+    <div class="right">
+      <button id="scroll-reset">⏹ Reset</button>
+      <button id="toggle-chord-diagrams">🎸 Show Diagrams</button>
+    </div>
+  </div>
+
+  <!-- Chord Diagrams (moved above the lyrics for beginners) -->
+  <div id="chord-section" class="chord-section-top">
+    <h2>Chords in this song</h2>
+    <div id="chord-diagrams"></div>
+  </div>
+
+  <!-- Lyrics -->
+  <div class="tp-main">
+    <div class="lyrics-container">
+      <div class="lyrics">
+        <div class="metadata">
+          <h1>{{ song.songTitle }}</h1>
+          {% if metadata.songwriter %}
+            <div class="songwriter">{{ metadata.songwriter }}</div>
+          {% endif %}
+          {% if metadata.artist %}
+            <div class="recording">
+              {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
+            </div>
+          {% endif %}
+        </div>
+        {{ lyrics_with_chords|safe }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Embedded chords JSON for teleprompter.js -->
+  <script id="chords-data" type="application/json">
+    {{ relevant_chords_json|safe }}
+  </script>
+
+  <!-- ✅ Single, correct teleprompter config -->
+  <script id="teleprompter-config" type="application/json">
+  {
+    "initialScrollSpeed": {{ initial_scroll_speed|default:40 }},
+    "userPreferences": {{ user_preferences_json|safe }}
+  }
+  </script>
+
+  <!-- Initialize SONG -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      window.SONG = {
+        id: "{{ song.id }}",
+        title: "{{ song.title|escapejs }}",
+        initialTranspose: 0,
+        chords: JSON.parse(document.getElementById("chords-data").textContent)
+      };
+      console.log("✅ SONG loaded:", window.SONG);
+    });
+  </script>
+  <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
+
+  <script>
+    // 🎸 Toggle chord-name labels <-> tiny inline chord diagrams
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById("toggle-chord-diagrams");
+      const lyricsEl = document.querySelector(".lyrics");
+      let diagramMode = false;
+
+      function findChordObject(rawName) {
+        if (!window.SONG || !Array.isArray(window.SONG.chords)) return null;
+        const target = cleanChordName(rawName);
+        return window.SONG.chords.find(c => cleanChordName(c.name) === target) || null;
+      }
+
+      if (toggleBtn && lyricsEl) {
+        toggleBtn.addEventListener("click", () => {
+          diagramMode = !diagramMode;
+          lyricsEl.classList.toggle("diagram-mode", diagramMode);
+
+          document.querySelectorAll(".chord-label").forEach(label => {
+            const rawName = label.dataset.chord || label.textContent;
+
+            if (diagramMode) {
+              const chordObj = findChordObject(rawName);
+              if (chordObj) {
+                label.innerHTML = "";
+                drawChordDiagram(label, chordObj, { scale: 0.35 });
+              }
+              // unmatched chords (e.g. "NC") just keep showing as text
+            } else {
+              label.innerHTML = rawName;
+            }
+          });
+
+          toggleBtn.textContent = diagramMode ? "🔤 Show Names" : "🎸 Show Diagrams";
+        });
+      }
+    });
+  </script>
+
+  <script>
+    // 🎸 iRig BlueTurn Support - Synced with auto-scroll
+    document.addEventListener("DOMContentLoaded", () => {
+      const lyricsContainer = document.querySelector(".lyrics-container");
+      const scrollAmount = 150;
+
+      const indicator = document.createElement("div");
+      indicator.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 20px 40px;
+        border-radius: 10px;
+        font-size: 24px;
+        z-index: 9999;
+        display: none;
+        pointer-events: none;
+      `;
+      document.body.appendChild(indicator);
+
+      function showIndicator(text) {
+        indicator.textContent = text;
+        indicator.style.display = "block";
+        setTimeout(() => indicator.style.display = "none", 500);
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(e.key)) {
+          e.preventDefault();
+        }
+
+        if (!lyricsContainer) return;
+
+        switch(e.key) {
+          case "ArrowLeft":
+          case "PageUp":
+            if (typeof window.scrollPos !== 'undefined') {
+              window.scrollPos = Math.max(0, window.scrollPos - scrollAmount);
+              lyricsContainer.scrollTop = window.scrollPos;
+            } else {
+              lyricsContainer.scrollTop -= scrollAmount;
+            }
+            showIndicator("⬆️");
+            break;
+
+          case "ArrowRight":
+          case "PageDown":
+            if (typeof window.scrollPos !== 'undefined') {
+              const maxScroll = lyricsContainer.scrollHeight - lyricsContainer.clientHeight;
+              window.scrollPos = Math.min(maxScroll, window.scrollPos + scrollAmount);
+              lyricsContainer.scrollTop = window.scrollPos;
+            } else {
+              lyricsContainer.scrollTop += scrollAmount;
+            }
+            showIndicator("⬇️");
+            break;
+        }
+      });
+
+      console.log("🎸 iRig BlueTurn enabled (synced with auto-scroll)");
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+song = Song.objects.get(pk=2150)
+for group in song.lyrics_with_chords:
+    for item in group:
+        print(item)
