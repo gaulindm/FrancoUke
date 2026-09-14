@@ -140,9 +140,17 @@ def teleprompter_view(request, song_id, beginner=False):
     relevant_chords = []
     for name in normalized_unique:
         if name in chord_library:
+            variations = chord_library[name]["variations"]
+            show_alt = bool(user_pref and getattr(user_pref, "is_printing_alternate_chord", False))
+
+            if show_alt and len(variations) > 1:
+                selected = [variations[1]]
+            else:
+                selected = [variations[0]]
+
             relevant_chords.append({
                 "name": name,
-                "variations": chord_library[name]["variations"],
+                "variations": selected,
             })
 
     # -----------------------------

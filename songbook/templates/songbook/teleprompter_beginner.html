@@ -42,17 +42,15 @@
     }
 
     /* Chord-above-lyric rendering (matches chord_position="above"
-       in render_lyrics_with_chords_html). Extra line-height on the
-       reading lines leaves room for the floating chord labels.
-       NOTE: teleprompter.css sets body font-size to 2em (~32px) with
-       no override for .verse/.lyrics text, so these values are tuned
-       against a 32px line, not a typical ~16-18px one — a smaller
-       multiplier here looked fine on paper but wasn't enough headroom
-       in practice and let labels bleed into the line above. */
+       in render_lyrics_with_chords_html).
+       🔧 TUNE: line-height for the lyric text itself. Independent of
+       --diagram-reserve below — this just controls how tight the
+       actual reading lines are; the reserve is extra space stacked
+       on top via padding, not part of this line-height. */
     .lyrics .verse,
     .lyrics .section-body,
     .lyrics .centered {
-      line-height: 3.6;
+      line-height: 3; /* 🔧 TUNE: tightened from 3.6 — lower bound is roughly 2.6-2.8 before the text label (-1.3em) starts crowding the line above */
     }
     .chord-word {
       position: relative;
@@ -60,23 +58,69 @@
     }
     .chord-label {
       position: absolute;
-      top: -1.3em;
+      top: -1.3em; /* default: plain text name, sits close to the lyric word */
       left: 0;
       font-weight: 700;
       font-size: 0.85em;
       color: #2a6f97;
       white-space: nowrap;
     }
-
-    /* When diagram mode is toggled on, labels hold a small SVG
-       instead of text, so they need more headroom. */
-    .lyrics.diagram-mode .verse,
-    .lyrics.diagram-mode .section-body,
-    .lyrics.diagram-mode .centered {
-      line-height: 9.5;
+    /* When a line is showing a diagram instead of a name, the label
+       needs to sit up in the reserved padding space instead of right
+       next to the text. */
+    .lyric-line.showing-diagram .chord-label {
+      top: calc(-1 * var(--diagram-reserve));
     }
-    .lyrics.diagram-mode .chord-label {
-      top: -4.4em;
+
+    /* Extra breathing room before the first verse, so the song
+       doesn't start right under the title/artist block.
+       🔧 TUNE: trimmed from 3rem alongside the other tightening. */
+    .lyrics .metadata {
+      margin-bottom: 2rem;
+    }
+
+    /* --- Diagram reserve ---
+       🔧 TUNE: --diagram-reserve is the single value that both the
+       padding-top and the label's upward offset (below) read from,
+       so they can't drift out of sync the way the old em-based values
+       did.
+
+       The diagram's actual pixel height is set by the `scale` option
+       passed to drawChordDiagram() in the script block below — and from
+       chord_diagrams.js's own math (fretCount=5, fretSpacing=20*scale,
+       topMargin=40*scale, bottomPad=20*scale), the diagram height
+       always works out to exactly:
+
+           diagram height (px) = 160 * scale
+
+       e.g. scale:0.7 → 112px tall. --diagram-reserve should be set
+       to at least that, plus a small gap (~15-20px) so the diagram
+       doesn't touch the line above it. If you change `scale` in the
+       JS below, bump this value to match: 160 * new_scale + ~20.
+
+       NOTE: this used to be reserved on EVERY line unconditionally, to
+       kill the karaoke-zone jump entirely — but that left big empty
+       gaps on every line that WASN'T showing a diagram (visible as
+       dead space under/above ordinary text lines). Reverted to
+       conditional (see .lyric-line.showing-diagram below): only lines
+       actually showing a diagram carry this space, and a transition
+       smooths the reflow instead. */
+    :root {
+      --diagram-reserve: 124px; /* 112px diagram (160*0.7) + 12px gap — trimmed down from 140px */
+    }
+
+    /* 🔧 TUNE: the transition below is what smooths the reflow when a
+       line crosses into/out of the zone and gains/loses
+       --diagram-reserve of padding-top. Longer = gentler but more
+       visible "settling" lag; shorter = snappier but closer to a hard
+       jump. 0.2s-0.35s is a reasonable range to try. */
+    .lyric-line {
+      display: block;
+      margin-bottom: 8px; /* 🔧 TUNE: gap below each line before the next one starts */
+      transition: padding-top 0.25s ease;
+    }
+    .lyric-line.showing-diagram {
+      padding-top: var(--diagram-reserve);
     }
     .chord-label .chord-outer-wrapper,
     .chord-label .chord-wrapper {
@@ -85,6 +129,29 @@
     }
     .chord-label svg {
       display: block;
+    }
+
+
+    /* --- Karaoke "now singing" zone ---
+       A fixed band overlaid on the lyrics viewport. Lines passing
+       through it get their chord labels swapped from plain text to
+       diagrams; lines outside it stay as text names. Sized and
+       positioned with JS (see refreshZoneObserver / updateKaraokeBandPosition)
+       since it needs to track a target *number of lines*, and each
+       line's rendered height depends on --diagram-reserve above. */
+    #karaoke-band {
+      position: fixed;
+      pointer-events: none;
+      z-index: 3;
+      background: linear-gradient(
+        to bottom,
+        rgba(42, 111, 151, 0.02),
+        rgba(42, 111, 151, 0.12) 35%,
+        rgba(42, 111, 151, 0.12) 65%,
+        rgba(42, 111, 151, 0.02)
+      );
+      border-top: 1px solid rgba(42, 111, 151, 0.4);
+      border-bottom: 1px solid rgba(42, 111, 151, 0.4);
     }
   </style>
 </head>
@@ -117,6 +184,7 @@
 
   <!-- Lyrics -->
   <div class="tp-main">
+    <div id="karaoke-band" aria-hidden="true"></div>
     <div class="lyrics-container">
       <div class="lyrics">
         <div class="metadata">
@@ -130,6 +198,7 @@
             </div>
           {% endif %}
         </div>
+        <div id="zone-start-spacer"></div>
         {{ lyrics_with_chords|safe }}
       </div>
     </div>
@@ -163,11 +232,32 @@
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 
   <script>
-    // 🎸 Toggle chord-name labels <-> tiny inline chord diagrams
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleBtn = document.getElementById("toggle-chord-diagrams");
-      const lyricsEl = document.querySelector(".lyrics");
-      let diagramMode = false;
+    // 🎯 Karaoke-style "now singing" zone, plus the existing
+    // name <-> diagram toggle (now acting as a global override on
+    // top of the zone rather than a standalone mode).
+    (function () {
+      "use strict";
+
+      // 🔧 TUNE: how many lines should typically be showing diagrams
+      // at once. The zone's actual pixel height is TARGET_LINES_IN_ZONE
+      // × (measured height of a .showing-diagram line), recalculated
+      // automatically — see measureShowingDiagramLineHeight() below —
+      // so this stays correct even if --diagram-reserve changes.
+      const TARGET_LINES_IN_ZONE = 3;
+
+      // 🔧 TUNE: where the zone sits vertically in the visible lyrics
+      // area, as a fraction of the leftover space (container height
+      // minus the zone's own height): 0 = zone hugs the top, 1 = zone
+      // hugs the bottom, 0.5 = dead center. (This replaces the earlier
+      // separate top/bottom-margin constants with one knob — easier
+      // to reason about, and it's the same math either way: the old
+      // "anchor to bottom" version was just this at 1.0.)
+      const ZONE_POSITION = 0.5;
+
+      let diagramModeGlobal = false; // true = "Diagrams Everywhere" button is on
+      let zoneObserver = null;
+      let zoneHeightPx = 0; // kept in sync with the observer so the visual band matches exactly
+      let zoneTopPx = 0;    // ditto — computed fresh each refresh, band reads it back
 
       function findChordObject(rawName) {
         if (!window.SONG || !Array.isArray(window.SONG.chords)) return null;
@@ -175,30 +265,194 @@
         return window.SONG.chords.find(c => cleanChordName(c.name) === target) || null;
       }
 
-      if (toggleBtn && lyricsEl) {
-        toggleBtn.addEventListener("click", () => {
-          diagramMode = !diagramMode;
-          lyricsEl.classList.toggle("diagram-mode", diagramMode);
+      function showDiagramForLabel(label) {
+        const rawName = label.dataset.chord || label.textContent;
+        const chordObj = findChordObject(rawName);
+        if (chordObj) {
+          label.innerHTML = "";
+          // 🔧 TUNE: diagram size. If you change this, also update
+          // --diagram-reserve in the <style> above (formula there):
+          // diagram height (px) = 160 * scale, plus a small gap.
+          drawChordDiagram(label, chordObj, { scale: 0.7 });
+        }
+        // unmatched chords (e.g. "NC") just keep showing as text
+      }
 
-          document.querySelectorAll(".chord-label").forEach(label => {
-            const rawName = label.dataset.chord || label.textContent;
+      function showNameForLabel(label) {
+        label.innerHTML = label.dataset.chord || label.textContent;
+      }
 
-            if (diagramMode) {
-              const chordObj = findChordObject(rawName);
-              if (chordObj) {
-                label.innerHTML = "";
-                drawChordDiagram(label, chordObj, { scale: 0.35 });
-              }
-              // unmatched chords (e.g. "NC") just keep showing as text
+      // Single place that keeps a line's chord labels, its layout
+      // (the .showing-diagram class drives --diagram-reserve padding
+      // in the CSS), and the label's own position offset all in sync —
+      // whether triggered by the zone or by the global override button.
+      // Also stamps .diagram-shown, a marker that's added but never
+      // removed here — see handleZoneIntersections below for why.
+      function applyDiagramStateToLine(line, showDiagram) {
+        line.querySelectorAll(".chord-label").forEach((label) =>
+          showDiagram ? showDiagramForLabel(label) : showNameForLabel(label)
+        );
+        line.classList.toggle("showing-diagram", showDiagram);
+        if (showDiagram) line.classList.add("diagram-shown");
+      }
+
+      // Split each server-rendered lyric block into one
+      // <div class="lyric-line"> per physical line (they currently
+      // arrive as one block per verse/section, separated only by
+      // <br/>). Purely a client-side DOM restructuring — the renderer
+      // and teleprompter.html are untouched.
+      function wrapLinesForKaraokeZone(scopeEl) {
+        const containers = scopeEl.querySelectorAll(".verse, .section-body, .centered");
+        containers.forEach((container) => {
+          const original = Array.from(container.childNodes);
+          const frag = document.createDocumentFragment();
+          let currentLine = document.createElement("div");
+          currentLine.className = "lyric-line";
+
+          original.forEach((node) => {
+            if (node.nodeName === "BR") {
+              frag.appendChild(currentLine);
+              currentLine = document.createElement("div");
+              currentLine.className = "lyric-line";
             } else {
-              label.innerHTML = rawName;
+              currentLine.appendChild(node);
             }
           });
+          frag.appendChild(currentLine);
 
-          toggleBtn.textContent = diagramMode ? "🔤 Show Names" : "🎸 Show Diagrams";
+          container.innerHTML = "";
+          container.appendChild(frag);
         });
       }
-    });
+
+      // Measures the real rendered height of a "showing-diagram" line
+      // specifically (not just any line — since the reserve is
+      // conditional again, an ordinary text line is much shorter and
+      // would badly undersize the zone). Temporarily toggling the
+      // class on a probe line gives an accurate number without
+      // depending on which specific line happens to be first.
+      function measureShowingDiagramLineHeight(lyricsEl) {
+        const probe = lyricsEl.querySelector(".lyric-line");
+        if (!probe) return 210; // fallback if the song has no lines yet
+        const alreadyShowing = probe.classList.contains("showing-diagram");
+        if (!alreadyShowing) probe.classList.add("showing-diagram");
+        const height = probe.getBoundingClientRect().height || 210;
+        if (!alreadyShowing) probe.classList.remove("showing-diagram");
+        return height;
+      }
+
+      function handleZoneIntersections(entries) {
+        entries.forEach((entry) => {
+          const line = entry.target;
+          line.classList.toggle("in-zone", entry.isIntersecting);
+          if (diagramModeGlobal) return; // override button already has every line showing diagrams
+
+          // Only entering the zone triggers a change. Deliberately no
+          // "else" branch reverting to text on exit — once a line has
+          // shown its diagram, it keeps showing it as it scrolls up
+          // and away. Lines below the zone that haven't been reached
+          // yet are simply never told to show a diagram, so they stay
+          // as plain text names by default.
+          if (entry.isIntersecting) applyDiagramStateToLine(line, true);
+        });
+      }
+
+      // (Re)builds the observer sized to show TARGET_LINES_IN_ZONE at
+      // once. IntersectionObserver options are immutable once created,
+      // so a container resize means disconnect-and-recreate rather
+      // than mutating rootMargin in place.
+      function refreshZoneObserver() {
+        const container = document.querySelector(".lyrics-container");
+        const lyricsEl = document.querySelector(".lyrics");
+        if (!container || !lyricsEl) return;
+
+        if (zoneObserver) zoneObserver.disconnect();
+
+        const lineHeightPx = measureShowingDiagramLineHeight(lyricsEl);
+        zoneHeightPx = lineHeightPx * TARGET_LINES_IN_ZONE;
+
+        const containerRect = container.getBoundingClientRect();
+        const leftover = Math.max(0, containerRect.height - zoneHeightPx);
+        zoneTopPx = leftover * ZONE_POSITION;
+        const bottomPx = leftover - zoneTopPx;
+
+        alignFirstLineToZone(lyricsEl, container);
+
+        zoneObserver = new IntersectionObserver(handleZoneIntersections, {
+          root: container,
+          rootMargin: `-${zoneTopPx}px 0px -${bottomPx}px 0px`,
+          threshold: 0,
+        });
+
+        document.querySelectorAll(".lyric-line").forEach((line) => zoneObserver.observe(line));
+        updateKaraokeBandPosition();
+      }
+
+      // So the song doesn't start with its first lines sitting above
+      // the zone (requiring a scroll before any diagram appears), a
+      // spacer right after the metadata block is sized so the first
+      // .lyric-line lands exactly at the zone's top edge when
+      // scrollTop is 0. Measures from scratch each time (resetting
+      // the spacer first) so repeated calls — e.g. on resize — don't
+      // compound.
+      function alignFirstLineToZone(lyricsEl, container) {
+        const spacer = document.getElementById("zone-start-spacer");
+        const firstLine = lyricsEl.querySelector(".lyric-line");
+        if (!spacer || !firstLine) return;
+
+        spacer.style.height = "0px";
+        const containerRect = container.getBoundingClientRect();
+        const firstLineRect = firstLine.getBoundingClientRect();
+        const currentOffset = firstLineRect.top - containerRect.top + container.scrollTop;
+        const needed = Math.max(0, zoneTopPx - currentOffset);
+        spacer.style.height = `${needed}px`;
+      }
+
+      function updateKaraokeBandPosition() {
+        const container = document.querySelector(".lyrics-container");
+        const band = document.getElementById("karaoke-band");
+        if (!container || !band) return;
+        const rect = container.getBoundingClientRect();
+        band.style.top = `${rect.top + zoneTopPx}px`;
+        band.style.height = `${zoneHeightPx}px`;
+        band.style.left = `${rect.left}px`;
+        band.style.width = `${rect.width}px`;
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const lyricsEl = document.querySelector(".lyrics");
+        wrapLinesForKaraokeZone(lyricsEl);
+        refreshZoneObserver();
+
+        // ResizeObserver catches height changes from teleprompter.js's
+        // own layout logic (e.g. updateLyricsContainerHeight) without
+        // needing to touch that shared file or race its timing.
+        const container = document.querySelector(".lyrics-container");
+        if (container && "ResizeObserver" in window) {
+          new ResizeObserver(refreshZoneObserver).observe(container);
+        } else {
+          window.addEventListener("resize", refreshZoneObserver, { passive: true });
+        }
+
+        // --- "Diagrams Everywhere" override button ---
+        const toggleBtn = document.getElementById("toggle-chord-diagrams");
+        if (toggleBtn && lyricsEl) {
+          toggleBtn.addEventListener("click", () => {
+            diagramModeGlobal = !diagramModeGlobal;
+
+            document.querySelectorAll(".lyric-line").forEach((line) => {
+              const shouldShowDiagram =
+                diagramModeGlobal ||
+                line.classList.contains("diagram-shown") ||
+                line.classList.contains("in-zone");
+              applyDiagramStateToLine(line, shouldShowDiagram);
+            });
+
+            toggleBtn.textContent = diagramModeGlobal ? "🔤 Show Names" : "🎸 Diagrams Everywhere";
+          });
+        }
+      });
+    })();
   </script>
 
   <script>

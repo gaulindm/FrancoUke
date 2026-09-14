@@ -348,6 +348,24 @@ class SongListView(SiteContextMixin, ListView):
         context["selected_tag"] = self.filter_params.get("tag", "")
         context["show_formatted"] = self.filter_params.get("formatted") == "1"
 
+        # 🆕 Preferred teleprompter style: instead of two columns (one per
+        # style), send the user straight to whichever style they prefer.
+        # A link to switch styles lives on the teleprompter page itself.
+        # Defaults to "inline" (chord symbols) for anonymous users and
+        # anyone who hasn't set a preference yet.
+        if self.request.user.is_authenticated:
+            preferences, _ = UserPreference.objects.get_or_create(user=self.request.user)
+            teleprompter_style = getattr(preferences, "teleprompter_style", "inline")
+        else:
+            teleprompter_style = "inline"
+        context["teleprompter_style"] = teleprompter_style
+        context["teleprompter_url_name"] = (
+            "teleprompter:teleprompter_beginner"
+            if teleprompter_style == "beginner"
+            else "teleprompter:teleprompter"
+        )
+
+
         # 🆕 Alphabet filter (A-Z + # for numbers/symbols)
         context["alphabet_filter"] = list(string.ascii_uppercase) + ["#"]
         context["selected_letter"] = self.filter_params.get("letter", "").strip().upper()

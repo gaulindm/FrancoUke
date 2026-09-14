@@ -166,12 +166,14 @@
             <tr>
                 {% if site_name == 'FrancoUke' %}
                     <th>Partitions</th><th>Status</th><th>Interprètes</th><th>Année</th><th>Balises</th>
-                    <th class="text-center">Accords jouées</th><th class="text-center">Actions</th>
+                    <th class="text-center">Accords jouées</th>
+                    <th class="text-center">PDF</th>
+                    <th class="text-center">Téléprompteur</th>
                 {% else %}
                     <th>Songs</th><th>Status</th><th>Artists</th><th>Year</th><th>Tags</th>
                     <th class="text-center">Chords played</th>
+                    <th class="text-center">PDF</th>
                     <th class="text-center">Teleprompter</th>
-                    <th class="text-center">Actions</th>
                 {% endif %}
             </tr>
         </thead>
@@ -217,25 +219,26 @@
                         {{ item.chords }}
                     {% endif %}
                 </td>
-                <td>  {% if item.song.pk %}
-                    <a href="{% url 'teleprompter:teleprompter' item.song.pk %}" 
-                       class="btn btn-sm btn-outline-primary"
-                       target="_blank" rel="noopener">
-                       Teleprompter
-                    </a>
-                  {% else %}
-                    <span class="text-muted">N/A</span>
-                  {% endif %}</td>
                 <td class="text-center">
                     {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
-                    <a href="{% url pdf_url item.song.id %}">
-                      PDF
+                    <a href="{% url pdf_url item.song.id %}"
+                       class="btn btn-sm btn-outline-secondary"
+                       title="{% if site_name == 'FrancoUke' %}Vue PDF{% else %}PDF View{% endif %}">
+                        📄
                     </a>
                     {% endwith %}
                 </td>
+                <td class="text-center">
+                    <a href="{% url teleprompter_url_name item.song.pk %}"
+                       class="btn btn-sm btn-outline-primary"
+                       target="_blank" rel="noopener"
+                       title="{% if teleprompter_style == 'beginner' %}{% if site_name == 'FrancoUke' %}Téléprompteur (diagrammes){% else %}Teleprompter (diagrams){% endif %}{% else %}{% if site_name == 'FrancoUke' %}Téléprompteur (symboles d'accords){% else %}Teleprompter (chord symbols){% endif %}{% endif %}">
+                        🎤
+                    </a>
+                </td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" class="text-center">No songs found matching your search.</td></tr>
+            <tr><td colspan="8" class="text-center">No songs found matching your search.</td></tr>
             {% endfor %}
         </tbody>
     </table>

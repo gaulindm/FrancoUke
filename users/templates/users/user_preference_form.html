@@ -79,10 +79,13 @@
           </div>
         </div>
 
-        <!-- Chord Display -->
+        <!-- Chord & Text Display (applies to PDF and Teleprompter) -->
         <hr class="my-4">
 
-        <h5 class="fw-semibold">Chord Display</h5>
+        <h5 class="fw-semibold">Chord &amp; Text Display</h5>
+        <p class="text-muted small">
+          These apply everywhere a chord sheet is shown — PDFs and both teleprompter views.
+        </p>
 
         <!-- Bracket Style -->
         <div class="mb-3">
@@ -113,6 +116,71 @@
             </div>
             {% endfor %}
           </div>
+        </div>
+
+        <!-- Font Size -->
+        <div class="mb-3">
+          <label for="id_font_size" class="form-label fw-semibold">
+            Font Size
+          </label>
+          {{ form.font_size }}
+        </div>
+
+        <!-- Font Style -->
+        <div class="mb-3">
+          <label for="id_font_style" class="form-label fw-semibold">
+            Font Style
+          </label>
+          {{ form.font_style }}
+        </div>
+
+        <!-- Teleprompter Settings -->
+        <hr class="my-4">
+
+        <h5 class="fw-semibold">Teleprompter Settings</h5>
+
+        <!-- Default Teleprompter View -->
+        <div class="mb-3">
+          <label for="id_teleprompter_style" class="form-label fw-semibold">
+            Default Teleprompter View
+          </label>
+          {{ form.teleprompter_style }}
+          <div class="form-text">
+            Which teleprompter opens when you tap 🎤 in the song list.
+            You can switch styles from within the teleprompter itself.
+          </div>
+        </div>
+
+        <!-- Theme -->
+        <div class="mb-3">
+          <label for="id_theme" class="form-label fw-semibold">
+            Theme
+          </label>
+          {{ form.theme }}
+        </div>
+
+        <!-- Auto-Scroll -->
+        <div class="form-check mb-3">
+          {{ form.auto_scroll }}
+          <label for="id_auto_scroll" class="form-check-label ms-1">
+            Enable auto-scroll
+          </label>
+        </div>
+
+        <!-- Scroll Speed -->
+        <div class="mb-3">
+          <label for="id_scroll_speed" class="form-label fw-semibold">
+            Scroll Speed
+          </label>
+          {{ form.scroll_speed }}
+        </div>
+
+        <!-- Line Spacing -->
+        <div class="mb-4">
+          <label for="id_line_spacing" class="form-label fw-semibold">
+            Line Spacing
+          </label>
+          {{ form.line_spacing }}
         </div>
 
         <!-- Buttons -->

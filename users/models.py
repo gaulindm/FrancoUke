@@ -44,6 +44,29 @@ class UserPreference(models.Model):
         ("green", "Green"),
     ]
 
+    # 🆕 Which teleprompter style to jump to from the song list —
+    # avoids showing two separate teleprompter buttons/columns per song.
+    TELEPROMPTER_STYLE_CHOICES = [
+        ("inline",   "Chord symbols inline"),
+        ("beginner", "Chord diagrams above lyrics"),
+    ]
+
+    # 🆕 Common (PDF + Teleprompter) display preferences
+    FONT_STYLE_CHOICES = [
+        ("sans-serif", "Sans-serif"),
+        ("serif",      "Serif"),
+        ("monospace",  "Monospace"),
+    ]
+
+    # 🆕 Teleprompter-only for now. PDF line spacing is already handled
+    # per-song via SongFormatting (see formatting_views.py) — this field
+    # is not wired into PDF rendering.
+    LINE_SPACING_CHOICES = [
+        ("compact", "Compact"),
+        ("normal",  "Normal"),
+        ("relaxed", "Relaxed"),
+    ]
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -75,12 +98,14 @@ class UserPreference(models.Model):
         null=True,
         blank=True
     )
+    # --- Common (PDF + Teleprompter): instrument & chord-diagram shape ---
     is_lefty = models.BooleanField(default=False)
+    # --- PDF-only ---
     is_printing_alternate_chord = models.BooleanField(default=False)
     known_chords = models.JSONField(default=list, blank=True)
     use_known_chord_filter = models.BooleanField(default=False)
 
-    # --- Chord display preferences ---
+    # --- Common (PDF + Teleprompter) display preferences ---
     chord_bracket_style = models.CharField(
         max_length=20,
         choices=BRACKET_CHOICES,
@@ -90,6 +115,31 @@ class UserPreference(models.Model):
         max_length=10,
         choices=CHORD_COLOR_CHOICES,
         default="red",
+    )
+    font_size = models.IntegerField(default=18)
+    font_style = models.CharField(
+        max_length=20,
+        choices=FONT_STYLE_CHOICES,
+        default="sans-serif",
+    )
+
+    # --- Teleprompter-only ---
+    teleprompter_style = models.CharField(
+        max_length=10,
+        choices=TELEPROMPTER_STYLE_CHOICES,
+        default="inline",
+    )
+    theme = models.CharField(
+        max_length=10,
+        choices=[("light", "Light"), ("dark", "Dark")],
+        default="light",
+    )
+    auto_scroll = models.BooleanField(default=False)
+    scroll_speed = models.IntegerField(default=20)
+    line_spacing = models.CharField(
+        max_length=10,
+        choices=LINE_SPACING_CHOICES,
+        default="normal",
     )
 
     def __str__(self):
