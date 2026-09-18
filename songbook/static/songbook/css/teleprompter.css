@@ -449,6 +449,76 @@ body {
 /* Full-height side zones for prev/next navigation */
 
 
+/* ===== CHORD DIAGRAM POSITION TOGGLE (bottom / right) ===== */
+.layout-toggle {
+  display: inline-flex;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.layout-toggle button {
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted);
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 0;
+  cursor: pointer;
+}
+.layout-toggle button:last-child { border-right: none; }
+.layout-toggle button.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: bold;
+}
+
+/* body.chords-right is toggled by teleprompter.js. Everything below only
+   applies when that class is present — the plain #chord-section rules
+   above remain the default (bottom-docked) behavior. */
+body.chords-right #chord-section {
+  top: 64px;
+  bottom: 0;
+  left: auto;
+  right: 0;
+  width: 220px;
+  max-height: none;
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-top: none;
+  border-left: 2px solid #444;
+  padding: 0.75rem 0.5rem;
+  transition: none;
+}
+
+body.chords-right #chord-section.hidden {
+  max-height: none;
+  width: 0;
+  padding: 0;
+  border-left: none;
+  overflow: hidden;
+}
+
+body.chords-right #chord-diagrams {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+body.chords-right .chord-wrapper {
+  transform: scale(0.8);
+}
+
+body.chords-right .lyrics-container {
+  padding: 120px 240px 40px 28px;
+}
+
 /* ===== SMALL SCREENS ===== */
 @media (max-width: 800px) {
   .controls {
@@ -468,5 +538,30 @@ body {
   .token .lyric span[style*="background-color"] {
     padding: 2px 4px;
     border-radius: 3px;
+  }
+
+  /* The sidebar is too cramped on narrow screens — fall back to
+     bottom-docking even when "Right" is selected. */
+  body.chords-right #chord-section {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: auto;
+    height: auto;
+    max-height: 210px;
+    flex-direction: row;
+    border-left: none;
+    border-top: 2px solid #444;
+  }
+  body.chords-right #chord-section.hidden {
+    max-height: 0;
+    width: auto;
+  }
+  body.chords-right #chord-diagrams {
+    flex-direction: row;
+  }
+  body.chords-right .lyrics-container {
+    padding: 12px 12px 250px 12px;
   }
 }

@@ -25,6 +25,9 @@
   const SLOWER_SCALE = 0.5;
   window.userPreferences = {};
 
+  const CHORD_LAYOUT_KEY = "tp-chord-layout"; // "bottom" | "right"
+  const TRANSPOSE_KEY = "tp-transpose-steps"; // integer semitone offset, per-browser
+
   // -----------------------------
   // Config loader
   // -----------------------------
@@ -233,6 +236,150 @@
     });
   }
 
+  // -----------------------------
+  // 🎼 Transpose
+  // -----------------------------
+  // This shifts each chord *shape* up/down the neck by N frets (the same
+  // trick a capo uses), rather than looking up a fresh "textbook" open
+  // shape for the new chord name. That means it works entirely offline,
+  // with zero calls back to Django, using only the chord shapes already
+  // embedded on the page for this song. The trade-off: a chord you'd
+  // normally finger as an open shape may show up as a small barre once
+  // transposed, instead of the open-position fingering the PDF/admin tool
+  // would pick. The chord *names* shown above the lyrics are always
+  // correct either way.
+  // Ported directly from songbook/utils/transposer.py's transpose_chord()
+  // so a chord shown here always matches what the same shift produces in
+  // your PDFs/admin tool.
+  const NOTES_SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const NOTES_FLAT  = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+  const ENHARMONIC_EQUIVALENTS = {
+    "B#": "C", "E#": "F", "Cb": "B", "Fb": "E",
+    "A#": "Bb", "D#": "Eb", "G#": "G#",
+    "Bb": "A#", "Eb": "D#", "Ab": "G#",
+  };
+  const TRANSPOSE_MIN = -11;
+  const TRANSPOSE_MAX = 11;
+
+  function normalizeChord(note) {
+    return Object.prototype.hasOwnProperty.call(ENHARMONIC_EQUIVALENTS, note)
+      ? ENHARMONIC_EQUIVALENTS[note]
+      : note;
+  }
+
+  // Mirrors transpose_chord()'s root-handling exactly: pre-map the root
+  // through ENHARMONIC_EQUIVALENTS to pick which scale (sharp/flat) to
+  // index into, then normalize the result the same way on the way out.
+  function transposeNoteName(root, steps) {
+    if (!NOTES_SHARP.includes(root) && !NOTES_FLAT.includes(root)) return root;
+    if (Object.prototype.hasOwnProperty.call(ENHARMONIC_EQUIVALENTS, root)) {
+      root = ENHARMONIC_EQUIVALENTS[root];
+    }
+    const notes = NOTES_SHARP.includes(root) ? NOTES_SHARP : NOTES_FLAT;
+    const newIdx = ((notes.indexOf(root) + steps) % 12 + 12) % 12;
+    return normalizeChord(notes[newIdx]);
+  }
+
+  let transposeSteps = 0;
+  let originalChordLabels = []; // [{ el, name }] captured once at page load
+  let originalSongChords = null; // deep copy of window.SONG.chords as first loaded
+
+  // Splits "D/F#", "Cmaj7", "F#m7b5" into { root, suffix, bass }
+  function splitChordName(name) {
+    const m = (name || "").match(/^([A-G][b#]?)(.*)$/);
+    if (!m) return { root: name || "", suffix: "", bass: "" };
+    let [, root, rest] = m;
+    let bass = "";
+    const bassMatch = rest.match(/\/([A-G][b#]?)$/);
+    if (bassMatch) {
+      bass = bassMatch[1];
+      rest = rest.slice(0, -bassMatch[0].length);
+    }
+    return { root, suffix: rest, bass };
+  }
+
+  function transposeChordName(name, steps) {
+    if (!steps || !name) return name;
+    const { root, suffix, bass } = splitChordName(name);
+    const newRoot = transposeNoteName(root, steps);
+    const newBass = bass ? transposeNoteName(bass, steps) : "";
+    return newRoot + suffix + (newBass ? "/" + newBass : "");
+  }
+
+  // Shifts a set of fretted string positions by N frets (capo-style).
+  // -1 (muted string) is left untouched; anything that would go below
+  // fret 0 wraps up an octave (+12) so it stays on the fretboard.
+  function transposePositions(positions, steps) {
+    return (positions || []).map((f) => {
+      if (f === -1) return -1;
+      let shifted = f + steps;
+      while (shifted < 0) shifted += 12;
+      return shifted;
+    });
+  }
+
+  // One-time snapshot of the page's untransposed state, so every transpose
+  // is computed fresh from the original (never compounded/rounded away).
+  function captureTransposeBaseline() {
+    // [data-chord] matches both render modes: chord_position="above"
+    // (<span class="chord-label" data-chord="C">C</span>) and the
+    // chord_position="inline" your teleprompter.html actually uses
+    // (<b class="chord-token" data-chord="C">[C]</b>). The attribute
+    // always holds the bare chord name even where the visible text
+    // includes brackets, so we capture the template text once and
+    // substring-replace into it rather than assuming a format.
+    originalChordLabels = Array.from(document.querySelectorAll("[data-chord]")).map((el) => ({
+      el,
+      chord: el.dataset.chord,
+      template: el.textContent,
+    }));
+    originalSongChords = window.SONG?.chords
+      ? JSON.parse(JSON.stringify(window.SONG.chords))
+      : null;
+  }
+
+  function applyTranspose(steps) {
+    steps = Math.max(TRANSPOSE_MIN, Math.min(TRANSPOSE_MAX, steps));
+    transposeSteps = steps;
+
+    // 1. Chord names shown above/inline with the lyrics
+    originalChordLabels.forEach(({ el, chord, template }) => {
+      const newChord = transposeChordName(chord, steps);
+      el.textContent = template.replace(chord, newChord);
+      el.dataset.chord = newChord;
+    });
+
+    // 2. Chord diagrams — shift each variation's shape, then re-render
+    if (originalSongChords) {
+      const transposed = originalSongChords.map((ch) => ({
+        ...ch,
+        name: transposeChordName(ch.name, steps),
+        variations: (ch.variations || []).map((v) => {
+          const positions = transposePositions(v.positions, steps);
+          return { ...v, positions, baseFret: computeBaseFret(positions) };
+        }),
+      }));
+      window.SONG.chords = transposed;
+      const section = $("#chord-section");
+      if (section && !section.classList.contains("hidden")) {
+        renderChordDiagrams(transposed);
+      }
+    }
+
+    const display = $("#transpose-value");
+    if (display) display.textContent = steps > 0 ? `+${steps}` : `${steps}`;
+
+    const downBtn = $("#transpose-down"), upBtn = $("#transpose-up");
+    if (downBtn) downBtn.disabled = steps <= TRANSPOSE_MIN;
+    if (upBtn) upBtn.disabled = steps >= TRANSPOSE_MAX;
+
+    try {
+      localStorage.setItem(TRANSPOSE_KEY, String(steps));
+    } catch (e) {
+      // localStorage unavailable — transpose just won't be remembered next visit.
+    }
+  }
+
   function toggleChordSection() {
     const section = $("#chord-section");
     if (!section) return;
@@ -250,15 +397,48 @@
   }
 
   // -----------------------------
+  // Chord diagram position (bottom strip vs. right sidebar)
+  // -----------------------------
+  function applyChordLayout(mode) {
+    const isRight = mode === "right";
+    document.body.classList.toggle("chords-right", isRight);
+
+    const bottomBtn = $("#chord-layout-bottom");
+    const rightBtn = $("#chord-layout-right");
+    bottomBtn?.classList.toggle("active", !isRight);
+    rightBtn?.classList.toggle("active", isRight);
+    bottomBtn?.setAttribute("aria-pressed", String(!isRight));
+    rightBtn?.setAttribute("aria-pressed", String(isRight));
+
+    try {
+      localStorage.setItem(CHORD_LAYOUT_KEY, mode);
+    } catch (e) {
+      // localStorage unavailable (private browsing etc.) — layout just
+      // won't be remembered next visit, nothing else breaks.
+    }
+
+    // #chord-section's box changes height (bottom mode) or width-only
+    // (right mode), so re-measure once the CSS transition/layout settles.
+    setTimeout(updateLyricsContainerHeight, 60);
+  }
+
+  // -----------------------------
   // Layout adjust
   // -----------------------------
   function updateLyricsContainerHeight() {
     const container = $(".lyrics-container");
     if (!container) return;
     const controlsH = $(".controls")?.getBoundingClientRect().height || 0;
-    const chordH = !$("#chord-section")?.classList.contains("hidden")
-      ? $("#chord-section").getBoundingClientRect().height
+
+    // In "right" layout the chord section takes up width (handled purely
+    // in CSS via .lyrics-container padding-right), not page height, so it
+    // should not shrink the scroll container the way the bottom strip does.
+    const isRightLayout = document.body.classList.contains("chords-right");
+    const section = $("#chord-section");
+    const chordH = (!isRightLayout && section && !section.classList.contains("hidden"))
+      ? section.getBoundingClientRect().height
       : 0;
+
     const available = Math.max(120, window.innerHeight - controlsH - chordH);
     container.style.height = available + "px";
     container.style.overflowY = "auto";
@@ -299,6 +479,19 @@
     resetBtn?.addEventListener("click", resetScroll);
     toggleChordsBtn?.addEventListener("click", toggleChordSection);
 
+    const layoutBottomBtn = $("#chord-layout-bottom");
+    const layoutRightBtn = $("#chord-layout-right");
+    layoutBottomBtn?.addEventListener("click", () => applyChordLayout("bottom"));
+    layoutRightBtn?.addEventListener("click", () => applyChordLayout("right"));
+
+    let savedLayout = "bottom";
+    try {
+      savedLayout = localStorage.getItem(CHORD_LAYOUT_KEY) || "bottom";
+    } catch (e) {
+      // localStorage unavailable — default to bottom
+    }
+    applyChordLayout(savedLayout);
+
     updateLyricsContainerHeight();
     window.addEventListener("resize", updateLyricsContainerHeight, { passive: true });
     window.addEventListener("orientationchange", () =>
@@ -319,6 +512,22 @@
         console.error("Chord JSON parse error:", e);
       }
     }
+
+    // Transpose — capture the untransposed state once chord labels and
+    // window.SONG.chords both exist, then bind the +/- controls.
+    captureTransposeBaseline();
+    const transposeDownBtn = $("#transpose-down");
+    const transposeUpBtn = $("#transpose-up");
+    transposeDownBtn?.addEventListener("click", () => applyTranspose(transposeSteps - 1));
+    transposeUpBtn?.addEventListener("click", () => applyTranspose(transposeSteps + 1));
+
+    let savedTranspose = 0;
+    try {
+      savedTranspose = parseInt(localStorage.getItem(TRANSPOSE_KEY), 10) || 0;
+    } catch (e) {
+      // localStorage unavailable — default to 0 (original key)
+    }
+    applyTranspose(savedTranspose);
 
     // Overlay handling
     const overlay = $("#nav-overlay");

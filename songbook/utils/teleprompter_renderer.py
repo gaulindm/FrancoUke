@@ -103,7 +103,9 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                             f'{lyric}</span>'
                         )
                     else:
-                        current_buffer.append(f"<b>[{chord}]</b>{lyric}")
+                        current_buffer.append(
+                            f'<b class="chord-token" data-chord="{chord}">[{chord}]</b>{lyric}'
+                        )
                 elif lyric.strip() == "" and lyric != "":
                     # 🆕 Blank-line divider convention: an item with no chord
                     # whose lyric is ONLY whitespace (e.g. a single space)

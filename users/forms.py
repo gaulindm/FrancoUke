@@ -68,6 +68,14 @@ class UserPreferenceForm(forms.ModelForm):
             "use_known_chord_filter",
             "chord_bracket_style",   # ← new
             "chord_color",           # ← new
+            "font_size",              # 🆕 common
+            "font_style",             # 🆕 common
+            "teleprompter_style",     # 🆕 teleprompter-only — this is the field that lets
+                                       #    someone pick "inline" vs "beginner"
+            "theme",                  # 🆕 teleprompter-only
+            "auto_scroll",            # 🆕 teleprompter-only
+            "scroll_speed",           # 🆕 teleprompter-only
+            "line_spacing",           # 🆕 teleprompter-only
         ]
         widgets = {
             "is_lefty": forms.CheckboxInput(attrs={"class": "form-check-input"}),
@@ -77,6 +85,9 @@ class UserPreferenceForm(forms.ModelForm):
             # chord_color is rendered as custom radio buttons in the template,
             # so we use a HiddenInput here to avoid a duplicate dropdown.
             "chord_color": forms.HiddenInput(),
+            # 🆕 auto_scroll is a checkbox — same treatment as is_lefty etc.,
+            # since the __init__ loop below skips CheckboxInput widgets.
+            "auto_scroll": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     def __init__(self, *args, **kwargs):
