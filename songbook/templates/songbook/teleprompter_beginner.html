@@ -9,149 +9,70 @@
   <!-- Diagram renderer -->
   <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
 
-  <!-- Scoped layout for the beginner "diagrams-on-top" arrangement.
-       Kept local to this template so the experienced-player
-       teleprompter.css / layout is untouched. -->
-  <style>
-    #chord-section.chord-section-top {
-      display: none; /* hidden for now — remove this line to bring it back */
-      order: -1;                 /* just in case flex is used on a parent */
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(0,0,0,0.15);
-      background: rgba(0,0,0,0.03);
-    }
-    #chord-section.chord-section-top h2 {
-      margin: 0 0 8px 0;
-      font-size: 1rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      opacity: 0.7;
-    }
-    #chord-section.chord-section-top #chord-diagrams {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-    }
-    /* Give each rendered diagram a bit of breathing room and a fixed-ish
-       width so 3-5 chords wrap cleanly on a phone/tablet screen. */
-    #chord-section.chord-section-top #chord-diagrams > * {
-      flex: 0 0 auto;
-      max-width: 120px;
-    }
+  <!-- Chord style (above / inline). Runs before the page paints so there is
+       no flash. Choice is remembered in this browser; default is "above". -->
+  <script>
+    (function () {
+      var style = "above";
+      try {
+        var saved = localStorage.getItem("chordStyle");
+        if (saved === "above" || saved === "inline") style = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute("data-chord-style", style);
+    })();
+  </script>
 
-    /* Chord-above-lyric rendering (matches chord_position="above"
-       in render_lyrics_with_chords_html).
-       🔧 TUNE: line-height for the lyric text itself. Independent of
-       --diagram-reserve below — this just controls how tight the
-       actual reading lines are; the reserve is extra space stacked
-       on top via padding, not part of this line-height. */
-    .lyrics .verse,
-    .lyrics .section-body,
-    .lyrics .centered {
-      line-height: 3; /* 🔧 TUNE: tightened from 3.6 — lower bound is roughly 2.6-2.8 before the text label (-1.3em) starts crowding the line above */
-    }
-    .chord-word {
-      position: relative;
-      display: inline-block;
-    }
+  <!-- The server always renders the chord-above markup (.chord-word /
+       .chord-label). These rules decide how it LOOKS. Chord diagram
+       placement (bottom / right) is handled by teleprompter.css +
+       teleprompter.js. -->
+  <style>
     .chord-label {
-      position: absolute;
-      top: -1.3em; /* default: plain text name, sits close to the lyric word */
-      left: 0;
       font-weight: 700;
-      font-size: 0.85em;
       color: #2a6f97;
       white-space: nowrap;
     }
-    /* When a line is showing a diagram instead of a name, the label
-       needs to sit up in the reserved padding space instead of right
-       next to the text. */
-    .lyric-line.showing-diagram .chord-label {
-      top: calc(-1 * var(--diagram-reserve));
+
+    /* ===== Chords ABOVE the lyrics ===== */
+    /* 🔧 TUNE: line-height leaves room for the chord name above each line.
+       Roughly 2.6-2.8 is the lower limit before the names (-1.3em)
+       start crowding the line above. */
+    html[data-chord-style="above"] .lyrics .verse,
+    html[data-chord-style="above"] .lyrics .section-body,
+    html[data-chord-style="above"] .lyrics .centered {
+      line-height: 3;
+    }
+    html[data-chord-style="above"] .chord-word {
+      position: relative;
+      display: inline-block;
+    }
+    /* Zero-width character so even an empty chord-word keeps full line
+       height and its chord name lines up with all the others. */
+    html[data-chord-style="above"] .chord-word::before {
+      content: "\200B";
+    }
+    html[data-chord-style="above"] .chord-label {
+      position: absolute;
+      top: -1.3em;
+      left: 0;
+      font-size: 0.85em;
     }
 
-    /* Extra breathing room before the first verse, so the song
-       doesn't start right under the title/artist block.
-       🔧 TUNE: trimmed from 3rem alongside the other tightening. */
+    /* ===== Chords INLINE, e.g. [C]One, two, [CM7]three, four ===== */
+    html[data-chord-style="inline"] .chord-word {
+      display: inline;
+    }
+    html[data-chord-style="inline"] .chord-label {
+      position: static;
+      display: inline;
+      font-size: 0.9em;
+    }
+    html[data-chord-style="inline"] .chord-label::before { content: "["; }
+    html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
+
+    /* Extra breathing room before the first verse. */
     .lyrics .metadata {
       margin-bottom: 2rem;
-    }
-
-    /* --- Diagram reserve ---
-       🔧 TUNE: --diagram-reserve is the single value that both the
-       padding-top and the label's upward offset (below) read from,
-       so they can't drift out of sync the way the old em-based values
-       did.
-
-       The diagram's actual pixel height is set by the `scale` option
-       passed to drawChordDiagram() in the script block below — and from
-       chord_diagrams.js's own math (fretCount=5, fretSpacing=20*scale,
-       topMargin=40*scale, bottomPad=20*scale), the diagram height
-       always works out to exactly:
-
-           diagram height (px) = 160 * scale
-
-       e.g. scale:0.7 → 112px tall. --diagram-reserve should be set
-       to at least that, plus a small gap (~15-20px) so the diagram
-       doesn't touch the line above it. If you change `scale` in the
-       JS below, bump this value to match: 160 * new_scale + ~20.
-
-       NOTE: this used to be reserved on EVERY line unconditionally, to
-       kill the karaoke-zone jump entirely — but that left big empty
-       gaps on every line that WASN'T showing a diagram (visible as
-       dead space under/above ordinary text lines). Reverted to
-       conditional (see .lyric-line.showing-diagram below): only lines
-       actually showing a diagram carry this space, and a transition
-       smooths the reflow instead. */
-    :root {
-      --diagram-reserve: 124px; /* 112px diagram (160*0.7) + 12px gap — trimmed down from 140px */
-    }
-
-    /* 🔧 TUNE: the transition below is what smooths the reflow when a
-       line crosses into/out of the zone and gains/loses
-       --diagram-reserve of padding-top. Longer = gentler but more
-       visible "settling" lag; shorter = snappier but closer to a hard
-       jump. 0.2s-0.35s is a reasonable range to try. */
-    .lyric-line {
-      display: block;
-      margin-bottom: 8px; /* 🔧 TUNE: gap below each line before the next one starts */
-      transition: padding-top 0.25s ease;
-    }
-    .lyric-line.showing-diagram {
-      padding-top: var(--diagram-reserve);
-    }
-    .chord-label .chord-outer-wrapper,
-    .chord-label .chord-wrapper {
-      display: inline-block;
-      line-height: 0;
-    }
-    .chord-label svg {
-      display: block;
-    }
-
-
-    /* --- Karaoke "now singing" zone ---
-       A fixed band overlaid on the lyrics viewport. Lines passing
-       through it get their chord labels swapped from plain text to
-       diagrams; lines outside it stay as text names. Sized and
-       positioned with JS (see refreshZoneObserver / updateKaraokeBandPosition)
-       since it needs to track a target *number of lines*, and each
-       line's rendered height depends on --diagram-reserve above. */
-    #karaoke-band {
-      position: fixed;
-      pointer-events: none;
-      z-index: 3;
-      background: linear-gradient(
-        to bottom,
-        rgba(42, 111, 151, 0.02),
-        rgba(42, 111, 151, 0.12) 35%,
-        rgba(42, 111, 151, 0.12) 65%,
-        rgba(42, 111, 151, 0.02)
-      );
-      border-top: 1px solid rgba(42, 111, 151, 0.4);
-      border-bottom: 1px solid rgba(42, 111, 151, 0.4);
     }
   </style>
 </head>
@@ -160,7 +81,6 @@
   <div class="controls">
     <div class="left">
       <span class="song-title">{{ song.title }}</span>
-      <button id="toggle-chords">Hide Chords</button>
     </div>
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
@@ -169,22 +89,28 @@
         <span id="speed-value">3</span>
         <button id="speed-up">+</button>
       </div>
+      <div class="control-inline" id="transpose-control">
+        <span>Transpose</span>
+        <button id="transpose-down">−</button>
+        <span id="transpose-value">0</span>
+        <button id="transpose-up">+</button>
+      </div>
     </div>
     <div class="right">
+      <div class="layout-toggle" role="group" aria-label="Chord style">
+        <button type="button" id="chord-style-above" aria-pressed="true">Above</button>
+        <button type="button" id="chord-style-inline" aria-pressed="false">Inline</button>
+      </div>
+      <div class="layout-toggle" role="group" aria-label="Chord diagram position">
+        <button type="button" id="chord-layout-bottom" aria-pressed="true">Bottom</button>
+        <button type="button" id="chord-layout-right" aria-pressed="false">Right</button>
+      </div>
       <button id="scroll-reset">⏹ Reset</button>
-      <button id="toggle-chord-diagrams">🎸 Show Diagrams</button>
     </div>
-  </div>
-
-  <!-- Chord Diagrams (moved above the lyrics for beginners) -->
-  <div id="chord-section" class="chord-section-top">
-    <h2>Chords in this song</h2>
-    <div id="chord-diagrams"></div>
   </div>
 
   <!-- Lyrics -->
   <div class="tp-main">
-    <div id="karaoke-band" aria-hidden="true"></div>
     <div class="lyrics-container">
       <div class="lyrics">
         <div class="metadata">
@@ -198,7 +124,6 @@
             </div>
           {% endif %}
         </div>
-        <div id="zone-start-spacer"></div>
         {{ lyrics_with_chords|safe }}
       </div>
     </div>
@@ -209,6 +134,12 @@
     {{ relevant_chords_json|safe }}
   </script>
 
+  <!-- ✅ Full per-instrument chord dictionary, used to look up the real
+       diagram for a chord after transposing (not just shift the shape) -->
+  <script id="full-chord-library" type="application/json">
+    {{ full_chord_library_json|safe }}
+  </script>
+
   <!-- ✅ Single, correct teleprompter config -->
   <script id="teleprompter-config" type="application/json">
   {
@@ -216,6 +147,11 @@
     "userPreferences": {{ user_preferences_json|safe }}
   }
   </script>
+
+  <!-- Chord Section (diagrams at the bottom or right, toggled by the layout buttons) -->
+  <div id="chord-section">
+    <div id="chord-diagrams"></div>
+  </div>
 
   <!-- Initialize SONG -->
   <script>
@@ -231,229 +167,98 @@
   </script>
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
 
+  <!-- Above / Inline chord style switch (instant, no reload). Keeps your
+       place in the song when the line heights change. -->
   <script>
-    // 🎯 Karaoke-style "now singing" zone, plus the existing
-    // name <-> diagram toggle (now acting as a global override on
-    // top of the zone rather than a standalone mode).
-    (function () {
-      "use strict";
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+      const buttons = {
+        above: document.getElementById("chord-style-above"),
+        inline: document.getElementById("chord-style-inline"),
+      };
 
-      // 🔧 TUNE: how many lines should typically be showing diagrams
-      // at once. The zone's actual pixel height is TARGET_LINES_IN_ZONE
-      // × (measured height of a .showing-diagram line), recalculated
-      // automatically — see measureShowingDiagramLineHeight() below —
-      // so this stays correct even if --diagram-reserve changes.
-      const TARGET_LINES_IN_ZONE = 3;
-
-      // 🔧 TUNE: where the zone sits vertically in the visible lyrics
-      // area, as a fraction of the leftover space (container height
-      // minus the zone's own height): 0 = zone hugs the top, 1 = zone
-      // hugs the bottom, 0.5 = dead center. (This replaces the earlier
-      // separate top/bottom-margin constants with one knob — easier
-      // to reason about, and it's the same math either way: the old
-      // "anchor to bottom" version was just this at 1.0.)
-      const ZONE_POSITION = 0.5;
-
-      let diagramModeGlobal = false; // true = "Diagrams Everywhere" button is on
-      let zoneObserver = null;
-      let zoneHeightPx = 0; // kept in sync with the observer so the visual band matches exactly
-      let zoneTopPx = 0;    // ditto — computed fresh each refresh, band reads it back
-
-      function findChordObject(rawName) {
-        if (!window.SONG || !Array.isArray(window.SONG.chords)) return null;
-        const target = cleanChordName(rawName);
-        return window.SONG.chords.find(c => cleanChordName(c.name) === target) || null;
-      }
-
-      function showDiagramForLabel(label) {
-        const rawName = label.dataset.chord || label.textContent;
-        const chordObj = findChordObject(rawName);
-        if (chordObj) {
-          label.innerHTML = "";
-          // 🔧 TUNE: diagram size. If you change this, also update
-          // --diagram-reserve in the <style> above (formula there):
-          // diagram height (px) = 160 * scale, plus a small gap.
-          drawChordDiagram(label, chordObj, { scale: 0.7 });
-        }
-        // unmatched chords (e.g. "NC") just keep showing as text
-      }
-
-      function showNameForLabel(label) {
-        label.innerHTML = label.dataset.chord || label.textContent;
-      }
-
-      // Single place that keeps a line's chord labels, its layout
-      // (the .showing-diagram class drives --diagram-reserve padding
-      // in the CSS), and the label's own position offset all in sync —
-      // whether triggered by the zone or by the global override button.
-      // Also stamps .diagram-shown, a marker that's added but never
-      // removed here — see handleZoneIntersections below for why.
-      function applyDiagramStateToLine(line, showDiagram) {
-        line.querySelectorAll(".chord-label").forEach((label) =>
-          showDiagram ? showDiagramForLabel(label) : showNameForLabel(label)
-        );
-        line.classList.toggle("showing-diagram", showDiagram);
-        if (showDiagram) line.classList.add("diagram-shown");
-      }
-
-      // Split each server-rendered lyric block into one
-      // <div class="lyric-line"> per physical line (they currently
-      // arrive as one block per verse/section, separated only by
-      // <br/>). Purely a client-side DOM restructuring — the renderer
-      // and teleprompter.html are untouched.
-      function wrapLinesForKaraokeZone(scopeEl) {
-        const containers = scopeEl.querySelectorAll(".verse, .section-body, .centered");
-        containers.forEach((container) => {
-          const original = Array.from(container.childNodes);
-          const frag = document.createDocumentFragment();
-          let currentLine = document.createElement("div");
-          currentLine.className = "lyric-line";
-
-          original.forEach((node) => {
-            if (node.nodeName === "BR") {
-              frag.appendChild(currentLine);
-              currentLine = document.createElement("div");
-              currentLine.className = "lyric-line";
-            } else {
-              currentLine.appendChild(node);
-            }
-          });
-          frag.appendChild(currentLine);
-
-          container.innerHTML = "";
-          container.appendChild(frag);
+      function reflectState(style) {
+        Object.entries(buttons).forEach(([name, btn]) => {
+          if (btn) btn.setAttribute("aria-pressed", String(name === style));
         });
       }
 
-      // Measures the real rendered height of a "showing-diagram" line
-      // specifically (not just any line — since the reserve is
-      // conditional again, an ordinary text line is much shorter and
-      // would badly undersize the zone). Temporarily toggling the
-      // class on a probe line gives an accurate number without
-      // depending on which specific line happens to be first.
-      function measureShowingDiagramLineHeight(lyricsEl) {
-        const probe = lyricsEl.querySelector(".lyric-line");
-        if (!probe) return 210; // fallback if the song has no lines yet
-        const alreadyShowing = probe.classList.contains("showing-diagram");
-        if (!alreadyShowing) probe.classList.add("showing-diagram");
-        const height = probe.getBoundingClientRect().height || 210;
-        if (!alreadyShowing) probe.classList.remove("showing-diagram");
-        return height;
-      }
-
-      function handleZoneIntersections(entries) {
-        entries.forEach((entry) => {
-          const line = entry.target;
-          line.classList.toggle("in-zone", entry.isIntersecting);
-          if (diagramModeGlobal) return; // override button already has every line showing diagrams
-
-          // Only entering the zone triggers a change. Deliberately no
-          // "else" branch reverting to text on exit — once a line has
-          // shown its diagram, it keeps showing it as it scrolls up
-          // and away. Lines below the zone that haven't been reached
-          // yet are simply never told to show a diagram, so they stay
-          // as plain text names by default.
-          if (entry.isIntersecting) applyDiagramStateToLine(line, true);
-        });
-      }
-
-      // (Re)builds the observer sized to show TARGET_LINES_IN_ZONE at
-      // once. IntersectionObserver options are immutable once created,
-      // so a container resize means disconnect-and-recreate rather
-      // than mutating rootMargin in place.
-      function refreshZoneObserver() {
+      function setChordStyle(style) {
         const container = document.querySelector(".lyrics-container");
-        const lyricsEl = document.querySelector(".lyrics");
-        if (!container || !lyricsEl) return;
+        const maxScroll = () => (container ? container.scrollHeight - container.clientHeight : 0);
+        const ratio = container && maxScroll() > 0 ? container.scrollTop / maxScroll() : 0;
 
-        if (zoneObserver) zoneObserver.disconnect();
+        root.setAttribute("data-chord-style", style);
+        try { localStorage.setItem("chordStyle", style); } catch (e) {}
+        reflectState(style);
 
-        const lineHeightPx = measureShowingDiagramLineHeight(lyricsEl);
-        zoneHeightPx = lineHeightPx * TARGET_LINES_IN_ZONE;
-
-        const containerRect = container.getBoundingClientRect();
-        const leftover = Math.max(0, containerRect.height - zoneHeightPx);
-        zoneTopPx = leftover * ZONE_POSITION;
-        const bottomPx = leftover - zoneTopPx;
-
-        alignFirstLineToZone(lyricsEl, container);
-
-        zoneObserver = new IntersectionObserver(handleZoneIntersections, {
-          root: container,
-          rootMargin: `-${zoneTopPx}px 0px -${bottomPx}px 0px`,
-          threshold: 0,
-        });
-
-        document.querySelectorAll(".lyric-line").forEach((line) => zoneObserver.observe(line));
-        updateKaraokeBandPosition();
-      }
-
-      // So the song doesn't start with its first lines sitting above
-      // the zone (requiring a scroll before any diagram appears), a
-      // spacer right after the metadata block is sized so the first
-      // .lyric-line lands exactly at the zone's top edge when
-      // scrollTop is 0. Measures from scratch each time (resetting
-      // the spacer first) so repeated calls — e.g. on resize — don't
-      // compound.
-      function alignFirstLineToZone(lyricsEl, container) {
-        const spacer = document.getElementById("zone-start-spacer");
-        const firstLine = lyricsEl.querySelector(".lyric-line");
-        if (!spacer || !firstLine) return;
-
-        spacer.style.height = "0px";
-        const containerRect = container.getBoundingClientRect();
-        const firstLineRect = firstLine.getBoundingClientRect();
-        const currentOffset = firstLineRect.top - containerRect.top + container.scrollTop;
-        const needed = Math.max(0, zoneTopPx - currentOffset);
-        spacer.style.height = `${needed}px`;
-      }
-
-      function updateKaraokeBandPosition() {
-        const container = document.querySelector(".lyrics-container");
-        const band = document.getElementById("karaoke-band");
-        if (!container || !band) return;
-        const rect = container.getBoundingClientRect();
-        band.style.top = `${rect.top + zoneTopPx}px`;
-        band.style.height = `${zoneHeightPx}px`;
-        band.style.left = `${rect.left}px`;
-        band.style.width = `${rect.width}px`;
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const lyricsEl = document.querySelector(".lyrics");
-        wrapLinesForKaraokeZone(lyricsEl);
-        refreshZoneObserver();
-
-        // ResizeObserver catches height changes from teleprompter.js's
-        // own layout logic (e.g. updateLyricsContainerHeight) without
-        // needing to touch that shared file or race its timing.
-        const container = document.querySelector(".lyrics-container");
-        if (container && "ResizeObserver" in window) {
-          new ResizeObserver(refreshZoneObserver).observe(container);
-        } else {
-          window.addEventListener("resize", refreshZoneObserver, { passive: true });
+        if (container) {
+          const top = ratio * maxScroll();
+          container.scrollTop = top;
+          // keep teleprompter.js's auto-scroll position in step (as the BlueTurn code does)
+          if (typeof window.scrollPos !== "undefined") window.scrollPos = top;
         }
+      }
 
-        // --- "Diagrams Everywhere" override button ---
-        const toggleBtn = document.getElementById("toggle-chord-diagrams");
-        if (toggleBtn && lyricsEl) {
-          toggleBtn.addEventListener("click", () => {
-            diagramModeGlobal = !diagramModeGlobal;
-
-            document.querySelectorAll(".lyric-line").forEach((line) => {
-              const shouldShowDiagram =
-                diagramModeGlobal ||
-                line.classList.contains("diagram-shown") ||
-                line.classList.contains("in-zone");
-              applyDiagramStateToLine(line, shouldShowDiagram);
-            });
-
-            toggleBtn.textContent = diagramModeGlobal ? "🔤 Show Names" : "🎸 Diagrams Everywhere";
-          });
-        }
+      Object.entries(buttons).forEach(([name, btn]) => {
+        if (btn) btn.addEventListener("click", () => setChordStyle(name));
       });
-    })();
+      reflectState(root.getAttribute("data-chord-style") || "above");
+    });
   </script>
+
+  <!-- Fix for chords that have a space right after them in the ChordPro
+       data (e.g. "[C6] Tell me", "want[F] some more"). The renderer leaves
+       those chord-words empty, which made the chord name drop below the
+       others and swallowed the space. This re-attaches the chord to the
+       next word and restores the space. Runs once, on load. -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // The words a .chord-word displays, ignoring the chord name itself.
+      const lyricTextOf = (el) => {
+        const clone = el.cloneNode(true);
+        clone.querySelectorAll(".chord-label").forEach((l) => l.remove());
+        return clone.textContent;
+      };
+
+      // True if there is already lyric text earlier on the same line that
+      // does not end in a space (so a space needs to be put back).
+      const needsSpaceBefore = (node) => {
+        for (let p = node.previousSibling; p; p = p.previousSibling) {
+          if (p.nodeName === "BR") return false;
+          const text = p.nodeType === Node.TEXT_NODE ? p.textContent : lyricTextOf(p);
+          if (text === "") continue;
+          if (text.trim() === "") return false; // whitespace already there
+          return !/\s$/.test(text);
+        }
+        return false; // start of a line
+      };
+
+      let fixed = 0;
+      document.querySelectorAll(".lyrics .chord-word").forEach((word) => {
+        if (lyricTextOf(word).trim() !== "") return; // chord already sits on a word
+
+        // Drop stray whitespace held inside the empty chord-word.
+        Array.from(word.childNodes).forEach((n) => {
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim() === "") n.remove();
+        });
+
+        // Pull the next word (the one the chord belongs over) into it.
+        const next = word.nextSibling;
+        if (!next || next.nodeType !== Node.TEXT_NODE) return;
+        const m = next.textContent.match(/^(\s*)(\S+)([\s\S]*)$/);
+        if (!m) return;
+
+        const spaceBefore = needsSpaceBefore(word);
+        word.appendChild(document.createTextNode(m[2]));
+        next.textContent = m[3];
+        if (spaceBefore) word.parentNode.insertBefore(document.createTextNode(" "), word);
+        fixed++;
+      });
+      console.log(`🎵 Re-attached ${fixed} chord(s) that had a space after them`);
+    });
+  </script>
+
 
   <script>
     // 🎸 iRig BlueTurn Support - Synced with auto-scroll

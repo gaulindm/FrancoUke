@@ -249,6 +249,11 @@ def teleprompter_view(request, song_id, beginner=False):
         "lyrics_with_chords": lyrics_html,
         "metadata": metadata,
         "relevant_chords_json": json.dumps(relevant_chords),
+        # Full dictionary for this instrument (not just this song's chords).
+        # Needed so the teleprompter can look up a *real* diagram for a
+        # chord after transposing, instead of just sliding the original
+        # shape up/down the neck.
+        "full_chord_library_json": json.dumps(chord_library),
         "user_preferences_json": json.dumps(user_preferences),
         "initial_scroll_speed": song.scroll_speed or 40,
         **context_data,

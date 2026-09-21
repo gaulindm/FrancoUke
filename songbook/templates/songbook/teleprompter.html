@@ -68,6 +68,12 @@
   {{ relevant_chords_json|safe }}
 </script>
 
+<!-- ✅ Full per-instrument chord dictionary, used to look up the real
+     diagram for a chord after transposing (not just shift the shape) -->
+<script id="full-chord-library" type="application/json">
+  {{ full_chord_library_json|safe }}
+</script>
+
 <!-- ✅ Single, correct teleprompter config -->
 <script id="teleprompter-config" type="application/json">
 {

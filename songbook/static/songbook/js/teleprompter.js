@@ -26,7 +26,15 @@
   window.userPreferences = {};
 
   const CHORD_LAYOUT_KEY = "tp-chord-layout"; // "bottom" | "right"
-  const TRANSPOSE_KEY = "tp-transpose-steps"; // integer semitone offset, per-browser
+  const TRANSPOSE_KEY = "tp-transpose-steps"; // integer semitone offset, per-browser, per-song
+
+  // Scope the storage key to this song so transposing one song doesn't
+  // carry over to the next one you open. Falls back to a shared key only
+  // if window.SONG.id isn't available for some reason.
+  function transposeStorageKey() {
+    const id = window.SONG?.id;
+    return id ? `${TRANSPOSE_KEY}:${id}` : TRANSPOSE_KEY;
+  }
 
   // -----------------------------
   // Config loader
@@ -47,6 +55,22 @@
       }
     } catch (e) {
       console.warn("⚠️ Failed to parse teleprompter-config JSON", e);
+    }
+  }
+
+  // Full per-instrument chord dictionary (all chords, not just this song's),
+  // embedded by the view specifically so transpose can look up a real
+  // diagram for the new chord name instead of shifting the old shape.
+  function loadFullChordLibrary() {
+    try {
+      const el = document.getElementById("full-chord-library");
+      window.FULL_CHORD_LIBRARY = el ? JSON.parse(el.textContent) : {};
+      console.log(
+        `📚 Full chord library loaded: ${Object.keys(window.FULL_CHORD_LIBRARY).length} chords`
+      );
+    } catch (e) {
+      console.warn("⚠️ Failed to parse full-chord-library JSON", e);
+      window.FULL_CHORD_LIBRARY = {};
     }
   }
 
@@ -306,16 +330,20 @@
     return newRoot + suffix + (newBass ? "/" + newBass : "");
   }
 
-  // Shifts a set of fretted string positions by N frets (capo-style).
-  // -1 (muted string) is left untouched; anything that would go below
-  // fret 0 wraps up an octave (+12) so it stays on the fretboard.
-  function transposePositions(positions, steps) {
-    return (positions || []).map((f) => {
-      if (f === -1) return -1;
-      let shifted = f + steps;
-      while (shifted < 0) shifted += 12;
-      return shifted;
-    });
+  // Looks up a *real* diagram for chordName in the full per-instrument
+  // dictionary sent by the view (window.FULL_CHORD_LIBRARY), rather than
+  // sliding the original shape up/down the neck. Mirrors the same
+  // variation-selection rule as views.py's relevant_chords build (index 1
+  // if the user prefers the alternate voicing and one exists, else index 0).
+  function lookupChordVariations(chordName) {
+    const entry = window.FULL_CHORD_LIBRARY?.[chordName];
+    if (!entry || !Array.isArray(entry.variations) || entry.variations.length === 0) {
+      return null;
+    }
+    const showAlt = !!window.userPreferences?.showAlternate;
+    return showAlt && entry.variations.length > 1
+      ? [entry.variations[1]]
+      : [entry.variations[0]];
   }
 
   // One-time snapshot of the page's untransposed state, so every transpose
@@ -349,16 +377,33 @@
       el.dataset.chord = newChord;
     });
 
-    // 2. Chord diagrams — shift each variation's shape, then re-render
+    // 2. Chord diagrams — look up the real shape for the transposed chord
+    // name in the full instrument dictionary, rather than shifting the
+    // original shape up/down the neck (which just moves the same
+    // fingering closer to the bridge and isn't how the chord is actually
+    // played in the new key).
     if (originalSongChords) {
-      const transposed = originalSongChords.map((ch) => ({
-        ...ch,
-        name: transposeChordName(ch.name, steps),
-        variations: (ch.variations || []).map((v) => {
-          const positions = transposePositions(v.positions, steps);
-          return { ...v, positions, baseFret: computeBaseFret(positions) };
-        }),
-      }));
+      const missing = [];
+      const transposed = originalSongChords
+        .map((ch) => {
+          if (steps === 0) return ch; // back at the original key — no lookup needed
+          const newName = transposeChordName(ch.name, steps);
+          const variations = lookupChordVariations(newName);
+          if (!variations) {
+            missing.push(newName);
+            return null; // no dictionary entry for this chord — drop its diagram
+          }
+          return { ...ch, name: newName, variations };
+        })
+        .filter(Boolean);
+
+      if (missing.length) {
+        console.warn(
+          `No diagram in the chord dictionary for: ${missing.join(", ")} ` +
+          `(instrument: ${window.userPreferences?.instrument || "ukulele"})`
+        );
+      }
+
       window.SONG.chords = transposed;
       const section = $("#chord-section");
       if (section && !section.classList.contains("hidden")) {
@@ -374,7 +419,7 @@
     if (upBtn) upBtn.disabled = steps >= TRANSPOSE_MAX;
 
     try {
-      localStorage.setItem(TRANSPOSE_KEY, String(steps));
+      localStorage.setItem(transposeStorageKey(), String(steps));
     } catch (e) {
       // localStorage unavailable — transpose just won't be remembered next visit.
     }
@@ -450,6 +495,7 @@
   // -----------------------------
   document.addEventListener("DOMContentLoaded", async () => {
     loadConfigFromDom();
+    loadFullChordLibrary();
 
     const prefs = window.userPreferences;
     const instrument = prefs.instrument || "ukulele";
@@ -523,7 +569,7 @@
 
     let savedTranspose = 0;
     try {
-      savedTranspose = parseInt(localStorage.getItem(TRANSPOSE_KEY), 10) || 0;
+      savedTranspose = parseInt(localStorage.getItem(transposeStorageKey()), 10) || 0;
     } catch (e) {
       // localStorage unavailable — default to 0 (original key)
     }
