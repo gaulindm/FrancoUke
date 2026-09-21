@@ -12,7 +12,11 @@ from songbook.context_processors import site_context
 # -----------------------------
 
 def clean_chord_name(chord: str) -> str:
-    """Normalize chord notation for consistent matching with chord library."""
+    """Normalize chord notation for consistent matching with chord library.
+
+    Major-seventh style chords are standardized on the "maj" spelling:
+    CM7, CMaj7, CΔ7 and Cmaj7 all become Cmaj7.
+    """
     if not chord:
         return chord
 
@@ -24,12 +28,14 @@ def clean_chord_name(chord: str) -> str:
     chord = re.sub(r"/[A-G][#b]?$", "", chord)
 
     # --- Normalize chord quality naming ---
-    # maj7, Maj7, MAJ7 → M7  (and same for maj9, etc.)
-    chord = re.sub(r"(?i)maj(?=\d*)", "M", chord)
+    # Maj7, MAJ7 → maj7
+    chord = re.sub(r"(?i)maj", "maj", chord)
+    # Capital M after the root, followed by a number: CM7 → Cmaj7, F#M9 → F#maj9
+    chord = re.sub(r"(?<=[A-G#b])M(?=\d)", "maj", chord)
+    # Jazz delta symbols → maj
+    chord = chord.replace("Δ", "maj").replace("△", "maj")
     # min → m
     chord = re.sub(r"(?i)min", "m", chord)
-    # Jazz delta symbol → M
-    chord = chord.replace("Δ", "M")
 
     # Standardize capitalization (e.g., fm7 → Fm7)
     chord = chord.strip().replace(" ", "")
@@ -39,6 +45,28 @@ def clean_chord_name(chord: str) -> str:
         chord = chord.upper()
 
     return chord
+
+
+_MAJ_STYLE = re.compile(r"(?i:maj)|(?<=[A-G#b])M(?=\d)|[Δ△]")
+
+
+def with_maj_aliases(chord_library):
+    """Return a copy of the chord library in which every major-seventh style
+    chord can be found under BOTH spellings (Cmaj7 and CM7).
+
+    That way the songs and the library don't have to agree on the spelling
+    while you convert your data, and transposing (which looks chords up by
+    exact name) keeps working either way.
+    """
+    result = dict(chord_library)
+    for key, value in chord_library.items():
+        if not _MAJ_STYLE.search(key):
+            continue
+        canonical = clean_chord_name(key)                    # CM7   → Cmaj7
+        legacy = re.sub(r"maj(?=\d)", "M", canonical)        # Cmaj7 → CM7
+        result.setdefault(canonical, value)
+        result.setdefault(legacy, value)
+    return result
 
 # -----------------------------
 # 🎨 Color Markup Helper
@@ -89,6 +117,10 @@ def apply_html_color_markup(text):
 # 🎵 Main Teleprompter View (WITH COLOR MARKUP SUPPORT)
 # -----------------------------
 def teleprompter_view(request, song_id, beginner=False):
+    # `beginner` is no longer used: there is now a single teleprompter page
+    # that switches between chords above / inline in the browser. The
+    # argument is kept only so an old URL route that still passes
+    # beginner=True doesn't raise an error.
     song = get_object_or_404(Song, pk=song_id)
 
     # -----------------------------
@@ -126,7 +158,7 @@ def teleprompter_view(request, song_id, beginner=False):
     # 🎸 Extract chords
     # -----------------------------
     chord_pattern = re.compile(
-        r"\[([A-G][#b]?(?:m|min|maj7|maj9|maj|sus2|sus4|dim|aug|\d)*(?:/[A-G#b]*)*/*)\]"
+        r"\[([A-G][#b]?(?:maj|min|add|sus|dim|aug|[mM+]|\d|[#b])*(?:/[A-G#b]*)*/*)\]"
     )
     found_chords = chord_pattern.findall(raw_lyrics)
 
@@ -137,10 +169,13 @@ def teleprompter_view(request, song_id, beginner=False):
     # -----------------------------
     # 📚 Match chords to chord dictionary
     # -----------------------------
+    # Indexed under both "maj7" and "M7" spellings (see with_maj_aliases).
+    full_library = with_maj_aliases(chord_library)
+
     relevant_chords = []
     for name in normalized_unique:
-        if name in chord_library:
-            variations = chord_library[name]["variations"]
+        if name in full_library:
+            variations = full_library[name]["variations"]
             show_alt = bool(user_pref and getattr(user_pref, "is_printing_alternate_chord", False))
 
             if show_alt and len(variations) > 1:
@@ -177,7 +212,7 @@ def teleprompter_view(request, song_id, beginner=False):
     lyrics_html, metadata = render_lyrics_with_chords_html(
         song.lyrics_with_chords,
         site_name,
-        chord_position="above" if beginner else "inline"
+        chord_position="above",  # the page switches Above/Inline with CSS
     )
 
     # -----------------------------
@@ -253,14 +288,11 @@ def teleprompter_view(request, song_id, beginner=False):
         # Needed so the teleprompter can look up a *real* diagram for a
         # chord after transposing, instead of just sliding the original
         # shape up/down the neck.
-        "full_chord_library_json": json.dumps(chord_library),
+        "full_chord_library_json": json.dumps(full_library),
         "user_preferences_json": json.dumps(user_preferences),
         "initial_scroll_speed": song.scroll_speed or 40,
         **context_data,
     }
 
-    template_name = (
-        "songbook/teleprompter_beginner.html" if beginner
-        else "songbook/teleprompter.html"
-    )
+    template_name = "songbook/teleprompter_unified.html"
     return render(request, template_name, context)

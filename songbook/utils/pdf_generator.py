@@ -203,23 +203,27 @@ def build_song_elements(song, styles, styles_dict, site_name,
 
     # --- Capo & Recording Info ---
     capo_value = metadata.get('capo')
-    artist = metadata.get('artist', 'Unknown Artist')
+    # Treat missing, None, and whitespace-only values all as "blank".
+    artist = str(metadata.get('artist') or '').strip()
+    songwriter = str(metadata.get('songwriter') or '').strip()
     year = metadata.get('year')
 
-    if isinstance(capo_value, str) and capo_value.lower() == "based":
-        recorded_by_text = f"Based on clip by {artist}"
-        if year:
-            recorded_by_text += f" ({year})"
-    else:
-        try:
-            capo_value = int(capo_value)
-        except (TypeError, ValueError):
-            capo_value = 0
-
-        if capo_value > 0:
-            recorded_by_text = f"Capo ({capo_value}) to match the recording by {artist}"
+    # With no artist there is no recording to refer to, so the line is left
+    # empty and omitted from the header entirely (see header_data below).
+    recorded_by_text = ""
+    if artist:
+        if isinstance(capo_value, str) and capo_value.lower() == "based":
+            recorded_by_text = f"Based on clip by {artist}"
         else:
-            recorded_by_text = f"Matches the recording by {artist}"
+            try:
+                capo_value = int(capo_value)
+            except (TypeError, ValueError):
+                capo_value = 0
+
+            if capo_value > 0:
+                recorded_by_text = f"Capo ({capo_value}) to match the recording by {artist}"
+            else:
+                recorded_by_text = f"Matches the recording by {artist}"
 
         if year:
             recorded_by_text += f" ({year})"
@@ -246,31 +250,43 @@ def build_song_elements(song, styles, styles_dict, site_name,
     row1_right_text = short_instruction_1 if short_instruction_1 else slash_note
 
     # --- Header table content ---
+    first_vocal_note_text = (
+        f"1st vocal note: {metadata.get('1stnote', '')}" if metadata.get('1stnote') else ""
+    )
+    count_in_text = (
+        f"Count in: {metadata.get('count_in', '')}" if metadata.get('count_in') else ""
+    )
+    short_instruction_2 = str(metadata.get('short_instruction_2') or '').strip()
+
     header_data = [
+        # Row 0: time signature | title | strumming pattern (always present)
         [
             Paragraph(f"{metadata.get('timeSignature', '')}", first_vocal_note_style),
             Paragraph(f"<b>{song.songTitle or 'Untitled Song'}</b>", styles['Title']),
             Paragraph(top_right_html, header_instruction_style)
             if top_right_html else Paragraph("", header_instruction_style),
         ],
-        [
-            Paragraph(
-                f"1st vocal note: {metadata.get('1stnote', '')}",
-                first_vocal_note_style
-            ) if metadata.get('1stnote') else Paragraph("", first_vocal_note_style),
-            Paragraph(f"{metadata.get('songwriter', '')}", songwriter_style),
-            Paragraph(row1_right_text, header_instruction_style)
-            if row1_right_text else Paragraph("", header_instruction_style),
-        ],
-        [
-            Paragraph(
-                f"Count in: {metadata.get('count_in', '')}",
-                count_in_style
-            ) if metadata.get('count_in') else Paragraph("", count_in_style),
-            Paragraph(recorded_by_text, recording_style),
-            Paragraph(f"{metadata.get('short_instruction_2', '')}", header_instruction_style),
-        ],
     ]
+
+    # Row 1: 1st vocal note | songwriter | instruction / slash-chord note
+    # Row 2: count in       | recorded by | short_instruction_2
+    # A row is only added if at least one of its cells has content, so songs
+    # with no songwriter/artist (e.g. preschool songs) don't get blank lines.
+    # If a side cell (1st note, count in, instructions) has content, the row
+    # stays and just leaves the centre blank, so that info isn't lost.
+    if songwriter or first_vocal_note_text or row1_right_text:
+        header_data.append([
+            Paragraph(first_vocal_note_text, first_vocal_note_style),
+            Paragraph(songwriter, songwriter_style),
+            Paragraph(row1_right_text, header_instruction_style),
+        ])
+
+    if recorded_by_text or count_in_text or short_instruction_2:
+        header_data.append([
+            Paragraph(count_in_text, count_in_style),
+            Paragraph(recorded_by_text, recording_style),
+            Paragraph(short_instruction_2, header_instruction_style),
+        ])
 
     # --- Header table layout ---
     header_table = Table(header_data, colWidths=[100, 400, 100])
