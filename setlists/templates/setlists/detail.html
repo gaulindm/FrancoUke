@@ -6,10 +6,14 @@
     <h1 class="mb-0">{{ setlist.name }}</h1>
 
     <div class="btn-group">
-      <a href="{% url 'board:full_board' %}?event={{ setlist.event.id }}" 
+      {% if group %}
+      <a href="{% url 'board:full_board' group_slug=group.slug %}?event={{ setlist.event.id }}" 
          class="btn btn-outline-primary btn-sm">
         🎤 View {{ setlist.event.title }}
       </a>
+      {% endif %}
+
+
 
       {% if can_edit %}
         <a href="{% url 'setlists:setlist_builder' setlist.id %}" 
@@ -111,11 +115,17 @@
               {% endfor %}
             </div>
             <div class="modal-footer">
-              <a href="{% url 'board:song_rehearsal_history' item.song.id %}" 
-                 class="btn btn-sm btn-outline-primary"
-                 target="_blank">
+
+              
+              {% if group %}
+              <a href="{% url 'board:song_rehearsal_history' group_slug=group.slug song_id=item.song.id %}" 
+                class="btn btn-sm btn-outline-primary"
+                target="_blank">
                 View Full History
               </a>
+              {% endif %}
+
+
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>

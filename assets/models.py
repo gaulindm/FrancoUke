@@ -51,6 +51,9 @@ class Asset(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    group = models.ForeignKey(
+        "core.Group", on_delete=models.CASCADE, null=True, blank=True, related_name="assets"
+    )
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default=TYPE_IMAGE)
     provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES, default=PROVIDER_LOCAL)
 

@@ -97,7 +97,11 @@
               <div>
                 <span>{{ song.songTitle }}</span>
                 {% if song.note_count > 0 %}
-                  <a href="{% url 'board:song_rehearsal_history' song.id %}"
+
+                {% if group %}
+                  <a href="{% url 'board:song_rehearsal_history' group_slug=group.slug song_id=song.id %}"
+                {% endif %}
+
                      class="btn btn-sm btn-outline-info ms-2"
                      title="View rehearsal notes for {{ song.songTitle }}"
                      data-bs-toggle="tooltip">
@@ -130,14 +134,18 @@
             <span class="drag-handle me-2">☰</span>
             <strong class="flex-grow-1">{{ item.song.songTitle }}</strong>
             <input type="hidden" name="order[]" value="{{ item.song.id }}">
-            {% if item.song.rehearsal_notes.all %}
-              <a href="{% url 'board:song_rehearsal_history' item.song.id %}"
-                 class="btn btn-sm btn-outline-secondary me-2"
-                 title="View rehearsal notes for {{ item.song.songTitle }}"
-                 data-bs-toggle="tooltip">
-                 📝 Notes
+
+            <!-- after -->
+              {% if group and item.song.rehearsal_notes.all %}
+              <a href="{% url 'board:song_rehearsal_history' group_slug=group.slug song_id=item.song.id %}"
+                class="btn btn-sm btn-outline-secondary me-2"
+                title="View rehearsal notes for {{ item.song.songTitle }}"
+                data-bs-toggle="tooltip">
+                📝 Notes
               </a>
-            {% endif %}
+              {% endif %}
+
+
             <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
           </li>
         {% endfor %}

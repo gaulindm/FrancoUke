@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'setlists',
 ]
 
+
+
 SITE_ID = 1
 
 MIDDLEWARE = [
@@ -87,6 +89,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'songbook.context_processors.site_context',
+                'core.context_processors.user_groups',
+
             ],
         },
     },

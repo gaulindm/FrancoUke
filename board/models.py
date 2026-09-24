@@ -25,6 +25,9 @@ class BoardColumn(models.Model):
         # 🚀 rehearsals/past performances now handled by Performance
     ]
 
+    group = models.ForeignKey(
+        "core.Group", on_delete=models.CASCADE, null=True, blank=True, related_name="board_columns"
+    )
     name = models.CharField(max_length=100)
     position = models.PositiveIntegerField(default=0)
     is_public = models.BooleanField(default=False)
@@ -41,6 +44,9 @@ class BoardColumn(models.Model):
         return self.name
 
 class Venue(models.Model):
+    group = models.ForeignKey(
+        "core.Group", on_delete=models.CASCADE, null=True, blank=True, related_name="venues"
+    )
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=500, blank=True, null=True)
     image = models.ImageField(upload_to="venues/", blank=True, null=True)
@@ -248,6 +254,10 @@ class Event(models.Model):
         ("tbc", "To Be Confirmed"),
         ("past", "Past"),
     ]
+
+    group = models.ForeignKey(
+        "core.Group", on_delete=models.CASCADE, null=True, blank=True, related_name="events"
+    )
 
     # 🔑 Optional Venue link (for recurring venue-based events)
     venue = models.ForeignKey(

@@ -7,14 +7,16 @@ from django.core.exceptions import PermissionDenied
 
 from ..models import Event, EventAvailability, BoardItem
 from setlists.models import SetList  # safe import: setlists is separate app in your project
+from core.group_access import group_member_required
 
 
-@login_required
-def event_detail(request, event_id):
+@group_member_required
+def event_detail(request, group_slug, event_id):
     """
     Event detail used by the modal include and standalone page.
     """
-    event = get_object_or_404(Event, id=event_id)
+    group = request.group
+    event = get_object_or_404(Event, id=event_id, group=group)
 
     # linked setlist if exists
     setlist = getattr(event, "setlist", None)
@@ -32,18 +34,20 @@ def event_detail(request, event_id):
         "event": event,
         "setlist": setlist,
         "user_status": user_status,
+        "group": group,
     })
 
 
 @require_POST
-@login_required
-def update_event_availability(request, event_id):
+@group_member_required
+def update_event_availability(request, group_slug, event_id):
     """
     Update current user's availability for an event.
     Returns JSON for AJAX; otherwise redirects to board.
     """
+    group = request.group
     status = request.POST.get("status")
-    event = get_object_or_404(Event, id=event_id)
+    event = get_object_or_404(Event, id=event_id, group=group)
 
     EventAvailability.objects.update_or_create(
         user=request.user,
@@ -58,24 +62,22 @@ def update_event_availability(request, event_id):
             "user": request.user.username
         })
 
-    return redirect("board:full_board")
+    return redirect("board:full_board", group_slug=group_slug)
 
 
 @require_POST
-@login_required
-def set_availability(request, event_id):
+@group_member_required
+def set_availability(request, group_slug, event_id):
     """
     Backwards-compatible wrapper used elsewhere in the app (keeps old route).
     """
-    return update_event_availability(request, event_id)
+    return update_event_availability(request, group_slug, event_id)
 
 
-# board/views/event_views.py
-from django.shortcuts import get_object_or_404, render
-from board.models import Event
-
-def rehearsal_detail_view(request, pk):
-    event = get_object_or_404(Event, pk=pk, event_type="rehearsal")
+@group_member_required
+def rehearsal_detail_view(request, group_slug, pk):
+    group = request.group
+    event = get_object_or_404(Event, pk=pk, event_type="rehearsal", group=group)
 
     user_availability = None
     if request.user.is_authenticated:
@@ -85,4 +87,5 @@ def rehearsal_detail_view(request, pk):
         "event": event,                     # ✅ add this
         "rehearsal": event,
         "user_availability": user_availability,
+        "group": group,
     })

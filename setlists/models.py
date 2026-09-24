@@ -5,6 +5,9 @@ from songbook.models import Song
 from board.models import Event  # optional, only if you want to attach setlists to events
 
 class SetList(models.Model):
+    group = models.ForeignKey(
+        "core.Group", on_delete=models.CASCADE, null=True, blank=True, related_name="setlists"
+    )
     name = models.CharField(max_length=200)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

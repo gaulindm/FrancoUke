@@ -81,6 +81,11 @@ def setlist_detail(request, pk):
     # ✅ Event info (optional)
     event = setlist.event  # might be None
 
+    # Performance group this setlist belongs to, if any (via its own
+    # `group` field, or inherited from the linked event's group). Used
+    # only so templates can build group-scoped board: links correctly.
+    group = setlist.group or (event.group if event else None)
+
     return render(
         request,
         "setlists/detail.html",
@@ -89,6 +94,7 @@ def setlist_detail(request, pk):
             "songs": songs,
             "event": event,
             "can_edit": can_edit,
+            "group": group,
         },
     )
 
@@ -327,10 +333,17 @@ def setlist_builder(request, pk=None):
         .order_by("songTitle")
     )
 
+    # Performance group this setlist belongs to, if any — same
+    # inheritance rule as setlist_detail, for the same reason (templates
+    # need it to build group-scoped board: links).
+    group = None
+    if setlist:
+        group = setlist.group or (setlist.event.group if setlist.event else None)
+
     return render(
         request,
         "setlists/builder.html",
-        {"setlist": setlist, "songs": songs},
+        {"setlist": setlist, "songs": songs, "group": group},
     )
 
 
@@ -374,6 +387,7 @@ def create_setlist_for_event(request, event_id):
         name=f"{event.title} Setlist",
         created_by=request.user,
         event=event,
+        group=event.group,  # inherit the event's group, so this setlist is correctly tagged
     )
 
     return redirect("setlists:setlist_builder", pk=setlist.pk)

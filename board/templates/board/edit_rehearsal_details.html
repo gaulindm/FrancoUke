@@ -3,8 +3,7 @@
 {% block content %}
 
 <div class="container mt-4 mb-5">
-  <a href="{% url 'board:full_board' %}" class="btn btn-secondary mb-3">← Back to Board</a>
-
+  <a href="{% url 'board:full_board' group_slug=group.slug %}" class="btn btn-secondary mb-3">← Back to Board</a>
   <div class="card shadow-sm">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
       <h5 class="mb-0">✏️ Edit Rehearsal Notes</h5>
@@ -33,7 +32,7 @@
           <button type="submit" class="btn btn-primary">
             💾 Save Rehearsal Notes
           </button>
-          <a href="{% url 'board:full_board' %}" class="btn btn-outline-secondary">
+          <a href="{% url 'board:full_board' group_slug=group.slug %}" class="btn btn-outline-secondary">
             Cancel
           </a>
         </div>

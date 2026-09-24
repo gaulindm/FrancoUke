@@ -2,8 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <a href="{% url 'board:full_board' %}" class="btn btn-secondary mb-3">← Back to Board</a>
-
+    <a href="{% url 'board:full_board' group_slug=group.slug %}" class="btn btn-secondary mb-3">← Back to Board</a>
     <div class="card shadow-sm">
         <div class="card-body">
             <h2 class="card-title">{{ rehearsal.title }}</h2>
@@ -30,8 +29,7 @@
 
             {% if request.user.is_authenticated %}
                 <hr>
-                <form method="post" action="{% url 'board:set_event_availability' event.id %}">
-                    {% csrf_token %}
+                <form method="post" action="{% url 'board:set_event_availability' group_slug=group.slug event_id=event.id %}">                    {% csrf_token %}
                     <input type="hidden" name="rehearsal_id" value="{{ rehearsal.id }}">
                     <div class="btn-group" role="group">
                         <button name="status" value="yes" class="btn btn-success btn-sm">✅ Coming</button>

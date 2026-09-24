@@ -46,6 +46,6 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Save Message</button>
-    <a href="{% url 'board:full_board' %}" class="btn btn-secondary">Cancel</a>
-  </form>
+    <a href="{% url 'board:full_board' group_slug=group.slug %}" class="btn btn-secondary">Cancel</a>
+    </form>
 {% endblock %}

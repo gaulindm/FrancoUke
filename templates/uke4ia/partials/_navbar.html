@@ -3,16 +3,24 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-info shadow-sm">
     <div class="container-fluid">
 
+        {% with first_user_group=user_groups|first %}
+        {% with active_group=group|default:first_user_group %}
+
         <!-- Brand - changes based on authentication status -->
-        {% if user.is_authenticated %}
-            <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'board:full_board' %}">
-                <img src="{% static 'board/img/logo-100.png' %}" alt="Uke4ia Logo" class="me-2" style="height:40px;">
-                Uke4ia Portal
+        {% if user.is_authenticated and active_group %}
+            <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'board:full_board' group_slug=active_group.slug %}">
+                <img src="{% static 'board/img/logo-100.png' %}" alt="{{ active_group.name }} Logo" class="me-2" style="height:40px;">
+                {{ active_group.name }} Portal
+            </a>
+        {% elif user.is_authenticated %}
+            <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'landing' %}">
+                <img src="{% static 'board/img/logo-100.png' %}" alt="Logo" class="me-2" style="height:40px;">
+                Performer Portal
             </a>
         {% else %}
             <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'about' %}">
-                <img src="{% static 'board/img/logo-100.png' %}" alt="Uke4ia Logo" class="me-2" style="height:40px;">
-                Uke4ia Public Site
+                <img src="{% static 'board/img/logo-100.png' %}" alt="{{ group.name|default:'Club' }} Logo" class="me-2" style="height:40px;">
+                {{ group.name|default:"Club" }} Public Site
             </a>
         {% endif %}
 
@@ -33,42 +41,59 @@
                     </a>
                 </li>
 
-                {% if user.is_authenticated %}
-                    <!-- Authenticated users see performer portal links -->
+                {% if user.is_authenticated and active_group %}
+                    <!-- Authenticated users see performer portal links, scoped to their active group -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'full_board' %}active{% endif %}"
-                           href="{% url 'board:full_board' %}">
+                           href="{% url 'board:full_board' group_slug=active_group.slug %}">
                             Full Board
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'performer_event_list' %}active{% endif %}"
-                           href="{% url 'board:performer_event_list' %}">
+                           href="{% url 'board:performer_event_list' group_slug=active_group.slug %}">
                             Performances
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'availability_matrix' %}active{% endif %}"
-                           href="{% url 'board:availability_matrix' %}">
+                           href="{% url 'board:availability_matrix' group_slug=active_group.slug %}">
                             Availability Matrix
                         </a>
                     </li>
+
+                    {% if user_groups|length > 1 %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="groupSwitchDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-people-fill me-1"></i> Switch group
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="groupSwitchDropdown">
+                            {% for g in user_groups %}
+                            <li><a class="dropdown-item {% if g == active_group %}active{% endif %}"
+                                   href="{% url 'board:full_board' group_slug=g.slug %}">{{ g.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endif %}
                 {% else %}
-                    <!-- Public users see public site links -->
+                    <!-- Public / no-group users see public site links -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
                            href="{% url 'about' %}">
-                            About Uke4ia
+                            About
                         </a>
                     </li>
+                    {% if group %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'public_board' %}active{% endif %}"
-                           href="{% url 'public_board' %}">
+                           href="{% url 'public:public_board' group_slug=group.slug %}">
                             Public Board
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
                            href="{% url 'contact' %}">
@@ -138,5 +163,7 @@
                 {% endif %}
             </ul>
         </div>
+        {% endwith %}
+        {% endwith %}
     </div>
 </nav>

@@ -1,31 +1,29 @@
 #public/views.py
 from django.shortcuts import render
 from django.utils import timezone
-from django.shortcuts import render
 from board.models import BoardColumn   # 👈 this line pulls the model from board
+from core.group_access import get_active_group_or_404
 
 
 def about(request):
     return render(request, "public/about.html")
 
-from django.shortcuts import render
-from django.utils import timezone
-from board.models import BoardColumn
 
-def public_board(request):
+def public_board(request, group_slug):
     """
-    Public board view
+    Public board view for ONE group
     - Accessible without login
-    - Only shows columns/items marked as public
+    - Only shows this group's columns/items marked as public
     - Shows all events (events don't have is_public)
     """
 
+    group = get_active_group_or_404(group_slug)
     today = timezone.localdate()
 
-    # ✅ Only fetch public columns
+    # ✅ Only fetch this group's public columns
     columns = (
         BoardColumn.objects
-        .filter(is_public=True)
+        .filter(is_public=True, group=group)
         .select_related("venue")
         .prefetch_related(
             "items__photos",
@@ -65,7 +63,7 @@ def public_board(request):
             f"Public Items: {column.public_items.count()}"
         )
 
-    return render(request, "public/public_board.html", {"columns": columns})
+    return render(request, "public/public_board.html", {"columns": columns, "group": group})
 
 
 def contact(request):
