@@ -119,8 +119,8 @@ class EventAdmin(admin.ModelAdmin):
     """Event management with media inlines, duplication, and rehearsal link."""
     form = EventAdminForm
 
-    list_display = ("title", "event_type", "status", "event_date", "venue", "column", "rehearsal_link")
-    list_filter = ("event_type", "status", "venue", "column")
+    list_display = ("title", "event_type", "status", "event_date", "venue", "column", "group", "rehearsal_link")
+    list_filter = ("event_type", "status", "venue", "column", "group")
     search_fields = ("title", "rich_description", "location")
     ordering = ("event_date", "start_time")
     readonly_fields = ("created_at", "updated_at","rehearsal_link")
@@ -134,9 +134,9 @@ class EventAdmin(admin.ModelAdmin):
         ("Scheduling", {
             "fields": ("event_date", "start_time", "end_time", "arrive_by", "chairs", "attire", "location")
         }),
-        ("Associations", {
-            "fields": ("venue", "column"),
-            "description": "Link event to a Venue (recurring) or Board Column (Upcoming, Past, etc.)"
+           ("Associations", {
+            "fields": ("group", "venue", "column"),
+            "description": "Choose which club this event belongs to, and optionally link it to a Venue (recurring) or Board Column (Upcoming, Past, etc.)"
         }),
         ("Metadata", {
             "fields": ("created_at", "updated_at"),
