@@ -203,6 +203,22 @@
                             <i class="bi bi-files"></i>
                         </span>
                     {% endif %}
+
+                    {# 🆕 Origin badge #}
+                    {% if item.song.origin %}
+                        <span class="badge bg-secondary ms-2">{{ item.song.origin }}</span>
+                    {% endif %}
+
+                    {# 🆕 Other-versions toggle: targets a shared class, not an id, since several rows need to expand/collapse together #}
+                    {% if item.other_versions %}
+                        <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                                data-bs-toggle="collapse"
+                                data-bs-target=".version-group-{{ item.song.id }}"
+                                aria-expanded="false"
+                                title="Other versions of this song">
+                            +{{ item.other_versions|length }} more
+                        </button>
+                    {% endif %}
                 </td>
                 <td>{% if item.is_formatted %}✅{% else %}❌{% endif %}</td>
                 <td>{{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
@@ -237,6 +253,52 @@
                     </a>
                 </td>
             </tr>
+
+            {# 🆕 One full row per alternate version, same 8 columns as the primary row above, so PDF and Teleprompter links work for every version #}
+            {% for v in item.other_versions %}
+            <tr class="collapse version-group-{{ item.song.id }} bg-light">
+                <td>
+                    <a href="{% url site_namespace|add:':chord_sheet' v.song.id %}" 
+                       class="song-link"
+                       title="{{ v.song.songTitle }}">
+                        ↳ {{ v.song.songTitle }}
+                    </a>
+                    {% if v.song.origin %}
+                        <span class="badge bg-secondary ms-2">{{ v.song.origin }}</span>
+                    {% else %}
+                        <span class="badge bg-light text-muted ms-2">(unlabeled)</span>
+                    {% endif %}
+                    {% if not v.song.is_public and v.song.contributor == user %}
+                        <span class="badge bg-warning text-dark ms-2"><i class="bi bi-lock-fill"></i></span>
+                    {% endif %}
+                    {% if v.song.cloned_from %}
+                        <span class="badge bg-info ms-2"><i class="bi bi-files"></i></span>
+                    {% endif %}
+                </td>
+                <td>{% if v.is_formatted %}✅{% else %}❌{% endif %}</td>
+                <td>{{ v.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
+                <td class="text-center">{{ v.song.metadata.year|default_if_none:"" }}</td>
+                <td>
+                    {% for tag in v.song.tags.all %}
+                        <small>{{ tag }}</small>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="text-center">
+                    {% if v.chords|length > 55 %}{{ v.chords|slice:":55" }}...{% else %}{{ v.chords }}{% endif %}
+                </td>
+                <td class="text-center">
+                    {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
+                    <a href="{% url pdf_url v.song.id %}" class="btn btn-sm btn-outline-secondary"
+                       title="{% if site_name == 'FrancoUke' %}Vue PDF{% else %}PDF View{% endif %}">📄</a>
+                    {% endwith %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url teleprompter_url_name v.song.pk %}" class="btn btn-sm btn-outline-primary"
+                       target="_blank" rel="noopener"
+                       title="{% if site_name == 'FrancoUke' %}Téléprompteur{% else %}Teleprompter{% endif %}">🎤</a>
+                </td>
+            </tr>
+            {% endfor %}
             {% empty %}
             <tr><td colspan="8" class="text-center">No songs found matching your search.</td></tr>
             {% endfor %}

@@ -53,6 +53,15 @@ def make_public(modeladmin, request, queryset):
     updated = queryset.update(is_public=True)
     messages.success(request, f"{updated} song(s) marked as PUBLIC.")
 
+# 🆕 TEMPORARY: bulk-assign origin to NBU for initial data cleanup.
+# Remove this action (and its entry in `actions` below) once you've
+# finished tagging your existing NBU-sourced songs.
+@admin.action(description="🏷️ Assign selected songs to NBU")
+def assign_origin_nbu(modeladmin, request, queryset):
+    updated = queryset.update(origin="NBU")
+    messages.success(request, f"{updated} song(s) assigned to NBU.")
+
+
 
 @admin.action(description="🔒 Make selected songs PRIVATE")
 def make_private(modeladmin, request, queryset):
@@ -175,6 +184,7 @@ class SongAdmin(admin.ModelAdmin):
         'songTitle', 
         'get_artist', 
         'contributor',           # 🆕 Show who owns the song
+        'origin',                # 🆕
         'get_privacy_status',    # 🆕 Show privacy status
         'get_is_clone',          # 🆕 Show if it's a clone
         'date_posted', 
@@ -203,6 +213,8 @@ class SongAdmin(admin.ModelAdmin):
         mark_hidden,
         restore_francouke,
         restore_strumsphere,
+        assign_origin_nbu,  # 🆕 TEMPORARY — remove once initial NBU tagging is done
+
     ]
 
     # 🆕 Show privacy and clone fields in detail view
@@ -215,7 +227,7 @@ class SongAdmin(admin.ModelAdmin):
             'classes': ('collapse',),  # Collapsible section
         }),
         ('Metadata', {
-            'fields': ('metadata', 'tags', 'revised_on', 'acknowledgement'),
+            'fields': ('metadata', 'tags', 'revised_on', 'acknowledgement','origin'),
             'classes': ('collapse',),
         }),
         ('Advanced', {

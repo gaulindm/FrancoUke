@@ -28,6 +28,7 @@ class SongCreateView(LoginRequiredMixin, CreateView):
             "revised_on",
             "tags",
             "acknowledgement",
+            "origin",
         ]
         
         # 🆕 Only leaders can set privacy
@@ -80,6 +81,7 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             "revised_on",
             "tags",
             "acknowledgement",
+            "origin",
         ]
         
         # 🆕 Only leaders can edit privacy

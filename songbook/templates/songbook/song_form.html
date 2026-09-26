@@ -62,6 +62,10 @@
                                 {{ form.acknowledgement|as_crispy_field }}
                             {% endif %}
 
+                            {% if 'origin' in form.fields %}
+                                {{ form.origin|as_crispy_field }}
+                            {% endif %}
+
                         </fieldset>
 
                         <!-- Bootstrap Accordion for Metadata and Lyrics with Chords -->

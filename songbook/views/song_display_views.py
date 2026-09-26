@@ -10,6 +10,9 @@ from types import SimpleNamespace
 import re
 import string
 
+from collections import OrderedDict
+from django.core.paginator import Paginator
+
 from songbook.mixins import SiteContextMixin
 from songbook.context_processors import site_context
 from songbook.models import Song, SongFormatting
@@ -170,7 +173,8 @@ class SongListView(SiteContextMixin, ListView):
     template_name = "songbook/song_list.html"
     context_object_name = "songs"
     ordering = ["songTitle"]
-    paginate_by = 25
+    paginate_by = None  # pagination is done manually, over song *families* — see get_context_data
+    FAMILIES_PER_PAGE = 20
 
     # 🆕 Seasonal tag: hidden from the main list except during its month,
     # unless the user explicitly filters by this tag (any time of year).
@@ -426,20 +430,70 @@ class SongListView(SiteContextMixin, ListView):
         context["all_keys"] = sorted(all_keys)
         context["key_filter"] = self.filter_params.get("key", "")
 
-        # Song data
-        song_data = []
+        # 🆕 Group songs into "families" — one row per distinct title, with
+        # other same-titled versions (different club/contributor origins)
+        # tucked underneath. Grouped by normalized title since cloned_from
+        # is reserved for personal tweaks, not club-origin variants, so it
+        # can't be relied on to link these versions together.
+        families = OrderedDict()
         for song in context["songs"]:
+            key = (song.songTitle or "").strip().lower()
+            families.setdefault(key, []).append(song)
+
+        def pick_primary(songs_in_family):
+            for s in songs_in_family:
+                if (s.origin or "").strip().upper() == "NBU":
+                    return s
+            # No NBU version: fall back to the oldest (lowest id = added
+            # first; date_posted isn't reliable here since it gets bumped
+            # forward on every content edit).
+            return min(songs_in_family, key=lambda s: s.id)
+
+        family_list = []
+        for songs_in_family in families.values():
+            primary = pick_primary(songs_in_family)
+            other_versions = [s for s in songs_in_family if s.id != primary.id]
+            family_list.append({
+                "primary": primary,
+                "other_versions": other_versions,
+                "version_count": len(songs_in_family),
+            })
+        family_list.sort(key=lambda f: (f["primary"].songTitle or "").strip().lower())
+
+        # 🆕 Manual pagination over families, not raw Song rows, so a
+        # family never gets split awkwardly across two pages.
+        paginator = Paginator(family_list, self.FAMILIES_PER_PAGE)
+        page_obj = paginator.get_page(self.request.GET.get("page"))
+        context["paginator"] = paginator
+        context["page_obj"] = page_obj
+        context["is_paginated"] = page_obj.has_other_pages()
+
+        def build_row_data(song):
             parsed_data = song.lyrics_with_chords or ""
             chords = extract_chords(parsed_data, unique=True) if parsed_data else []
             chords = [c for c in chords if is_valid_chord(c)]  # 🆕 drop N.C. and other non-chord tokens
             tags = [tag.name for tag in song.tags.all()]
             is_formatted = SongFormatting.objects.filter(song=song).exists()
-            song_data.append({
+            return {
                 "song": song,
                 "chords": ", ".join(chords),
                 "tags": ", ".join(tags),
                 "is_formatted": is_formatted,
-            })
+            }
+
+        # Song data — only for this page's families. Each entry carries its
+        # own full row data PLUS the same row data for every other version
+        # in its family, so the template can render a complete row (artist,
+        # year, tags, chords, PDF, teleprompter) for every version, not just
+        # the primary one.
+        song_data = []
+        for family in page_obj.object_list:
+            primary_data = build_row_data(family["primary"])
+            primary_data["other_versions"] = [
+                build_row_data(v) for v in family["other_versions"]
+            ]
+            primary_data["version_count"] = family["version_count"]
+            song_data.append(primary_data)
 
         context["song_data"] = song_data
         return context

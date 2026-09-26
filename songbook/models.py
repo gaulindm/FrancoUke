@@ -12,15 +12,6 @@ from django.conf import settings
 from django.utils import timezone
 from .parsers import parse_song_data  # adjust as per your structure
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
-
-import re
-from django.db import models
-from django.utils import timezone
-from django.urls import reverse
-from taggit.managers import TaggableManager
-from django.conf import settings
-from .parsers import parse_song_data
-from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 from songbook.utils.transposer import extract_chords
 
 
@@ -72,6 +63,12 @@ class Song(models.Model):
         help_text="Teleprompter scroll speed in pixels per second (default 30 if unset)"
     )
     acknowledgement = models.CharField(max_length=100, blank=True, null=True)
+    origin = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        help_text="Short code for where this version came from, e.g. NBU, SOUP, I-UKE, OZBCOZ (free text)."
+    )
     site_name = models.CharField(
         max_length=20,
         choices=SITE_CHOICES,
