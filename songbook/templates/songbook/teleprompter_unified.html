@@ -22,15 +22,104 @@
     })();
   </script>
 
+  <!-- Theme (light/dark), chord color, and text size. Read before paint,
+       same pattern as chordStyle above, so there's no flash on load. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+
+      var theme = "light";
+      try {
+        var savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "light" || savedTheme === "dark") theme = savedTheme;
+      } catch (e) {}
+      root.setAttribute("data-theme", theme);
+
+      try {
+        var savedColor = localStorage.getItem("chordColor");
+        if (savedColor) root.style.setProperty("--chord-color", savedColor);
+      } catch (e) {}
+
+      try {
+        var savedScale = parseFloat(localStorage.getItem("textScale"));
+        if (!isNaN(savedScale) && savedScale >= 0.7 && savedScale <= 2.0) {
+          root.style.setProperty("--text-scale", savedScale);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- The server always renders the chord-above markup (.chord-word /
        .chord-label). These rules decide how it LOOKS. Chord diagram
        placement (bottom / right) is handled by teleprompter.css +
        teleprompter.js. -->
   <style>
+    /* ===== Theme + chord color + text size, all overridable live ===== */
+    :root {
+      --chord-color: #2a6f97;
+      --text-scale: 1;
+
+      --bg-color: #ffffff;
+      --text-color: #1a1a1a;
+      --controls-bg: #f4f4f4;
+      --controls-border: #d8d8d8;
+      --button-bg: #ffffff;
+      --button-text: #1a1a1a;
+    }
+    html[data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #f0f0f0;
+      --controls-bg: #1e1e1e;
+      --controls-border: #3a3a3a;
+      --button-bg: #2a2a2a;
+      --button-text: #f0f0f0;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+    .controls {
+      background: var(--controls-bg);
+      color: var(--text-color);
+      border-color: var(--controls-border);
+    }
+    .controls button,
+    .controls .layout-toggle button {
+      background: var(--button-bg);
+      color: var(--button-text);
+      border-color: var(--controls-border);
+    }
+    #chord-section {
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    /* Chord diagrams (fretboards) drawn by chord_diagrams.js: force them
+       to plain black in light mode. Targets any element that has an
+       inline fill/stroke set to something other than "none", so open
+       string circles (fill="none") stay hollow instead of turning into
+       solid black dots. Left untouched in dark mode. */
+    html[data-theme="light"] #chord-diagrams svg [fill]:not([fill="none"]),
+    html[data-theme="light"] #chord-diagrams svg text {
+      fill: #000 !important;
+    }
+    html[data-theme="light"] #chord-diagrams svg [stroke]:not([stroke="none"]) {
+      stroke: #000 !important;
+    }
+
     .chord-label {
       font-weight: 700;
-      color: #2a6f97;
+      color: var(--chord-color);
       white-space: nowrap;
+    }
+
+    /* Text size applies to both lyrics and (via em, below) the chord
+       names, so the +/- control scales the whole song together. */
+    .lyrics .verse,
+    .lyrics .section-body,
+    .lyrics .centered {
+      font-size: calc(1em * var(--text-scale));
     }
 
     /* ===== Chords ABOVE the lyrics ===== */
@@ -97,6 +186,20 @@
       </div>
     </div>
     <div class="right">
+      <div class="control-inline" id="fontsize-control">
+        <span>Size</span>
+        <button id="fontsize-down" title="Smaller text">A−</button>
+        <span id="fontsize-value">100%</span>
+        <button id="fontsize-up" title="Larger text">A+</button>
+      </div>
+      <div class="control-inline" id="chordcolor-control">
+        <label for="chord-color-picker">Chord color</label>
+        <input type="color" id="chord-color-picker" value="#2a6f97" title="Chord symbol color">
+      </div>
+      <div class="layout-toggle" role="group" aria-label="Theme">
+        <button type="button" id="theme-light" aria-pressed="true">☀️ Light</button>
+        <button type="button" id="theme-dark" aria-pressed="false">🌙 Dark</button>
+      </div>
       <div class="layout-toggle" role="group" aria-label="Chord style">
         <button type="button" id="chord-style-above" aria-pressed="true">Above</button>
         <button type="button" id="chord-style-inline" aria-pressed="false">Inline</button>
@@ -204,6 +307,65 @@
         if (btn) btn.addEventListener("click", () => setChordStyle(name));
       });
       reflectState(root.getAttribute("data-chord-style") || "above");
+    });
+  </script>
+
+  <!-- Chord color, text size, and light/dark theme controls. -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+
+      // --- Chord color ---
+      const colorPicker = document.getElementById("chord-color-picker");
+      if (colorPicker) {
+        const current = getComputedStyle(root).getPropertyValue("--chord-color").trim();
+        if (current) colorPicker.value = current.startsWith("#") ? current : "#2a6f97";
+        colorPicker.addEventListener("input", () => {
+          root.style.setProperty("--chord-color", colorPicker.value);
+          try { localStorage.setItem("chordColor", colorPicker.value); } catch (e) {}
+        });
+      }
+
+      // --- Text size (+/-), 10% steps, 70%-200% ---
+      const fontValue = document.getElementById("fontsize-value");
+      const fontDown = document.getElementById("fontsize-down");
+      const fontUp = document.getElementById("fontsize-up");
+      const MIN_SCALE = 0.7, MAX_SCALE = 2.0, STEP = 0.1;
+
+      function getScale() {
+        const raw = parseFloat(getComputedStyle(root).getPropertyValue("--text-scale"));
+        return isNaN(raw) ? 1 : raw;
+      }
+      function setScale(scale) {
+        scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round(scale * 100) / 100));
+        root.style.setProperty("--text-scale", scale);
+        try { localStorage.setItem("textScale", scale); } catch (e) {}
+        if (fontValue) fontValue.textContent = Math.round(scale * 100) + "%";
+      }
+
+      if (fontValue) fontValue.textContent = Math.round(getScale() * 100) + "%";
+      if (fontDown) fontDown.addEventListener("click", () => setScale(getScale() - STEP));
+      if (fontUp) fontUp.addEventListener("click", () => setScale(getScale() + STEP));
+
+      // --- Light / dark theme ---
+      const themeButtons = {
+        light: document.getElementById("theme-light"),
+        dark: document.getElementById("theme-dark"),
+      };
+      function reflectTheme(theme) {
+        Object.entries(themeButtons).forEach(([name, btn]) => {
+          if (btn) btn.setAttribute("aria-pressed", String(name === theme));
+        });
+      }
+      function setTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try { localStorage.setItem("theme", theme); } catch (e) {}
+        reflectTheme(theme);
+      }
+      Object.entries(themeButtons).forEach(([name, btn]) => {
+        if (btn) btn.addEventListener("click", () => setTheme(name));
+      });
+      reflectTheme(root.getAttribute("data-theme") || "light");
     });
   </script>
 
