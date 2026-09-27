@@ -90,6 +90,14 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     flush_buffer()
                     section_type = selected_map[directive]
 
+            # 🆕 {c:...} / {comment:...} — flush whatever's buffered so the
+            # comment renders as its own standalone block, then keep going
+            # with the same section_type (a comment is an aside, not a
+            # section boundary).
+            elif "comment" in item:
+                flush_buffer()
+                html.append(f'<div class="song-comment">{item["comment"]}</div>')
+
             elif "lyric" in item or "chord" in item:
                 chord = item.get("chord", "")
                 lyric = item.get("lyric", "")  # This contains color markup tags

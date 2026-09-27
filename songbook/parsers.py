@@ -49,6 +49,14 @@ def parse_song_data(chordpro_text):
                     result.append([{"instruction": instruction_text}])
                 continue
 
+            # 🎯 NEW: Handle {c: ...} / {comment: ...}
+            comment_match = re.match(r'{c(?:omment)?\s*:(.*)}', stripped, re.IGNORECASE)
+            if comment_match:
+                comment_text = comment_match.group(1).strip()
+                if comment_text:
+                    result.append([{"comment": comment_text}])
+                continue
+
             # 🎯 Existing: Directives like {soc}, {sov}, {title: ...}, etc.
             directive_match = re.match(r'{(.*?)\s*:?([^}]*)}', stripped)
             if directive_match:

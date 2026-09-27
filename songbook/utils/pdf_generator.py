@@ -393,6 +393,19 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
 
     selected_map = directive_map.get(site_name, directive_map["StrumSphere"])
 
+    # 🆕 Style for {c:...} / {comment:...} ChordPro annotations, e.g.
+    # "(repeat chorus x2)" — printed as a small centered italic note, distinct
+    # from section labels and lyric text.
+    comment_style = ParagraphStyle(
+        'SongComment',
+        parent=base_style,
+        fontSize=9,
+        textColor=colors.grey,
+        alignment=TA_CENTER,
+        spaceBefore=4,
+        spaceAfter=4,
+    )
+
     def flush_buffer():
         nonlocal paragraph_buffer, section_type, section_instruction
 
@@ -462,6 +475,16 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
 
             elif "instruction" in item:
                 section_instruction = item["instruction"]
+                continue
+
+            # 🆕 {c:...} / {comment:...} — flush whatever's buffered so the
+            # comment prints as its own standalone note, then keep going
+            # with the same section_type (a comment is an aside, not a
+            # section boundary).
+            elif "comment" in item:
+                flush_buffer()
+                comment_text = apply_color_markup(item["comment"])
+                elements.append(Paragraph(f"<i>{comment_text}</i>", comment_style))
                 continue
 
             elif "lyric" in item:
