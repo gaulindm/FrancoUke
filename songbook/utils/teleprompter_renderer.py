@@ -34,6 +34,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
 
     metadata = {
         "title": None,
+        "subtitle": None,
         "artist": None,
         "album": None,
         "year": None,
@@ -74,6 +75,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                 # Metadata
                 if key in ["t", "title"]:
                     metadata["title"] = val
+                elif key in ["st", "subtitle"]:
+                    metadata["subtitle"] = val
                 elif key == "artist":
                     metadata["artist"] = val
                 elif key == "album":

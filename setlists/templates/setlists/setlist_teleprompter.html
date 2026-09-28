@@ -123,6 +123,15 @@
   color: var(--fg);
 }
 
+/* {st:...} / {subtitle:...} — quieter line directly under the title */
+.song-subtitle {
+  font-size: 0.6em;
+  font-weight: normal;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
 /* Songwriter row */
 .metadata-table tr:nth-child(2) td:nth-child(2) {
   font-size: 1em;
@@ -223,7 +232,12 @@
         <table class="metadata-table">
           <tr>
             <td>{{ metadata.timeSignature|default:"" }}</td>
-            <td>{{ song.songTitle|default:"Untitled Song" }}</td>
+            <td>
+              {{ song.songTitle|default:"Untitled Song" }}
+              {% if metadata.subtitle %}
+                <div class="song-subtitle">{{ metadata.subtitle }}</div>
+              {% endif %}
+            </td>
             <td>{% if has_slash_chord %}(/ = one strum){% endif %}</td>
           </tr>
           <tr>

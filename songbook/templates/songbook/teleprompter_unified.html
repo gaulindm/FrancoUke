@@ -163,6 +163,14 @@
     .lyrics .metadata {
       margin-bottom: 2rem;
     }
+    /* {st:...} / {subtitle:...} — sits directly under the title, quieter
+       than it so it doesn't compete for attention. */
+    .song-subtitle {
+      font-style: italic;
+      font-size: 1.1em;
+      opacity: 0.75;
+      margin-top: -0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -218,6 +226,9 @@
       <div class="lyrics">
         <div class="metadata">
           <h1>{{ song.songTitle }}</h1>
+          {% if metadata.subtitle %}
+            <div class="song-subtitle">{{ metadata.subtitle }}</div>
+          {% endif %}
           {% if metadata.songwriter %}
             <div class="songwriter">{{ metadata.songwriter }}</div>
           {% endif %}

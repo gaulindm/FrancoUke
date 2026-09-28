@@ -362,7 +362,7 @@ def song_search(request):
         songs = songs.filter(songTitle__icontains=query)
 
     results = [
-        {"id": s.id, "title": s.songTitle}
+        {"id": s.id, "title": s.songTitle, "origin": s.origin}
         for s in songs.order_by("songTitle")[:100]  # Limit to 100 results for speed
     ]
 

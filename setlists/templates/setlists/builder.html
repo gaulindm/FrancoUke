@@ -21,6 +21,11 @@
       color: inherit;
       padding: 0;
     }
+    .origin-badge {
+      font-size: 0.65rem;
+      vertical-align: middle;
+      letter-spacing: 0.02em;
+    }
     /* Toast styling */
     #toast {
       position: fixed;
@@ -96,6 +101,9 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
                 <span>{{ song.songTitle }}</span>
+                {% if song.origin %}
+                  <span class="badge bg-secondary origin-badge ms-1" title="Origin: {{ song.origin }}">{{ song.origin }}</span>
+                {% endif %}
                 {% if song.note_count > 0 %}
 
                 {% if group %}
@@ -116,7 +124,8 @@
               <button type="button"
                       class="btn btn-sm btn-success add-song"
                       data-id="{{ song.id }}"
-                      data-title="{{ song.songTitle }}">
+                      data-title="{{ song.songTitle }}"
+                      data-origin="{{ song.origin|default:'' }}">
                 + Add
               </button>
             </li>
@@ -132,7 +141,12 @@
           {% for item in setlist.songs.all %}
           <li class="list-group-item d-flex align-items-center" data-id="{{ item.song.id }}">
             <span class="drag-handle me-2">☰</span>
-            <strong class="flex-grow-1">{{ item.song.songTitle }}</strong>
+            <strong class="flex-grow-1">
+              {{ item.song.songTitle }}
+              {% if item.song.origin %}
+                <span class="badge bg-secondary origin-badge ms-1" title="Origin: {{ item.song.origin }}">{{ item.song.origin }}</span>
+              {% endif %}
+            </strong>
             <input type="hidden" name="order[]" value="{{ item.song.id }}">
 
             <!-- after -->
@@ -219,12 +233,16 @@ document.addEventListener("DOMContentLoaded", function () {
         data.songs.forEach(song => {
           const li = document.createElement("li");
           li.className = "list-group-item d-flex justify-content-between align-items-center";
+          const originBadge = song.origin
+            ? `<span class="badge bg-secondary origin-badge ms-1" title="Origin: ${song.origin}">${song.origin}</span>`
+            : "";
           li.innerHTML = `
-            <span>${song.title}</span>
+            <span>${song.title}${originBadge}</span>
             <button type="button"
                     class="btn btn-sm btn-success add-song"
                     data-id="${song.id}"
-                    data-title="${song.title}">
+                    data-title="${song.title}"
+                    data-origin="${song.origin || ''}">
               + Add
             </button>`;
           songList.appendChild(li);
@@ -241,18 +259,23 @@ function bindAddButtons() {
       e.preventDefault();
       const songId = btn.dataset.id;
       const songTitle = btn.dataset.title;
+      const songOrigin = btn.dataset.origin || "";
 
       if (document.querySelector(`#setlist-songs li[data-id="${songId}"]`)) {
         showToast("⚠️ Already in setlist", "warning");
         return;
       }
 
+      const originBadge = songOrigin
+        ? `<span class="badge bg-secondary origin-badge ms-1" title="Origin: ${songOrigin}">${songOrigin}</span>`
+        : "";
+
       const li = document.createElement("li");
       li.className = "list-group-item d-flex align-items-center";
       li.dataset.id = songId;
       li.innerHTML = `
         <span class="drag-handle me-2">☰</span>
-        <strong class="flex-grow-1">${songTitle}</strong>
+        <strong class="flex-grow-1">${songTitle}${originBadge}</strong>
         <input type="hidden" name="order[]" value="${songId}">
         <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
       `;
