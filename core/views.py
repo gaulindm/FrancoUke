@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from .models import Group
 
 
 def landing_page(request):
@@ -16,4 +17,17 @@ def landing_page(request):
             "url": "strumsphere:home",
         }
     ]
-    return render(request, "core/landing.html", {"brands": brands})
+
+    # Top-level clubs only (parent__isnull=True excludes performance subgroups)
+    clubs = list(Group.objects.filter(is_active=True, parent__isnull=True))
+
+    member_group_ids = set()
+    if request.user.is_authenticated:
+        member_group_ids = set(
+            request.user.group_memberships.values_list("group_id", flat=True)
+        )
+
+    for club in clubs:
+        club.is_member = club.id in member_group_ids
+
+    return render(request, "core/landing.html", {"brands": brands, "clubs": clubs})

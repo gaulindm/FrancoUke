@@ -46,8 +46,16 @@ def public_board(request, group_slug):
         upcoming = events.filter(event_date__gte=today).order_by("event_date", "start_time")
         past = events.filter(event_date__lt=today).order_by("-event_date", "-start_time")
 
-        # 🔹 Combine
-        column.sorted_events = list(upcoming) + list(past)
+        # 🔹 Pick the right list based on column name (mirrors board/views/board_views.py)
+        if column.name.lower().startswith("upcoming"):
+            column.sorted_events = list(upcoming)
+        elif column.name.lower().startswith("past"):
+            column.sorted_events = list(past)
+        elif column.name.lower().startswith("to be confirmed"):
+            column.sorted_events = list(events.order_by("event_date", "start_time"))
+        else:
+            column.sorted_events = list(upcoming) + list(past)
+
 
         # 🔹 Attach cover photo (no is_public filter on photos)
         for event in column.sorted_events:
