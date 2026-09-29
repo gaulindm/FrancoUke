@@ -1,3 +1,6 @@
+import re
+
+
 def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", chord_position="inline"):
     """
     Render parsed lyrics_with_chords (list of groups) into HTML,
@@ -46,8 +49,37 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     current_buffer = []
     section_type = None
 
+    # 🆕 Singing-group markers: {c:1}, {c:2}, {c:1+2}, {c:All}.
+    # A marker applies ONLY to the single line right after it. We remember
+    # it in pending_group until that line's first chord/lyric arrives, wrap
+    # the line in <div class="grp grp-N">, and close it at the LINEBREAK.
+    GROUP_RE = re.compile(
+        r'^\s*(\d+(?:\s*[+&,]\s*\d+)*|all|tous|tutti)\s*$', re.I
+    )
+    pending_group = None   # marker waiting for the next line of lyrics
+    open_group = False     # currently inside a group line?
+
+    def close_group():
+        nonlocal open_group
+        if open_group:
+            current_buffer.append('</div>')
+            open_group = False
+
+    def start_group_line():
+        nonlocal pending_group, open_group
+        if pending_group and not open_group:
+            label = pending_group
+            cls = 'grp-' + re.sub(r'[^a-z0-9]+', '-', label.lower()).strip('-')
+            current_buffer.append(
+                f'<div class="grp {cls}">'
+                f'<span class="grp-badge">{label}</span>'
+            )
+            open_group = True
+            pending_group = None
+
     def flush_buffer():
         nonlocal current_buffer, section_type
+        close_group()
         if current_buffer:
             text = "".join(current_buffer)
             # 🆕 Check for empty section_type (centered sections with no label)
@@ -98,6 +130,13 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             # with the same section_type (a comment is an aside, not a
             # section boundary).
             elif "comment" in item:
+                text = item["comment"].strip()
+                if GROUP_RE.match(text):
+                    # 🆕 Singing-group marker: don't render it on its own;
+                    # it decorates the next line. `continue` also skips any
+                    # LINEBREAK attached to the marker item itself.
+                    pending_group = text
+                    continue
                 flush_buffer()
                 html.append(f'<div class="song-comment">{item["comment"]}</div>')
 
@@ -107,6 +146,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                 
                 # 🎨 Preserve color markup tags - don't escape them
                 if chord:
+                    start_group_line()
                     if chord_position == "above":
                         current_buffer.append(
                             f'<span class="chord-word">'
@@ -128,6 +168,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     # still fires normally and produces the blank line.
                     pass
                 else:
+                    start_group_line()
                     current_buffer.append(lyric)
 
             # 🆕 Checked independently (not elif) — an item can carry
@@ -138,8 +179,14 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             # next line's lyrics to run on after it.
             if "format" in item:
                 if item["format"] == "LINEBREAK":
-                    current_buffer.append("<br/>")
+                    if open_group:
+                        close_group()   # the block ends the line: no <br/>
+                    elif pending_group:
+                        pass            # this break belongs to the marker line
+                    else:
+                        current_buffer.append("<br/>")
                 elif item["format"] == "PARAGRAPHBREAK":
+                    pending_group = None
                     flush_buffer()
                     html.append('<div class="para-break"></div>')
 

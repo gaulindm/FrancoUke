@@ -248,6 +248,11 @@ class SongListView(SiteContextMixin, ListView):
         if artist_name:
             qs = qs.filter(metadata__artist__iexact=artist_name)
 
+        # 🆕 Filter by club (the Song.origin field: SOUP, I-Ukes, NBU, FWC...)
+        origin_filter = self.filter_params.get("origin", "").strip()
+        if origin_filter:
+            qs = qs.filter(origin__iexact=origin_filter)
+
         # 🆕 Filter by starting letter (A-Z) or number/symbol ("#")
         letter_filter = self.filter_params.get("letter", "").strip().upper()
         if letter_filter:
@@ -429,6 +434,16 @@ class SongListView(SiteContextMixin, ListView):
                 all_keys.add(song.effective_key)
         context["all_keys"] = sorted(all_keys)
         context["key_filter"] = self.filter_params.get("key", "")
+
+        # 🆕 Origin (club) filter — only offer origins that actually have songs
+        context["all_origins"] = (
+            site_songs.exclude(origin__isnull=True)
+            .exclude(origin="")
+            .order_by("origin")
+            .values_list("origin", flat=True)
+            .distinct()
+        )
+        context["origin_filter"] = self.filter_params.get("origin", "")
 
         # 🆕 Group songs into "families" — one row per distinct title, with
         # other same-titled versions (different club/contributor origins)
