@@ -5,8 +5,9 @@ from board.models import BoardColumn   # 👈 this line pulls the model from boa
 from core.group_access import get_active_group_or_404
 
 
-def about(request):
-    return render(request, "public/about.html")
+def about(request, group_slug):
+    group = get_active_group_or_404(group_slug)
+    return render(request, "public/about.html", {"group": group})
 
 
 def public_board(request, group_slug):
@@ -74,5 +75,6 @@ def public_board(request, group_slug):
     return render(request, "public/public_board.html", {"columns": columns, "group": group})
 
 
-def contact(request):
-    return render(request, "public/contact.html")
+def contact(request, group_slug):
+    group = get_active_group_or_404(group_slug)
+    return render(request, "public/contact.html", {"group": group})

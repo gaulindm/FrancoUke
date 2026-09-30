@@ -6,13 +6,13 @@ def landing_page(request):
     brands = [
         {
             "name": "FrancoUke",
-            "desc": "Ton chansonnier francophone",
+            "desc": "Ton chansonnier francophone. L'application fonctionne mais ne sera pas nécessairement amélioré pour le moment pour me permettre a concentrer sur les autres applications.",
             "icon": "bi-music-note-beamed",
             "url": "francouke:home",
         },
         {
             "name": "StrumSphere",
-            "desc": "Connect and strum around the world",
+            "desc": "Connect and strum around the world.  This is an active project",
             "icon": "bi-globe",
             "url": "strumsphere:home",
         }

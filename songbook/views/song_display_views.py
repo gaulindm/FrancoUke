@@ -36,8 +36,8 @@ class LandingView(TemplateView):
 
         if site_name == "StrumSphere":
             return ["sites/home_strumsphere.html"]
-        if site_name == "Uke4ia":
-            return ["sites/home_uke4ia.html"]
+
+
         return ["sites/home_francouke.html"]
 
 

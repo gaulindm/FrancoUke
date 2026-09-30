@@ -199,8 +199,8 @@ LOGOUT_REDIRECT_URL = 'landing' # After logout → Landing page
 
 # Note: Most of your apps are PUBLIC with selective authentication:
 # - FrancoUke/StrumSphere: Public viewing, auth for editing ChordPro
-# - Uke4ia Public: No auth required
-# - Uke4ia Performers: Auth required for board/availability/setlists
+# - Groups Public: No auth required
+# - Groups Performers: Auth required for board/availability/setlists
 # - FrancontCube: Public now, will need auth for training timer/leaderboard
 
 

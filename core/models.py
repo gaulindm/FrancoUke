@@ -4,7 +4,7 @@ from django.db import models
 
 class Group(models.Model):
     """
-    A performance group / ukulele club (e.g. Uke4ia, I-Ukes).
+    A performance group / ukulele club (e.g. FWC, I-Ukes).
     Acts as the tenant that board/assets/setlists content belongs to.
     """
     name = models.CharField(max_length=100, unique=True)
@@ -20,6 +20,9 @@ class Group(models.Model):
     )
     logo = models.ImageField(upload_to="group_logos/", blank=True, null=True)
     contact_email = models.EmailField(blank=True)
+    description   = models.TextField(blank=True)
+    contact_phone = models.CharField(max_length=30, blank=True)
+    facebook_url  = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -33,7 +36,7 @@ class Group(models.Model):
 class GroupMembership(models.Model):
     """
     Links a user to a group with a role. A user can belong to more than
-    one group (e.g. someone who performs with both Uke4ia and I-Ukes).
+    one group (e.g. someone who performs with both FWC and I-Ukes).
     """
     ROLE_CHOICES = [
         ("performer", "Performer"),

@@ -1,21 +1,33 @@
-{% extends "uke4ia/base.html" %}
-{% block title %}Contact Uke4ia{% endblock %}
+{% extends "groups/base.html" %}
+{% block title %}Contact {{ group.name|default:"Us" }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <h2>Contact Uke4ia</h2>
+        <h2>Contact {{ group.name|default:"Us" }}</h2>
         <p>We’d love to hear from you! You can reach us at:</p>
 
         <ul class="list-group mb-4">
-            <li class="list-group-item"><i class="bi bi-envelope me-2"></i> uke4ia@example.com</li>
-            <li class="list-group-item"><i class="bi bi-telephone me-2"></i> (555) 123-4567</li>
-            <li class="list-group-item"><i class="bi bi-facebook me-2"></i> <a href="#">Facebook Page</a></li>
+            {% if group.contact_email %}
+            <li class="list-group-item"><i class="bi bi-envelope me-2"></i>
+                <a href="mailto:{{ group.contact_email }}">{{ group.contact_email }}</a></li>
+            {% endif %}
+            {% if group.contact_phone %}
+            <li class="list-group-item"><i class="bi bi-telephone me-2"></i> {{ group.contact_phone }}</li>
+            {% endif %}
+            {% if group.facebook_url %}
+            <li class="list-group-item"><i class="bi bi-facebook me-2"></i>
+                <a href="{{ group.facebook_url }}">Facebook Page</a></li>
+            {% endif %}
         </ul>
 
         <p>
-            Interested in volunteering or performing? 
-            <a href="{% url 'users:login' %}?next=/board/">Login as a performer</a>.
+            Interested in volunteering or performing?
+            {% if group %}
+                <a href="{% url 'users:login' %}?next={% url 'board:full_board' group_slug=group.slug %}">Login as a performer</a>.
+            {% else %}
+                <a href="{% url 'users:login' %}">Login as a performer</a>.
+            {% endif %}
         </p>
     </div>
 </div>

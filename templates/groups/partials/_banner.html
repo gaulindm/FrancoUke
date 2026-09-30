@@ -1,0 +1,15 @@
+{% with first_user_group=user_groups|first %}
+{% with active_group=group|default:first_user_group %}
+{% if user.is_authenticated %}
+    <div class="pt-5 pb-3 bg-primary text-white text-center shadow-sm">
+        <h2 class="mb-0">Welcome to the {{ active_group.name|default:"Club" }} Volunteer Portal</h2>
+        <small>Manage your availability for upcoming performances</small>
+    </div>
+{% else %}
+    <div class="pt-5 pb-3 bg-primary text-white text-center shadow-sm">
+        <h1 class="mb-0">Welcome to {{ group.name|default:"our club" }}!</h1>
+        <small>Check out our volunteer activities and public boards</small>
+    </div>
+{% endif %}
+{% endwith %}
+{% endwith %}

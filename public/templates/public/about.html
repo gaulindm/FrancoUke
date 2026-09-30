@@ -1,16 +1,13 @@
-{% extends "uke4ia/base.html" %}
-{% block title %}About Uke4ia{% endblock %}
+{% extends "groups/base.html" %}
+{% block title %}About {{ group.name|default:"Us" }}{% endblock %}
 
 {% block content %}
 <div class="text-center">
-    <h2>About Uke4ia</h2>
-    <p class="lead">
-        Uke4ia is a volunteer-driven ukulele performance group bringing joy to the community
-        through music and friendship.
-    </p>
-    <p>
-        We perform at senior centers, festivals, and special events. Volunteers are the heart of our group,
-        whether playing music or supporting behind the scenes.
-    </p>
+    <h2>About {{ group.name|default:"Us" }}</h2>
+    {% if group.description %}
+        <div class="lead">{{ group.description|linebreaks }}</div>
+    {% else %}
+        <p class="lead">More information coming soon.</p>
+    {% endif %}
 </div>
 {% endblock %}

@@ -10,8 +10,6 @@ class SiteContextMixin:
             return "FrancoUke"
         elif ns == "strumsphere":
             return "StrumSphere"
-        elif ns == "uke4ia":
-            return "Uke4ia"
         return "Unknown"
 
     def get_base_template(self):
@@ -20,8 +18,6 @@ class SiteContextMixin:
             return "base_francouke.html"
         elif site_name == "StrumSphere":
             return "base_strumsphere.html"
-        elif site_name == "Uke4ia":
-            return "uke4ia/base.html"
         return "base.html"  # fallback
 
     def get_context_data(self, **kwargs):

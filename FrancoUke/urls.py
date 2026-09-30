@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
 from core.views import landing_page 
-from public import views as public_views
+#from public import views as public_views
 
 urlpatterns = [
     path("admin/assets/", include("assets.urls")),
@@ -24,8 +24,8 @@ urlpatterns = [
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
     path("strumsphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
 
-    path("about/", public_views.about, name="about"),
-    path("contact/", public_views.contact, name="contact"),
+#    path("about/", public_views.about, name="about"),
+#    path("contact/", public_views.contact, name="contact"),
     path("public-board/<slug:group_slug>/", include(("public.urls", "public"), namespace="public")),
 
 ]

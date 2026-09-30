@@ -20,7 +20,7 @@ class SetList(models.Model):
     on_delete=models.SET_NULL,
     null=True, blank=True,
     related_name="setlist",  # 👈 gives us event.setlist
-    help_text="Optional: link this setlist to a Uke4ia event"
+    help_text="Optional: link this setlist to an event"
 )
 
     def __str__(self):

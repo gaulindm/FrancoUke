@@ -5,7 +5,7 @@
 <nav class="navbar navbar-expand-md navbar-dark
   {% if site_name == 'FrancoUke' %} bg-success
   {% elif site_name == 'StrumSphere' %} bg-primary
-  {% else %} bg-uke4ia-dark
+  {% else %} bg-dark
   {% endif %} fixed-top shadow-sm">
 
   <div class="container-fluid">
@@ -20,7 +20,7 @@
       {% elif site_name == "StrumSphere" %}
         🎵 StrumSphere
       {% else %}
-        🎵 Uke4ia Volunteers
+        🎵 Songbook
       {% endif %}
     </a>
 
@@ -83,17 +83,6 @@
 
         {% endif %}
 
-        {% if site_name == "Uke4ia" and user.is_authenticated %}
-          <a class="nav-item nav-link" href="{% url my_avail_url %}">
-            🎵 My Availability
-          </a>
-
-          {% if user|has_group:"Leaders" %}
-            <a class="nav-item nav-link" href="{% url avail_matrix_url %}">
-              📊 Availability Matrix
-            </a>
-          {% endif %}
-        {% endif %}
 
       </div>
 
