@@ -3,7 +3,7 @@
 from django.shortcuts import get_object_or_404
 from django.http import QueryDict
 from django.views.generic import TemplateView, ListView, DetailView
-from django.db.models import Q
+from django.db.models import Q, prefetch_related_objects
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from types import SimpleNamespace
@@ -223,7 +223,9 @@ class SongListView(SiteContextMixin, ListView):
 
         # Existing filters
         if self.filter_params.get("formatted") == "1":
-            qs = qs.filter(songformatting__isnull=False)
+            # pk__in (not a join) so a song formatted by several users can't
+            # appear twice; that keeps the final DISTINCT unnecessary.
+            qs = qs.filter(pk__in=SongFormatting.objects.values("song_id"))
 
         search_query = self.filter_params.get("q", "").strip()
         selected_tag = self.filter_params.get("tag", "").strip()
@@ -344,7 +346,10 @@ class SongListView(SiteContextMixin, ListView):
                     matching_pks.append(pk)
             qs = qs.filter(pk__in=matching_pks)
 
-        return qs.distinct()
+        # 🆕 PERFORMANCE: no .distinct(). Nothing above can produce duplicate
+        # rows (formatted uses pk__in, tag/exclude match one row per song), and
+        # DISTINCT over full rows (incl. songChordPro + JSON) cost ~1s here.
+        return qs
     
     
 
@@ -392,13 +397,44 @@ class SongListView(SiteContextMixin, ListView):
 
         # 🆕 All unique chords across the site for the clickable buttons
         # In get_context_data():
+        # 🆕 PERFORMANCE: one lightweight query feeds the chord, decade and
+        # key filter buttons below. values_list() fetches only these three
+        # columns, so we no longer load every visible song in full
+        # (songChordPro + lyrics_with_chords JSON) three separate times.
         all_chords = set()
-        for song in site_songs:
-            if song.chords_used:
-                for chord in song.chords_used.split(","):
+        all_decades = set()
+        all_keys = set()
+        all_origins = set()
+        for chords_used, metadata, detected_key, origin in site_songs.values_list(
+            "chords_used", "metadata", "detected_key", "origin"
+        ):
+            metadata = metadata or {}
+
+            # Origins (clubs)
+            if origin:
+                all_origins.add(origin)
+
+            # Chords
+            if chords_used:
+                for chord in chords_used.split(","):
                     chord = chord.strip()
                     if is_valid_chord(chord):
                         all_chords.add(chord)
+
+            # Decades
+            year_str = metadata.get("year")
+            if year_str:
+                try:
+                    all_decades.add((int(year_str) // 10) * 10)
+                except (ValueError, TypeError):
+                    pass
+
+            # Keys: manual {key:} tag if set, else auto-detected
+            # (same rule as Song.effective_key)
+            effective_key = metadata.get("key") or detected_key
+            if effective_key:
+                all_keys.add(effective_key)
+
         context["all_chords"] = sorted(all_chords)
         context["chord_filter"] = self.filter_params.get("chords", "")
         context["chord_mode"] = self.filter_params.get("chord_mode", "playable")
@@ -414,35 +450,19 @@ class SongListView(SiteContextMixin, ListView):
         context["chord_count_filter"] = self.filter_params.get("chord_count", "")
 
         # 🆕 Decade filter — only offer decades that actually have songs
-        all_decades = set()
-        for song in site_songs:
-            year_str = (song.metadata or {}).get("year")
-            if year_str:
-                try:
-                    year = int(year_str)
-                    all_decades.add((year // 10) * 10)
-                except (ValueError, TypeError):
-                    pass
+        # (all_decades is collected in the single pass above)
         context["all_decades"] = sorted(all_decades)
         context["decade_filter"] = self.filter_params.get("decade", "")
 
         # 🆕 Key filter — only offer keys that actually appear (using effective_key:
         # manual {key:} tag if set, else the auto-detected key)
-        all_keys = set()
-        for song in site_songs:
-            if song.effective_key:
-                all_keys.add(song.effective_key)
+        # (all_keys is collected in the single pass above)
         context["all_keys"] = sorted(all_keys)
         context["key_filter"] = self.filter_params.get("key", "")
 
         # 🆕 Origin (club) filter — only offer origins that actually have songs
-        context["all_origins"] = (
-            site_songs.exclude(origin__isnull=True)
-            .exclude(origin="")
-            .order_by("origin")
-            .values_list("origin", flat=True)
-            .distinct()
-        )
+        # (all_origins is collected in the single pass above)
+        context["all_origins"] = sorted(all_origins)
         context["origin_filter"] = self.filter_params.get("origin", "")
 
         # 🆕 Group songs into "families" — one row per distinct title, with
@@ -483,12 +503,25 @@ class SongListView(SiteContextMixin, ListView):
         context["page_obj"] = page_obj
         context["is_paginated"] = page_obj.has_other_pages()
 
+        # 🆕 PERFORMANCE: fetch tags and "is formatted" for ALL songs on this
+        # page in two queries, instead of two queries per song.
+        page_songs = []
+        for family in page_obj.object_list:
+            page_songs.append(family["primary"])
+            page_songs.extend(family["other_versions"])
+        prefetch_related_objects(page_songs, "tags")
+        formatted_ids = set(
+            SongFormatting.objects.filter(
+                song_id__in=[s.id for s in page_songs]
+            ).values_list("song_id", flat=True)
+        )
+
         def build_row_data(song):
             parsed_data = song.lyrics_with_chords or ""
             chords = extract_chords(parsed_data, unique=True) if parsed_data else []
             chords = [c for c in chords if is_valid_chord(c)]  # 🆕 drop N.C. and other non-chord tokens
-            tags = [tag.name for tag in song.tags.all()]
-            is_formatted = SongFormatting.objects.filter(song=song).exists()
+            tags = [tag.name for tag in song.tags.all()]  # prefetched above
+            is_formatted = song.id in formatted_ids
             return {
                 "song": song,
                 "chords": ", ".join(chords),

@@ -56,6 +56,18 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     GROUP_RE = re.compile(
         r'^\s*(\d+(?:\s*[+&,]\s*\d+)*|all|tous|tutti)\s*$', re.I
     )
+    # 🆕 Hold cue: {c:(23)} at the end of a line = keep strumming the last
+    # chord through those beats (2 and 3). Rendered inline, in orange.
+    HOLD_RE = re.compile(r'^\s*\(\s*([\d,\s]+?)\s*\)\s*$')
+    # The parser leaves {c:(...)} as plain lyric text when it sits at the
+    # END of a line, so also catch it inside lyric strings.
+    HOLD_INLINE_RE = re.compile(r'\s*\{c:\s*\(\s*([\d,\s]+?)\s*\)\s*\}', re.I)
+
+    def inline_holds(lyric):
+        return HOLD_INLINE_RE.sub(
+            lambda m: f'<span class="hold-cue">({m.group(1).replace(" ", "")})</span>',
+            lyric,
+        )
     pending_group = None   # marker waiting for the next line of lyrics
     open_group = False     # currently inside a group line?
 
@@ -131,18 +143,27 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             # section boundary).
             elif "comment" in item:
                 text = item["comment"].strip()
-                if GROUP_RE.match(text):
+                hold = HOLD_RE.match(text)
+                if hold:
+                    # 🆕 Hold cue: stays on the current line. No flush and
+                    # no `continue`, so a LINEBREAK attached to this item
+                    # still gets handled by the `format` check below.
+                    current_buffer.append(
+                        f'<span class="hold-cue">({hold.group(1)})</span>'
+                    )
+                elif GROUP_RE.match(text):
                     # 🆕 Singing-group marker: don't render it on its own;
                     # it decorates the next line. `continue` also skips any
                     # LINEBREAK attached to the marker item itself.
                     pending_group = text
                     continue
-                flush_buffer()
-                html.append(f'<div class="song-comment">{item["comment"]}</div>')
+                else:
+                    flush_buffer()
+                    html.append(f'<div class="song-comment">{item["comment"]}</div>')
 
             elif "lyric" in item or "chord" in item:
                 chord = item.get("chord", "")
-                lyric = item.get("lyric", "")  # This contains color markup tags
+                lyric = inline_holds(item.get("lyric", ""))  # color markup tags kept
                 
                 # 🎨 Preserve color markup tags - don't escape them
                 if chord:

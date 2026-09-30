@@ -75,6 +75,7 @@ class Song(models.Model):
         null=True,
         blank=True,
         default=None,
+        db_index=True,   # <-- add this
         help_text="Leave empty to hide this song from all platforms"
     )
 
