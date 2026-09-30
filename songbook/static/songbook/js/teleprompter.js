@@ -27,6 +27,7 @@
 
   const CHORD_LAYOUT_KEY = "tp-chord-layout"; // "bottom" | "right"
   const TRANSPOSE_KEY = "tp-transpose-steps"; // integer semitone offset, per-browser, per-song
+  const DIAGRAM_SCALE_KEY = "tp-diagram-scale"; // chord diagram size, per-browser (S .6 / M .85 / L 1.15 / XL 1.5)
 
   // Scope the storage key to this song so transposing one song doesn't
   // carry over to the next one you open. Falls back to a shared key only
@@ -245,19 +246,58 @@
     if (!cont) return;
     cont.innerHTML = "";
   
+    const scale = getDiagramScale();
+
     chords.forEach((chord) => {
       // The variations are already correctly selected by the backend
       const variations = chord.variations || [];
       
-      // Render ALL variations that were sent from the backend
+      // Render ALL variations that were sent from the backend.
+      // drawChordDiagram() builds its own .chord-outer-wrapper/.chord-wrapper,
+      // so draw straight into the container (no extra wrapper to double-scale).
       variations.forEach((v, idx) => {
-        const wrap = document.createElement("div");
-        wrap.className = "chord-wrapper";
         if (typeof drawChordDiagram === "function")
-          drawChordDiagram(wrap, { name: chord.name, ...v, variation_index: idx });
-        cont.appendChild(wrap);
+          drawChordDiagram(cont, { name: chord.name, ...v, variation_index: idx }, { scale });
       });
     });
+  }
+
+  // -----------------------------
+  // Chord diagram size (S / M / L / XL buttons)
+  // -----------------------------
+  function getDiagramScale() {
+    const raw = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--diagram-scale")
+    );
+    return isNaN(raw) ? 0.85 : raw;
+  }
+
+  function applyDiagramScale(scale, { save = true } = {}) {
+    document.documentElement.style.setProperty("--diagram-scale", scale);
+
+    document.querySelectorAll("[data-diagram-scale]").forEach((btn) => {
+      const on = Math.abs(parseFloat(btn.dataset.diagramScale) - scale) < 0.01;
+      btn.setAttribute("aria-pressed", String(on));
+      btn.classList.toggle("active", on);
+    });
+
+    if (save) {
+      try {
+        localStorage.setItem(DIAGRAM_SCALE_KEY, String(scale));
+      } catch (e) {
+        // localStorage unavailable — size just won't be remembered.
+      }
+    }
+
+    // Redraw at the new size. Skip the 1.4s hide/show animation so the
+    // strip resizes at once and the lyrics area can be re-measured right away.
+    const section = $("#chord-section");
+    if (section) section.style.transition = "none";
+    if (window.SONG?.chords && section && !section.classList.contains("hidden")) {
+      renderChordDiagrams(window.SONG.chords);
+    }
+    updateLyricsContainerHeight();
+    if (section) requestAnimationFrame(() => { section.style.transition = ""; });
   }
 
   // -----------------------------
@@ -524,6 +564,11 @@
     );
     resetBtn?.addEventListener("click", resetScroll);
     toggleChordsBtn?.addEventListener("click", toggleChordSection);
+
+    document.querySelectorAll("[data-diagram-scale]").forEach((btn) =>
+      btn.addEventListener("click", () => applyDiagramScale(parseFloat(btn.dataset.diagramScale)))
+    );
+    applyDiagramScale(getDiagramScale(), { save: false }); // reflect the saved size on the buttons
 
     const layoutBottomBtn = $("#chord-layout-bottom");
     const layoutRightBtn = $("#chord-layout-right");

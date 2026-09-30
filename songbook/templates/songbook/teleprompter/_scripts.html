@@ -1,0 +1,218 @@
+{# Shared behaviour scripts. Included by teleprompter_base.html AFTER teleprompter.js #}
+  <!-- Above / Inline chord style switch (instant, no reload). Keeps your
+       place in the song when the line heights change. -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+      const buttons = {
+        above: document.getElementById("chord-style-above"),
+        inline: document.getElementById("chord-style-inline"),
+      };
+
+      function reflectState(style) {
+        Object.entries(buttons).forEach(([name, btn]) => {
+          if (btn) btn.setAttribute("aria-pressed", String(name === style));
+        });
+      }
+
+      function setChordStyle(style) {
+        const container = document.querySelector(".lyrics-container");
+        const maxScroll = () => (container ? container.scrollHeight - container.clientHeight : 0);
+        const ratio = container && maxScroll() > 0 ? container.scrollTop / maxScroll() : 0;
+
+        root.setAttribute("data-chord-style", style);
+        try { localStorage.setItem("chordStyle", style); } catch (e) {}
+        reflectState(style);
+
+        if (container) {
+          const top = ratio * maxScroll();
+          container.scrollTop = top;
+          // keep teleprompter.js's auto-scroll position in step (as the BlueTurn code does)
+          if (typeof window.scrollPos !== "undefined") window.scrollPos = top;
+        }
+      }
+
+      Object.entries(buttons).forEach(([name, btn]) => {
+        if (btn) btn.addEventListener("click", () => setChordStyle(name));
+      });
+      reflectState(root.getAttribute("data-chord-style") || "above");
+    });
+  </script>
+
+  <!-- Chord color, text size, and light/dark theme controls. -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const root = document.documentElement;
+
+      // --- Chord color ---
+      const colorPicker = document.getElementById("chord-color-picker");
+      if (colorPicker) {
+        const current = getComputedStyle(root).getPropertyValue("--chord-color").trim();
+        if (current) colorPicker.value = current.startsWith("#") ? current : "#2a6f97";
+        colorPicker.addEventListener("input", () => {
+          root.style.setProperty("--chord-color", colorPicker.value);
+          try { localStorage.setItem("chordColor", colorPicker.value); } catch (e) {}
+        });
+      }
+
+      // --- Text size (+/-), 10% steps, 70%-200% ---
+      const fontValue = document.getElementById("fontsize-value");
+      const fontDown = document.getElementById("fontsize-down");
+      const fontUp = document.getElementById("fontsize-up");
+      const MIN_SCALE = 0.7, MAX_SCALE = 2.0, STEP = 0.1;
+
+      function getScale() {
+        const raw = parseFloat(getComputedStyle(root).getPropertyValue("--text-scale"));
+        return isNaN(raw) ? 1 : raw;
+      }
+      function setScale(scale) {
+        scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round(scale * 100) / 100));
+        root.style.setProperty("--text-scale", scale);
+        try { localStorage.setItem("textScale", scale); } catch (e) {}
+        if (fontValue) fontValue.textContent = Math.round(scale * 100) + "%";
+      }
+
+      if (fontValue) fontValue.textContent = Math.round(getScale() * 100) + "%";
+      if (fontDown) fontDown.addEventListener("click", () => setScale(getScale() - STEP));
+      if (fontUp) fontUp.addEventListener("click", () => setScale(getScale() + STEP));
+
+      // --- Light / dark theme ---
+      const themeButtons = {
+        light: document.getElementById("theme-light"),
+        dark: document.getElementById("theme-dark"),
+      };
+      function reflectTheme(theme) {
+        Object.entries(themeButtons).forEach(([name, btn]) => {
+          if (btn) btn.setAttribute("aria-pressed", String(name === theme));
+        });
+      }
+      function setTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try { localStorage.setItem("theme", theme); } catch (e) {}
+        reflectTheme(theme);
+      }
+      Object.entries(themeButtons).forEach(([name, btn]) => {
+        if (btn) btn.addEventListener("click", () => setTheme(name));
+      });
+      reflectTheme(root.getAttribute("data-theme") || "light");
+    });
+  </script>
+
+  <!-- Fix for chords that have a space right after them in the ChordPro
+       data (e.g. "[C6] Tell me", "want[F] some more"). The renderer leaves
+       those chord-words empty, which made the chord name drop below the
+       others and swallowed the space. This re-attaches the chord to the
+       next word and restores the space. Runs once, on load. -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // The words a .chord-word displays, ignoring the chord name itself.
+      const lyricTextOf = (el) => {
+        const clone = el.cloneNode(true);
+        clone.querySelectorAll(".chord-label").forEach((l) => l.remove());
+        return clone.textContent;
+      };
+
+      // True if there is already lyric text earlier on the same line that
+      // does not end in a space (so a space needs to be put back).
+      const needsSpaceBefore = (node) => {
+        for (let p = node.previousSibling; p; p = p.previousSibling) {
+          if (p.nodeName === "BR") return false;
+          const text = p.nodeType === Node.TEXT_NODE ? p.textContent : lyricTextOf(p);
+          if (text === "") continue;
+          if (text.trim() === "") return false; // whitespace already there
+          return !/\s$/.test(text);
+        }
+        return false; // start of a line
+      };
+
+      let fixed = 0;
+      document.querySelectorAll(".lyrics .chord-word").forEach((word) => {
+        if (lyricTextOf(word).trim() !== "") return; // chord already sits on a word
+
+        // Drop stray whitespace held inside the empty chord-word.
+        Array.from(word.childNodes).forEach((n) => {
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim() === "") n.remove();
+        });
+
+        // Pull the next word (the one the chord belongs over) into it.
+        const next = word.nextSibling;
+        if (!next || next.nodeType !== Node.TEXT_NODE) return;
+        const m = next.textContent.match(/^(\s*)(\S+)([\s\S]*)$/);
+        if (!m) return;
+
+        const spaceBefore = needsSpaceBefore(word);
+        word.appendChild(document.createTextNode(m[2]));
+        next.textContent = m[3];
+        if (spaceBefore) word.parentNode.insertBefore(document.createTextNode(" "), word);
+        fixed++;
+      });
+      console.log(`🎵 Re-attached ${fixed} chord(s) that had a space after them`);
+    });
+  </script>
+
+
+  <script>
+    // 🎸 iRig BlueTurn Support - Synced with auto-scroll
+    document.addEventListener("DOMContentLoaded", () => {
+      const lyricsContainer = document.querySelector(".lyrics-container");
+      const scrollAmount = 150;
+
+      const indicator = document.createElement("div");
+      indicator.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 20px 40px;
+        border-radius: 10px;
+        font-size: 24px;
+        z-index: 9999;
+        display: none;
+        pointer-events: none;
+      `;
+      document.body.appendChild(indicator);
+
+      function showIndicator(text) {
+        indicator.textContent = text;
+        indicator.style.display = "block";
+        setTimeout(() => indicator.style.display = "none", 500);
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(e.key)) {
+          e.preventDefault();
+        }
+
+        if (!lyricsContainer) return;
+
+        switch(e.key) {
+          case "ArrowLeft":
+          case "PageUp":
+            if (typeof window.scrollPos !== 'undefined') {
+              window.scrollPos = Math.max(0, window.scrollPos - scrollAmount);
+              lyricsContainer.scrollTop = window.scrollPos;
+            } else {
+              lyricsContainer.scrollTop -= scrollAmount;
+            }
+            showIndicator("⬆️");
+            break;
+
+          case "ArrowRight":
+          case "PageDown":
+            if (typeof window.scrollPos !== 'undefined') {
+              const maxScroll = lyricsContainer.scrollHeight - lyricsContainer.clientHeight;
+              window.scrollPos = Math.min(maxScroll, window.scrollPos + scrollAmount);
+              lyricsContainer.scrollTop = window.scrollPos;
+            } else {
+              lyricsContainer.scrollTop += scrollAmount;
+            }
+            showIndicator("⬇️");
+            break;
+        }
+      });
+
+      console.log("🎸 iRig BlueTurn enabled (synced with auto-scroll)");
+    });
+  </script>

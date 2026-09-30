@@ -1,60 +1,9 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>{{ current.song.songTitle }}</title>
-  <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+{% extends "songbook/teleprompter_base.html" %}
+
+{% block extra_styles %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Chord style (above / inline). Runs before the page paints so there is
-       no flash. Choice is remembered in this browser; default is "above". -->
-  <script>
-    (function () {
-      var style = "above";
-      try {
-        var saved = localStorage.getItem("chordStyle");
-        if (saved === "above" || saved === "inline") style = saved;
-      } catch (e) {}
-      document.documentElement.setAttribute("data-chord-style", style);
-    })();
-  </script>
-
-  <!-- Chord color. If the user has picked one, restore it before the page
-       paints. If not, nothing is set and your existing chord colors apply. -->
-  <script>
-    (function () {
-      try {
-        var savedColor = localStorage.getItem("chordColor");
-        if (savedColor) {
-          var root = document.documentElement;
-          root.style.setProperty("--chord-color", savedColor);
-          root.setAttribute("data-chord-color", "custom");
-        }
-      } catch (e) {}
-    })();
-  </script>
-
-
-<!-- ✅ Embedded teleprompter configuration -->
-<script id="teleprompter-config" type="application/json">
-  {
-    "initialScrollSpeed": {{ initial_scroll_speed|default:40 }},
-    "userPreferences": {{ user_preferences_json|safe }}
-  }
-  </script>
-
-<!-- Diagram renderer -->
-  <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
-
-  <!-- Teleprompter engine: loaded at the END of <body>, after window.SONG is set -->
-
   <style>
-    .song-title {
-      font-size: 1rem;
-      font-weight: bold;
-    }
-    .nav-btn {
+        .nav-btn {
       background: transparent;
       border: none;
       font-size: 1.8rem;
@@ -151,7 +100,7 @@
 }
 
 /* {st:...} / {subtitle:...} — quieter line directly under the title */
-.song-subtitle {
+.metadata-table .song-subtitle {
   font-size: 0.6em;
   font-weight: normal;
   font-style: italic;
@@ -173,63 +122,6 @@
   font-weight: normal;
 }
 
-/* ===== Custom chord color (only active once the user picks one) ===== */
-html[data-chord-color="custom"] .chord-label,
-html[data-chord-color="custom"] .chord-label *,
-html[data-chord-color="custom"] .chord-token,
-html[data-chord-color="custom"] .chord-token * {
-  color: var(--chord-color) !important;
-}
-.color-pick {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-}
-.color-pick input[type="color"] {
-  width: 32px;
-  height: 26px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-
-/* ===== Chords ABOVE the lyrics ===== */
-/* 🔧 TUNE: line-height leaves room for the chord name above each line. */
-html[data-chord-style="above"] .lyrics .verse,
-html[data-chord-style="above"] .lyrics .section-body,
-html[data-chord-style="above"] .lyrics .centered {
-  line-height: 3;
-}
-html[data-chord-style="above"] .chord-word {
-  position: relative;
-  display: inline-block;
-}
-/* Zero-width character so an empty chord-word keeps full line height. */
-html[data-chord-style="above"] .chord-word::before {
-  content: "\200B";
-}
-html[data-chord-style="above"] .chord-label {
-  position: absolute;
-  top: -1.3em;
-  left: 0;
-  font-size: 0.85em;
-  white-space: nowrap;
-}
-
-/* ===== Chords INLINE, e.g. [C]One, two, [CM7]three, four ===== */
-html[data-chord-style="inline"] .chord-word {
-  display: inline;
-}
-html[data-chord-style="inline"] .chord-label {
-  position: static;
-  display: inline;
-  font-size: 0.9em;
-}
-html[data-chord-style="inline"] .chord-label::before { content: "["; }
-html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
-
 /* Mobile responsive */
 @media (max-width: 800px) {
   .metadata-table {
@@ -247,160 +139,68 @@ html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
   }
 }
 
-
-  /* ===== Singing groups: {c:1} / {c:2} marks the line after it ===== */
-  .lyrics .grp {
-    --grp: #666;
-    border-left: 4px solid var(--grp);
-    padding-left: 0.6em;
-    background: color-mix(in srgb, var(--grp) 10%, transparent);
-  }
-  .lyrics .grp-1 { --grp: #c0392b; }
-  .lyrics .grp-2 { --grp: #2471a3; }
-  .lyrics .grp-badge {
-    display: inline-block;
-    min-width: 1.6em;
-    text-align: center;
-    border-radius: 1em;
-    padding: 0 0.5em;
-    margin-right: 0.6em;
-    font-size: 0.7em;
-    font-weight: 700;
-    color: #fff;
-    background: var(--grp);
-  }
-
-  /* ===== Hold cue: {c:(23)} = keep strumming the last chord on those beats ===== */
-  .lyrics .hold-cue {
-    color: orange;
-    font-weight: 700;
-    margin-left: 0.3em;
-    white-space: nowrap;
-  }
-
   </style>
-</head>
-<body>
+{% endblock %}
 
-  <!-- Controls -->
-  <div class="controls">
+{% block controls_left %}
+  <span class="song-title">Setlist {{ setlist.id }} – {{ setlist.name }}</span>
+  <button id="toggle-chords">Hide Chords</button>
+{% endblock %}
 
-    <!-- Left -->
-    <div class="left">
-      <span class="song-title">
-        Setlist {{ setlist.id }} – {{ setlist.name }}
-      </span>
-      <button id="toggle-chords">Hide Chords</button>
-    </div>
+{% block controls_right_extra %}
+  {% if prev_song %}
+    <button id="prev-song-btn" class="nav-btn"
+            onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'">⬅️</button>
+  {% else %}
+    <button id="prev-song-btn" class="nav-btn" disabled>⬅️</button>
+  {% endif %}
+  {% if next_song %}
+    <button id="next-song-btn" class="nav-btn"
+            onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'">➡️</button>
+  {% else %}
+    <button id="next-song-btn" class="nav-btn" disabled>➡️</button>
+  {% endif %}
+{% endblock %}
 
-    <!-- Center -->
-    <div class="center">
-      <button id="scroll-toggle">▶️ Start</button>
-      <div class="control-inline">
-        <button id="speed-down">-</button>
-        <span id="scroll-speed-display">{{ song.scroll_speed|default:40 }} px/s</span>
-        <button id="speed-up">+</button>
-      </div>
-      
-      <div class="control-inline">
-        <button id="font-down">A-</button>
-        <span id="font-size-display">100%</span>
-        <button id="font-up">A+</button>
-      </div>
+{% block lyrics_header %}
+  <table class="metadata-table">
+    <tr>
+      <td>{{ metadata.timeSignature|default:"" }}</td>
+      <td>
+        {{ song.songTitle|default:"Untitled Song" }}
+        {% if metadata.subtitle %}
+          <div class="song-subtitle">{{ metadata.subtitle }}</div>
+        {% endif %}
+      </td>
+      <td>{% if has_slash_chord %}(/ = one strum){% endif %}</td>
+    </tr>
+    <tr>
+      <td>
+        {% with first_note=metadata.1stnote %}
+          {% if first_note %}1st vocal note: {{ first_note }}{% endif %}
+        {% endwith %}
+      </td>
+      <td>{{ metadata.songwriter|default:"" }}</td>
+      <td>{{ metadata.short_instruction_1|default:"" }}</td>
+    </tr>
+    <tr>
+      <td>
+        {% with count=metadata.count_in %}
+          {% if count %}Count in: {{ count }}{% endif %}
+        {% endwith %}
+      </td>
+      <td>
+        {% if metadata.artist %}
+          {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
+        {% endif %}
+      </td>
+      <td>{{ metadata.short_instruction_2|default:"" }}</td>
+    </tr>
+  </table>
+{% endblock %}
 
-      <button id="scroll-reset">⏹ Reset</button>
-    </div>
-
-    <!-- Right -->
-    <div class="right">
-      <label class="color-pick" for="chord-color-picker" title="Chord symbol color">
-        <span>Chords</span>
-        <input type="color" id="chord-color-picker" value="#2a6f97">
-      </label>
-      <div class="layout-toggle" role="group" aria-label="Chord style">
-        <button type="button" id="chord-style-above" aria-pressed="true">Above</button>
-        <button type="button" id="chord-style-inline" aria-pressed="false">Inline</button>
-      </div>
-      <div class="layout-toggle" role="group" aria-label="Chord diagram position">
-        <button type="button" id="chord-layout-bottom" aria-pressed="true">Bottom</button>
-        <button type="button" id="chord-layout-right" aria-pressed="false">Right</button>
-      </div>
-
-      <button id="theme-toggle" title="Toggle light/dark theme">🌙</button>
-      
-      {% if prev_song %}
-        <button id="prev-song-btn" class="nav-btn"
-                onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'">
-          ⬅️
-        </button>
-      {% else %}
-        <button id="prev-song-btn" class="nav-btn" disabled>⬅️</button>
-      {% endif %}
-    
-      {% if next_song %}
-        <button id="next-song-btn" class="nav-btn"
-                onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'">
-          ➡️
-        </button>
-      {% else %}
-        <button id="next-song-btn" class="nav-btn" disabled>➡️</button>
-      {% endif %}
-    </div>
-    
-    
-    
-  </div>
-
-  <!-- Lyrics -->
-  <div class="tp-main">
-    <div class="lyrics-container">
-      <div class="lyrics">
-        
-        <!-- ✅ NEW: Metadata Table -->
-        <table class="metadata-table">
-          <tr>
-            <td>{{ metadata.timeSignature|default:"" }}</td>
-            <td>
-              {{ song.songTitle|default:"Untitled Song" }}
-              {% if metadata.subtitle %}
-                <div class="song-subtitle">{{ metadata.subtitle }}</div>
-              {% endif %}
-            </td>
-            <td>{% if has_slash_chord %}(/ = one strum){% endif %}</td>
-          </tr>
-          <tr>
-            <td>
-              {% with first_note=metadata.1stnote %}
-                {% if first_note %}1st vocal note: {{ first_note }}{% endif %}
-              {% endwith %}
-            </td>
-            <td>{{ metadata.songwriter|default:"" }}</td>
-            <td>{{ metadata.short_instruction_1|default:"" }}</td>
-          </tr>
-          <tr>
-            <td>
-              {% with count=metadata.count_in %}
-                {% if count %}Count in: {{ count }}{% endif %}
-              {% endwith %}
-            </td>
-            <td>
-              {% if metadata.artist %}
-                {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
-              {% endif %}
-            </td>
-            <td>{{ metadata.short_instruction_2|default:"" }}</td>
-          </tr>
-        </table>
-
-        <!-- ✅ Color markup is now processed in the view and safe to render -->
-        {{ lyrics_with_chords|safe }}
-      </div>
-    </div>
-  </div>
-
-
-
-  <!-- Touch zones for mobile nav (keep or remove if using swipe gestures only) -->
+{% block after_main %}
+  <!-- Touch zones for mobile nav -->
   {% if prev_song %}
   <div class="touch-zone touch-left"
        onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'"></div>
@@ -409,42 +209,9 @@ html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
   <div class="touch-zone touch-right"
        onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'"></div>
   {% endif %}
+{% endblock %}
 
-  <!-- Chords JSON -->
-  <script id="chords-data" type="application/json">
-    {{ relevant_chords_json|safe }}
-  </script>
-
-
-
-  <!-- Full chord dictionary (same tag the single-song page has). Falls back
-       to an empty object if the view doesn't supply it. -->
-  <script id="full-chord-library" type="application/json">
-    {{ full_chord_library_json|default:"{}"|safe }}
-  </script>
-
-  <!-- Chord Section (diagrams at the bottom or right, toggled by the layout buttons) -->
-  <div id="chord-section">
-    <div id="chord-diagrams"></div>
-  </div>
-
-  <!-- Initialize SONG (same as teleprompter_unified.html) -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      window.SONG = {
-        id: "{{ song.id }}",
-        title: "{{ song.songTitle|escapejs }}",
-        initialTranspose: 0,
-        chords: JSON.parse(document.getElementById("chords-data").textContent)
-      };
-      console.log("✅ SONG loaded:", window.SONG);
-    });
-  </script>
-
-  <!-- Teleprompter engine: must come AFTER the SONG init above so its
-       DOMContentLoaded handlers run once window.SONG exists -->
-  <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
-
+{% block extra_scripts %}
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const prevBtn = document.getElementById("prev-song-btn");
@@ -472,217 +239,4 @@ html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
       });
           });
     </script>
-    <script>
-      // Above / Inline chord style switch (instant, no reload).
-      // Keeps your place in the song when the line heights change.
-      document.addEventListener("DOMContentLoaded", () => {
-        const root = document.documentElement;
-        const buttons = {
-          above: document.getElementById("chord-style-above"),
-          inline: document.getElementById("chord-style-inline"),
-        };
-
-        function reflectState(style) {
-          Object.entries(buttons).forEach(([name, btn]) => {
-            if (btn) btn.setAttribute("aria-pressed", String(name === style));
-          });
-        }
-
-        function setChordStyle(style) {
-          const container = document.querySelector(".lyrics-container");
-          const maxScroll = () => (container ? container.scrollHeight - container.clientHeight : 0);
-          const ratio = container && maxScroll() > 0 ? container.scrollTop / maxScroll() : 0;
-
-          root.setAttribute("data-chord-style", style);
-          try { localStorage.setItem("chordStyle", style); } catch (e) {}
-          reflectState(style);
-
-          if (container) {
-            const top = ratio * maxScroll();
-            container.scrollTop = top;
-            if (typeof window.scrollPos !== "undefined") window.scrollPos = top;
-          }
-        }
-
-        Object.entries(buttons).forEach(([name, btn]) => {
-          if (btn) btn.addEventListener("click", () => setChordStyle(name));
-        });
-        reflectState(root.getAttribute("data-chord-style") || "above");
-      });
-    </script>
-    <script>
-      // 🎨 Chord color picker
-      document.addEventListener("DOMContentLoaded", () => {
-        const root = document.documentElement;
-        const picker = document.getElementById("chord-color-picker");
-        if (!picker) return;
-
-        // "rgb(42, 111, 151)" -> "#2a6f97" (color inputs only accept hex)
-        const rgbToHex = (rgb) => {
-          const m = rgb.match(/\d+/g);
-          if (!m || m.length < 3) return null;
-          return "#" + m.slice(0, 3).map(n => (+n).toString(16).padStart(2, "0")).join("");
-        };
-
-        // Start the picker on whatever color the chords currently are.
-        const saved = localStorage.getItem("chordColor");
-        const label = document.querySelector(".chord-label");
-        if (saved) {
-          picker.value = saved;
-        } else if (label) {
-          const hex = rgbToHex(getComputedStyle(label).color);
-          if (hex) picker.value = hex;
-        }
-
-        picker.addEventListener("input", () => {
-          root.style.setProperty("--chord-color", picker.value);
-          root.setAttribute("data-chord-color", "custom");
-          try { localStorage.setItem("chordColor", picker.value); } catch (e) {}
-        });
-      });
-    </script>
-    <script>
-      // 🌓 Theme Toggle
-      document.addEventListener("DOMContentLoaded", () => {
-        const themeToggle = document.getElementById("theme-toggle");
-        const body = document.body;
-        
-        // Load saved theme
-        const savedTheme = localStorage.getItem("teleprompter-theme");
-        if (savedTheme === "light") {
-          body.classList.add("light-theme");
-          themeToggle.textContent = "☀️";
-        }
-        
-        themeToggle.addEventListener("click", () => {
-          body.classList.toggle("light-theme");
-          
-          if (body.classList.contains("light-theme")) {
-            themeToggle.textContent = "☀️";
-            localStorage.setItem("teleprompter-theme", "light");
-          } else {
-            themeToggle.textContent = "🌙";
-            localStorage.setItem("teleprompter-theme", "dark");
-          }
-        });
-        
-        console.log("🌓 Theme toggle initialized");
-      });
-    </script>
-    <script>
-      // 🔤 Font Size Controls
-      document.addEventListener("DOMContentLoaded", () => {
-        const lyricsContainer = document.querySelector(".lyrics");
-        const fontUpBtn = document.getElementById("font-up");
-        const fontDownBtn = document.getElementById("font-down");
-        const fontDisplay = document.getElementById("font-size-display");
-        
-        // Get initial font size from CSS (default is 2em on body, which is 32px at browser default 16px)
-        let currentFontSize = 100; // percentage
-        const minFontSize = 50;
-        const maxFontSize = 200;
-        const step = 10;
-        
-        // Load saved font size from localStorage
-        const savedFontSize = localStorage.getItem("teleprompter-font-size");
-        if (savedFontSize) {
-          currentFontSize = parseInt(savedFontSize);
-          applyFontSize(currentFontSize);
-        }
-        
-        function applyFontSize(size) {
-          lyricsContainer.style.fontSize = `${size}%`;
-          fontDisplay.textContent = `${size}%`;
-          localStorage.setItem("teleprompter-font-size", size);
-        }
-        
-        fontUpBtn.addEventListener("click", () => {
-          if (currentFontSize < maxFontSize) {
-            currentFontSize += step;
-            applyFontSize(currentFontSize);
-          }
-        });
-        
-        fontDownBtn.addEventListener("click", () => {
-          if (currentFontSize > minFontSize) {
-            currentFontSize -= step;
-            applyFontSize(currentFontSize);
-          }
-        });
-        
-        console.log("🔤 Font size controls initialized");
-      });
-    </script>
-    <script>
-      // 🎸 iRig BlueTurn Support - Synced with auto-scroll
-      document.addEventListener("DOMContentLoaded", () => {
-        const lyricsContainer = document.querySelector(".lyrics-container");
-        const scrollAmount = 150;
-        
-        const indicator = document.createElement("div");
-        indicator.style.cssText = `
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background: rgba(0,0,0,0.8);
-          color: white;
-          padding: 20px 40px;
-          border-radius: 10px;
-          font-size: 24px;
-          z-index: 9999;
-          display: none;
-          pointer-events: none;
-        `;
-        document.body.appendChild(indicator);
-        
-        function showIndicator(text) {
-          indicator.textContent = text;
-          indicator.style.display = "block";
-          setTimeout(() => indicator.style.display = "none", 500);
-        }
-        
-        document.addEventListener("keydown", (e) => {
-          if (["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(e.key)) {
-            e.preventDefault();
-          }
-    
-          if (!lyricsContainer) return;
-    
-          switch(e.key) {
-            case "ArrowLeft":
-            case "PageUp":
-              // Update both the DOM and internal scroll position
-              if (typeof window.scrollPos !== 'undefined') {
-                window.scrollPos = Math.max(0, window.scrollPos - scrollAmount);
-                lyricsContainer.scrollTop = window.scrollPos;
-              } else {
-                lyricsContainer.scrollTop -= scrollAmount;
-              }
-              showIndicator("⬆️");
-              console.log("⬆️ BlueTurn: Scrolled up");
-              break;
-              
-            case "ArrowRight":
-            case "PageDown":
-              // Update both the DOM and internal scroll position
-              if (typeof window.scrollPos !== 'undefined') {
-                const maxScroll = lyricsContainer.scrollHeight - lyricsContainer.clientHeight;
-                window.scrollPos = Math.min(maxScroll, window.scrollPos + scrollAmount);
-                lyricsContainer.scrollTop = window.scrollPos;
-              } else {
-                lyricsContainer.scrollTop += scrollAmount;
-              }
-              showIndicator("⬇️");
-              console.log("⬇️ BlueTurn: Scrolled down");
-              break;
-          }
-        });
-    
-        console.log("🎸 iRig BlueTurn enabled (synced with auto-scroll)");
-      });
-    </script>
-
-      
-</body>
-</html>
+{% endblock %}

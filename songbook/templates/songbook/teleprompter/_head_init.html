@@ -1,0 +1,50 @@
+  <script>
+    (function () {
+      var style = "above";
+      try {
+        var saved = localStorage.getItem("chordStyle");
+        if (saved === "above" || saved === "inline") style = saved;
+      } catch (e) {}
+      document.documentElement.setAttribute("data-chord-style", style);
+    })();
+  </script>
+
+  <!-- Theme (light/dark), chord color, and text size. Read before paint,
+       same pattern as chordStyle above, so there's no flash on load. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+
+      var theme = "light";
+      try {
+        var savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "light" || savedTheme === "dark") theme = savedTheme;
+      } catch (e) {}
+      root.setAttribute("data-theme", theme);
+
+      try {
+        var savedColor = localStorage.getItem("chordColor");
+        if (savedColor) root.style.setProperty("--chord-color", savedColor);
+      } catch (e) {}
+
+      try {
+        var savedScale = parseFloat(localStorage.getItem("textScale"));
+        if (!isNaN(savedScale) && savedScale >= 0.7 && savedScale <= 2.0) {
+          root.style.setProperty("--text-scale", savedScale);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Chord diagram size: restore before paint (S .6 / M .85 / L 1.15 / XL 1.5). -->
+  <script>
+    (function () {
+      try {
+        var s = parseFloat(localStorage.getItem("tp-diagram-scale"));
+        if (!isNaN(s) && s >= 0.4 && s <= 2) {
+          document.documentElement.style.setProperty("--diagram-scale", s);
+        }
+      } catch (e) {}
+    })();
+  </script>
+

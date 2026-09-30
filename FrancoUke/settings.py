@@ -77,6 +77,18 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'FrancoUke.urls'
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {
+        "songbook.views": {"handlers": ["console"], "level": "DEBUG"},
+        "setlists.views": {"handlers": ["console"], "level": "DEBUG"},
+        "songbook.utils.teleprompter_renderer": {"handlers": ["console"], "level": "DEBUG"},
+    },
+}
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

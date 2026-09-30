@@ -1,4 +1,7 @@
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 
 def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", chord_position="inline"):
@@ -213,10 +216,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
 
     flush_buffer()
     
-    # 🐛 DEBUG: Print a sample to verify tags are present
     result = "".join(html)
-    print("🎨 RENDERER OUTPUT (first 300 chars):")
-    print(result[:300])
-    print("=" * 80)
-    
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("Renderer output (first 300 chars): %s", result[:300])
+
     return result, metadata

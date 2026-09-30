@@ -1,5 +1,6 @@
 #setlist/views.py
 import json
+import logging
 import re
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -9,52 +10,11 @@ from .models import SetList, SetListSong
 from songbook.models import Song
 from songbook.utils.chord_library import extract_relevant_chords
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
+from songbook.utils.chord_library import load_chord_dict
+from songbook.utils.teleprompter_helpers import apply_html_color_markup, with_maj_aliases
 from songbook.context_processors import site_context
 
-
-# ----------------------------
-# 🎨 Color Markup Helper
-# ----------------------------
-def apply_html_color_markup(text):
-    """
-    Convert custom color tags to HTML for web display.
-    Similar to PDF apply_color_markup but outputs span tags.
-    """
-    if not text:
-        return text
-    
-    color_map = {
-        'red': 'red',
-        'blue': 'blue',
-        'green': 'green',
-        'yellow': 'gold',
-        'orange': 'orange',
-        'pink': 'hotpink',
-        'purple': 'purple',
-    }
-    
-    # Full color names: <red>text</red> → <span style='color:red'>text</span>
-    for tag, color in color_map.items():
-        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
-        text = pattern.sub(lambda m: f"<span style='color:{color}'>{m.group(1)}</span>", text)
-    
-    # Short color codes: <r>text</r> → <span style='color:red'>text</span>
-    short_map = {'r': 'red', 'g': 'green', 'y': 'gold'}
-    for tag, color in short_map.items():
-        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.IGNORECASE | re.DOTALL)
-        text = pattern.sub(lambda m: f"<span style='color:{color}'>{m.group(1)}</span>", text)
-    
-    # Custom highlight: <highlight color="blue">text</highlight>
-    pattern = re.compile(r'<highlight\s+color="(.*?)">(.*?)</highlight>', re.IGNORECASE | re.DOTALL)
-    text = pattern.sub(lambda m: f"<span style='background-color:{m.group(1)}'>{m.group(2)}</span>", text)
-    
-    # Simple highlight: <h>text</h> → yellow background
-    text = re.sub(r'<h>(.*?)</h>', r"<span style='background-color:yellow'>\1</span>", text, flags=re.IGNORECASE | re.DOTALL)
-    
-    # Clean up any nested closing tags
-    text = re.sub(r'</span>\s*</span>', '</span>', text)
-    
-    return text
+logger = logging.getLogger(__name__)
 
 
 # ----------------------------
@@ -137,7 +97,7 @@ def setlist_teleprompter(request, setlist_id, order):
     suggested_alternate = None
     if current.song.metadata:
         suggested_alternate = current.song.metadata.get('suggested_alternate')
-        print(f"[TELEPROMPTER] suggested_alternate from metadata: {suggested_alternate}")
+        logger.debug("suggested_alternate from metadata: %s", suggested_alternate)
 
     # --- 🆕 Use load_relevant_chords (same as PDF) ---
     from songbook.utils.chords.loader import load_relevant_chords
@@ -148,10 +108,10 @@ def setlist_teleprompter(request, setlist_id, order):
         suggested_alternate=suggested_alternate
     )
 
-    # 🐛 DEBUG: Check what chords were loaded
-    print(f"[TELEPROMPTER] Loaded {len(relevant_chords)} chord definitions")
-    for chord in relevant_chords:
-        print(f"  - {chord['name']}: {len(chord.get('variations', []))} variations")
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("Loaded %d chord definitions", len(relevant_chords))
+        for chord in relevant_chords:
+            logger.debug("  - %s: %d variations", chord["name"], len(chord.get("variations", [])))
 
     # --- Site context ---
     context_data = site_context(request)
@@ -159,7 +119,9 @@ def setlist_teleprompter(request, setlist_id, order):
 
     # --- Render lyrics + metadata ---
     lyrics_html, metadata = render_lyrics_with_chords_html(
-        current.song.lyrics_with_chords, site_name
+        current.song.lyrics_with_chords,
+        site_name,
+        chord_position="above",  # the page switches Above/Inline with CSS
     )
 
     # ✅ OVERRIDE with complete metadata from Song model
@@ -175,6 +137,9 @@ def setlist_teleprompter(request, setlist_id, order):
     # ----------------------------
     lyrics_html = apply_html_color_markup(lyrics_html)
 
+    # --- Full chord dictionary (lets transpose look up a real diagram) ---
+    full_library = with_maj_aliases(load_chord_dict(instrument))
+
     # --- User preferences for JS ---
     user_preferences = {
         "instrument": instrument,
@@ -183,38 +148,25 @@ def setlist_teleprompter(request, setlist_id, order):
     }
 
     # ----------------------------
-    # 🐛 DEBUGGING OUTPUT
+    # 🐛 DEBUG (only runs when the logger is set to DEBUG)
     # ----------------------------
-    print("\n====== 🎶 TELEPROMPTER DEBUG ======")
-    print(f"Setlist: {setlist.name} (ID {setlist.id})")
-    print(f"Order: {current.order} / {total_songs}")
-    print(f"Song: {current.song.songTitle} (ID {current.song.id})")
-    print(f"Song.scroll_speed from DB: {getattr(current.song, 'scroll_speed', '❌ MISSING')}")
-    print(f"Metadata scroll_speed (if any): {current.song.metadata.get('scroll_speed') if current.song.metadata else 'None'}")
-    print(f"User: {request.user if request.user.is_authenticated else 'Anonymous'}")
-    print(f"Relevant chords count: {len(relevant_chords)}")
-    
-    # 🎨 Check for color markup
-    has_color_spans = '<span style=' in lyrics_html
-    print(f"🎨 Color markup applied? {has_color_spans}")
-    if has_color_spans:
-        print("✅ Color spans detected in lyrics_html")
-    else:
-        print("⚠️ No color spans found - check if song has color tags")
-    
-    # ✅ Print metadata fields for debugging
-    print(f"\n📋 Metadata fields available:")
-    if metadata:
-        for key, value in metadata.items():
-            if value:
-                print(f"  - {key}: {value}")
-    print("==================================\n")
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(
+            "Setlist %s (%s) | song %d/%d: %s (ID %s) | user %s",
+            setlist.name, setlist.id, current.order, total_songs,
+            current.song.songTitle, current.song.id,
+            request.user if request.user.is_authenticated else "Anonymous",
+        )
+        logger.debug("Song.scroll_speed: %s | chords: %d | color spans: %s",
+                     getattr(current.song, "scroll_speed", "MISSING"),
+                     len(relevant_chords), "<span style=" in lyrics_html)
+        logger.debug("Metadata fields: %s",
+                     {k: v for k, v in (metadata or {}).items() if v})
 
     # --- Use scroll speed from the Song model ---
     initial_scroll_speed = getattr(current.song, "scroll_speed", 40) or 40
 
-    # 🐛 Confirm what we're actually passing to the template
-    print(f"✅ Passing scroll speed to template: {initial_scroll_speed}\n")
+    logger.debug("Passing scroll speed to template: %s", initial_scroll_speed)
 
     # --- Render template ---
     return render(
@@ -231,6 +183,7 @@ def setlist_teleprompter(request, setlist_id, order):
             "metadata": metadata,  # ✅ Now contains ALL fields from Song.metadata
             "has_slash_chord": has_slash_chord,  # ✅ New variable for template
             "relevant_chords_json": json.dumps(relevant_chords),
+            "full_chord_library_json": json.dumps(full_library),
             "user_preferences_json": json.dumps(user_preferences),
             "initial_scroll_speed": initial_scroll_speed,
             **context_data,

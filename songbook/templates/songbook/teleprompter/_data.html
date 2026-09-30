@@ -1,0 +1,30 @@
+{# Data blocks read by teleprompter.js. Needs: relevant_chords_json,
+   full_chord_library_json (optional), initial_scroll_speed,
+   user_preferences_json, song. #}
+<script id="chords-data" type="application/json">
+  {{ relevant_chords_json|safe }}
+</script>
+
+<!-- Full per-instrument chord dictionary, used to look up the real diagram
+     for a chord after transposing. Empty object if the view doesn't send it. -->
+<script id="full-chord-library" type="application/json">
+  {{ full_chord_library_json|default:"{}"|safe }}
+</script>
+
+<script id="teleprompter-config" type="application/json">
+{
+  "initialScrollSpeed": {{ initial_scroll_speed|default:40 }},
+  "userPreferences": {{ user_preferences_json|safe }}
+}
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    window.SONG = {
+      id: "{{ song.id }}",
+      title: "{{ song.songTitle|escapejs }}",
+      initialTranspose: 0,
+      chords: JSON.parse(document.getElementById("chords-data").textContent)
+    };
+  });
+</script>

@@ -1,0 +1,97 @@
+{% load static %}<!DOCTYPE html>
+<!--Shared teleprompter page. Song page and setlist page both extend this.
+   Child templates fill in: title, controls_left, controls_right_extra,
+   extra_styles, lyrics_header, after_main, extra_scripts. #}-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{{ song.songTitle }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
+
+  <!-- Diagram renderer -->
+  <script src="{% static 'songbook/js/chord_diagrams.js' %}"></script>
+
+  {% include "songbook/teleprompter/_head_init.html" %}
+  {% include "songbook/teleprompter/_styles.html" %}
+  {% block extra_styles %}{% endblock %}
+</head>
+<body>
+  <!-- Controls -->
+  <div class="controls">
+    <div class="left">
+      {% block controls_left %}<span class="song-title">{{ song.songTitle }}</span>{% endblock %}
+    </div>
+    <div class="center">
+      <button id="scroll-toggle">▶️ Start</button>
+      <div class="control-inline">
+        <button id="speed-down">−</button>
+        <span id="speed-value">3</span>
+        <button id="speed-up">+</button>
+      </div>
+      <div class="control-inline" id="transpose-control">
+        <span>Transpose</span>
+        <button id="transpose-down">−</button>
+        <span id="transpose-value">0</span>
+        <button id="transpose-up">+</button>
+      </div>
+    </div>
+    <div class="right">
+      <div class="control-inline" id="fontsize-control">
+        <span>Size</span>
+        <button id="fontsize-down" title="Smaller text">A−</button>
+        <span id="fontsize-value">100%</span>
+        <button id="fontsize-up" title="Larger text">A+</button>
+      </div>
+      <div class="control-inline" id="chordcolor-control">
+        <label for="chord-color-picker">Chord color</label>
+        <input type="color" id="chord-color-picker" value="#2a6f97" title="Chord symbol color">
+      </div>
+      <div class="layout-toggle" role="group" aria-label="Theme">
+        <button type="button" id="theme-light" aria-pressed="true">☀️ Light</button>
+        <button type="button" id="theme-dark" aria-pressed="false">🌙 Dark</button>
+      </div>
+      <div class="layout-toggle" role="group" aria-label="Chord style">
+        <button type="button" id="chord-style-above" aria-pressed="true">Above</button>
+        <button type="button" id="chord-style-inline" aria-pressed="false">Inline</button>
+      </div>
+      <div class="layout-toggle" role="group" aria-label="Chord diagram position">
+        <button type="button" id="chord-layout-bottom" aria-pressed="true">Bottom</button>
+        <button type="button" id="chord-layout-right" aria-pressed="false">Right</button>
+      </div>
+      <div class="layout-toggle" role="group" aria-label="Chord diagram size" id="diagram-size-control">
+        <button type="button" data-diagram-scale="0.6"  aria-pressed="false" title="Small diagrams (songs with many chords)">S</button>
+        <button type="button" data-diagram-scale="0.85" aria-pressed="true"  title="Medium diagrams">M</button>
+        <button type="button" data-diagram-scale="1.15" aria-pressed="false" title="Large diagrams">L</button>
+        <button type="button" data-diagram-scale="1.5"  aria-pressed="false" title="Extra large (learn-to-play groups)">XL</button>
+      </div>
+      <button id="scroll-reset">⏹ Reset</button>
+      {% block controls_right_extra %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- Lyrics -->
+  <div class="tp-main">
+    <div class="lyrics-container">
+      <div class="lyrics">
+        {% block lyrics_header %}{% endblock %}
+        {{ lyrics_with_chords|safe }}
+      </div>
+    </div>
+  </div>
+
+  {% block after_main %}{% endblock %}
+
+  {% include "songbook/teleprompter/_data.html" %}
+
+  <!-- Chord Section (diagrams at the bottom or right, toggled by the layout buttons) -->
+  <div id="chord-section">
+    <div id="chord-diagrams"></div>
+  </div>
+
+  <!-- Teleprompter engine: must come AFTER window.SONG is set in _data.html -->
+  <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
+
+  {% include "songbook/teleprompter/_scripts.html" %}
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
