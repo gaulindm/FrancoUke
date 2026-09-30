@@ -247,6 +247,37 @@ html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
   }
 }
 
+
+  /* ===== Singing groups: {c:1} / {c:2} marks the line after it ===== */
+  .lyrics .grp {
+    --grp: #666;
+    border-left: 4px solid var(--grp);
+    padding-left: 0.6em;
+    background: color-mix(in srgb, var(--grp) 10%, transparent);
+  }
+  .lyrics .grp-1 { --grp: #c0392b; }
+  .lyrics .grp-2 { --grp: #2471a3; }
+  .lyrics .grp-badge {
+    display: inline-block;
+    min-width: 1.6em;
+    text-align: center;
+    border-radius: 1em;
+    padding: 0 0.5em;
+    margin-right: 0.6em;
+    font-size: 0.7em;
+    font-weight: 700;
+    color: #fff;
+    background: var(--grp);
+  }
+
+  /* ===== Hold cue: {c:(23)} = keep strumming the last chord on those beats ===== */
+  .lyrics .hold-cue {
+    color: orange;
+    font-weight: 700;
+    margin-left: 0.3em;
+    white-space: nowrap;
+  }
+
   </style>
 </head>
 <body>
