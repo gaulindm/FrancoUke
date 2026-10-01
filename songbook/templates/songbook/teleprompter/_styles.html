@@ -1,150 +1,152 @@
 <style>
-    /* ===== Theme + chord color + text size, all overridable live ===== */
-    :root {
-      --chord-color: #2a6f97;
-      --text-scale: 1;
+  /* ===== Theme + chord color + text size, all overridable live ===== */
+  :root {
+    --chord-color: #2a6f97;
+    --text-scale: 1;
 
-      --bg-color: #ffffff;
-      --text-color: #1a1a1a;
-      --controls-bg: #f4f4f4;
-      --controls-border: #d8d8d8;
-      --button-bg: #ffffff;
-      --button-text: #1a1a1a;
-      --bg: #ffffff; --fg: #1a1a1a; --muted: #666666; --accent: #ff8c00;
-    }
-    html[data-theme="dark"] {
-      --bg-color: #121212;
-      --text-color: #f0f0f0;
-      --controls-bg: #1e1e1e;
-      --controls-border: #3a3a3a;
-      --button-bg: #2a2a2a;
-      --button-text: #f0f0f0;
-      --bg: #121212; --fg: #f0f0f0; --muted: #9aa6b2; --accent: #ffd166;
-    }
+    --bg-color: #ffffff;
+    --text-color: #1a1a1a;
+    --controls-bg: #f4f4f4;
+    --controls-border: #d8d8d8;
+    --button-bg: #ffffff;
+    --button-text: #1a1a1a;
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #666666; --accent: #ff8c00;
+  }
+  html[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #f0f0f0;
+    --controls-bg: #1e1e1e;
+    --controls-border: #3a3a3a;
+    --button-bg: #2a2a2a;
+    --button-text: #f0f0f0;
+    --bg: #121212; --fg: #f0f0f0; --muted: #9aa6b2; --accent: #ffd166;
+  }
 
-    body {
-      background: var(--bg-color);
-      color: var(--text-color);
-    }
-    .controls {
-      background: var(--controls-bg);
-      color: var(--text-color);
-      border-color: var(--controls-border);
-    }
-    .controls button,
-    .controls .layout-toggle button {
-      background: var(--button-bg);
-      color: var(--button-text);
-      border-color: var(--controls-border);
-    }
-    #chord-section {
-      background: var(--bg-color);
-      color: var(--text-color);
-    }
+  body {
+    background: var(--bg-color);
+    color: var(--text-color);
+  }
+  .controls {
+    background: var(--controls-bg);
+    color: var(--text-color);
+    border-color: var(--controls-border);
+  }
+  .controls button,
+  .controls .layout-toggle button {
+    background: var(--button-bg);
+    color: var(--button-text);
+    border-color: var(--controls-border);
+  }
+  #chord-section {
+    background: var(--bg-color);
+    color: var(--text-color);
+  }
 
-    /* Chord diagrams (fretboards) drawn by chord_diagrams.js: force them
-       to plain black in light mode. Targets any element that has an
-       inline fill/stroke set to something other than "none", so open
-       string circles (fill="none") stay hollow instead of turning into
-       solid black dots. Left untouched in dark mode. */
-    html[data-theme="light"] #chord-diagrams svg [fill]:not([fill="none"]),
-    html[data-theme="light"] #chord-diagrams svg text {
-      fill: #000 !important;
-    }
-    html[data-theme="light"] #chord-diagrams svg [stroke]:not([stroke="none"]) {
-      stroke: #000 !important;
-    }
+  /* Chord diagrams (fretboards) drawn by chord_diagrams.js: force them
+     to plain black in light mode. Targets any element that has an
+     inline fill/stroke set to something other than "none", so open
+     string circles (fill="none") stay hollow instead of turning into
+     solid black dots. Left untouched in dark mode. */
+  html[data-theme="light"] #chord-diagrams svg [fill]:not([fill="none"]),
+  html[data-theme="light"] #chord-diagrams svg text {
+    fill: #000 !important;
+  }
+  html[data-theme="light"] #chord-diagrams svg [stroke]:not([stroke="none"]) {
+    stroke: #000 !important;
+  }
 
-    .chord-label {
-      font-weight: 700;
-      color: var(--chord-color);
-      white-space: nowrap;
-    }
+  .chord-label {
+    font-weight: 700;
+    color: var(--chord-color);
+    white-space: nowrap;
+  }
 
-    /* Text size applies to both lyrics and (via em, below) the chord
-       names, so the +/- control scales the whole song together. */
-    .lyrics .verse,
-    .lyrics .section-body,
-    .lyrics .centered {
-      font-size: calc(1em * var(--text-scale));
-    }
+  /* Text size applies to both lyrics and (via em, below) the chord
+     names, so the +/- control scales the whole song together. */
+  .lyrics .verse,
+  .lyrics .section-body,
+  .lyrics .centered {
+    font-size: calc(1em * var(--text-scale));
+  }
 
-    /* ===== Chords ABOVE the lyrics ===== */
-    /* 🔧 TUNE: line-height leaves room for the chord name above each line.
-       Roughly 2.6-2.8 is the lower limit before the names (-1.3em)
-       start crowding the line above. */
-    html[data-chord-style="above"] .lyrics .verse,
-    html[data-chord-style="above"] .lyrics .section-body,
-    html[data-chord-style="above"] .lyrics .centered {
-      line-height: 3;
-    }
-    html[data-chord-style="above"] .chord-word {
-      position: relative;
-      display: inline-block;
-    }
-    /* Zero-width character so even an empty chord-word keeps full line
-       height and its chord name lines up with all the others. */
-    html[data-chord-style="above"] .chord-word::before {
-      content: "\200B";
-    }
-    html[data-chord-style="above"] .chord-label {
-      position: absolute;
-      top: -1.3em;
-      left: 0;
-      font-size: 0.85em;
-    }
+  /* ===== Chords ABOVE the lyrics ===== */
+  /* 🔧 TUNE: line-height leaves room for the chord name above each line.
+     Roughly 2.6-2.8 is the lower limit before the names (-1.3em)
+     start crowding the line above. */
+  html[data-chord-style="above"] .lyrics .verse,
+  html[data-chord-style="above"] .lyrics .section-body,
+  html[data-chord-style="above"] .lyrics .centered {
+    line-height: 3;
+  }
+  html[data-chord-style="above"] .chord-word {
+    position: relative;
+    display: inline-block;
+  }
+  /* Zero-width character so even an empty chord-word keeps full line
+     height and its chord name lines up with all the others. */
+  html[data-chord-style="above"] .chord-word::before {
+    content: "\200B";
+  }
+  html[data-chord-style="above"] .chord-label {
+    position: absolute;
+    top: -1.3em;
+    left: 0;
+    font-size: 0.85em;
+  }
 
-    /* ===== Chords INLINE, e.g. [C]One, two, [CM7]three, four ===== */
-    html[data-chord-style="inline"] .chord-word {
-      display: inline;
-    }
-    html[data-chord-style="inline"] .chord-label {
-      position: static;
-      display: inline;
-      font-size: 0.9em;
-    }
-    html[data-chord-style="inline"] .chord-label::before { content: "["; }
-    html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
+  /* ===== Chords INLINE, e.g. [C]One, two, [CM7]three, four ===== */
+  html[data-chord-style="inline"] .chord-word {
+    display: inline;
+  }
+  html[data-chord-style="inline"] .chord-label {
+    position: static;
+    display: inline;
+    font-size: 0.9em;
+  }
+  html[data-chord-style="inline"] .chord-label::before { content: "["; }
+  html[data-chord-style="inline"] .chord-label::after  { content: "]"; }
 
-    /* Extra breathing room before the first verse. */
-    .lyrics .metadata {
-      margin-bottom: 2rem;
-    }
-    /* {st:...} / {subtitle:...} — sits directly under the title, quieter
-       than it so it doesn't compete for attention. */
-    .song-subtitle {
-      font-style: italic;
-      font-size: 1.1em;
-      opacity: 0.75;
-      margin-top: -0.5rem;
-    }
+  /* Extra breathing room before the first verse. */
+  .lyrics .metadata {
+    margin-bottom: 2rem;
+  }
+  /* {st:...} / {subtitle:...} — sits directly under the title, quieter
+     than it so it doesn't compete for attention. */
+  .song-subtitle {
+    font-style: italic;
+    font-size: 1.1em;
+    opacity: 0.75;
+    margin-top: -0.5rem;
+  }
 
-    /* ===== Singing groups: {c:1} / {c:2} marks the line after it ===== */
-    .lyrics .grp {
-      --grp: #666;
-      border-left: 4px solid var(--grp);
-      padding-left: 0.6em;
-      background: color-mix(in srgb, var(--grp) 10%, transparent);
-    }
-    .lyrics .grp-1 { --grp: #c0392b; }
-    .lyrics .grp-2 { --grp: #2471a3; }
-    .lyrics .grp-badge {
-      display: inline-block;
-      min-width: 1.6em;
-      text-align: center;
-      border-radius: 1em;
-      padding: 0 0.5em;
-      margin-right: 0.6em;
-      font-size: 0.7em;
-      font-weight: 700;
-      color: #fff;
-      background: var(--grp);
-    }
-    /* ===== Hold cue: {c:(23)} = keep strumming the last chord on those beats ===== */
-    .lyrics .hold-cue {
-      color: orange;
-      font-weight: 700;
-      margin-left: 0.3em;
-      white-space: nowrap;
-    }
-  </style>
+  /* ===== Singing groups: {c:1} / {c:2} marks the line after it ===== */
+  .lyrics .grp {
+    --grp: #666;
+    border-left: 4px solid var(--grp);
+    padding-left: 0.6em;
+    background: color-mix(in srgb, var(--grp) 10%, transparent);
+  }
+  .lyrics .grp-1 { --grp: #c0392b; }
+  .lyrics .grp-2 { --grp: #2471a3; }
+  .lyrics .grp-badge {
+    display: inline-block;
+    min-width: 1.6em;
+    text-align: center;
+    border-radius: 1em;
+    padding: 0 0.5em;
+    margin-right: 0.6em;
+    font-size: 0.7em;
+    font-weight: 700;
+    white-space: nowrap;
+    color: #fff;
+    background: var(--grp);
+  }
+  /* ===== Hold cue: {c:(23)} = keep strumming the last chord on those beats ===== */
+  .lyrics .hold-cue {
+    color: orange;
+    font-weight: 700;
+    font-style: italic;
+    margin-left: 0.3em;
+    white-space: nowrap;
+  }
+</style>

@@ -339,6 +339,57 @@ def render_chord_html(chord, bracket_style="square", chord_color="black", option
 
 
 # =======================
+# COUNT CUES & VOCAL GROUPS
+# =======================
+# {c:(234)} / {c:(2 3 4)} / {c:(234, 12)} -> a count cue: only digits, spaces
+# and commas inside parentheses. Anything else in parentheses, such as
+# {c:(Two Parts)}, stays an ordinary standalone note.
+COUNT_CUE_RE = re.compile(r'^\(\s*\d[\d\s,]*\)$')
+
+# {c:VG1} / {c:VG2}  (a bare {c:1} / {c:2} is accepted too, so older files
+# keep working while you migrate).
+VOCAL_GROUP_RE = re.compile(r'^(?:VG\s*)?(\d+)$', re.IGNORECASE)
+
+# Label printed in front of the line. Colour helps on screen; the text
+# keeps it readable when printed in black and white.
+VOCAL_GROUP_LABEL = "Vocal Group {n}:"
+VOCAL_GROUP_COLORS = {"1": "#1f5fbf", "2": "#c2410c"}
+VOCAL_GROUP_DEFAULT_COLOR = "#555555"
+
+
+def render_count_cue_html(text):
+    """Bold-italic count cue, appended to the end of a lyric line."""
+    return f"&nbsp;&nbsp;<b><i>{text}</i></b>"
+
+
+INLINE_COMMENT_RE = re.compile(r'\{\s*(?:c|comment)\s*:\s*(.*?)\s*\}', re.IGNORECASE)
+
+
+def convert_inline_comments(text):
+    """Convert {c:...} / {comment:...} found inside a lyric line.
+
+    When a comment shares a line with lyrics, the parser leaves it in the
+    lyric text instead of emitting a separate comment item, so it would
+    print literally. Count cues become bold italic; any other inline
+    comment becomes a small grey italic note.
+    """
+    def _replace(match):
+        inner = match.group(1).strip()
+        if COUNT_CUE_RE.match(inner):
+            return render_count_cue_html(inner)
+        return f'&nbsp;<font size="9" color="grey"><i>{inner}</i></font>'
+
+    return INLINE_COMMENT_RE.sub(_replace, text)
+
+
+def render_vocal_group_label(group_number):
+    """Small bold coloured label placed in front of a sung line."""
+    color = VOCAL_GROUP_COLORS.get(str(group_number), VOCAL_GROUP_DEFAULT_COLOR)
+    label = VOCAL_GROUP_LABEL.format(n=group_number)
+    return f'<font size="8" color="{color}"><b>{label}</b></font>&nbsp;'
+
+
+# =======================
 # LYRICS ELEMENTS
 # =======================
 def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name,
@@ -352,6 +403,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
     paragraph_buffer = []
     section_type = None
     section_instruction = None
+    pending_group = None  # vocal group number waiting for its lyric line
 
     # Map directives per site
     directive_map = {
@@ -463,6 +515,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
 
                 if directive in selected_map:
                     flush_buffer()
+                    pending_group = None
                     mapped = selected_map[directive]
                     if mapped == "PAGEBREAK":
                         elements.append(PageBreak())
@@ -482,14 +535,38 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             # with the same section_type (a comment is an aside, not a
             # section boundary).
             elif "comment" in item:
+                comment_raw = str(item["comment"]).strip()
+
+                # Vocal group tag ({c:VG1} / {c:VG2}, or bare {c:1} / {c:2}):
+                # no output of its own. The next lyric line gets the label.
+                group_match = VOCAL_GROUP_RE.match(comment_raw)
+                if group_match:
+                    pending_group = group_match.group(1)
+                    continue
+
+                # Count cue ({c:(234)}): attach to the end of the current
+                # line in bold italic. If it sits on its own line, slide it
+                # back before the trailing line break(s) so it still lands
+                # at the end of the line above.
+                if COUNT_CUE_RE.match(comment_raw) and paragraph_buffer:
+                    trailing_breaks = 0
+                    while paragraph_buffer and paragraph_buffer[-1] == "<br/>":
+                        paragraph_buffer.pop()
+                        trailing_breaks += 1
+                    paragraph_buffer.append(render_count_cue_html(comment_raw))
+                    paragraph_buffer.extend(["<br/>"] * trailing_breaks)
+                    continue
+
+                # Any other comment, e.g. {c:(Two Parts)}: standalone note.
                 flush_buffer()
-                comment_text = apply_color_markup(item["comment"])
+                pending_group = None
+                comment_text = apply_color_markup(comment_raw)
                 elements.append(Paragraph(f"<i>{comment_text}</i>", comment_style))
                 continue
 
             elif "lyric" in item:
                 chord = item.get("chord", "")
-                lyric = item["lyric"]
+                lyric = convert_inline_comments(item["lyric"])
                 if chord:
                     is_optional = item.get("optional", False)
                     chord_html = render_chord_html(chord, chord_bracket_style, chord_color, optional=is_optional)
@@ -504,9 +581,16 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                         line = f" {chord_html}{lyric}"
                 else:
                     line = lyric
+                if pending_group is not None:
+                    line = render_vocal_group_label(pending_group) + line
+                    pending_group = None
                 paragraph_buffer.append(line)
 
             elif "format" in item and item["format"] == "LINEBREAK":
+                # The break that ends a {c:VG1}/{c:VG2} line is swallowed so
+                # the label sits on the same line as the lyrics it labels.
+                if pending_group is not None:
+                    continue
                 paragraph_buffer.append("<br/>")
 
     flush_buffer()

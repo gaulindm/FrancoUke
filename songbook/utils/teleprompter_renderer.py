@@ -56,9 +56,14 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     # A marker applies ONLY to the single line right after it. We remember
     # it in pending_group until that line's first chord/lyric arrives, wrap
     # the line in <div class="grp grp-N">, and close it at the LINEBREAK.
+    # Accepts {c:1}, {c:VG1}, {c:VG 2}, {c:1+2}, {c:All}. The optional "VG"
+    # prefix is dropped, so VG1 and 1 produce the same colour class.
     GROUP_RE = re.compile(
-        r'^\s*(\d+(?:\s*[+&,]\s*\d+)*|all|tous|tutti)\s*$', re.I
+        r'^\s*(?:vg\s*)?(\d+(?:\s*[+&,]\s*\d+)*|all|tous|tutti)\s*$', re.I
     )
+    # 🔧 TUNE: text shown in the badge for numbered groups ({n} = 1, 2, 1+2).
+    # Use "VG{n}" for a shorter badge, e.g. on a projector with big text.
+    VOCAL_GROUP_LABEL = "Vocal Group {n}"
     # 🆕 Hold cue: {c:(23)} at the end of a line = keep strumming the last
     # chord through those beats (2 and 3). Rendered inline, in orange.
     HOLD_RE = re.compile(r'^\s*\(\s*([\d,\s]+?)\s*\)\s*$')
@@ -85,9 +90,14 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
         if pending_group and not open_group:
             label = pending_group
             cls = 'grp-' + re.sub(r'[^a-z0-9]+', '-', label.lower()).strip('-')
+            # Numbered groups read "Vocal Group 1"; All/Tous/Tutti stay as written.
+            shown = (
+                VOCAL_GROUP_LABEL.format(n=label.replace(" ", ""))
+                if label[0].isdigit() else label
+            )
             current_buffer.append(
                 f'<div class="grp {cls}">'
-                f'<span class="grp-badge">{label}</span>'
+                f'<span class="grp-badge">{shown}</span>'
             )
             open_group = True
             pending_group = None
@@ -158,7 +168,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     # 🆕 Singing-group marker: don't render it on its own;
                     # it decorates the next line. `continue` also skips any
                     # LINEBREAK attached to the marker item itself.
-                    pending_group = text
+                    pending_group = GROUP_RE.match(text).group(1).strip()
                     continue
                 else:
                     flush_buffer()
