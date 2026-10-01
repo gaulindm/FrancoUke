@@ -18,9 +18,24 @@
         </div>
 
         <!-- Control Panel -->
-        <div class="col-md-4 col-12 p-3 bg-white border-start">
-            {% include "partials/_control_panel.html" %}
-        </div>
+<!-- Control Panel -->
+<div class="col-md-4 col-12 p-3 bg-white border-start">
+
+    {# Jump to the teleprompter view of this same song #}
+    <div class="mb-3">
+        <a href="{% url 'teleprompter:teleprompter' song_id=chord_sheet.id %}"
+           class="btn btn-primary w-100">
+            <i class="bi bi-display me-2"></i>
+            {% if site_name == "FrancoUke" %}
+                Ouvrir dans le téléprompteur
+            {% else %}
+                Open in Teleprompter
+            {% endif %}
+        </a>
+    </div>
+
+    {% include "partials/_control_panel.html" %}
+</div>
     </div>
 
     <!-- Optional debug output (hidden by default) -->
