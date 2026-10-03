@@ -601,7 +601,8 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
 # =======================
 # PDF GENERATION
 # =======================
-def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None, site_name="FrancoUke"):
+def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None,
+                       site_name="FrancoUke", prefs_override=None):
     """
     Generate PDF for a list of songs for the given user.
     Draws chords in the footer for the primary instrument.
@@ -631,7 +632,9 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     # bottomMargin can't be adjusted after the doc starts laying out
     # flowables, so getting this order right matters.
     user_prefs = get_user_preferences(user)
-
+    if prefs_override:
+        user_prefs = {**user_prefs, **prefs_override}
+        
     # Get suggested_alternate from first song's metadata
     suggested_alternate = None
     if songs and songs[0].metadata:

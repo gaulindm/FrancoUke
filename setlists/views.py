@@ -13,6 +13,9 @@ from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 from songbook.utils.chord_library import load_chord_dict
 from songbook.utils.teleprompter_helpers import apply_html_color_markup, with_maj_aliases
 from songbook.context_processors import site_context
+from django.http import Http404
+from django.utils.text import slugify
+from .setlist_pdf import build_setlist_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,26 @@ def setlist_detail(request, pk):
             "group": group,
         },
     )
+
+def setlist_pdf(request, pk):
+    setlist = get_object_or_404(SetList, pk=pk)
+    if not setlist.songs.exists():
+        raise Http404("This setlist has no songs.")
+
+    site_name = site_context(request).get("site_name")
+    user = request.user if request.user.is_authenticated else None
+    large = request.GET.get("large") == "1"
+
+    pdf_bytes = build_setlist_pdf(setlist, user=user, site_name=site_name,
+                                  large_print=large)
+
+    filename = (slugify(setlist.name) or f"setlist-{setlist.pk}") + ("-large-print" if large else "")
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="{filename}.pdf"'
+    return response
+
+
+
 
 
 # ----------------------------

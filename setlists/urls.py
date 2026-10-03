@@ -6,6 +6,7 @@ app_name = "setlists"
 urlpatterns = [
     path("", views.setlist_list, name="list"),
     path("<int:pk>/", views.setlist_detail, name="detail"),
+    path("<int:pk>/pdf/", views.setlist_pdf, name="setlist_pdf"),
     path(
         "<int:setlist_id>/teleprompter/<int:order>/",
         views.setlist_teleprompter,
