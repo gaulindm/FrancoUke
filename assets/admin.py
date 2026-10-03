@@ -16,6 +16,7 @@ class AssetAdmin(admin.ModelAdmin):
     list_display = (
         'admin_thumbnail_tag',
         'title',
+        'group',
         'type',
         'file_size_display',
         'dimensions_display',
@@ -45,7 +46,7 @@ class AssetAdmin(admin.ModelAdmin):
             'fields': ('title', 'caption', 'alt_text', 'type', 'is_public')
         }),
         ('Organization', {
-            'fields': ('tags', 'uploaded_by')
+            'fields': ('group','tags', 'uploaded_by')
         }),
         ('Technical Info (Auto-generated)', {
             'fields': (

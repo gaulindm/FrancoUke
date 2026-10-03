@@ -19,6 +19,10 @@ class Group(models.Model):
                    "subgroup that belongs to a club (e.g. 'I-Ukes Performers' -> parent 'I-Ukes').",
     )
     logo = models.ImageField(upload_to="group_logos/", blank=True, null=True)
+    landing_image = models.ImageField(
+        upload_to="group_landing/", blank=True, null=True,
+        help_text="Square image (e.g. 600×600 px) shown on the landing page card.",
+    )
     contact_email = models.EmailField(blank=True)
     description   = models.TextField(blank=True)
     contact_phone = models.CharField(max_length=30, blank=True)
