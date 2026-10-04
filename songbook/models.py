@@ -10,7 +10,6 @@ from .utils.transposer import detect_key
 from taggit.managers import TaggableManager
 from django.conf import settings
 from django.utils import timezone
-from .parsers import parse_song_data  # adjust as per your structure
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 from songbook.utils.transposer import extract_chords
 

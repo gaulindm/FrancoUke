@@ -1,6 +1,6 @@
 from reportlab.graphics.shapes import Drawing, Line
 from reportlab.graphics import renderPDF
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable, Table, TableStyle, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable, Table, TableStyle, Spacer, PageBreak, Preformatted
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter
@@ -388,6 +388,38 @@ def render_vocal_group_label(group_number):
     label = VOCAL_GROUP_LABEL.format(n=group_number)
     return f'<font size="8" color="{color}"><b>{label}</b></font>&nbsp;'
 
+# =======================
+# TAB BLOCKS ({sot} ... {eot})
+# =======================
+TAB_FONT = "Courier"
+TAB_MAX_FONT_SIZE = 10          # 🔧 TUNE: normal size for tabs
+TAB_MIN_FONT_SIZE = 5           # never shrink below this
+TAB_COLUMN_WIDTH = 500          # same width as the lyrics column in sections
+TAB_PADDING = 6
+TAB_BACKGROUND = colors.HexColor("#F2F2F2")
+COURIER_CHAR_WIDTH = 0.6        # Courier is 0.6 x font size wide per character
+
+
+def build_tab_flowable(tab_lines):
+    """Monospaced block for a tab. Shrinks the font if a line is too wide."""
+    lines = [str(l).expandtabs(4).rstrip() for l in tab_lines]
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+    if not lines:
+        return None
+
+    available = TAB_COLUMN_WIDTH - 2 * TAB_PADDING
+    longest = max(len(l) for l in lines)
+    size = min(TAB_MAX_FONT_SIZE, available / (COURIER_CHAR_WIDTH * longest))
+    size = max(size, TAB_MIN_FONT_SIZE)
+
+    style = ParagraphStyle(
+        "TabBlock", fontName=TAB_FONT, fontSize=size,
+        leading=size * 1.25, textColor=colors.black,
+    )
+    return Preformatted("\n".join(lines), style)
 
 # =======================
 # LYRICS ELEMENTS
@@ -404,6 +436,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
     section_type = None
     section_instruction = None
     pending_group = None  # vocal group number waiting for its lyric line
+    section_label_shown = False  # has this section's "Intro:" label been printed yet?
 
     # Map directives per site
     directive_map = {
@@ -459,7 +492,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
     )
 
     def flush_buffer():
-        nonlocal paragraph_buffer, section_type, section_instruction
+        nonlocal paragraph_buffer, section_type, section_instruction, section_label_shown
 
         if not paragraph_buffer:
             return
@@ -473,6 +506,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             label_html = ""
             if section_type.lower() != "centered":
                 label_html = f"<b>{section_type}:</b>"
+                section_label_shown = True
                 if section_instruction:
                     label_html += f"<br/><font size='9' color='gray'><i>{section_instruction}</i></font>"
             else:
@@ -509,6 +543,40 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
 
     # Main parse loop
     for group in lyrics_with_chords:
+        # 🆕 Tab block ({sot}...{eot}) arrives as a dict, not a list of items.
+        if isinstance(group, dict) and group.get("type") == "tab":
+            flush_buffer()
+            pending_group = None
+            tab_flowable = build_tab_flowable(group.get("lines", []))
+            if tab_flowable is not None:
+                label_html = ""
+                if (section_type and section_type.lower() not in ("verse", "centered")
+                        and not section_label_shown):
+                    label_html = f"<b>{section_type}:</b>"
+                    if section_instruction:
+                        label_html += f"<br/><font size='9' color='gray'><i>{section_instruction}</i></font>"
+                        section_instruction = None
+                    section_label_shown = True
+
+                tab_table = Table(
+                    [[Paragraph(label_html, base_style), tab_flowable]],
+                    colWidths=[60, TAB_COLUMN_WIDTH],
+                    hAlign="CENTER",
+                )
+                tab_table.setStyle(TableStyle([
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('BACKGROUND', (1, 0), (1, 0), TAB_BACKGROUND),
+                    ('LEFTPADDING', (0, 0), (0, 0), 2),
+                    ('RIGHTPADDING', (0, 0), (0, 0), 2),
+                    ('LEFTPADDING', (1, 0), (1, 0), TAB_PADDING),
+                    ('RIGHTPADDING', (1, 0), (1, 0), TAB_PADDING),
+                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ]))
+                elements.append(tab_table)
+                elements.append(Spacer(1, 4))
+            continue
+
         for item in group:
             if "directive" in item:
                 directive = item["directive"].lower()
@@ -524,6 +592,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                         section_type = None
                     else:
                         section_type = mapped
+                        section_label_shown = False
                     continue
 
             elif "instruction" in item:

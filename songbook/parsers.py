@@ -9,6 +9,8 @@ _OPT_MARKER = "\x00OPT\x00"
 # e.g. <opt>[Em]</opt> or <OPT>[F#m7]</OPT>
 _OPT_CHORD_RE = re.compile(r'<opt>\s*\[(.*?)\]\s*</opt>', re.IGNORECASE)
 
+_SOT_RE = re.compile(r'^\{\s*(?:sot|start_of_tab)\s*(?::.*)?\}$', re.IGNORECASE)
+_EOT_RE = re.compile(r'^\{\s*(?:eot|end_of_tab)\s*\}$', re.IGNORECASE)
 
 def _mark_optional_chords(line):
     """Replace <opt>[Chord]</chord> with [Chord<marker>] so the existing
@@ -29,11 +31,12 @@ def parse_song_data(chordpro_text):
             stripped = line.strip()
 
             # TAB block start
-            if stripped == "{start_of_tab}":
+            
+            if _SOT_RE.match(stripped):
                 inside_tab_block = True
                 tab_lines = []
                 continue
-            if stripped == "{end_of_tab}":
+            if _EOT_RE.match(stripped):
                 inside_tab_block = False
                 result.append({"type": "tab", "lines": tab_lines})
                 continue

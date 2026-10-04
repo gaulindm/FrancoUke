@@ -6,23 +6,31 @@
         {% with first_user_group=user_groups|first %}
         {% with active_group=group|default:first_user_group %}
 
-        <!-- Brand - changes based on authentication status -->
-        {% if user.is_authenticated and active_group %}
-            <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'board:full_board' group_slug=active_group.slug %}">
-                <img src="{% static 'board/img/logo-100.png' %}" alt="{{ active_group.name }} Logo" class="me-2" style="height:40px;">
-                {{ active_group.name }} Portal
-            </a>
-        {% elif user.is_authenticated %}
-            <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'landing' %}">
-                <img src="{% static 'board/img/logo-100.png' %}" alt="Logo" class="me-2" style="height:40px;">
-                Performer Portal
-            </a>
-        {% else %}
-            <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% if group %}{% url 'public:about' group_slug=group.slug %}{% else %}{% url 'landing' %}{% endif %}">
-                <img src="{% static 'board/img/logo-100.png' %}" alt="{{ group.name|default:'Club' }} Logo" class="me-2" style="height:40px;">
-                {{ group.name|default:"Club" }} Public Site
-            </a>
-        {% endif %}
+              <!-- Brand - changes based on authentication status -->
+              {% if user.is_authenticated and active_group %}
+              <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'board:full_board' group_slug=active_group.slug %}">
+                  {% if active_group.logo %}
+                      <img src="{{ active_group.logo.url }}" alt="{{ active_group.name }} Logo" class="me-2" style="height:40px; width:auto; max-width:120px; object-fit:contain;">
+                  {% else %}
+                      <img src="{% static 'board/img/logo-100.png' %}" alt="{{ active_group.name }} Logo" class="me-2" style="height:40px;">
+                  {% endif %}
+                  {{ active_group.name }} Portal
+              </a>
+          {% elif user.is_authenticated %}
+              <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'landing' %}">
+                  <img src="{% static 'board/img/logo-100.png' %}" alt="Logo" class="me-2" style="height:40px;">
+                  Performer Portal
+              </a>
+          {% else %}
+              <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% if group %}{% url 'public:about' group_slug=group.slug %}{% else %}{% url 'landing' %}{% endif %}">
+                  {% if group.logo %}
+                      <img src="{{ group.logo.url }}" alt="{{ group.name }} Logo" class="me-2" style="height:40px; width:auto; max-width:120px; object-fit:contain;">
+                  {% else %}
+                      <img src="{% static 'board/img/logo-100.png' %}" alt="{{ group.name|default:'Club' }} Logo" class="me-2" style="height:40px;">
+                  {% endif %}
+                  {{ group.name|default:"Club" }} Public Site
+              </a>
+          {% endif %}
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
                 aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">

@@ -1,5 +1,6 @@
 import logging
 import re
+from html import escape as html_escape
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +123,20 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             current_buffer = []
 
     for group in lyrics_with_chords:
+        # Tab block ({sot}...{eot}) arrives as a dict, not a list of items.
+        if isinstance(group, dict) and group.get("type") == "tab":
+            close_group()
+            current_buffer.append(
+                '<pre class="tab-block">'
+                + html_escape("\n".join(group["lines"]))
+                + '</pre>'
+            )
+            continue
+
+
+
+
+
         for item in group:
             if "directive" in item:
                 directive = item["directive"]
