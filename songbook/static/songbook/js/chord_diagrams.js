@@ -89,15 +89,19 @@ function drawChordDiagram(container, chord, options = {}) {
   // 🎸 Extract positions + baseFret from chord (support both schemas)
   let positions = [];
   let baseFret = 1;
+  let explicitBarre = null;   // barre comes from the DATA, never guessed
 
   if (chord.variations && chord.variations.length > 0) {
-    // ✅ JSON schema with variations
-    positions = chord.variations[0].positions || [];
-    baseFret = chord.variations[0].baseFret || 1;
+    // ✅ JSON schema with variations (barre lives inside the variation)
+    const v = chord.variations[0];
+    positions = v.positions || [];
+    baseFret = v.baseFret || 1;
+    explicitBarre = v.barre || null;
   } else {
     // ✅ Old style fallback
     positions = chord.positions || [];
     baseFret = chord.baseFret || 1;
+    explicitBarre = chord.barre || null;
   }
 
   console.groupCollapsed(`🎸 Drawing chord: ${chord.name || "Unnamed"}`);
@@ -121,7 +125,19 @@ function drawChordDiagram(container, chord, options = {}) {
     return;
   }
 
-  const barre = chord.barre || detectBarre(positions);
+  // 🔧 TUNE: barre is data-driven. detectBarre() only runs if a caller
+  // passes { autoBarre: true } — it mistakes shapes like D (2,2,2,0) for barres.
+  let barre = explicitBarre || (options.autoBarre ? detectBarre(positions) : null);
+
+  // 🔄 Mirror the barre's string range when the diagram is flipped for lefties
+  if (barre && prefs.isLefty) {
+    const n = positions.length;
+    barre = {
+      ...barre,
+      fromString: n + 1 - barre.toString,
+      toString: n + 1 - barre.fromString,
+    };
+  }
   const name = chord.name || "Chord";
 
   console.log("%cFinal positions:", "color: green", positions);
