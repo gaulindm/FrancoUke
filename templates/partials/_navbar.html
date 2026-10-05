@@ -38,9 +38,18 @@
 
     <div class="collapse navbar-collapse" id="navbarToggle">
 
-      <!-- Left Navigation -->
-      <div class="navbar-nav me-auto">
+    <!-- Left Navigation -->
+    <div class="navbar-nav me-auto">
 
+      <a class="nav-item nav-link {% if request.resolver_match.url_name == 'landing' %}active{% endif %}"
+      href="{% url 'landing' %}">
+     <i class="bi bi-grid-3x3-gap-fill me-1"></i>
+     {% if site_name == "FrancoUke" %}
+       Toutes les applis
+     {% else %}
+       All Apps
+     {% endif %}
+   </a>
         {% if site_name == "FrancoUke" or site_name == "StrumSphere" %}
 
           <a class="nav-item nav-link" href="{% url 'songbook:song_list' %}">

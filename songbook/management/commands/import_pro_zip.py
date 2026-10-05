@@ -9,6 +9,9 @@ Like clean_artist_field.py, this is a DRY RUN unless you add --apply.
     # 2. When the report looks right, do it for real:
     python manage.py import_pro_zip SOUP_SONGS.zip --origin SOUP --contributor daniel --apply
 
+    python manage.py import_pro_zip playlist4.zip --origin I-Ukes --contributor francoukedg --apply
+    
+
 Optional:
     --site FrancoUke     make the songs visible on that site right away.
                          (Left off, site_name stays empty, which HIDES the songs
