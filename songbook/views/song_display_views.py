@@ -416,6 +416,14 @@ class SongListView(SiteContextMixin, ListView):
         context["search_query"] = self.filter_params.get("q", "")
         context["selected_tag"] = self.filter_params.get("tag", "")
         context["show_formatted"] = self.filter_params.get("formatted") == "1"
+        # 🆕 How many filters are switched on (the search box doesn't count: it is
+        # always visible). Shown as a badge on the mobile "Filters" button so a
+        # collapsed filter panel never hides the fact that the list is filtered.
+        filter_keys = ("tag", "letter", "chords", "chord_count", "decade", "key", "origin")
+        active_filters = sum(1 for k in filter_keys if self.filter_params.get(k, "").strip())
+        if self.view_mode != "simple" and self.filter_params.get("formatted") == "1":
+            active_filters += 1
+        context["active_filter_count"] = active_filters
         context["view_mode"] = self.view_mode
         # The cookie is only sent back with the NEXT request, so also tell the
         # navbar which view this page is. (Not on artist pages: they're always

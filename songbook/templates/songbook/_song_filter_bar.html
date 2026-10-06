@@ -16,10 +16,26 @@
                         <button class="btn btn-primary" type="submit">🔍 Search</button>
                     {% endif %}
                 </div>
+
+                <!-- 🎛 Show/hide the filters on every screen size (remembered in this browser). The search box above is never hidden. -->
+                <div class="mt-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="songFilterToggle"
+                            aria-expanded="false">
+                        <i class="bi bi-funnel"></i>
+                        {% if site_name == 'FrancoUke' %}Filtres{% else %}Filters{% endif %}
+                        {% if active_filter_count %}<span class="badge {% if site_name == 'FrancoUke' %}bg-success{% else %}bg-primary{% endif %} ms-1">{{ active_filter_count }}</span>{% endif %}
+                        <span class="filter-caret">▾</span>
+                    </button>
+                    {% if active_filter_count %}
+                        <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" id="songFilterClear" class="btn btn-outline-danger btn-sm ms-1">
+                            {% if site_name == 'FrancoUke' %}Effacer{% else %}Clear{% endif %}
+                        </a>
+                    {% endif %}
+                </div>
             </div>
     
             <!-- Filter Buttons -->
-            <div class="col-md-4 text-end">
+            <div class="col-md-4 text-end collapse song-filter-collapsible">
                 <label class="me-2">{% if site_name == 'FrancoUke' %}Filtre :{% else %}Filter:{% endif %}</label>
                 {% if view_mode != "simple" %}
                 <a href="?formatted=1&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}" 
@@ -46,6 +62,9 @@
 
         </div>
     
+        {# Everything below folds away behind the Filters button (on every screen size) #}
+        <div class="collapse song-filter-collapsible">
+
         <!-- 🏷️ Tag Filters (on a new row) -->
         <div class="row">
             <div class="col">
@@ -159,6 +178,45 @@
                 {% endif %}
             </div>
         </div>
+        </div>{# /song-filter-collapsible #}
     </form>
     
 </div>
+
+{# Show/hide filters. State is remembered per view (simple / extended) in localStorage. Runs right after the markup so there is no flash. #}
+<script>
+(function () {
+    // 🔧 TUNE: what a first-time visitor sees, before they ever press the button.
+    //   simple view   -> closed everywhere (calm for newcomers)
+    //   extended view -> open on tablet/desktop, closed on phones
+    var isPhone = window.matchMedia ? window.matchMedia("(max-width: 767.98px)").matches : false;
+    var DEFAULT_OPEN = {% if view_mode == "simple" %}false{% else %}!isPhone{% endif %};
+    var KEY = "songListFiltersOpen_{{ view_mode }}";
+
+    var btn = document.getElementById("songFilterToggle");
+    var clearLink = document.getElementById("songFilterClear");
+    var panels = document.querySelectorAll(".song-filter-collapsible");
+    if (!btn || !panels.length) return;
+
+    function setOpen(open) {
+        panels.forEach(function (p) { p.classList.toggle("show", open); });
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.querySelector(".filter-caret").textContent = open ? "\u25B4" : "\u25BE";
+        // the open panel has its own "Clear Filter" button, so hide the small one
+        if (clearLink) clearLink.classList.toggle("d-none", open);
+    }
+
+    var open = DEFAULT_OPEN;
+    try {
+        var saved = localStorage.getItem(KEY);
+        if (saved !== null) open = (saved === "1");
+    } catch (e) { /* storage blocked: use the default */ }
+    setOpen(open);
+
+    btn.addEventListener("click", function () {
+        open = !open;
+        setOpen(open);
+        try { localStorage.setItem(KEY, open ? "1" : "0"); } catch (e) { /* ignore */ }
+    });
+})();
+</script>
