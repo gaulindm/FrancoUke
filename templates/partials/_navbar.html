@@ -52,7 +52,10 @@
    </a>
         {% if site_name == "FrancoUke" or site_name == "StrumSphere" %}
 
-          <a class="nav-item nav-link" href="{% url 'songbook:song_list' %}">
+          {# "Songs" opens the view the person used last (remembered in a cookie); simple view if none yet #}
+          {% firstof song_view_pref request.COOKIES.song_list_view "simple" as songs_view %}
+          <a class="nav-item nav-link"
+             href="{% if songs_view == 'extended' %}{% url 'songbook:song_list' %}{% else %}{% url 'songbook:song_list_simple' %}{% endif %}">
             {% if site_name == "FrancoUke" %}
               Partitions
             {% else %}

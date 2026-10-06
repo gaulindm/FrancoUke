@@ -1,0 +1,201 @@
+{# songbook/_chord_filter_modal.html: chord filter modal + its JavaScript (shared by the simple and extended views; uses the view's context) #}
+<!-- 🎸 Chord Filter Modal -->
+<div class="modal fade" id="chordFilterModal" tabindex="-1" 
+     aria-labelledby="chordFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chordFilterModalLabel">
+                    {% if site_name == 'FrancoUke' %}Filtrer par accords{% else %}Filter by Chords{% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">
+                    {% if site_name == 'FrancoUke' %}
+                        Choisissez les accords que vous connaissez. « Jouables » : chansons qui n'utilisent que ces accords. « Presque » : chansons qui demandent UN seul accord de plus. « Contient » : chansons qui contiennent tous ces accords.
+                    {% else %}
+                        Pick the chords you know. "Playable": songs that use only those chords. "Almost": songs that need just ONE more chord. "Contains": songs that include all of them.
+                    {% endif %}
+                </p>
+                <!-- Toggle -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        {% if site_name == 'FrancoUke' %}Mode de filtre{% else %}Filter Mode{% endif %}
+                    </label>
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="chordMode" 
+                                id="modePlayable" value="playable"
+                                {% if chord_mode != "contains" and chord_mode != "almost" %}checked{% endif %}>
+                            <label class="form-check-label" for="modePlayable">
+                                {% if site_name == 'FrancoUke' %}
+                                    Chansons jouables avec ces accords seulement
+                                {% else %}
+                                    Songs playable with ONLY these chords
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="chordMode" 
+                                id="modeAlmost" value="almost"
+                                {% if chord_mode == "almost" %}checked{% endif %}>
+                            <label class="form-check-label" for="modeAlmost">
+                                {% if site_name == 'FrancoUke' %}
+                                    Presque jouables (UN accord de plus)
+                                {% else %}
+                                    Almost playable (just ONE more chord)
+                                {% endif %}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="chordMode" 
+                                id="modeContains" value="contains"
+                                {% if chord_mode == "contains" %}checked{% endif %}>
+                            <label class="form-check-label" for="modeContains">
+                                {% if site_name == 'FrancoUke' %}
+                                    Chansons contenant TOUS ces accords
+                                {% else %}
+                                    Songs containing ALL selected chords
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <!-- Text input -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        {% if site_name == 'FrancoUke' %}Accords (séparés par des virgules){% else %}Chords (comma separated){% endif %}
+                    </label>
+                    <input type="text" id="chordTextInput" class="form-control"
+                           placeholder="e.g. C, G, Am, F"
+                           value="{{ chord_filter }}">
+                </div>
+
+                <!-- Clickable chord buttons -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        {% if site_name == 'FrancoUke' %}Ou cliquez sur les accords{% else %}Or click chords{% endif %}
+                    </label>
+                    <div id="chordButtons" class="d-flex flex-wrap gap-2">
+                        {% for chord in all_chords %}
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-sm chord-btn"
+                                    data-chord="{{ chord }}">
+                                {{ chord }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Selected chords display -->
+                <div id="selectedChordsDisplay" class="mt-2 text-muted small">
+                    {% if chord_filter %}
+                        {% if site_name == 'FrancoUke' %}Accords sélectionnés :{% else %}Selected:{% endif %}
+                        <strong>{{ chord_filter }}</strong>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% if site_name == 'FrancoUke' %}Annuler{% else %}Cancel{% endif %}
+                </button>
+                <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-outline-danger">
+                    {% if site_name == 'FrancoUke' %}Effacer{% else %}Clear{% endif %}
+                </a>
+                <button type="button" class="btn btn-success" id="applyChordFilter">
+                    {% if site_name == 'FrancoUke' %}Appliquer{% else %}Apply{% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // --- Chord filter logic ---
+    const chordTextInput = document.getElementById("chordTextInput");
+    const chordButtons = document.querySelectorAll(".chord-btn");
+
+    // Parse existing chord_filter into active set
+    let selectedChords = new Set(
+        "{{ chord_filter }}".split(",").map(c => c.trim()).filter(c => c)
+    );
+
+    // Highlight already-selected chords when modal opens
+    function syncButtons() {
+        chordButtons.forEach(btn => {
+            const chord = btn.dataset.chord;
+            if (selectedChords.has(chord)) {
+                btn.classList.remove("btn-outline-secondary");
+                btn.classList.add("btn-success");
+            } else {
+                btn.classList.remove("btn-success");
+                btn.classList.add("btn-outline-secondary");
+            }
+        });
+        chordTextInput.value = [...selectedChords].join(", ");
+        document.getElementById("selectedChordsDisplay").innerHTML =
+            selectedChords.size > 0
+                ? `{% if site_name == 'FrancoUke' %}Accords sélectionnés :{% else %}Selected:{% endif %} <strong>${[...selectedChords].join(", ")}</strong>`
+                : "";
+    }
+
+    syncButtons();
+
+    // Toggle chord on button click
+    chordButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const chord = this.dataset.chord;
+            if (selectedChords.has(chord)) {
+                selectedChords.delete(chord);
+            } else {
+                selectedChords.add(chord);
+            }
+            syncButtons();
+        });
+    });
+
+    // Keep text input in sync with button clicks
+    chordTextInput.addEventListener("input", function () {
+    // Only sync buttons, don't rewrite the input value while typing
+    const typed = new Set(
+        this.value.split(",").map(c => c.trim()).filter(c => c)
+    );
+    selectedChords = typed;
+    
+    // Sync buttons without touching the input value
+    chordButtons.forEach(btn => {
+        const chord = btn.dataset.chord;
+        if (selectedChords.has(chord)) {
+            btn.classList.remove("btn-outline-secondary");
+            btn.classList.add("btn-success");
+        } else {
+            btn.classList.remove("btn-success");
+            btn.classList.add("btn-outline-secondary");
+        }
+    });
+
+    document.getElementById("selectedChordsDisplay").innerHTML =
+        selectedChords.size > 0
+            ? `Selected: <strong>${[...selectedChords].join(", ")}</strong>`
+            : "";
+});
+
+    // Apply button — redirect with chords param
+    document.getElementById("applyChordFilter").addEventListener("click", function () {
+    const chords = [...selectedChords].join(",");
+    const mode = document.querySelector('input[name="chordMode"]:checked').value;
+    const params = new URLSearchParams({
+        q: "{{ search_query }}",
+        tag: "{{ selected_tag }}",
+        letter: "{{ selected_letter }}",
+        chords: chords,
+        chord_mode: mode,
+        chord_count: "{{ chord_count_filter }}",
+        decade: "{{ decade_filter }}",
+        key: "{{ key_filter }}",
+        origin: "{{ origin_filter }}",
+        {% if show_formatted %}formatted: "1",{% endif %}
+    });
+    window.location.href = "?" + params.toString();
+});
+</script>

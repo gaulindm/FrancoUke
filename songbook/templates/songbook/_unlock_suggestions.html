@@ -1,0 +1,15 @@
+{# songbook/_unlock_suggestions.html: "learn one more chord" box for almost-playable mode (shared by both views) #}
+<!-- 🎸 "Learn one more chord" suggestions (almost-playable mode only) -->
+{% if almost_mode and unlock_suggestions %}
+<div class="alert alert-info py-2">
+    <strong>
+        {% if site_name == 'FrancoUke' %}Apprenez un accord de plus pour débloquer des chansons :{% else %}Learn one more chord to unlock songs:{% endif %}
+    </strong>
+    {% for u in unlock_suggestions %}
+        <a href="{{ u.url }}" class="btn btn-sm btn-outline-primary ms-1"
+           title="{% if site_name == 'FrancoUke' %}Voir les chansons jouables avec {{ u.chord }}{% else %}See songs playable with {{ u.chord }} added{% endif %}">
+            {{ u.chord }} <span class="badge bg-primary">{{ u.count }}</span>
+        </a>
+    {% endfor %}
+</div>
+{% endif %}

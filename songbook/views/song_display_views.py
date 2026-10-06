@@ -9,8 +9,9 @@ from django.utils import timezone
 from types import SimpleNamespace
 import re
 import string
+from urllib.parse import quote
 
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 from django.core.paginator import Paginator
 
 from songbook.mixins import SiteContextMixin
@@ -176,6 +177,24 @@ class SongListView(SiteContextMixin, ListView):
     paginate_by = None  # pagination is done manually, over song *families* — see get_context_data
     FAMILIES_PER_PAGE = 20
 
+    # 🆕 Two flavours of this page share all the filtering code below:
+    #   extended view (this class): every column, every song
+    #   simple view   (SongListSimpleView): fewer columns, formatted songs only
+    # Subclasses only change these three attributes + the template.
+    view_mode = "extended"            # used by the templates (switch button, hidden controls)
+    list_url_suffix = ":song_list"    # URL name (without namespace) of THIS view, for "Clear Filter" links
+    formatted_only = False            # True = only songs that have a SongFormatting row
+
+    # 🆕 The browser remembers which view was used last: a plain cookie, so it
+    # survives logout (a session wouldn't) and works for anonymous visitors.
+    # The navbar "Songs" link reads it (see partials/_navbar.html).
+    VIEW_COOKIE = "song_list_view"
+    VIEW_COOKIE_MAX_AGE = 60 * 60 * 24 * 365  # one year
+
+    # 🆕 "Almost playable" chord mode: show songs that need exactly this many
+    # chords the player doesn't know yet (1 = "learn one more chord").
+    ALMOST_MAX_MISSING = 1
+
     # 🆕 Seasonal tag: hidden from the main list except during its month,
     # unless the user explicitly filters by this tag (any time of year).
     SEASONAL_TAG = "Xmas"
@@ -198,6 +217,11 @@ class SongListView(SiteContextMixin, ListView):
         #   3. no GET at all   -> bare visit: fall back to whatever was
         #                          last saved for this site (or nothing).
         # -------------------------------------------------------------
+        # 🆕 pk -> chords this song needs that the player doesn't know yet
+        # (filled in by the "almost" chord mode below, read by build_row_data)
+        self.almost_missing = {}
+        self.requested_chords_list = []
+
         site_name = self.get_site_name()
         session_key = f"song_list_filters:{site_name}"
 
@@ -222,7 +246,7 @@ class SongListView(SiteContextMixin, ListView):
             qs = qs.filter(is_public=True)
 
         # Existing filters
-        if self.filter_params.get("formatted") == "1":
+        if self.formatted_only or self.filter_params.get("formatted") == "1":
             # pk__in (not a join) so a song formatted by several users can't
             # appear twice; that keeps the final DISTINCT unnecessary.
             qs = qs.filter(pk__in=SongFormatting.objects.values("song_id"))
@@ -268,25 +292,44 @@ class SongListView(SiteContextMixin, ListView):
         chord_mode = self.filter_params.get("chord_mode", "playable")
 
         if chord_filter:
-            requested_chords = {c.strip().lower() for c in chord_filter.split(",") if c.strip()}
+            self.requested_chords_list = [c.strip() for c in chord_filter.split(",") if c.strip()]
+            requested_chords = {c.lower() for c in self.requested_chords_list}
 
-            if chord_mode == "playable":
-                matching_pks = []
-                for pk, chords_used in qs.values_list("pk", "chords_used"):
-                    if chords_used:
-                        song_chords = {c.strip().lower() for c in chords_used.split(",")}
-                        if song_chords.issubset(requested_chords):
-                            matching_pks.append(pk)
-                qs = qs.filter(pk__in=matching_pks)
+            # One pass for all three modes. Only real chords count — [N.C.]
+            # and other junk tokens are ignored, otherwise a song containing
+            # N.C. could never be "playable" (or would always be "missing" it).
+            matching_pks = []
+            for pk, chords_used in qs.values_list("pk", "chords_used"):
+                if not chords_used:
+                    continue
+                # lowercase -> original spelling, so we can show "Em" not "em"
+                song_map = {
+                    c.strip().lower(): c.strip()
+                    for c in chords_used.split(",")
+                    if is_valid_chord(c.strip())
+                }
+                song_chords = set(song_map)
+                if not song_chords:
+                    continue
 
-            else:  # contains
-                matching_pks = []
-                for pk, chords_used in qs.values_list("pk", "chords_used"):
-                    if chords_used:
-                        song_chords = {c.strip().lower() for c in chords_used.split(",")}
-                        if requested_chords.issubset(song_chords):
-                            matching_pks.append(pk)
-                qs = qs.filter(pk__in=matching_pks)
+                if chord_mode == "playable":
+                    # every chord in the song is one the player knows
+                    if song_chords.issubset(requested_chords):
+                        matching_pks.append(pk)
+
+                elif chord_mode == "almost":
+                    # song needs 1 (ALMOST_MAX_MISSING) chord(s) the player
+                    # doesn't know yet; fully playable songs are NOT included
+                    missing = song_chords - requested_chords
+                    if 1 <= len(missing) <= self.ALMOST_MAX_MISSING:
+                        matching_pks.append(pk)
+                        self.almost_missing[pk] = sorted(song_map[k] for k in missing)
+
+                else:  # contains
+                    if requested_chords.issubset(song_chords):
+                        matching_pks.append(pk)
+
+            qs = qs.filter(pk__in=matching_pks)
 
         # 🆕 Filter by NUMBER of chords used (2, 3, 4, 5, or "gt5" meaning >5)
         chord_count_filter = self.filter_params.get("chord_count", "").strip()
@@ -353,6 +396,18 @@ class SongListView(SiteContextMixin, ListView):
     
     
 
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        # Remember the last view used — but not for a "Songs by <artist>" page
+        if not self.kwargs.get("artist_name"):
+            response.set_cookie(
+                self.VIEW_COOKIE,
+                self.view_mode,
+                max_age=self.VIEW_COOKIE_MAX_AGE,
+                samesite="Lax",
+            )
+        return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -361,6 +416,13 @@ class SongListView(SiteContextMixin, ListView):
         context["search_query"] = self.filter_params.get("q", "")
         context["selected_tag"] = self.filter_params.get("tag", "")
         context["show_formatted"] = self.filter_params.get("formatted") == "1"
+        context["view_mode"] = self.view_mode
+        # The cookie is only sent back with the NEXT request, so also tell the
+        # navbar which view this page is. (Not on artist pages: they're always
+        # the extended layout and shouldn't change the remembered choice.)
+        if not self.kwargs.get("artist_name"):
+            context["song_view_pref"] = self.view_mode
+        context["list_url_suffix"] = self.list_url_suffix
 
         # 🆕 Preferred teleprompter style: instead of two columns (one per
         # style), send the user straight to whichever style they prefer.
@@ -437,6 +499,9 @@ class SongListView(SiteContextMixin, ListView):
 
         context["all_chords"] = sorted(all_chords)
         context["chord_filter"] = self.filter_params.get("chords", "")
+        # 🆕 URL-safe copy for building filter links: a raw "F#m" in an href
+        # starts a URL fragment at "#" and silently drops every later parameter.
+        context["chord_filter_qs"] = quote(self.filter_params.get("chords", ""), safe="")
         context["chord_mode"] = self.filter_params.get("chord_mode", "playable")
 
         # 🆕 Chord-count filter
@@ -495,6 +560,33 @@ class SongListView(SiteContextMixin, ListView):
             })
         family_list.sort(key=lambda f: (f["primary"].songTitle or "").strip().lower())
 
+        # 🆕 "Learn one more chord" suggestions (almost mode only): for each
+        # missing chord, how many song FAMILIES it would unlock. Counted per
+        # family so several versions of one song don't inflate the number.
+        # Each suggestion links to the same page with that chord added to the
+        # player's chords and the mode switched to "playable".
+        context["almost_mode"] = bool(self.almost_missing)
+        unlock_counter = Counter()
+        for songs_in_family in families.values():
+            family_missing = set()
+            for s in songs_in_family:
+                family_missing.update(self.almost_missing.get(s.id, []))
+            unlock_counter.update(family_missing)
+
+        unlock_suggestions = []
+        for chord, count in unlock_counter.most_common(8):
+            params = self.filter_params.copy()
+            params["chords"] = ",".join(self.requested_chords_list + [chord])
+            params["chord_mode"] = "playable"
+            if "page" in params:
+                del params["page"]
+            unlock_suggestions.append({
+                "chord": chord,
+                "count": count,
+                "url": "?" + params.urlencode(),
+            })
+        context["unlock_suggestions"] = unlock_suggestions
+
         # 🆕 Manual pagination over families, not raw Song rows, so a
         # family never gets split awkwardly across two pages.
         paginator = Paginator(family_list, self.FAMILIES_PER_PAGE)
@@ -525,6 +617,8 @@ class SongListView(SiteContextMixin, ListView):
             return {
                 "song": song,
                 "chords": ", ".join(chords),
+                # 🆕 "almost" mode only: chords the player still needs for this song
+                "missing_chords": ", ".join(self.almost_missing.get(song.id, [])),
                 "tags": ", ".join(tags),
                 "is_formatted": is_formatted,
             }
@@ -545,3 +639,14 @@ class SongListView(SiteContextMixin, ListView):
 
         context["song_data"] = song_data
         return context
+
+
+# -------------------------------------------------------------
+# Simple view: same filters as SongListView, but fewer columns and
+# ONLY formatted songs — the friendly list for everyday members.
+# -------------------------------------------------------------
+class SongListSimpleView(SongListView):
+    template_name = "songbook/song_list_simple.html"
+    view_mode = "simple"
+    list_url_suffix = ":song_list_simple"
+    formatted_only = True

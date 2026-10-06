@@ -1,0 +1,149 @@
+{% extends base_template %}
+{% load static %}
+
+{# songbook/song_list_simple.html: the SIMPLE song list. Formatted songs only. #}
+{# Columns: Title (opens the PDF view) | Teleprompter | Artist (year) | Chords played #}
+{# The filter bar, chord modal, switch button, "learn one more chord" box and pagination are shared includes. #}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'songbook/song_list.css' %}">
+
+<!-- 🔎 Search / Filters (shared) -->
+{% include "songbook/_song_filter_bar.html" %}
+
+<!-- 🎤 Heading + Simple | Extended switch -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+    <h2 class="mb-0">{% if site_name == 'FrancoUke' %}Toutes les partitions{% else %}All Songs{% endif %}</h2>
+    {% include "songbook/_view_switch.html" %}
+</div>
+
+{% include "songbook/_unlock_suggestions.html" %}
+
+<!-- 🎼 Songs Table (simple) -->
+<div class="table-responsive">
+    <table class="table table-striped table-hover compact-table">
+        <thead>
+            <tr>
+                {% if site_name == 'FrancoUke' %}
+                    <th>Partitions</th>
+                    <th class="text-center">Téléprompteur</th>
+                    <th>Interprète (année)</th>
+                    <th class="text-center">Accords jouées</th>
+                {% else %}
+                    <th>Songs</th>
+                    <th class="text-center">Teleprompter</th>
+                    <th>Artist (year)</th>
+                    <th class="text-center">Chords played</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in song_data %}
+            <tr>
+                <td>
+                    {# Title opens the PDF view #}
+                    <a href="{% url site_namespace|add:':generate_single_song_pdf' item.song.id %}"
+                       class="song-link"
+                       title="{{ item.song.songTitle }}">
+                        {{ item.song.songTitle }}
+                    </a>
+
+                    {# Only YOUR private songs get a lock #}
+                    {% if not item.song.is_public and item.song.contributor == user %}
+                        <span class="badge bg-warning text-dark ms-2"
+                              title="{% if site_name == 'FrancoUke' %}Privée - Visible seulement par vous{% else %}Private - Only visible to you{% endif %}">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+                    {% endif %}
+
+                    {% if item.song.origin %}
+                        <span class="badge bg-secondary ms-2">{{ item.song.origin }}</span>
+                    {% endif %}
+
+                    {# Other versions of the same title (different club/origin) #}
+                    {% if item.other_versions %}
+                        <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                                data-bs-toggle="collapse"
+                                data-bs-target=".version-group-{{ item.song.id }}"
+                                aria-expanded="false"
+                                title="Other versions of this song">
+                            +{{ item.other_versions|length }} more
+                        </button>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url teleprompter_url_name item.song.pk %}"
+                       class="btn btn-sm btn-outline-primary"
+                       target="_blank" rel="noopener"
+                       title="{% if teleprompter_style == 'beginner' %}{% if site_name == 'FrancoUke' %}Téléprompteur (diagrammes){% else %}Teleprompter (diagrams){% endif %}{% else %}{% if site_name == 'FrancoUke' %}Téléprompteur (symboles d'accords){% else %}Teleprompter (chord symbols){% endif %}{% endif %}">
+                        🎤
+                    </a>
+                </td>
+                <td>
+                    {{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if item.song.metadata.year %} ({{ item.song.metadata.year }}){% endif %}
+                </td>
+                <td class="text-center">
+                    {% if item.chords|length > 55 %}
+                        {{ item.chords|slice:":55" }}...
+                    {% else %}
+                        {{ item.chords }}
+                    {% endif %}
+                    {% if item.missing_chords %}
+                        <br><small class="text-danger fw-bold">{% if site_name == 'FrancoUke' %}Manque{% else %}Needs{% endif %}: {{ item.missing_chords }}</small>
+                    {% endif %}
+                </td>
+            </tr>
+
+            {# One full row per alternate version, same 4 columns #}
+            {% for v in item.other_versions %}
+            <tr class="collapse version-group-{{ item.song.id }} bg-light">
+                <td>
+                    <a href="{% url site_namespace|add:':generate_single_song_pdf' v.song.id %}"
+                       class="song-link"
+                       title="{{ v.song.songTitle }}">
+                        ↳ {{ v.song.songTitle }}
+                    </a>
+                    {% if v.song.origin %}
+                        <span class="badge bg-secondary ms-2">{{ v.song.origin }}</span>
+                    {% else %}
+                        <span class="badge bg-light text-muted ms-2">(unlabeled)</span>
+                    {% endif %}
+                    {% if not v.song.is_public and v.song.contributor == user %}
+                        <span class="badge bg-warning text-dark ms-2"><i class="bi bi-lock-fill"></i></span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url teleprompter_url_name v.song.pk %}" class="btn btn-sm btn-outline-primary"
+                       target="_blank" rel="noopener"
+                       title="{% if site_name == 'FrancoUke' %}Téléprompteur{% else %}Teleprompter{% endif %}">🎤</a>
+                </td>
+                <td>
+                    {{ v.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if v.song.metadata.year %} ({{ v.song.metadata.year }}){% endif %}
+                </td>
+                <td class="text-center">
+                    {% if v.chords|length > 55 %}{{ v.chords|slice:":55" }}...{% else %}{{ v.chords }}{% endif %}
+                    {% if v.missing_chords %}
+                        <br><small class="text-danger fw-bold">{% if site_name == 'FrancoUke' %}Manque{% else %}Needs{% endif %}: {{ v.missing_chords }}</small>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">
+                    {% if site_name == 'FrancoUke' %}Aucune chanson formatée ne correspond à votre recherche.{% else %}No formatted songs found matching your search.{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 🔄 Pagination (shared) -->
+{% include "songbook/_song_pagination.html" %}
+
+<!-- 🎸 Chord filter modal + JS (shared) -->
+{% include "songbook/_chord_filter_modal.html" %}
+
+{% endblock content %}

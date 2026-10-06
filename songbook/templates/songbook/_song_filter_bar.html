@@ -1,0 +1,164 @@
+{# songbook/_song_filter_bar.html: search box + all filter rows for the song list (shared by the simple and extended views; uses the view's context) #}
+<!-- 🔎 Search / Filter -->
+<div class="container-fluid">
+    <form method="get" class="song-search-form mb-4 w-100">
+        <!-- 🔍 Search + Filters Row -->
+        <div class="row align-items-center mb-2">
+            <!-- Search Bar (larger portion) -->
+            <div class="col-md-8">
+                <div class="input-group w-100">
+                    <input type="text" name="q" class="form-control"
+                           placeholder="{% if site_name == 'FrancoUke' %}Recherche par titre, compositeur et interprète{% else %}Search by title, composer, and performer{% endif %}"
+                           value="{{ search_query }}">
+                    {% if site_name == 'FrancoUke' %}
+                        <button class="btn btn-success" type="submit">🔍 Recherche</button>
+                    {% else %}
+                        <button class="btn btn-primary" type="submit">🔍 Search</button>
+                    {% endif %}
+                </div>
+            </div>
+    
+            <!-- Filter Buttons -->
+            <div class="col-md-4 text-end">
+                <label class="me-2">{% if site_name == 'FrancoUke' %}Filtre :{% else %}Filter:{% endif %}</label>
+                {% if view_mode != "simple" %}
+                <a href="?formatted=1&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}" 
+                   class="btn btn-outline-secondary btn-sm me-1 {% if show_formatted %}active{% endif %}">
+                    {% if site_name == 'FrancoUke' %}Partitions formatées{% else %}Show Formatted{% endif %}
+                </a>
+                {% endif %}
+                <button type="button" class="btn btn-outline-secondary btn-sm me-1" 
+                        data-bs-toggle="modal" data-bs-target="#chordFilterModal">
+                    🎸 {% if site_name == 'FrancoUke' %}Filtrer par accords{% else %}Filter by Chords{% endif %}
+                {% if chord_filter %}
+                    <span class="badge bg-success ms-1">
+                        {{ chord_filter }} 
+                        {% if chord_mode == "playable" %}{% if site_name == 'FrancoUke' %}(jouables){% else %}(playable){% endif %}{% elif chord_mode == "almost" %}{% if site_name == 'FrancoUke' %}(presque){% else %}(almost){% endif %}{% else %}{% if site_name == 'FrancoUke' %}(contient){% else %}(contains){% endif %}{% endif %}
+                    </span>
+                {% endif %}
+                </button>
+                <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-danger btn-sm">
+                    {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                </a>
+            </div>
+
+
+
+        </div>
+    
+        <!-- 🏷️ Tag Filters (on a new row) -->
+        <div class="row">
+            <div class="col">
+                <strong>Tags: </strong>
+                {% for tag in all_tags %}
+                    <a href="?tag={{ tag }}&q={{ search_query }}&letter={{ selected_letter }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if selected_tag == tag %}active{% endif %}">
+                        {{ tag }}
+                    </a>
+                {% endfor %}
+    
+                {% if selected_tag %}
+                    <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 🔤 Alphabet Filter -->
+        <div class="row mt-2">
+            <div class="col">
+                <strong>{% if site_name == 'FrancoUke' %}Lettre :{% else %}Letter:{% endif %}</strong>
+                {% for letter in alphabet_filter %}
+                    <a href="?letter={{ letter }}&q={{ search_query }}&tag={{ selected_tag }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if selected_letter == letter %}active{% endif %}">
+                        {{ letter }}
+                    </a>
+                {% endfor %}
+
+                {% if selected_letter %}
+                    <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 🎸 Number of Chords Filter -->
+        <div class="row mt-2">
+            <div class="col">
+                <strong>{% if site_name == 'FrancoUke' %}Nombre d'accords :{% else %}Number of Chords:{% endif %}</strong>
+                {% for choice in chord_count_choices %}
+                    <a href="?chord_count={{ choice.value }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if chord_count_filter == choice.value %}active{% endif %}">
+                        {{ choice.label }}
+                    </a>
+                {% endfor %}
+
+                {% if chord_count_filter %}
+                    <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 📅 Decade Filter -->
+        <div class="row mt-2">
+            <div class="col">
+                <strong>{% if site_name == 'FrancoUke' %}Décennie :{% else %}Decade:{% endif %}</strong>
+                {% for decade in all_decades %}
+                    <a href="?decade={{ decade }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if decade_filter == decade|stringformat:'s' %}active{% endif %}">
+                        {{ decade }}s
+                    </a>
+                {% endfor %}
+
+                {% if decade_filter %}
+                    <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 🎵 Key Filter -->
+        <div class="row mt-2">
+            <div class="col">
+                <strong>{% if site_name == 'FrancoUke' %}Tonalité :{% else %}Key:{% endif %}</strong>
+                {% for key in all_keys %}
+                    <a href="?key={{ key }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if key_filter == key %}active{% endif %}">
+                        {{ key }}
+                    </a>
+                {% endfor %}
+
+                {% if key_filter %}
+                    <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 🏛️ Club (Origin) Filter -->
+        <div class="row mt-2">
+            <div class="col">
+                <strong>Club:</strong>
+                {% for origin in all_origins %}
+                    <a href="?origin={{ origin }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter_qs }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}{% if show_formatted %}&formatted=1{% endif %}"
+                       class="btn btn-outline-secondary btn-sm {% if origin_filter == origin %}active{% endif %}">
+                        {{ origin }}
+                    </a>
+                {% endfor %}
+
+                {% if origin_filter %}
+                    <a href="{% url site_namespace|add:list_url_suffix %}?reset=1" class="btn btn-danger btn-sm">
+                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+    
+</div>

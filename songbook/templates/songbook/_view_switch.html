@@ -1,0 +1,16 @@
+{# songbook/_view_switch.html: Simple | Extended toggle shown next to the page heading. Needs view_mode ("simple"/"extended"). Hidden on artist pages. #}
+{% if not selected_artist %}
+<div class="btn-group btn-group-sm" role="group"
+     aria-label="{% if site_name == 'FrancoUke' %}Choisir la vue{% else %}Choose view{% endif %}">
+    <a href="{% url site_namespace|add:':song_list_simple' %}"
+       class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %} {% if view_mode == 'simple' %}active{% endif %}"
+       {% if view_mode == 'simple' %}aria-current="page"{% endif %}>
+        {% if site_name == 'FrancoUke' %}Vue simple{% else %}Simple view{% endif %}
+    </a>
+    <a href="{% url site_namespace|add:':song_list' %}"
+       class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %} {% if view_mode == 'extended' %}active{% endif %}"
+       {% if view_mode == 'extended' %}aria-current="page"{% endif %}>
+        {% if site_name == 'FrancoUke' %}Vue étendue{% else %}Extended view{% endif %}
+    </a>
+</div>
+{% endif %}

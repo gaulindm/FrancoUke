@@ -5,167 +5,7 @@
 
 <link rel="stylesheet" href="{% static 'songbook/song_list.css' %}">
 
-<!-- 🔎 Search / Filter -->
-<div class="container-fluid">
-    <form method="get" class="song-search-form mb-4 w-100">
-        <!-- 🔍 Search + Filters Row -->
-        <div class="row align-items-center mb-2">
-            <!-- Search Bar (larger portion) -->
-            <div class="col-md-8">
-                <div class="input-group w-100">
-                    <input type="text" name="q" class="form-control"
-                           placeholder="{% if site_name == 'FrancoUke' %}Recherche par titre, compositeur et interprète{% else %}Search by title, composer, and performer{% endif %}"
-                           value="{{ search_query }}">
-                    {% if site_name == 'FrancoUke' %}
-                        <button class="btn btn-success" type="submit">🔍 Recherche</button>
-                    {% else %}
-                        <button class="btn btn-primary" type="submit">🔍 Search</button>
-                    {% endif %}
-                </div>
-            </div>
-    
-            <!-- Filter Buttons -->
-            <div class="col-md-4 text-end">
-                <label class="me-2">{% if site_name == 'FrancoUke' %}Filtre :{% else %}Filter:{% endif %}</label>
-                <a href="?formatted=1&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}" 
-                   class="btn btn-outline-secondary btn-sm me-1 {% if show_formatted %}active{% endif %}">
-                    {% if site_name == 'FrancoUke' %}Partitions formatées{% else %}Show Formatted{% endif %}
-                </a>
-                <button type="button" class="btn btn-outline-secondary btn-sm me-1" 
-                        data-bs-toggle="modal" data-bs-target="#chordFilterModal">
-                    🎸 {% if site_name == 'FrancoUke' %}Filtrer par accords{% else %}Filter by Chords{% endif %}
-                {% if chord_filter %}
-                    <span class="badge bg-success ms-1">
-                        {{ chord_filter }} 
-                        {% if chord_mode == "playable" %}(playable){% else %}(contains){% endif %}
-                    </span>
-                {% endif %}
-                </button>
-                <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-danger btn-sm">
-                    {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-                </a>
-            </div>
-
-
-
-        </div>
-    
-        <!-- 🏷️ Tag Filters (on a new row) -->
-        <div class="row">
-            <div class="col">
-                <strong>Tags: </strong>
-                {% for tag in all_tags %}
-                    <a href="?tag={{ tag }}&q={{ search_query }}&letter={{ selected_letter }}&chords={{ chord_filter }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
-                       class="btn btn-outline-secondary btn-sm {% if selected_tag == tag %}active{% endif %}">
-                        {{ tag }}
-                    </a>
-                {% endfor %}
-    
-                {% if selected_tag %}
-                    <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-danger btn-sm">
-                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- 🔤 Alphabet Filter -->
-        <div class="row mt-2">
-            <div class="col">
-                <strong>{% if site_name == 'FrancoUke' %}Lettre :{% else %}Letter:{% endif %}</strong>
-                {% for letter in alphabet_filter %}
-                    <a href="?letter={{ letter }}&q={{ search_query }}&tag={{ selected_tag }}&chords={{ chord_filter }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
-                       class="btn btn-outline-secondary btn-sm {% if selected_letter == letter %}active{% endif %}">
-                        {{ letter }}
-                    </a>
-                {% endfor %}
-
-                {% if selected_letter %}
-                    <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-danger btn-sm">
-                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- 🎸 Number of Chords Filter -->
-        <div class="row mt-2">
-            <div class="col">
-                <strong>{% if site_name == 'FrancoUke' %}Nombre d'accords :{% else %}Number of Chords:{% endif %}</strong>
-                {% for choice in chord_count_choices %}
-                    <a href="?chord_count={{ choice.value }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter }}&chord_mode={{ chord_mode }}&decade={{ decade_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
-                       class="btn btn-outline-secondary btn-sm {% if chord_count_filter == choice.value %}active{% endif %}">
-                        {{ choice.label }}
-                    </a>
-                {% endfor %}
-
-                {% if chord_count_filter %}
-                    <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-danger btn-sm">
-                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- 📅 Decade Filter -->
-        <div class="row mt-2">
-            <div class="col">
-                <strong>{% if site_name == 'FrancoUke' %}Décennie :{% else %}Decade:{% endif %}</strong>
-                {% for decade in all_decades %}
-                    <a href="?decade={{ decade }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&key={{ key_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
-                       class="btn btn-outline-secondary btn-sm {% if decade_filter == decade|stringformat:'s' %}active{% endif %}">
-                        {{ decade }}s
-                    </a>
-                {% endfor %}
-
-                {% if decade_filter %}
-                    <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-danger btn-sm">
-                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- 🎵 Key Filter -->
-        <div class="row mt-2">
-            <div class="col">
-                <strong>{% if site_name == 'FrancoUke' %}Tonalité :{% else %}Key:{% endif %}</strong>
-                {% for key in all_keys %}
-                    <a href="?key={{ key }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&origin={{ origin_filter }}{% if show_formatted %}&formatted=1{% endif %}"
-                       class="btn btn-outline-secondary btn-sm {% if key_filter == key %}active{% endif %}">
-                        {{ key }}
-                    </a>
-                {% endfor %}
-
-                {% if key_filter %}
-                    <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-danger btn-sm">
-                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- 🏛️ Club (Origin) Filter -->
-        <div class="row mt-2">
-            <div class="col">
-                <strong>Club:</strong>
-                {% for origin in all_origins %}
-                    <a href="?origin={{ origin }}&q={{ search_query }}&tag={{ selected_tag }}&letter={{ selected_letter }}&chords={{ chord_filter }}&chord_mode={{ chord_mode }}&chord_count={{ chord_count_filter }}&decade={{ decade_filter }}&key={{ key_filter }}{% if show_formatted %}&formatted=1{% endif %}"
-                       class="btn btn-outline-secondary btn-sm {% if origin_filter == origin %}active{% endif %}">
-                        {{ origin }}
-                    </a>
-                {% endfor %}
-
-                {% if origin_filter %}
-                    <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-danger btn-sm">
-                        {% if site_name == 'FrancoUke' %}Effacer le filtre{% else %}Clear Filter{% endif %}
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </form>
-    
-</div>
+{% include "songbook/_song_filter_bar.html" %}
 
 <!-- 🎤 Artist Filtered Title -->
 {% if selected_artist %}
@@ -174,8 +14,13 @@
         {% if site_name == 'FrancoUke' %}Afficher tous les artistes{% else %}Show All Artists{% endif %}
     </a>
 {% else %}
-    <h2>{% if site_name == 'FrancoUke' %}Toutes les partitions{% else %}All Songs{% endif %}</h2>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <h2 class="mb-0">{% if site_name == 'FrancoUke' %}Toutes les partitions{% else %}All Songs{% endif %}</h2>
+        {% include "songbook/_view_switch.html" %}
+    </div>
 {% endif %}
+
+{% include "songbook/_unlock_suggestions.html" %}
 
 <!-- 🎼 Songs Table -->
 <div class="table-responsive">
@@ -252,6 +97,9 @@
                     {% else %}
                         {{ item.chords }}
                     {% endif %}
+                    {% if item.missing_chords %}
+                        <br><small class="text-danger fw-bold">{% if site_name == 'FrancoUke' %}Manque{% else %}Needs{% endif %}: {{ item.missing_chords }}</small>
+                    {% endif %}
                 </td>
                 <td class="text-center">
                     {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
@@ -303,6 +151,9 @@
                 </td>
                 <td class="text-center">
                     {% if v.chords|length > 55 %}{{ v.chords|slice:":55" }}...{% else %}{{ v.chords }}{% endif %}
+                    {% if v.missing_chords %}
+                        <br><small class="text-danger fw-bold">{% if site_name == 'FrancoUke' %}Manque{% else %}Needs{% endif %}: {{ v.missing_chords }}</small>
+                    {% endif %}
                 </td>
                 <td class="text-center">
                     {% with site_namespace|add:":generate_single_song_pdf" as pdf_url %}
@@ -377,235 +228,8 @@
     });
 </script>
 
-<!-- 🔄 Pagination -->
-{% if is_paginated %}
-    {% with base_query="q="|add:search_query|add:"&tag="|add:selected_tag|add:"&letter="|add:selected_letter|add:"&chords="|add:chord_filter|add:"&chord_mode="|add:chord_mode|add:"&chord_count="|add:chord_count_filter|add:"&decade="|add:decade_filter|add:"&key="|add:key_filter|add:"&origin="|add:origin_filter %}
-    <div class="pagination d-flex gap-2 mb-0">
-        {% if page_obj.has_previous %}
-            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page=1&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">First</a>
-            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page={{ page_obj.previous_page_number }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Previous</a>
-        {% endif %}
+{% include "songbook/_song_pagination.html" %}
 
-        {% for num in page_obj.paginator.page_range %}
-            {% if num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
-                {% if page_obj.number == num %}
-                    <a class="btn {% if site_name == 'FrancoUke' %}btn-success{% else %}btn-primary{% endif %}" 
-                       href="?page={{ num }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">{{ num }}</a>
-                {% else %}
-                    <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-                       href="?page={{ num }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">{{ num }}</a>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
+{% include "songbook/_chord_filter_modal.html" %}
 
-        {% if page_obj.has_next %}
-            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page={{ page_obj.next_page_number }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Next</a>
-            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
-               href="?page={{ page_obj.paginator.num_pages }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Last</a>
-        {% endif %}
-    </div>
-    {% endwith %}
-{% endif %}
-<!-- 🎸 Chord Filter Modal -->
-<div class="modal fade" id="chordFilterModal" tabindex="-1" 
-     aria-labelledby="chordFilterModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="chordFilterModalLabel">
-                    {% if site_name == 'FrancoUke' %}Filtrer par accords{% else %}Filter by Chords{% endif %}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small">
-                    {% if site_name == 'FrancoUke' %}
-                        Sélectionnez les accords — seules les chansons contenant TOUS les accords sélectionnés seront affichées.
-                    {% else %}
-                        Select chords — only songs containing ALL selected chords will be shown.
-                    {% endif %}
-                </p>
-                <!-- Toggle -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">
-                        {% if site_name == 'FrancoUke' %}Mode de filtre{% else %}Filter Mode{% endif %}
-                    </label>
-                    <div class="d-flex gap-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="chordMode" 
-                                id="modePlayable" value="playable"
-                                {% if chord_mode != "contains" %}checked{% endif %}>
-                            <label class="form-check-label" for="modePlayable">
-                                {% if site_name == 'FrancoUke' %}
-                                    Chansons jouables avec ces accords seulement
-                                {% else %}
-                                    Songs playable with ONLY these chords
-                                {% endif %}
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="chordMode" 
-                                id="modeContains" value="contains"
-                                {% if chord_mode == "contains" %}checked{% endif %}>
-                            <label class="form-check-label" for="modeContains">
-                                {% if site_name == 'FrancoUke' %}
-                                    Chansons contenant TOUS ces accords
-                                {% else %}
-                                    Songs containing ALL selected chords
-                                {% endif %}
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <!-- Text input -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">
-                        {% if site_name == 'FrancoUke' %}Accords (séparés par des virgules){% else %}Chords (comma separated){% endif %}
-                    </label>
-                    <input type="text" id="chordTextInput" class="form-control"
-                           placeholder="e.g. C, G, Am, F"
-                           value="{{ chord_filter }}">
-                </div>
-
-                <!-- Clickable chord buttons -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">
-                        {% if site_name == 'FrancoUke' %}Ou cliquez sur les accords{% else %}Or click chords{% endif %}
-                    </label>
-                    <div id="chordButtons" class="d-flex flex-wrap gap-2">
-                        {% for chord in all_chords %}
-                            <button type="button"
-                                    class="btn btn-outline-secondary btn-sm chord-btn"
-                                    data-chord="{{ chord }}">
-                                {{ chord }}
-                            </button>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Selected chords display -->
-                <div id="selectedChordsDisplay" class="mt-2 text-muted small">
-                    {% if chord_filter %}
-                        {% if site_name == 'FrancoUke' %}Accords sélectionnés :{% else %}Selected:{% endif %}
-                        <strong>{{ chord_filter }}</strong>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    {% if site_name == 'FrancoUke' %}Annuler{% else %}Cancel{% endif %}
-                </button>
-                <a href="{% url site_namespace|add:':song_list' %}?reset=1" class="btn btn-outline-danger">
-                    {% if site_name == 'FrancoUke' %}Effacer{% else %}Clear{% endif %}
-                </a>
-                <button type="button" class="btn btn-success" id="applyChordFilter">
-                    {% if site_name == 'FrancoUke' %}Appliquer{% else %}Apply{% endif %}
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    // --- Existing multi-song report logic ---
-    document.getElementById("generateReportBtn").addEventListener("click", function () {
-        var selectedTag = document.getElementById("selectedTag").value;
-        if (!selectedTag) {
-            var modal = new bootstrap.Modal(document.getElementById("tagWarningModal"));
-            modal.show();
-        } else {
-            document.getElementById("multiSongReportForm").submit();
-        }
-    });
-
-    // --- Chord filter logic ---
-    const chordTextInput = document.getElementById("chordTextInput");
-    const chordButtons = document.querySelectorAll(".chord-btn");
-
-    // Parse existing chord_filter into active set
-    let selectedChords = new Set(
-        "{{ chord_filter }}".split(",").map(c => c.trim()).filter(c => c)
-    );
-
-    // Highlight already-selected chords when modal opens
-    function syncButtons() {
-        chordButtons.forEach(btn => {
-            const chord = btn.dataset.chord;
-            if (selectedChords.has(chord)) {
-                btn.classList.remove("btn-outline-secondary");
-                btn.classList.add("btn-success");
-            } else {
-                btn.classList.remove("btn-success");
-                btn.classList.add("btn-outline-secondary");
-            }
-        });
-        chordTextInput.value = [...selectedChords].join(", ");
-        document.getElementById("selectedChordsDisplay").innerHTML =
-            selectedChords.size > 0
-                ? `{% if site_name == 'FrancoUke' %}Accords sélectionnés :{% else %}Selected:{% endif %} <strong>${[...selectedChords].join(", ")}</strong>`
-                : "";
-    }
-
-    syncButtons();
-
-    // Toggle chord on button click
-    chordButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
-            const chord = this.dataset.chord;
-            if (selectedChords.has(chord)) {
-                selectedChords.delete(chord);
-            } else {
-                selectedChords.add(chord);
-            }
-            syncButtons();
-        });
-    });
-
-    // Keep text input in sync with button clicks
-    chordTextInput.addEventListener("input", function () {
-    // Only sync buttons, don't rewrite the input value while typing
-    const typed = new Set(
-        this.value.split(",").map(c => c.trim()).filter(c => c)
-    );
-    selectedChords = typed;
-    
-    // Sync buttons without touching the input value
-    chordButtons.forEach(btn => {
-        const chord = btn.dataset.chord;
-        if (selectedChords.has(chord)) {
-            btn.classList.remove("btn-outline-secondary");
-            btn.classList.add("btn-success");
-        } else {
-            btn.classList.remove("btn-success");
-            btn.classList.add("btn-outline-secondary");
-        }
-    });
-
-    document.getElementById("selectedChordsDisplay").innerHTML =
-        selectedChords.size > 0
-            ? `Selected: <strong>${[...selectedChords].join(", ")}</strong>`
-            : "";
-});
-
-    // Apply button — redirect with chords param
-    document.getElementById("applyChordFilter").addEventListener("click", function () {
-    const chords = [...selectedChords].join(",");
-    const mode = document.querySelector('input[name="chordMode"]:checked').value;
-    const params = new URLSearchParams({
-        q: "{{ search_query }}",
-        tag: "{{ selected_tag }}",
-        letter: "{{ selected_letter }}",
-        chords: chords,
-        chord_mode: mode,
-        chord_count: "{{ chord_count_filter }}",
-        decade: "{{ decade_filter }}",
-        key: "{{ key_filter }}",
-        origin: "{{ origin_filter }}",
-        {% if show_formatted %}formatted: "1",{% endif %}
-    });
-    window.location.href = "?" + params.toString();
-});
-</script>
 {% endblock content %}

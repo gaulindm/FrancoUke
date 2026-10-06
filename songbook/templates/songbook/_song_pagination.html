@@ -1,0 +1,33 @@
+{# songbook/_song_pagination.html: page links (shared by both views) #}
+<!-- 🔄 Pagination -->
+{% if is_paginated %}
+    {% with base_query="q="|add:search_query|add:"&tag="|add:selected_tag|add:"&letter="|add:selected_letter|add:"&chords="|add:chord_filter_qs|add:"&chord_mode="|add:chord_mode|add:"&chord_count="|add:chord_count_filter|add:"&decade="|add:decade_filter|add:"&key="|add:key_filter|add:"&origin="|add:origin_filter %}
+    <div class="pagination d-flex gap-2 mb-0">
+        {% if page_obj.has_previous %}
+            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+               href="?page=1&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">First</a>
+            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+               href="?page={{ page_obj.previous_page_number }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
+                {% if page_obj.number == num %}
+                    <a class="btn {% if site_name == 'FrancoUke' %}btn-success{% else %}btn-primary{% endif %}" 
+                       href="?page={{ num }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">{{ num }}</a>
+                {% else %}
+                    <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+                       href="?page={{ num }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">{{ num }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+               href="?page={{ page_obj.next_page_number }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Next</a>
+            <a class="btn {% if site_name == 'FrancoUke' %}btn-outline-success{% else %}btn-outline-primary{% endif %}" 
+               href="?page={{ page_obj.paginator.num_pages }}&{{ base_query }}{% if show_formatted %}&formatted=1{% endif %}">Last</a>
+        {% endif %}
+    </div>
+    {% endwith %}
+{% endif %}
