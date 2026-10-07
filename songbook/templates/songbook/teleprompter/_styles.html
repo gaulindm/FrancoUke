@@ -78,9 +78,12 @@
   html[data-chord-style="above"] .lyrics .centered {
     line-height: 3;
   }
+
   html[data-chord-style="above"] .chord-word {
     position: relative;
     display: inline-block;
+    /* The renderer adds an inline min-width (based on the chord name's
+       length) so a short lyric like "//" can't let chords collide. */
   }
   /* Zero-width character so even an empty chord-word keeps full line
      height and its chord name lines up with all the others. */

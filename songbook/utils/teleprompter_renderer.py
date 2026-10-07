@@ -4,6 +4,23 @@ from html import escape as html_escape
 
 logger = logging.getLogger(__name__)
 
+def merge_chord_pieces(items):
+    """A chord item may carry only the first character of a word, with the
+    rest in following chordless items. Glue them together so the chord
+    covers the whole run of text up to the next chord."""
+    merged = []
+    for item in items:
+        prev = merged[-1] if merged else None
+        if (prev is not None
+                and prev.get("chord") and "format" not in prev
+                and "lyric" in item and not item.get("chord")
+                and "directive" not in item and "comment" not in item):
+            prev["lyric"] = prev.get("lyric", "") + item["lyric"]
+            if "format" in item:
+                prev["format"] = item["format"]   # keep the line break
+            continue
+        merged.append(dict(item))
+    return merged
 
 def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", chord_position="inline"):
     """
@@ -134,7 +151,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             continue
 
 
-
+        group = merge_chord_pieces(group)
+        
 
 
         for item in group:
@@ -197,10 +215,17 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                 if chord:
                     start_group_line()
                     if chord_position == "above":
+                        # Runs of spaces (alignment padding for the inline view) -> one space.
+                        lyric = re.sub(r'[ \t]{2,}', ' ', lyric)
+                        # Trailing space stays outside the box so it remains a real gap.
+                        body = lyric.rstrip()
+                        trail = lyric[len(body):]
+                        # Minimum width: room for the chord name plus a small gap.
+                        width = len(chord) * 0.62 + 0.5
                         current_buffer.append(
-                            f'<span class="chord-word">'
+                            f'<span class="chord-word" style="min-width:{width:.2f}em">'
                             f'<span class="chord-label" data-chord="{chord}">{chord}</span>'
-                            f'{lyric}</span>'
+                            f'{body}</span>{trail}'
                         )
                     else:
                         current_buffer.append(
