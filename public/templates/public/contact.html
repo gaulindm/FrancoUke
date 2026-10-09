@@ -7,19 +7,32 @@
         <h2>Contact {{ group.name|default:"Us" }}</h2>
         <p>We’d love to hear from you! You can reach us at:</p>
 
-        <ul class="list-group mb-4">
-            {% if group.contact_email %}
-            <li class="list-group-item"><i class="bi bi-envelope me-2"></i>
-                <a href="mailto:{{ group.contact_email }}">{{ group.contact_email }}</a></li>
-            {% endif %}
-            {% if group.contact_phone %}
-            <li class="list-group-item"><i class="bi bi-telephone me-2"></i> {{ group.contact_phone }}</li>
-            {% endif %}
-            {% if group.facebook_url %}
-            <li class="list-group-item"><i class="bi bi-facebook me-2"></i>
-                <a href="{{ group.facebook_url }}">Facebook Page</a></li>
-            {% endif %}
-        </ul>
+        {% if group %}
+        {% for contact in group.contacts.all %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title mb-0">{{ contact.name }}</h5>
+                {% if contact.role %}
+                    <div class="text-muted small mb-2">{{ contact.role }}</div>
+                {% endif %}
+                <ul class="list-unstyled mb-0">
+                    {% if contact.email %}
+                    <li><i class="bi bi-envelope me-2"></i>
+                        <a href="mailto:{{ contact.email }}">{{ contact.email }}</a></li>
+                    {% endif %}
+                    {% if contact.phone %}
+                    <li><i class="bi bi-telephone me-2"></i> {{ contact.phone }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    
+        {% if group.facebook_url %}
+        <p><i class="bi bi-facebook me-2"></i>
+            <a href="{{ group.facebook_url }}">Facebook Page</a></p>
+        {% endif %}
+    {% endif %}
 
         <p>
             Interested in volunteering or performing?

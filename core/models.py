@@ -36,6 +36,45 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
+from django.core.exceptions import ValidationError
+
+
+class GroupContact(models.Model):
+    """A contact person shown on a group's Contact page (max 3 per group)."""
+    MAX_PER_GROUP = 3
+
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+        related_name="contacts",
+    )
+    name = models.CharField(max_length=100)
+    role = models.CharField(
+        max_length=100, blank=True,
+        help_text="e.g. Leader, Treasurer, Membership",
+    )
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+    order = models.PositiveSmallIntegerField(
+        default=0, help_text="Lower numbers are shown first."
+    )
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.group})"
+
+    def clean(self):
+        super().clean()
+        if self.group_id:
+            others = GroupContact.objects.filter(group_id=self.group_id)
+            if self.pk:
+                others = others.exclude(pk=self.pk)
+            if others.count() >= self.MAX_PER_GROUP:
+                raise ValidationError(
+                    f"A group can have at most {self.MAX_PER_GROUP} contacts."
+                )
 
 class GroupMembership(models.Model):
     """
