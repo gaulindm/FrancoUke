@@ -3,12 +3,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from ..models import BoardColumn, BoardMessage
 from ..forms import BoardMessageForm
-from ..decorators import group_required
-from core.group_access import group_member_required
+from core.group_access import group_leader_required
 
 
-@group_member_required
-@group_required("Leaders")
+@group_leader_required
 def create_board_message(request, group_slug, column_id):
     group = request.group
     column = get_object_or_404(BoardColumn, pk=column_id, group=group)

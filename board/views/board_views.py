@@ -102,11 +102,12 @@ def availability_matrix(request, group_slug):
         group=group, event_date__gte=today
     ).order_by("event_date", "start_time")
 
-    # Note: "Performers" here is a Django auth Group (unrelated to core.Group).
-    # This still shows every user in the site-wide "Performers" auth group,
-    # not just members of THIS core.Group — worth revisiting once membership
-    # roles fully replace the old auth-group-based permissions.
-    players = User.objects.filter(groups__name="Performers").order_by("username")
+    # Only members of THIS group appear in the matrix.
+    players = (
+        User.objects
+        .filter(group_memberships__group=group)
+        .order_by("username")
+    )
 
     matrix = []
     for player in players:

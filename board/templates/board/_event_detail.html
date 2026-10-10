@@ -1,5 +1,5 @@
 <div class="container py-3">
-  {% load group_tags %}
+  
 
   <h3 class="mb-3">{{ event.title }}</h3>
 
@@ -61,7 +61,7 @@
       <a href="{% url 'setlists:detail' setlist.id %}" class="btn btn-primary btn-sm">
         🎵 View Setlist
       </a>
-      {% if request.user|has_group:"Leaders" %}
+      {% if request.is_group_leader %}
       <a href="{% url 'setlists:setlist_builder' setlist.id %}" class="btn btn-outline-primary btn-sm">
         ✏️ Edit Setlist
       </a>

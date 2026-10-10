@@ -1,22 +1,18 @@
 # board/views/rehearsal_views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import user_passes_test
 from board.models import Event, RehearsalDetails
 from django.contrib import messages  # ✅ Add this
 
 from board.forms_rehearsal import RehearsalDetailsForm, SongRehearsalNote
 from board.rehearsal_notes import SongRehearsalNote
 from songbook.models import Song
-from core.group_access import group_member_required
+from core.group_access import group_member_required, group_leader_required
 
 
-# Optional helper: restrict to leaders only
-def is_leader(user):
-    return user.groups.filter(name="Leaders").exists()
 
 
-@group_member_required
-@user_passes_test(is_leader)
+
+@group_leader_required
 def edit_rehearsal_details(request, group_slug, event_id):
     """View for leaders to create or edit rehearsal details (notes, focus, etc.)"""
     group = request.group
@@ -65,8 +61,7 @@ def song_rehearsal_history(request, group_slug, song_id):
     })
 
 
-@group_member_required
-@user_passes_test(is_leader)
+@group_leader_required
 def edit_song_rehearsal_notes(request, group_slug, event_id):
     group = request.group
     event = get_object_or_404(Event, id=event_id, group=group)
