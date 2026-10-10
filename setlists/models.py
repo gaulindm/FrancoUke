@@ -1,5 +1,6 @@
 #setlist/models.py
 from django.db import models
+from django.db.models import Max
 from django.conf import settings
 from songbook.models import Song
 from board.models import Event  # optional, only if you want to attach setlists to events

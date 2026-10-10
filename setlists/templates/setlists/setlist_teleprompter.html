@@ -150,13 +150,13 @@
 {% block controls_right_extra %}
   {% if prev_song %}
     <button id="prev-song-btn" class="nav-btn"
-            onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'">⬅️</button>
+            onclick="window.location.href='{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=prev_song.order %}'">⬅️</button>
   {% else %}
     <button id="prev-song-btn" class="nav-btn" disabled>⬅️</button>
   {% endif %}
   {% if next_song %}
     <button id="next-song-btn" class="nav-btn"
-            onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'">➡️</button>
+            onclick="window.location.href='{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=next_song.order %}'">➡️</button>
   {% else %}
     <button id="next-song-btn" class="nav-btn" disabled>➡️</button>
   {% endif %}
@@ -203,11 +203,11 @@
   <!-- Touch zones for mobile nav -->
   {% if prev_song %}
   <div class="touch-zone touch-left"
-       onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id prev_song.order %}'"></div>
+       onclick="window.location.href='{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=prev_song.order %}'"></div>
   {% endif %}
   {% if next_song %}
   <div class="touch-zone touch-right"
-       onclick="window.location.href='{% url 'setlists:setlist_teleprompter' setlist.id next_song.order %}'"></div>
+       onclick="window.location.href='{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=next_song.order %}'"></div>
   {% endif %}
 {% endblock %}
 

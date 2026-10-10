@@ -5,7 +5,7 @@ import re
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from core.group_access import group_member_required, group_leader_required
 from .models import SetList, SetListSong
 from songbook.models import Song
 from songbook.utils.chord_library import extract_relevant_chords
@@ -23,46 +23,33 @@ logger = logging.getLogger(__name__)
 # ----------------------------
 # 📋 List of all setlists
 # ----------------------------
-def setlist_list(request):
-    setlists = SetList.objects.all().order_by("-created_at")
-    return render(request, "setlists/setlist_list.html", {"setlists": setlists})
-
+@group_member_required
+def setlist_list(request, group_slug):
+    group = request.group
+    setlists = SetList.objects.filter(group=group).order_by("-created_at")
+    return render(request, "setlists/setlist_list.html",
+                  {"setlists": setlists, "group": group})
 
 # ----------------------------
 # 📄 Setlist detail view
 # ----------------------------
-def setlist_detail(request, pk):
-    setlist = get_object_or_404(SetList, pk=pk)
+@group_member_required
+def setlist_detail(request, group_slug, pk):
+    group = request.group
+    setlist = get_object_or_404(SetList, pk=pk, group=group)
     songs = setlist.songs.select_related("song").order_by("order")
 
-    # ✅ Group check
-    can_edit = (
-        request.user.is_authenticated
-        and request.user.groups.filter(name="Leaders").exists()
-    )
+    return render(request, "setlists/detail.html", {
+        "setlist": setlist,
+        "songs": songs,
+        "event": setlist.event,  # might be None
+        "can_edit": request.is_group_leader,
+        "group": group,
+    })
 
-    # ✅ Event info (optional)
-    event = setlist.event  # might be None
-
-    # Performance group this setlist belongs to, if any (via its own
-    # `group` field, or inherited from the linked event's group). Used
-    # only so templates can build group-scoped board: links correctly.
-    group = setlist.group or (event.group if event else None)
-
-    return render(
-        request,
-        "setlists/detail.html",
-        {
-            "setlist": setlist,
-            "songs": songs,
-            "event": event,
-            "can_edit": can_edit,
-            "group": group,
-        },
-    )
-
-def setlist_pdf(request, pk):
-    setlist = get_object_or_404(SetList, pk=pk)
+@group_member_required
+def setlist_pdf(request, group_slug, pk):
+    setlist = get_object_or_404(SetList, pk=pk, group=request.group)
     if not setlist.songs.exists():
         raise Http404("This setlist has no songs.")
 
@@ -85,10 +72,11 @@ def setlist_pdf(request, pk):
 # ----------------------------
 # 🎤 Teleprompter for a setlist song (WITH COLOR MARKUP)
 # ----------------------------
-def setlist_teleprompter(request, setlist_id, order):
+@group_member_required
+def setlist_teleprompter(request, group_slug, setlist_id, order):
     """Teleprompter view for a song within a setlist."""
-    setlist = get_object_or_404(SetList, pk=setlist_id)
-
+    setlist = get_object_or_404(SetList, pk=setlist_id, group=request.group)
+    
     # Ordered songs in the setlist
     songs = setlist.songs.select_related("song").order_by("order")
     total_songs = songs.count()
@@ -209,6 +197,7 @@ def setlist_teleprompter(request, setlist_id, order):
             "full_chord_library_json": json.dumps(full_library),
             "user_preferences_json": json.dumps(user_preferences),
             "initial_scroll_speed": initial_scroll_speed,
+             "group": request.group,
             **context_data,
         },
     )
@@ -216,8 +205,9 @@ def setlist_teleprompter(request, setlist_id, order):
 # ----------------------------
 # 📦 Export / Import Setlists
 # ----------------------------
-def export_setlist(request, pk):
-    setlist = get_object_or_404(SetList, pk=pk)
+@group_member_required
+def export_setlist(request, group_slug, pk):
+    setlist = get_object_or_404(SetList, pk=pk, group=request.group)
     data = {
         "setlist": [
             {
@@ -236,12 +226,16 @@ def export_setlist(request, pk):
     return response
 
 
-def import_setlist(request):
+@group_leader_required
+def import_setlist(request, group_slug):
+    group = request.group
     if request.method == "POST" and request.FILES.get("setlist_file"):
         uploaded_file = request.FILES["setlist_file"]
         data = json.load(uploaded_file)
 
-        new_setlist = SetList.objects.create(name="Imported Setlist")
+        new_setlist = SetList.objects.create(
+            name="Imported Setlist", group=group, created_by=request.user
+        )
         for song_data in data["setlist"]:
             song, _ = Song.objects.get_or_create(
                 songTitle=song_data["title"],
@@ -256,80 +250,73 @@ def import_setlist(request):
                 order=song_data["order"],
                 rehearsal_notes=song_data.get("notes", ""),
             )
-        return redirect("setlists:detail", pk=new_setlist.pk)
+        return redirect("setlists:detail", group_slug=group_slug, pk=new_setlist.pk)
 
-    return render(request, "setlists/import_setlist.html")
+    return render(request, "setlists/import_setlist.html", {"group": group})
 
 
 # ----------------------------
 # 🧱 Setlist Builder 
 # ----------------------------
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from board.models import SongRehearsalNote
 
-@login_required
-def setlist_builder(request, pk=None):
+@group_leader_required
+def setlist_builder(request, group_slug, pk=None):
     """Create or edit a setlist via UI builder."""
+    group = request.group
     setlist = None
     if pk:
-        setlist = get_object_or_404(SetList, pk=pk)
+        setlist = get_object_or_404(SetList, pk=pk, group=group)
 
     if request.method == "POST":
         name = request.POST.get("name")
         if not setlist:
-            setlist = SetList.objects.create(name=name, created_by=request.user)
+            setlist = SetList.objects.create(
+                name=name, created_by=request.user, group=group
+            )
         else:
             setlist.name = name
             setlist.save()
 
-        # Clear old songs
         setlist.songs.all().delete()
 
-        # Rebuild setlist order from POST data
         orders = request.POST.getlist("order[]")
         for idx, song_id in enumerate(orders, start=1):
-            SetListSong.objects.create(
-                setlist=setlist,
-                song_id=song_id,
-                order=idx,
-            )
+            SetListSong.objects.create(setlist=setlist, song_id=song_id, order=idx)
 
-        return redirect("setlists:detail", pk=setlist.pk)
+        return redirect("setlists:detail", group_slug=group_slug, pk=setlist.pk)
 
-    # ✅ Prefetch rehearsal notes + their related rehearsal event titles
+    # Songs are a shared pool, but rehearsal notes belong to a club,
+    # so count and prefetch only THIS group's notes.
     songs = (
         Song.objects.all()
-        .annotate(note_count=Count("rehearsal_notes"))
+        .annotate(note_count=Count(
+            "rehearsal_notes",
+            filter=Q(rehearsal_notes__rehearsal__event__group=group),
+        ))
         .prefetch_related(
             Prefetch(
                 "rehearsal_notes",
-                queryset=SongRehearsalNote.objects.select_related("rehearsal__event"),
+                queryset=SongRehearsalNote.objects
+                    .filter(rehearsal__event__group=group)
+                    .select_related("rehearsal__event"),
             )
         )
         .order_by("songTitle")
     )
-
-    # Performance group this setlist belongs to, if any — same
-    # inheritance rule as setlist_detail, for the same reason (templates
-    # need it to build group-scoped board: links).
-    group = None
-    if setlist:
-        group = setlist.group or (setlist.event.group if setlist.event else None)
 
     return render(
         request,
         "setlists/builder.html",
         {"setlist": setlist, "songs": songs, "group": group},
     )
-
-
-
 # ----------------------------
 # 🧱 AJAX filter for setlist builder
 # ----------------------------
 
-@login_required
-def song_search(request):
+@group_member_required
+def song_search(request, group_slug):
     """AJAX endpoint to filter songs for the builder."""
     query = request.GET.get("q", "").strip().lower()
     songs = Song.objects.all()
@@ -344,26 +331,22 @@ def song_search(request):
 
     return JsonResponse({"songs": results})
 
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import get_object_or_404, redirect
 from board.models import Event
-from .models import SetList
 
-@login_required
-@user_passes_test(lambda u: u.groups.filter(name="Leaders").exists())
-def create_setlist_for_event(request, event_id):
+@group_leader_required
+def create_setlist_for_event(request, group_slug, event_id):
     """Create a new setlist and link it to a specific event."""
-    event = get_object_or_404(Event, pk=event_id)
+    group = request.group
+    event = get_object_or_404(Event, pk=event_id, group=group)
 
-    # Avoid duplicates
     if hasattr(event, "setlist") and event.setlist:
-        return redirect("setlists:detail", pk=event.setlist.pk)
+        return redirect("setlists:detail", group_slug=group_slug, pk=event.setlist.pk)
 
     setlist = SetList.objects.create(
         name=f"{event.title} Setlist",
         created_by=request.user,
         event=event,
-        group=event.group,  # inherit the event's group, so this setlist is correctly tagged
+        group=group,
     )
 
-    return redirect("setlists:setlist_builder", pk=setlist.pk)
+    return redirect("setlists:setlist_builder", group_slug=group_slug, pk=setlist.pk)

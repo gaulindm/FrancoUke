@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ✅ Fetch filtered songs via AJAX
   function fetchSongs(query) {
     if (currentAjax) currentAjax.abort?.();
-    fetch(`/setlists/ajax/song-search/?q=${encodeURIComponent(query)}`)
+    fetch(`{% url 'setlists:ajax_song_search' group_slug=group.slug %}?q=${encodeURIComponent(query)}`)
       .then((res) => res.json())
       .then((data) => {
         songList.innerHTML = "";

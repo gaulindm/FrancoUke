@@ -20,8 +20,7 @@ urlpatterns = [
     path('teleprompter/', include('teleprompter.urls', namespace='teleprompter')),
     path('tinymce/', include('tinymce.urls')),
 
-    path("setlists/", include("setlists.urls", namespace="setlists")),
-
+    path("setlists/<slug:group_slug>/", include("setlists.urls", namespace="setlists")),
     path("francouke/", include(("songbook.urls", "songbook"), namespace="francouke")),
     path("strumsphere/", include(("songbook.urls", "songbook"), namespace="strumsphere")),
 

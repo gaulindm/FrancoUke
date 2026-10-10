@@ -16,7 +16,7 @@
 
 
       {% if can_edit %}
-        <a href="{% url 'setlists:setlist_builder' setlist.id %}" 
+        <a href="{% url 'setlists:setlist_builder' group_slug=request.group.slug pk=setlist.id %}" 
            class="btn btn-sm btn-outline-secondary">
           ✏️ Edit Setlist
         </a>
@@ -75,15 +75,15 @@
 
   {% if songs %}
     <div class="mt-4 text-center">
-      <a href="{% url 'setlists:setlist_teleprompter' setlist.id songs.0.order %}" 
+      <a href="{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=songs.0.order %}" 
          class="btn btn-primary btn-lg">
         🎤 Start Teleprompter
       </a>
-      <a href="{% url 'setlists:setlist_pdf' setlist.id %}"
+      <a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}"
    class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
   🖨️ Printable PDF
 </a>
-<a href="{% url 'setlists:setlist_pdf' setlist.id %}?large=1"
+<a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}?large=1"
    class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
   🔍 Large print
 </a>

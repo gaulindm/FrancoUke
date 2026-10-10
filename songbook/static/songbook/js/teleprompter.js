@@ -712,29 +712,36 @@
 
   }); // end DOMContentLoaded
 
-  // --- 🎵 Navigation Helpers (global functions) ---
-// --- 🎵 Navigation Helpers (match Django buttons) ---
-window.navigateToNextSong = function() {
-  const nextOrder = window.SONG?.next_order;
-  const setlistId = window.SONG?.setlist_id;
-  if (nextOrder && setlistId) {
-    console.log("⏭️ Navigating to next song (setlist order):", nextOrder);
-    window.location.href = `/setlists/${setlistId}/teleprompter/${nextOrder}/`;
-  } else {
-    alert("No next song available.");
+  // --- 🎵 Navigation Helpers (match Django buttons) ---
+  // The page URL looks like /setlists/<group_slug>/<setlist_id>/teleprompter/<order>/
+  // so we build the next/previous URL by swapping only the trailing order number.
+  // This keeps the club slug correct without having to pass it in from Django.
+  function setlistTeleprompterUrl(order) {
+    const m = window.location.pathname.match(/^(.*\/teleprompter\/)\d+\/?$/);
+    return m ? `${m[1]}${order}/` : null;
   }
-};
 
-window.navigateToPreviousSong = function() {
-  const prevOrder = window.SONG?.previous_order;
-  const setlistId = window.SONG?.setlist_id;
-  if (prevOrder && setlistId) {
-    console.log("⏮️ Navigating to previous song (setlist order):", prevOrder);
-    window.location.href = `/setlists/${setlistId}/teleprompter/${prevOrder}/`;
-  } else {
-    alert("No previous song available.");
-  }
-};
+  window.navigateToNextSong = function () {
+    const nextOrder = window.SONG?.next_order;
+    const url = nextOrder ? setlistTeleprompterUrl(nextOrder) : null;
+    if (url) {
+      console.log("⏭️ Navigating to next song (setlist order):", nextOrder);
+      window.location.href = url;
+    } else {
+      alert("No next song available.");
+    }
+  };
+
+  window.navigateToPreviousSong = function () {
+    const prevOrder = window.SONG?.previous_order;
+    const url = prevOrder ? setlistTeleprompterUrl(prevOrder) : null;
+    if (url) {
+      console.log("⏮️ Navigating to previous song (setlist order):", prevOrder);
+      window.location.href = url;
+    } else {
+      alert("No previous song available.");
+    }
+  };
 
 
   // --- ✅ Teleprompter public API ---
