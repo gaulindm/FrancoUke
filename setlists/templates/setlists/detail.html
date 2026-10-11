@@ -2,6 +2,13 @@
 
 {% block content %}
 <div class="container mt-4">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">{{ setlist.name }}</h1>
 
@@ -13,7 +20,12 @@
       </a>
       {% endif %}
 
-
+      {% if group %}
+      <a href="{% url 'setlists:my_suggestions' group_slug=group.slug %}"
+         class="btn btn-sm btn-outline-secondary">
+        💡 My suggestions
+      </a>
+      {% endif %}
 
       {% if can_edit %}
         <a href="{% url 'setlists:setlist_builder' group_slug=request.group.slug pk=setlist.id %}" 
@@ -89,6 +101,26 @@
 </a>
     </div>
   {% endif %}
+
+  <!-- 💡 SUGGEST A SONG -->
+  {% if group %}
+  <div class="card mt-5" id="suggest-card"
+       data-search-url="{% url 'setlists:suggest_song_search' group_slug=group.slug %}"
+       data-suggest-url-template="{% url 'setlists:suggest_song' group_slug=group.slug song_id=0 %}">
+    <div class="card-body">
+      {% csrf_token %}
+      <h2 class="h5">💡 Suggest a song for {{ group.name }}</h2>
+      <p class="text-muted small mb-2">
+        Type part of a title. A club leader reviews every suggestion before it is added to a setlist.
+      </p>
+      <input type="search" id="suggest-q" class="form-control mb-2"
+             placeholder="Search by song title…" autocomplete="off">
+      <input type="text" id="suggest-note" class="form-control form-control-sm mb-2"
+             maxlength="300" placeholder="Optional note for the leader (why this song?)">
+      <div id="suggest-results" class="list-group"></div>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <!-- 📝 REHEARSAL NOTES MODALS -->
@@ -157,4 +189,103 @@
     padding-left: 1.2rem;
   }
 </style>
+
+<script>
+(function () {
+  const card = document.getElementById("suggest-card");
+  if (!card) return;
+
+  const searchUrl = card.dataset.searchUrl;
+  const suggestUrlTemplate = card.dataset.suggestUrlTemplate;
+  const csrf = card.querySelector("[name=csrfmiddlewaretoken]").value;
+  const input = document.getElementById("suggest-q");
+  const noteInput = document.getElementById("suggest-note");
+  const box = document.getElementById("suggest-results");
+  let timer = null;
+  let latest = 0;
+
+  // Small helper. textContent (not innerHTML) keeps song titles from being read as HTML.
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function actionFor(song) {
+    if (song.state === "mine") return el("span", "text-success small", "✔ You suggested this");
+    if (song.state === "approved") return el("span", "text-success small", "✔ Already approved");
+    if (song.state === "declined") return el("span", "text-muted small", "Reviewed earlier, not added");
+
+    const form = el("form");
+    form.method = "post";
+    form.action = suggestUrlTemplate.replace("/0/", "/" + song.id + "/");
+
+    const fields = {
+      csrfmiddlewaretoken: csrf,
+      next: window.location.pathname + window.location.search,
+      note: "",
+    };
+    for (const name in fields) {
+      const hidden = el("input");
+      hidden.type = "hidden";
+      hidden.name = name;
+      hidden.value = fields[name];
+      form.appendChild(hidden);
+    }
+    // Copy the optional note into this song's form at the moment of sending
+    form.addEventListener("submit", function () {
+      form.querySelector("[name=note]").value = noteInput.value;
+    });
+
+    const label = song.state === "pending" ? "Suggest too" : "Suggest";
+    const button = el("button", "btn btn-sm btn-outline-primary", label);
+    button.type = "submit";
+    form.appendChild(button);
+    return form;
+  }
+
+  function render(songs) {
+    box.replaceChildren();
+    if (!songs.length) {
+      box.appendChild(el("div", "list-group-item text-muted small", "No matching songs."));
+      return;
+    }
+    songs.forEach(function (song) {
+      const row = el("div", "list-group-item d-flex justify-content-between align-items-center");
+      const left = el("div");
+      left.appendChild(el("strong", "", song.title));
+      if (song.origin) left.appendChild(el("span", "badge bg-secondary ms-2", song.origin));
+      if (song.artist) left.appendChild(el("div", "text-muted small", song.artist));
+      row.appendChild(left);
+      row.appendChild(actionFor(song));
+      box.appendChild(row);
+    });
+  }
+
+  input.addEventListener("input", function () {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) {
+      box.replaceChildren();
+      return;
+    }
+    timer = setTimeout(function () {
+      const thisRequest = ++latest;
+      fetch(searchUrl + "?q=" + encodeURIComponent(q), {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (thisRequest === latest) render(data.songs);  // ignore out-of-date answers
+        })
+        .catch(function () {
+          box.replaceChildren(
+            el("div", "list-group-item text-danger small", "Search failed. Please try again.")
+          );
+        });
+    }, 300);
+  });
+})();
+</script>
 {% endblock %}

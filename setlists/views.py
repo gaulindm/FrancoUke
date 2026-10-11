@@ -1,12 +1,17 @@
 #setlist/views.py
 import json
 import logging
+from django.db import transaction
+from django.utils import timezone
 import re
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from core.group_access import group_member_required, group_leader_required
-from .models import SetList, SetListSong
+from .models import SetList, SetListSong, SongSuggestion, SongSuggester
+from django.contrib import messages
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 from songbook.models import Song
 from songbook.utils.chord_library import extract_relevant_chords
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
@@ -27,8 +32,13 @@ logger = logging.getLogger(__name__)
 def setlist_list(request, group_slug):
     group = request.group
     setlists = SetList.objects.filter(group=group).order_by("-created_at")
+    pending_count = 0
+    if request.is_group_leader:
+        pending_count = SongSuggestion.objects.filter(
+            group=group, status=SongSuggestion.Status.PENDING
+        ).count()
     return render(request, "setlists/setlist_list.html",
-                  {"setlists": setlists, "group": group})
+                  {"setlists": setlists, "group": group, "pending_count": pending_count})
 
 # ----------------------------
 # 📄 Setlist detail view
@@ -350,3 +360,245 @@ def create_setlist_for_event(request, group_slug, event_id):
     )
 
     return redirect("setlists:setlist_builder", group_slug=group_slug, pk=setlist.pk)
+
+# ----------------------------
+# 💡 Song suggestions (member side)
+# ----------------------------
+@group_member_required
+@require_POST
+def suggest_song(request, group_slug, song_id):
+    """A club member suggests a song (one specific version) for this club."""
+    group = request.group
+    song = get_object_or_404(Song, pk=song_id, is_public=True)
+
+    # site_name empty means the song is hidden from every platform
+    if not song.site_name:
+        raise Http404("This song is not available.")
+
+    suggestion, created = SongSuggestion.objects.get_or_create(group=group, song=song)
+
+    if suggestion.status == SongSuggestion.Status.APPROVED:
+        messages.info(request, f"“{song.songTitle}” has already been approved for {group.name}.")
+    elif suggestion.status == SongSuggestion.Status.DECLINED:
+        reason = f" Leader's comment: {suggestion.leader_comment}" if suggestion.leader_comment else ""
+        messages.info(request, f"“{song.songTitle}” was reviewed earlier and not added.{reason}")
+    else:
+        note = request.POST.get("note", "").strip()[:300]
+        _, new_vote = SongSuggester.objects.get_or_create(
+            suggestion=suggestion, user=request.user, defaults={"note": note}
+        )
+        if new_vote:
+            messages.success(request, f"Thanks! “{song.songTitle}” was suggested for {group.name}. You can add a note under My suggestions.")
+        else:
+            messages.info(request, f"You already suggested “{song.songTitle}”.")
+
+    # Go back to the page the member came from, if it is a safe address
+    next_url = request.POST.get("next", "")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+    return redirect("setlists:my_suggestions", group_slug=group_slug)
+
+
+@group_member_required
+def my_suggestions(request, group_slug):
+    """The songs this member has suggested for this club, and what happened to them."""
+    group = request.group
+    mine = (
+        SongSuggester.objects
+        .filter(user=request.user, suggestion__group=group)
+        .select_related("suggestion__song", "suggestion__added_to_setlist")
+        .order_by("-created_at")
+    )
+    return render(request, "setlists/my_suggestions.html", {
+        "group": group,
+        "my_suggestions": mine,
+    })
+
+@group_member_required
+def suggest_song_search(request, group_slug):
+    """AJAX: songs a member may suggest, each marked with where it stands for this club."""
+    group = request.group
+    query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return JsonResponse({"songs": []})
+
+    # Same rule as suggest_song: public songs, and site_name set (empty = hidden)
+    songs = list(
+        Song.objects
+        .filter(is_public=True, songTitle__icontains=query)
+        .exclude(site_name__isnull=True)
+        .exclude(site_name="")
+        .order_by("songTitle")[:30]
+    )
+
+    existing = {
+        s.song_id: s
+        for s in SongSuggestion.objects.filter(group=group, song__in=songs)
+    }
+    mine = set(
+        SongSuggester.objects
+        .filter(user=request.user, suggestion__group=group, suggestion__song__in=songs)
+        .values_list("suggestion__song_id", flat=True)
+    )
+
+    results = []
+    for song in songs:
+        suggestion = existing.get(song.id)
+        if suggestion is None:
+            state = "open"          # nobody has suggested this version yet
+        elif suggestion.status == SongSuggestion.Status.APPROVED:
+            state = "approved"
+        elif suggestion.status == SongSuggestion.Status.DECLINED:
+            state = "declined"
+        elif song.id in mine:
+            state = "mine"          # pending, and this member already suggested it
+        else:
+            state = "pending"       # pending, others suggested it; this member can add their name
+        results.append({
+            "id": song.id,
+            "title": song.songTitle,
+            "artist": (song.metadata or {}).get("artist") or "",
+            "origin": song.origin,
+            "state": state,
+        })
+
+    return JsonResponse({"songs": results})
+
+@group_member_required
+@require_POST
+def edit_suggestion_note(request, group_slug, suggester_id):
+    """A member changes the note on their own suggestion, while it is still pending."""
+    suggester = get_object_or_404(
+        SongSuggester.objects.select_related("suggestion__song"),
+        pk=suggester_id,
+        user=request.user,                 # only your own suggestions
+        suggestion__group=request.group,   # and only in this club
+    )
+
+    if suggester.suggestion.status != SongSuggestion.Status.PENDING:
+        messages.info(request, "A leader has already reviewed this suggestion, so its note can no longer be changed.")
+    else:
+        suggester.note = request.POST.get("note", "").strip()[:300]
+        suggester.save(update_fields=["note"])
+        messages.success(request, f"Your note on “{suggester.suggestion.song.songTitle}” was saved.")
+
+    return redirect("setlists:my_suggestions", group_slug=group_slug)
+
+# ----------------------------
+# 💡 Song suggestions (leader side)
+# ----------------------------
+def _other_versions(group, song):
+    """Other public, visible versions with the same title. The club's own version comes first."""
+    if not song.songTitle:
+        return []
+    versions = list(
+        Song.objects
+        .filter(is_public=True, songTitle__iexact=song.songTitle)
+        .exclude(pk=song.pk)
+        .exclude(site_name__isnull=True)
+        .exclude(site_name="")
+    )
+    own = group.origin_code
+    versions.sort(key=lambda v: (not (own and v.origin == own), v.origin))
+    return versions
+
+
+@group_leader_required
+def suggestion_queue(request, group_slug):
+    """The leader's list of suggestions waiting for a decision."""
+    group = request.group
+    pending = list(
+        SongSuggestion.objects
+        .filter(group=group, status=SongSuggestion.Status.PENDING)
+        .select_related("song")
+        .prefetch_related("suggesters__user")
+        .order_by("created_at")
+    )
+    for suggestion in pending:
+        suggestion.other_versions = _other_versions(group, suggestion.song)
+
+    reviewed = (
+        SongSuggestion.objects
+        .filter(group=group)
+        .exclude(status=SongSuggestion.Status.PENDING)
+        .select_related("song", "reviewed_by", "added_to_setlist")
+        .order_by("-reviewed_at")[:15]
+    )
+    setlists = SetList.objects.filter(group=group).order_by("-created_at")
+
+    return render(request, "setlists/suggestion_queue.html", {
+        "group": group,
+        "pending": pending,
+        "reviewed": reviewed,
+        "setlists": setlists,
+    })
+
+
+@group_leader_required
+@require_POST
+def review_suggestion(request, group_slug, pk):
+    """Approve (add to a setlist) or decline one suggestion."""
+    group = request.group
+    suggestion = get_object_or_404(
+        SongSuggestion.objects.select_related("song"), pk=pk, group=group
+    )
+    back = redirect("setlists:suggestion_queue", group_slug=group_slug)
+
+    if suggestion.status != SongSuggestion.Status.PENDING:
+        messages.info(request, "This suggestion has already been reviewed.")
+        return back
+
+    action = request.POST.get("action")
+    comment = request.POST.get("leader_comment", "").strip()[:300]
+    title = suggestion.song.songTitle
+
+    if action == "decline":
+        suggestion.status = SongSuggestion.Status.DECLINED
+        suggestion.leader_comment = comment
+        suggestion.reviewed_by = request.user
+        suggestion.reviewed_at = timezone.now()
+        suggestion.save()
+        messages.success(request, f"“{title}” was declined.")
+        return back
+
+    if action != "approve":
+        messages.error(request, "Please use the Approve or Decline button.")
+        return back
+
+    # --- Approve: which setlist? Must belong to this club.
+    raw_setlist = request.POST.get("setlist_id", "")
+    setlist = SetList.objects.filter(pk=raw_setlist, group=group).first() if raw_setlist.isdigit() else None
+    if setlist is None:
+        messages.error(request, "Please choose a setlist to add the song to.")
+        return back
+
+    # --- Which version? The one suggested, or another version of the same title.
+    song_to_add = suggestion.song
+    raw_song = request.POST.get("use_song_id", "")
+    if raw_song.isdigit() and int(raw_song) != suggestion.song_id:
+        allowed = {v.pk: v for v in _other_versions(group, suggestion.song)}
+        song_to_add = allowed.get(int(raw_song))
+        if song_to_add is None:
+            messages.error(request, "That version of the song is not available.")
+            return back
+        note = f"Added the {song_to_add.origin or 'other'} version instead."
+        comment = f"{comment} {note}".strip()[:300]
+
+    with transaction.atomic():
+        already_there = setlist.songs.filter(song=song_to_add).exists()
+        if not already_there:
+            # order=None lets SetListSong.save() put it at the end of the setlist
+            SetListSong.objects.create(setlist=setlist, song=song_to_add, order=None)
+
+        suggestion.status = SongSuggestion.Status.APPROVED
+        suggestion.leader_comment = comment
+        suggestion.reviewed_by = request.user
+        suggestion.reviewed_at = timezone.now()
+        suggestion.added_to_setlist = setlist
+        suggestion.save()
+
+    if already_there:
+        messages.success(request, f"“{song_to_add.songTitle}” was already on {setlist.name}. Marked as approved.")
+    else:
+        messages.success(request, f"“{song_to_add.songTitle}” was added to {setlist.name}.")
+    return back

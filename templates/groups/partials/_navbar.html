@@ -7,7 +7,7 @@
         {% with active_group=group|default:first_user_group %}
 
               <!-- Brand - changes based on authentication status -->
-              {% if user.is_authenticated and active_group %}
+              {% if active_group and active_group in user_groups or active_group and user.is_superuser %}
               <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'board:full_board' group_slug=active_group.slug %}">
                   {% if active_group.logo %}
                       <img src="{{ active_group.logo.url }}" alt="{{ active_group.name }} Logo" class="me-2" style="height:40px; width:auto; max-width:120px; object-fit:contain;">
@@ -16,7 +16,7 @@
                   {% endif %}
                   {{ active_group.name }} Portal
               </a>
-          {% elif user.is_authenticated %}
+          {% elif user.is_authenticated and not group %}
               <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="{% url 'landing' %}">
                   <img src="{% static 'board/img/logo-100.png' %}" alt="Logo" class="me-2" style="height:40px;">
                   Performer Portal
@@ -49,8 +49,8 @@
                     </a>
                 </li>
 
-                {% if user.is_authenticated and active_group %}
-                    <!-- Authenticated users see performer portal links, scoped to their active group -->
+                {% if active_group and active_group in user_groups or active_group and user.is_superuser %}
+                    <!-- Members (and superusers) see performer portal links, scoped to the club in the URL -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'full_board' %}active{% endif %}"
                            href="{% url 'board:full_board' group_slug=active_group.slug %}">
@@ -101,6 +101,31 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
                            href="{% url 'public:contact' group_slug=group.slug %}">Contact</a>
                     </li>
+                    {% endif %}
+
+                    <!-- Logged-in member of other club(s) viewing a club they don't belong to: link back to their own -->
+                    {% if user.is_authenticated and user_groups %}
+                        {% if user_groups|length > 1 %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="myClubsDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-people-fill me-1"></i> My clubs
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="myClubsDropdown">
+                                {% for g in user_groups %}
+                                <li><a class="dropdown-item"
+                                       href="{% url 'board:full_board' group_slug=g.slug %}">{{ g.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{% url 'board:full_board' group_slug=first_user_group.slug %}">
+                                <i class="bi bi-arrow-left-circle me-1"></i> Back to {{ first_user_group.name }}
+                            </a>
+                        </li>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </ul>

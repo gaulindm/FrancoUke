@@ -1,0 +1,134 @@
+{% extends 'groups/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">💡 Song suggestions</h1>
+    <a href="{% url 'setlists:list' group_slug=group.slug %}"
+       class="btn btn-sm btn-outline-secondary">← Setlists</a>
+  </div>
+
+  <p class="text-muted">Suggestions waiting for a decision in {{ group.name }}.</p>
+
+  {% if not setlists %}
+    <div class="alert alert-warning">
+      {{ group.name }} has no setlists yet, so nothing can be approved.
+      <a href="{% url 'setlists:setlist_builder' group_slug=group.slug %}">Create one first.</a>
+    </div>
+  {% endif %}
+
+  {% for s in pending %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h2 class="h5 mb-1">
+              {{ s.song.songTitle }}
+              {% if s.song.origin %}
+                <span class="badge bg-secondary ms-2">{{ s.song.origin }}</span>
+              {% endif %}
+            </h2>
+            <ul class="list-unstyled small text-muted mb-2">
+              {% for sg in s.suggesters.all %}
+                <li>
+                  {{ sg.user.get_full_name|default:sg.user.username }}
+                  {% if sg.note %}— “{{ sg.note }}”{% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <a href="{% url 'songbook:chord_sheet' s.song.pk %}"
+             class="btn btn-sm btn-outline-primary"
+             target="_blank" rel="noopener noreferrer">🎼 View</a>
+        </div>
+
+        <form method="post"
+              action="{% url 'setlists:review_suggestion' group_slug=group.slug pk=s.pk %}">
+          {% csrf_token %}
+
+          <div class="row g-2 mb-2">
+            {% if s.other_versions %}
+              <div class="col-md-6">
+                <label class="form-label small mb-0">Version to add</label>
+                <select name="use_song_id" class="form-select form-select-sm">
+                  <option value="{{ s.song.pk }}" selected>
+                    As suggested ({{ s.song.origin|default:"no origin" }}){% if group.origin_code and s.song.origin == group.origin_code %} – this club's version{% endif %}
+                  </option>
+                  {% for v in s.other_versions %}
+                    <option value="{{ v.pk }}">
+                      {{ v.songTitle }} ({{ v.origin|default:"no origin" }}){% if group.origin_code and v.origin == group.origin_code %} – this club's version{% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+
+            {% if setlists %}
+              <div class="col-md-6">
+                <label class="form-label small mb-0">Add to setlist</label>
+                <select name="setlist_id" class="form-select form-select-sm">
+                  {% for sl in setlists %}
+                    <option value="{{ sl.pk }}">{{ sl.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+          </div>
+
+          <input type="text" name="leader_comment" maxlength="300"
+                 class="form-control form-control-sm mb-2"
+                 placeholder="Optional comment for the member">
+
+          {% if setlists %}
+            <button type="submit" name="action" value="approve"
+                    class="btn btn-sm btn-success">✔ Approve</button>
+          {% endif %}
+          <button type="submit" name="action" value="decline"
+                  class="btn btn-sm btn-outline-secondary">Decline</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-light border">No suggestions are waiting. 🎉</div>
+  {% endfor %}
+
+  <h2 class="h5 mt-5">Recently reviewed</h2>
+  <ul class="list-group">
+    {% for r in reviewed %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ r.song.songTitle }}</strong>
+          {% if r.song.origin %}
+            <span class="badge bg-secondary ms-2">{{ r.song.origin }}</span>
+          {% endif %}
+          {% if r.leader_comment %}
+            <div class="small text-muted">{{ r.leader_comment }}</div>
+          {% endif %}
+        </div>
+        <div class="text-end small">
+          {% if r.status == "approved" %}
+            <span class="badge bg-success">Approved</span>
+            {% if r.added_to_setlist %}
+              → <a href="{% url 'setlists:detail' group_slug=group.slug pk=r.added_to_setlist.pk %}">{{ r.added_to_setlist.name }}</a>
+            {% endif %}
+          {% else %}
+            <span class="badge bg-secondary">Declined</span>
+          {% endif %}
+          <div class="text-muted">
+            {{ r.reviewed_at|date:"M d" }}{% if r.reviewed_by %} · {{ r.reviewed_by.username }}{% endif %}
+          </div>
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">Nothing reviewed yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

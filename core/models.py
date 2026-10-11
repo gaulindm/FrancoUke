@@ -27,6 +27,12 @@ class Group(models.Model):
     description   = models.TextField(blank=True)
     contact_phone = models.CharField(max_length=30, blank=True)
     facebook_url  = models.URLField(blank=True)
+    origin_code = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="Must match Song.origin exactly (e.g. FWC). Songs with this "
+                  "origin are this club's own versions of songs.",
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
