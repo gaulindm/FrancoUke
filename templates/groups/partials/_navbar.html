@@ -71,7 +71,12 @@
                             Availability Matrix
                         </a>
                     </li>
-
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.namespace == 'setlists' %}active{% endif %}"
+                           href="{% url 'setlists:list' group_slug=active_group.slug %}">
+                            Setlists
+                        </a>
+                    </li>
                     {% if user_groups|length > 1 %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="groupSwitchDropdown" role="button"

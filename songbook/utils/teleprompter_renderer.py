@@ -209,7 +209,13 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
 
             elif "lyric" in item or "chord" in item:
                 chord = item.get("chord", "")
-                lyric = inline_holds(item.get("lyric", ""))  # color markup tags kept
+                raw_lyric = item.get("lyric", "")
+                # Pull any {c:(23)} out of the lyric; it is re-added AFTER the chord box closes
+                cue_html = "".join(
+                    f'<span class="hold-cue">({c.replace(" ", "")})</span>'
+                    for c in HOLD_INLINE_RE.findall(raw_lyric)
+                )
+                lyric = HOLD_INLINE_RE.sub("", raw_lyric)
                 
                 # 🎨 Preserve color markup tags - don't escape them
                 if chord:
@@ -225,7 +231,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                         current_buffer.append(
                             f'<span class="chord-word" style="min-width:{width:.2f}em">'
                             f'<span class="chord-label" data-chord="{chord}">{chord}</span>'
-                            f'{body}</span>{trail}'
+                            f'{body}</span>{cue_html}{trail}'
                         )
                     else:
                         current_buffer.append(
