@@ -1,0 +1,12 @@
+{% load user_extras %}
+{% with vid=song.metadata.youtube|youtube_id popup_name=site_namespace|add:':video_popup' %}
+    {% if vid %}
+        <a href="{% url popup_name vid %}?title={{ song.songTitle|urlencode }}"
+           class="btn btn-sm btn-outline-danger"
+           target="ukeVideo"
+           onclick="window.open(this.href, 'ukeVideo', 'popup=yes,width=480,height=300,left=40,top=40,resizable=yes'); return false;"
+           title="{% if site_name == 'FrancoUke' %}Voir la vidéo{% else %}Watch video{% endif %}">
+            🎥
+        </a>
+    {% endif %}
+{% endwith %}

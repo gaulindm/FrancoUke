@@ -1,0 +1,37 @@
+<!-- 🎥 Modal: Video Player (shared) -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="videoModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9">
+                    <iframe id="videoFrame" src="" title="YouTube video player"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const videoModal = document.getElementById("videoModal");
+    const videoFrame = document.getElementById("videoFrame");
+
+    videoModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;  // the 🎥 button that opened the modal
+        document.getElementById("videoModalLabel").textContent = button.dataset.songTitle;
+        videoFrame.src = "https://www.youtube-nocookie.com/embed/" + button.dataset.videoId + "?autoplay=1";
+    });
+
+    // Clearing src on close stops the video from playing in the background
+    videoModal.addEventListener("hidden.bs.modal", function () {
+        videoFrame.src = "";
+    });
+})();
+</script>

@@ -287,78 +287,32 @@
 
     <hr>
 
-    <!-- 🎥 YouTube Player Section -->
-    {% if chord_sheet.metadata.youtube %}
-        <div>
-            <p>
-                {% if site_name == "FrancoUke" %}
-                    Lien YouTube: 
-                {% else %}
-                    YouTube link:
-                {% endif %}
-                <a href="{{ chord_sheet.metadata.youtube }}" target="_blank">
-                    {% if site_name == "FrancoUke" %}
-                        Visionner sur YouTube
-                    {% else %}
-                        Watch on YouTube
-                    {% endif %}
-                </a>
-            </p>
-        </div>
-        <div id="youtube-player-container" style="margin-top: 20px; max-width: 320px; position: relative;"></div>
-    {% else %}
-        <p class="text-muted">
-            {% if site_name == "FrancoUke" %}
-                Pas de clip Youtube de la chanson.
-            {% else %}
-                No YouTube video available for this chord_sheet.
-            {% endif %}
-        </p>
-    {% endif %}
+   <!-- 🎥 YouTube Player Section -->
+{% with video_id=chord_sheet.metadata.youtube|youtube_id %}
+{% if video_id %}
+    <div class="ratio ratio-16x9 mb-2" style="max-width: 320px;">
+        <iframe src="https://www.youtube-nocookie.com/embed/{{ video_id }}"
+                title="YouTube video player"
+                class="rounded shadow-sm"
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+    </div>
+    <p class="small">
+        <a href="{{ chord_sheet.metadata.youtube }}" target="_blank" rel="noopener">
+            {% if site_name == "FrancoUke" %}Visionner sur YouTube{% else %}Watch on YouTube{% endif %}
+        </a>
+    </p>
+{% else %}
+    <p class="text-muted">
+        {% if site_name == "FrancoUke" %}
+            Pas de clip YouTube valide pour cette chanson.
+        {% else %}
+            No valid YouTube video for this song.
+        {% endif %}
+    </p>
+{% endif %}
+{% endwith %}
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    let youtubeUrl = "{{ chord_sheet.metadata.youtube }}";
-
-    function extractVideoId(url) {
-        if (!url) return null;
-        if (url.includes("youtu.be/")) return url.split("youtu.be/")[1]?.split("?")[0];
-        if (url.includes("youtube.com/watch?v=")) return url.split("v=")[1]?.split("&")[0];
-        if (url.includes("youtube.com/embed/")) return url.split("embed/")[1]?.split("?")[0];
-        return null;
-    }
-
-    let videoId = extractVideoId(youtubeUrl);
-    if (videoId) {
-        let playerContainer = document.getElementById("youtube-player-container");
-        if (playerContainer) {
-            playerContainer.innerHTML = `
-                <iframe width="320" height="180" 
-                        src="https://www.youtube.com/embed/${videoId}" 
-                        title="YouTube video player" frameborder="0" 
-                        style="border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen>
-                </iframe>`;
-        }
-    }
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    let updatePreviewBtn = document.getElementById("update-preview");
-    let transposeSelect = document.getElementById("transpose-select");
-
-    if (updatePreviewBtn && transposeSelect) {
-        updatePreviewBtn.addEventListener("click", function() {
-            let transposeValue = transposeSelect.value;
-            let pdfIframe = document.getElementById("pdf-preview");
-            if (pdfIframe) {
-                let url = new URL(pdfIframe.src);
-                url.searchParams.set("transpose", transposeValue);
-                pdfIframe.src = url.toString();
-            }
-        });
-    }
-});
-</script>

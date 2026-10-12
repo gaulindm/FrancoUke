@@ -1,7 +1,7 @@
 from django.urls import path
 #from songbook import legacy_views as views
 from songbook.views.formatting_views import edit_song_formatting
-from songbook.views.misc_views import about, whats_new, save_scroll_speed
+from songbook.views.misc_views import about, whats_new, save_scroll_speed, video_popup
 from songbook.views.artist_views import ArtistListView
 
 from songbook.views.pdf_views import (
@@ -61,7 +61,9 @@ urlpatterns = [
     path('songs/<int:song_id>/clone/', clone_song, name='clone_song'),
     path('songs/<int:song_id>/make-public/', make_public, name='make_public'),
     path('songs/<int:song_id>/make-private/', make_private, name='make_private'),
-    
+
+    # 🎥 Video pop-up window (opened from the 🎥 button on the song lists)
+    path("video/<str:video_id>/", video_popup, name="video_popup"),
 
     # 🔹 Static
     path("about/", about, name="about"),

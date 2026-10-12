@@ -43,3 +43,16 @@ def save_scroll_speed(request, song_id):
         return JsonResponse({"status": "ok", "scroll_speed": new_speed})
     except Song.DoesNotExist:
         return JsonResponse({"error": "Song not found"}, status=404)
+
+import re
+from django.http import Http404
+from django.shortcuts import render
+
+def video_popup(request, video_id):
+    # Only accept a real 11-character YouTube ID
+    if not re.fullmatch(r"[\w-]{11}", video_id):
+        raise Http404("Invalid video ID")
+    return render(request, "songbook/video_popup.html", {
+        "video_id": video_id,
+        "title": request.GET.get("title", "Video"),
+    })

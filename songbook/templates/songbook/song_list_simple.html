@@ -2,8 +2,8 @@
 {% load static %}
 
 {# songbook/song_list_simple.html: the SIMPLE song list. Formatted songs only. #}
-{# Columns: Title (opens the PDF view) | Teleprompter | Artist (year) | Chords played #}
-{# The filter bar, chord modal, switch button, "learn one more chord" box and pagination are shared includes. #}
+{# Columns: Title (opens the PDF view) | Teleprompter | Video | Artist (year) | Chords played #}
+{# The filter bar, chord modal, switch button, "learn one more chord" box, pagination and video modal are shared includes. #}
 
 {% block content %}
 
@@ -28,11 +28,13 @@
                 {% if site_name == 'FrancoUke' %}
                     <th>Partitions</th>
                     <th class="text-center">Téléprompteur</th>
+                    <th class="text-center">Vidéo</th>
                     <th>Interprète (année)</th>
                     <th class="text-center">Accords jouées</th>
                 {% else %}
                     <th>Songs</th>
                     <th class="text-center">Teleprompter</th>
+                    <th class="text-center">Video</th>
                     <th>Artist (year)</th>
                     <th class="text-center">Chords played</th>
                 {% endif %}
@@ -80,6 +82,9 @@
                         🎤
                     </a>
                 </td>
+                <td class="text-center">
+                    {% include "songbook/_video_button.html" with song=item.song %}
+                </td>
                 <td>
                     {{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if item.song.metadata.year %} ({{ item.song.metadata.year }}){% endif %}
                 </td>
@@ -95,7 +100,7 @@
                 </td>
             </tr>
 
-            {# One full row per alternate version, same 4 columns #}
+            {# One full row per alternate version, same 5 columns #}
             {% for v in item.other_versions %}
             <tr class="collapse version-group-{{ item.song.id }} bg-light">
                 <td>
@@ -118,6 +123,9 @@
                        target="_blank" rel="noopener"
                        title="{% if site_name == 'FrancoUke' %}Téléprompteur{% else %}Teleprompter{% endif %}">🎤</a>
                 </td>
+                <td class="text-center">
+                    {% include "songbook/_video_button.html" with song=v.song %}
+                </td>
                 <td>
                     {{ v.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if v.song.metadata.year %} ({{ v.song.metadata.year }}){% endif %}
                 </td>
@@ -131,7 +139,7 @@
             {% endfor %}
             {% empty %}
             <tr>
-                <td colspan="4" class="text-center">
+                <td colspan="5" class="text-center">
                     {% if site_name == 'FrancoUke' %}Aucune chanson formatée ne correspond à votre recherche.{% else %}No formatted songs found matching your search.{% endif %}
                 </td>
             </tr>
@@ -145,5 +153,6 @@
 
 <!-- 🎸 Chord filter modal + JS (shared) -->
 {% include "songbook/_chord_filter_modal.html" %}
+
 
 {% endblock content %}
