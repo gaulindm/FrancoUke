@@ -88,6 +88,13 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     # The parser leaves {c:(...)} as plain lyric text when it sits at the
     # END of a line, so also catch it inside lyric strings.
     HOLD_INLINE_RE = re.compile(r'\s*\{c:\s*\(\s*([\d,\s]+?)\s*\)\s*\}', re.I)
+    # 🆕 "[C]_" = chord strummed before singing. The underscore only exists so
+    # the chord has something to sit on; it is invisible but still takes up space.
+    PLACEHOLDER_RE = re.compile(r'^_+(\s*)$')
+    # 🔧 TUNE: how many invisible underscores sit after a chord-only "[G]_".
+    # Total = chord-name length + this number. Each one is about half a letter wide.
+    PH_EXTRA = 2
+
 
     def inline_holds(lyric):
         return HOLD_INLINE_RE.sub(
@@ -216,6 +223,10 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     for c in HOLD_INLINE_RE.findall(raw_lyric)
                 )
                 lyric = HOLD_INLINE_RE.sub("", raw_lyric)
+                ph = PLACEHOLDER_RE.match(lyric) if chord else None
+                if ph:
+                    pad = "_" * (len(chord) + PH_EXTRA)
+                    lyric = f'<span class="ph">{pad}</span>' + ph.group(1)
                 
                 # 🎨 Preserve color markup tags - don't escape them
                 if chord:
@@ -228,8 +239,11 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                         trail = lyric[len(body):]
                         # Minimum width: room for the chord name plus a small gap.
                         width = len(chord) * 0.62 + 0.5
+                        if ph:
+                            width += 1.8   # 🔧 TUNE: extra gap after a chord-only "[G]_"
+                        word_cls = "chord-word ph-word" if ph else "chord-word"
                         current_buffer.append(
-                            f'<span class="chord-word" style="min-width:{width:.2f}em">'
+                            f'<span class="{word_cls}" style="min-width:{width:.8f}em">'
                             f'<span class="chord-label" data-chord="{chord}">{chord}</span>'
                             f'{body}</span>{cue_html}{trail}'
                         )
@@ -271,9 +285,10 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     html.append('<div class="para-break"></div>')
 
     flush_buffer()
-    
+
     result = "".join(html)
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug("Renderer output (first 300 chars): %s", result[:300])
+        i = result.find("Interlude")
+        logger.debug("Interlude output: %s", result[i:i + 300] if i >= 0 else "no Interlude found")
 
     return result, metadata

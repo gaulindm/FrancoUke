@@ -636,6 +636,10 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             elif "lyric" in item:
                 chord = item.get("chord", "")
                 lyric = convert_inline_comments(item["lyric"])
+                if item.get("chord"):
+                    m = re.match(r'^_+(\s*)$', lyric)
+                    if m:
+                        lyric = m.group(1)   # keep the gap, drop the underscore
                 if chord:
                     is_optional = item.get("optional", False)
                     chord_html = render_chord_html(chord, chord_bracket_style, chord_color, optional=is_optional)

@@ -99,8 +99,6 @@ def apply_html_color_markup(text):
     
     # Simple highlight: <h>text</h> → yellow background
     text = re.sub(r'<h>(.*?)</h>', r"<span style='background-color:yellow'>\1</span>", text, flags=re.IGNORECASE | re.DOTALL)
-    
-    # Clean up any nested closing tags
-    text = re.sub(r'</span>\s*</span>', '</span>', text)
+
     
     return text
