@@ -7,21 +7,28 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from songbook.context_processors import site_context
 from songbook.forms import SongFormattingForm
-from songbook.models import SongFormatting
+from songbook.models import Song, SongFormatting
 
 
 @login_required
 @permission_required("songbook.change_songformatting", raise_exception=True)
 def edit_song_formatting(request, song_id):
     """
-    Edit per-user SongFormatting with a dual-edit copy-from-Gaulind on first creation.
+    Edit per-user SongFormatting.
+
+    The first time a user formats a song, their formatting starts as a copy
+    of someone else's: the song's contributor if they have one, otherwise
+    the most recently created formatting by anyone else.
     """
     context_data = site_context(request)
+
+    # Fetch the song first: a bad id now gives a 404 instead of a stray row
+    song = get_object_or_404(Song, pk=song_id)
 
     # Ensure formatting exists for (user, song)
     formatting, created = SongFormatting.objects.get_or_create(
         user=request.user,
-        song_id=song_id,
+        song=song,
         defaults={
             "intro": {},
             "verse": {},
@@ -29,21 +36,21 @@ def edit_song_formatting(request, song_id):
             "bridge": {},
             "interlude": {},
             "outro": {},
-            "centered": {},  # ✔️ keep this
+            "centered": {},
         },
     )
 
-    # Auto-copy Gaulind formatting if this user just created their own
+    # First time this user formats this song: start from someone else's version
     if created:
-        gaulind_formatting = SongFormatting.objects.filter(
-            user__username="Gaulind",
-            song_id=song_id
-        ).first()
-
-        if gaulind_formatting:
+        others = SongFormatting.objects.filter(song=song).exclude(user=request.user)
+        source = (
+            others.filter(user=song.contributor).first()
+            or others.order_by("-pk").first()
+        )
+        if source:
             for section in ["intro", "verse", "chorus",
                             "bridge", "interlude", "outro"]:
-                setattr(formatting, section, getattr(gaulind_formatting, section))
+                setattr(formatting, section, getattr(source, section))
             formatting.save()
 
     # Handle POST save
@@ -52,7 +59,7 @@ def edit_song_formatting(request, song_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Formatting updated successfully!")
-            return redirect(f"{context_data['site_namespace']}:chord_sheet", pk=song_id)
+            return redirect(f"{context_data['site_namespace']}:chord_sheet", pk=song.pk)
     else:
         form = SongFormattingForm(instance=formatting)
 
@@ -61,7 +68,7 @@ def edit_song_formatting(request, song_id):
         "songbook/edit_formatting.html",
         {
             "form": form,
-            "pk": song_id,
+            "pk": song.pk,
             "formatting": formatting,
             **context_data,
         },

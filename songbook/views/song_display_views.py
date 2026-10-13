@@ -159,6 +159,15 @@ class ChordSheetView(DetailView):
         #context["is_owner"] = (self.request.user == context["song"].contributor)
         context["is_owner"] = (self.request.user == self.object.contributor)
 
+        # Same rule as SongUpdateView.test_func: staff, anyone with the
+        # change_song permission (the Songbook Editors group), or the contributor
+        user = self.request.user
+        context["can_edit"] = user.is_authenticated and (
+            user.is_staff
+            or user.has_perm("songbook.change_song")
+            or user == self.object.contributor
+        )
+
         return context
 
 

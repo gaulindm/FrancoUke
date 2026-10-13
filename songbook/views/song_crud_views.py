@@ -96,10 +96,10 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return DynamicSongForm
 
     def test_func(self):
-        if self.request.user.is_staff:
+        user = self.request.user
+        if user.is_staff or user.has_perm("songbook.change_song"):
             return True
-        song = self.get_object()
-        return self.request.user == song.contributor
+        return user == self.get_object().contributor
 
     def form_valid(self, form):
         raw_lyrics = form.cleaned_data.get("songChordPro", "")
@@ -110,15 +110,14 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return self.form_invalid(form)
 
         form.instance.lyrics_with_chords = parsed_lyrics
-        form.instance.contributor = self.request.user
-        
-        # 🆕 Non-leaders cannot change privacy via form manipulation
+
+        # Non-leaders cannot change privacy via form manipulation
         if not self.request.user.groups.filter(name='Leaders').exists():
             original = Song.objects.get(pk=self.object.pk)
             form.instance.is_public = original.is_public
-        
-        return super().form_valid(form)
 
+        return super().form_valid(form)
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(site_context(self.request))
