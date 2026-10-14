@@ -76,7 +76,7 @@
   html[data-chord-style="above"] .lyrics .verse,
   html[data-chord-style="above"] .lyrics .section-body,
   html[data-chord-style="above"] .lyrics .centered {
-    line-height: 3;
+    line-height: 2.2;
   }
 
   html[data-chord-style="above"] .chord-word {
@@ -92,7 +92,7 @@
   }
   html[data-chord-style="above"] .chord-label {
     position: absolute;
-    top: -1.3em;
+    top: -0.8em;
     left: 0;
     font-size: 0.85em;
   }
@@ -166,6 +166,18 @@
     background: color-mix(in srgb, var(--text-color) 6%, transparent);
     border-radius: 4px;
   }
+  /* ===== Chorus: bar down the left side ({soc} ... {eoc}) =====
+     Needs the renderer to emit class="section section-chorus". */
+  .lyrics .section-chorus {
+    border-left: 8px solid var(--accent);   /* 🔧 TUNE: colour / thickness */
+    padding-left: 0.8em;
+    text-align: left;
+  }
+  .lyrics .section-chorus .section-body {
+    display: block;          /* was inline-block, which hugged the text */
+    text-align: left;
+  }
+
   .ph { visibility: hidden; }
 
 

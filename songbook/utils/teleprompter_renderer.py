@@ -69,6 +69,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     html = []
     current_buffer = []
     section_type = None
+    section_is_chorus = False   # 🆕 True between {soc} and {eoc}
 
     # 🆕 Singing-group markers: {c:1}, {c:2}, {c:1+2}, {c:All}.
     # A marker applies ONLY to the single line right after it. We remember
@@ -136,8 +137,9 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             if section_type == "":
                 html.append(f'<div class="centered">{text}</div>')
             elif section_type and section_type.lower() != "verse":
+                cls = "section section-chorus" if section_is_chorus else "section"
                 html.append(
-                    f'<div class="section">'
+                    f'<div class="{cls}">'
                     f'<div class="section-name">{section_type}</div>'
                     f'<div class="section-body">{text}</div>'
                     f'</div>'
@@ -189,6 +191,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                 elif directive in selected_map:
                     flush_buffer()
                     section_type = selected_map[directive]
+                    section_is_chorus = (directive == "{soc}")   # 🆕
 
             # 🆕 {c:...} / {comment:...} — flush whatever's buffered so the
             # comment renders as its own standalone block, then keep going

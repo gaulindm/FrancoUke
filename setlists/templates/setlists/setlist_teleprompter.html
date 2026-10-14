@@ -18,17 +18,20 @@
       font-size: 0.9rem;
       padding: 2px 6px;
     }
-
+    .lyrics-container {
+  padding-left: 8px;
+  padding-right: 8px;
+}
 
     .touch-zone {
-      position: fixed;
-      top: 0;
-      width: 50%;
-      height: 100%;
-      z-index: 10; /* 🔽 lower than UI controls */
-      pointer-events: auto;
-      background: transparent;
-    }
+  position: fixed;
+  top: 0;
+  width: 15%;            /* was 50% */
+  height: 100%;
+  z-index: 10;
+  background: transparent;
+  touch-action: pan-y;   /* vertical drags still scroll */
+}
 
 
     .touch-left {
@@ -57,14 +60,12 @@
   max-width: 100%;
   margin: 0 auto 30px auto;
   border-collapse: collapse;
-  border: 2px solid #ff6b6b; /* 🔴 DEBUG: Red outer border */
 }
 
 .metadata-table td {
   padding: 8px 10px;
   vertical-align: middle;
   text-align: center;
-  border: 1px solid #74c0fc; /* 🔵 DEBUG: Blue cell borders */
 }
 
 /* Left column (time signature, 1st note, count in) */
@@ -137,6 +138,10 @@
   .metadata-table tr:first-child td:nth-child(2) {
     font-size: 1.1em;
   }
+}
+body.chords-right .lyrics-container {
+  padding-left: 8px;
+  padding-right: calc(140px * var(--diagram-scale) + 55px);
 }
 
   </style>
