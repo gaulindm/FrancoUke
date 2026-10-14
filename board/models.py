@@ -182,50 +182,6 @@ class BoardItem(models.Model):
         return False
 
 
-
-# -------------------------
-# Performances + Availability
-# -------------------------
-'''
-class Performance(models.Model):
-    PERFORMANCE_CHOICES = [
-        ("upcoming", "Upcoming"),
-        ("tbc", "To Be Confirmed"),
-        ("past", "Past Performance"),
-    ]
-
-    board_item = models.OneToOneField(BoardItem, on_delete=models.CASCADE, related_name="performance")
-
-    event_date = models.DateField(blank=True, null=True)
-    start_time = models.TimeField(blank=True, null=True)
-    end_time = models.TimeField(blank=True, null=True)
-    arrive_by = models.TimeField(blank=True, null=True)
-    venue = models.ForeignKey(
-            "Venue",
-            on_delete=models.SET_NULL,
-            related_name="performances",
-            null=True,
-            blank=True
-        )
-    location = models.CharField(max_length=255, blank=True)
-    attire = models.CharField(max_length=255, null=True, blank=True)
-    chairs = models.CharField(max_length=255, null=True, blank=True)
-
-    performance_type = models.CharField(max_length=20, choices=PERFORMANCE_CHOICES, default="upcoming")
-    is_rehearsal = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def get_my_availability_display(self):
-        if hasattr(self, "my_availability") and self.my_availability:
-            mapping = {"yes": "Yes", "no": "No", "maybe": "Maybe"}
-            return mapping.get(self.my_availability, self.my_availability)
-        return "Not set"
-
-    def __str__(self):
-        return f"{self.board_item.title} ({self.get_performance_type_display()})"
-'''
-
 class BoardItemPhoto(models.Model):
     board_item = models.ForeignKey(BoardItem, on_delete=models.CASCADE, related_name="photos")
     image = models.ImageField(upload_to="board_photos/")
@@ -276,6 +232,8 @@ class Event(models.Model):
         null=True,
         blank=True
     )
+
+
 
     title = models.CharField(max_length=255)
     rich_description = HTMLField(blank=True, null=True)
