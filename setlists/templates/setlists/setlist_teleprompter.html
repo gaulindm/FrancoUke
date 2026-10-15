@@ -1,10 +1,5 @@
 {% extends "songbook/teleprompter_base.html" %}
 
-{% block exit_link %}
-  {% url 'setlists:detail' group_slug=request.group.slug pk=setlist.id as exit_url %}
-  {% include "songbook/teleprompter/_exit_link.html" with exit_url=exit_url exit_label="Setlist" exit_title="Back to setlist" %}
-{% endblock %}
-
 {% block extra_styles %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -152,6 +147,11 @@ body.chords-right .lyrics-container {
   </style>
 {% endblock %}
 
+{% block exit_link %}
+  {% url 'setlists:detail' group_slug=request.group.slug pk=setlist.id as exit_url %}
+  {% include "songbook/teleprompter/_exit_link.html" with exit_url=exit_url exit_label="Setlist" exit_title="Back to setlist" %}
+{% endblock %}
+
 {% block controls_left %}
   <span class="song-title">Setlist {{ setlist.id }} – {{ setlist.name }}</span>
   <button id="toggle-chords">Hide Chords</button>
@@ -239,14 +239,23 @@ body.chords-right .lyrics-container {
         if (nextBtn && !nextBtn.disabled) nextBtn.click();
       });
     
-      // Optional: swipe gesture support (for mobile smoothness)
-      let startX = 0;
-      document.addEventListener("touchstart", (e) => startX = e.touches[0].clientX);
+      // Swipe left/right to change song. Must be clearly sideways, and must
+      // not start in the controls bar (so dragging a slider or colour picker
+      // never changes song).
+      let startX = 0, startY = 0, swipeOk = false;
+      document.addEventListener("touchstart", (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        swipeOk = !e.target.closest(".controls");
+      }, { passive: true });
       document.addEventListener("touchend", (e) => {
-        const diff = e.changedTouches[0].clientX - startX;
-        if (diff > 50 && prevBtn && !prevBtn.disabled) prevBtn.click();  // Swipe right → previous
-        else if (diff < -50 && nextBtn && !nextBtn.disabled) nextBtn.click(); // Swipe left → next
-      });
-          });
+        if (!swipeOk) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 2) return;  // not sideways enough
+        if (dx > 0 && prevBtn && !prevBtn.disabled) prevBtn.click();        // Swipe right → previous
+        else if (dx < 0 && nextBtn && !nextBtn.disabled) nextBtn.click();   // Swipe left → next
+      }, { passive: true });
+    });
     </script>
 {% endblock %}

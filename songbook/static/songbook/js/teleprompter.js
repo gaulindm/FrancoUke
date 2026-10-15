@@ -155,9 +155,22 @@
   function bindPauseOnUserScroll(c) {
     if (!c) return;
     const pause = () => isAutoScrolling && stopScroll();
-    c.addEventListener("touchstart", pause, { passive: true });
+
+    // Touch: pause only once the finger actually drags. A plain tap must not
+    // pause here, or the tap handler below would immediately restart scrolling.
+    let sx = 0, sy = 0;
+    c.addEventListener("touchstart", (e) => {
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+    }, { passive: true });
+    c.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      if (Math.abs(t.clientX - sx) > 10 || Math.abs(t.clientY - sy) > 10) pause();
+    }, { passive: true });
+
+    // Mouse: wheel or click still pauses at once (touch taps are handled above).
     c.addEventListener("wheel", pause, { passive: true });
-    c.addEventListener("pointerdown", pause, { passive: true });
+    c.addEventListener("pointerdown", (e) => { if (e.pointerType !== "touch") pause(); }, { passive: true });
   }
 
   // -----------------------------
@@ -633,80 +646,71 @@
     // --- 🎯 Gesture Enhancements (moved inside DOMContentLoaded) ---
     const lyrics = $(".lyrics-container");
     if (lyrics) {
-      let lastTap = 0;
       let startY = 0;
       let startX = 0;
-      let endY = 0;
-      let endX = 0;
-      const SWIPE_THRESHOLD = 50; // px minimum swipe distance
-      const TAP_ZONE_RATIO = 0.3; // left/right screen zones for prev/next
+      let tapTimer = null;
+      const SWIPE_THRESHOLD = 50;  // px minimum swipe distance
+      const TAP_MAX_MOVE = 10;     // px: less movement than this counts as a tap
+      const TAP_ZONE_RATIO = 0.3;  // left/right 30% = prev/next song (setlist page only)
+      const DOUBLE_TAP_MS = 300;   // 🔧 TUNE: how long to wait for a possible second tap
 
-      // Capture swipe start
+      // Only the setlist teleprompter has these buttons.
+      const onSetlistPage = !!($("#prev-song-btn") || $("#next-song-btn"));
+
+      // What a single tap does. Runs only after we know no second tap followed.
+      function handleSingleTap(x) {
+        const toggleScroll = () => (isAutoScrolling ? stopScroll() : startScroll());
+        if (!onSetlistPage) { toggleScroll(); return; }   // song page: any tap = start/pause
+
+        const w = window.innerWidth;
+        if (x < w * TAP_ZONE_RATIO) {
+          $("#prev-song-btn:not([disabled])")?.click();   // does nothing on the first song
+        } else if (x > w * (1 - TAP_ZONE_RATIO)) {
+          $("#next-song-btn:not([disabled])")?.click();   // does nothing on the last song
+        } else {
+          toggleScroll();
+        }
+      }
+
       lyrics.addEventListener("touchstart", (e) => {
         const touch = e.touches[0];
         startY = touch.clientY;
         startX = touch.clientX;
       }, { passive: true });
 
-      // Capture swipe end (and taps)
       lyrics.addEventListener("touchend", (e) => {
-        const now = Date.now();
-        const deltaTime = now - lastTap;
         const touch = e.changedTouches[0];
-        endY = touch.clientY;
-        endX = touch.clientX;
-        const diffY = endY - startY;
-        const diffX = endX - startX;
+        const diffY = touch.clientY - startY;
+        const diffX = touch.clientX - startX;
         const absY = Math.abs(diffY);
         const absX = Math.abs(diffX);
-        lastTap = now;
-
-        // --- Double Tap (toggle chords) ---
-        if (deltaTime < 300 && absX < 10 && absY < 10) {
-          toggleChordSection();
-          return;
-        }
 
         // --- Swipe Up/Down to Adjust Speed ---
         if (absY > SWIPE_THRESHOLD && absY > absX) {
           if (diffY < 0) {
-            // Swipe Up → Increase speed
-            scrollSpeed = Math.min(1000, scrollSpeed + 1);
-            console.log("⬆️ Increased scroll speed:", scrollSpeed);
+            scrollSpeed = Math.min(1000, scrollSpeed + 1);   // Swipe Up → faster
           } else {
-            // Swipe Down → Decrease speed
-            scrollSpeed = Math.max(1, scrollSpeed - 1);
-            console.log("⬇️ Decreased scroll speed:", scrollSpeed);
+            scrollSpeed = Math.max(1, scrollSpeed - 1);      // Swipe Down → slower
           }
           updateSpeedDisplay();
           return;
         }
 
-        // --- Tap zones for previous / next song ---
-        const screenWidth = window.innerWidth;
-        const leftZone = screenWidth * TAP_ZONE_RATIO;
-        const rightZone = screenWidth * (1 - TAP_ZONE_RATIO);
+        // Moved too far to be a tap (small drag or sideways swipe): nothing to do.
+        if (absX >= TAP_MAX_MOVE || absY >= TAP_MAX_MOVE) return;
 
-        if (absX < 10 && absY < 10) {
-          if (endX < leftZone) {
-            console.log("⏮️ Previous song");
-            if (typeof window.navigateToPreviousSong === "function") {
-              window.navigateToPreviousSong();
-            } else {
-              alert("Previous song not implemented yet.");
-            }
-          } else if (endX > rightZone) {
-            console.log("⏭️ Next song");
-            if (typeof window.navigateToNextSong === "function") {
-              window.navigateToNextSong();
-            } else {
-              alert("Next song not implemented yet.");
-            }
-          } else {
-            // --- Center Tap toggles scroll ---
-            isAutoScrolling ? stopScroll() : startScroll();
-          }
+        // --- Tap. A second tap soon after = double tap (toggle chord diagrams). ---
+        if (tapTimer) {
+          clearTimeout(tapTimer);
+          tapTimer = null;
+          toggleChordSection();
+          return;
         }
+        const tapX = touch.clientX;
+        tapTimer = setTimeout(() => {
+          tapTimer = null;
+          handleSingleTap(tapX);
+        }, DOUBLE_TAP_MS);
       }, { passive: true });
     }
 
@@ -728,7 +732,7 @@
       console.log("⏭️ Navigating to next song (setlist order):", nextOrder);
       window.location.href = url;
     } else {
-      alert("No next song available.");
+      console.warn("No next song available.");
     }
   };
 
@@ -739,7 +743,7 @@
       console.log("⏮️ Navigating to previous song (setlist order):", prevOrder);
       window.location.href = url;
     } else {
-      alert("No previous song available.");
+      console.warn("No previous song available.");
     }
   };
 
