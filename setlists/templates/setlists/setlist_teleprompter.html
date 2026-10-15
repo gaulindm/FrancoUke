@@ -1,5 +1,10 @@
 {% extends "songbook/teleprompter_base.html" %}
 
+{% block exit_link %}
+  {% url 'setlists:detail' group_slug=request.group.slug pk=setlist.id as exit_url %}
+  {% include "songbook/teleprompter/_exit_link.html" with exit_url=exit_url exit_label="Setlist" exit_title="Back to setlist" %}
+{% endblock %}
+
 {% block extra_styles %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>

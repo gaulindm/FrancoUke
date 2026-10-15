@@ -19,8 +19,10 @@
   <!-- Controls -->
   <div class="controls">
     <div class="left">
+      {% block exit_link %}{% endblock %}
       {% block controls_left %}<span class="song-title">{{ song.songTitle }}</span>{% endblock %}
     </div>
+
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline">

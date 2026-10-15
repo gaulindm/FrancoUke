@@ -193,4 +193,63 @@
     font-style: italic;     /* remove this line for upright text */
   }
 
+  /* ===== Intro / Interlude blocks: {soi}..{eoi} and {sod}..{eod} =====
+     In "chords above" mode these switch to the inline look, so ( ) and -
+     stay level with the chords instead of dropping below them. */
+     html[data-chord-style="above"] .lyrics .section-inline .section-body {
+    line-height: 1.3;   /* 🔧 TUNE: single spacing; 1.2 = tighter, 1.5 = looser */
+  }
+  html[data-chord-style="above"] .section-inline .chord-word {
+    display: inline;
+  }
+  html[data-chord-style="above"] .section-inline .chord-label {
+    position: static;
+    display: inline;
+    font-size: 0.9em;
+  }
+  html[data-chord-style="above"] .section-inline .chord-label::before { content: "["; }
+  html[data-chord-style="above"] .section-inline .chord-label::after  { content: "]"; }
+
+    /* ===== Everything left-aligned (easier to follow on wide screens) ===== */
+    html .lyrics,
+  html .lyrics .verse,
+  html .lyrics .centered,
+  html .lyrics .section,
+  html .lyrics .section-name,
+  html .lyrics .section-body,
+  html .lyrics .song-comment {
+    text-align: left;
+  }
+  /* The old inline-block made non-chorus sections shrink to their text and
+     sit in the middle of the page. Let them fill the width from the left. */
+  html .lyrics .section-body {
+    display: block;
+  }
+    /* ===== Strumming-pattern tail at the end of a lyric line =====
+     Same inline look as Intro/Interlude, but only for the chords the
+     renderer tagged chord-inline. The words before them keep their
+     chords above. */
+     html[data-chord-style="above"] .chord-word.chord-inline {
+    display: inline;
+  }
+  html[data-chord-style="above"] .chord-word.chord-inline .chord-label {
+    position: static;
+    display: inline;
+    font-size: 0.9em;
+  }
+  html[data-chord-style="above"] .chord-word.chord-inline .chord-label::before { content: "["; }
+  html[data-chord-style="above"] .chord-word.chord-inline .chord-label::after  { content: "]"; }
+    /* ===== Exit button (top-left of the controls bar) ===== */
+    .exit-btn {
+    display: inline-block;
+    padding: 8px 14px;            /* 🔧 TUNE: big enough for a thumb on a phone */
+    margin-right: 10px;
+    border: 1px solid var(--controls-border);
+    border-radius: 6px;
+    background: var(--button-bg);
+    color: var(--button-text);
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+  }
 </style>

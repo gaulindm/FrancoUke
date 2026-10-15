@@ -70,6 +70,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     current_buffer = []
     section_type = None
     section_is_chorus = False   # 🆕 True between {soc} and {eoc}
+    section_is_inline = False   # 🆕 True in {soi}..{eoi} and {sod}..{eod}
 
     # 🆕 Singing-group markers: {c:1}, {c:2}, {c:1+2}, {c:All}.
     # A marker applies ONLY to the single line right after it. We remember
@@ -95,6 +96,13 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     # 🔧 TUNE: how many invisible underscores sit after a chord-only "[G]_".
     # Total = chord-name length + this number. Each one is about half a letter wide.
     PH_EXTRA = 2
+
+    # 🆕 Strumming-pattern tail: a chord whose text is only "-", "(" or ")"
+    # and spaces (at least one symbol), e.g. "[D/] - [D7/] ([G/] [G/] - [D/])".
+    # From that chord to the end of the line, chords are drawn inline so the
+    # symbols stay level with them instead of dropping below.
+    PATTERN_RE = re.compile(r'^[\s\-()]*[-()][\s\-()]*$')
+    in_pattern = False   # True from the first pattern chord to the end of the line
 
 
     def inline_holds(lyric):
@@ -137,7 +145,11 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             if section_type == "":
                 html.append(f'<div class="centered">{text}</div>')
             elif section_type and section_type.lower() != "verse":
-                cls = "section section-chorus" if section_is_chorus else "section"
+                cls = "section"
+                if section_is_chorus:
+                    cls += " section-chorus"
+                if section_is_inline:
+                    cls += " section-inline"   # 🆕 Intro / Interlude: chords drawn inline
                 html.append(
                     f'<div class="{cls}">'
                     f'<div class="section-name">{section_type}</div>'
@@ -159,10 +171,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             )
             continue
 
-
         group = merge_chord_pieces(group)
-        
-
+        in_pattern = False   # 🆕 a new group never starts mid-pattern
 
         for item in group:
             if "directive" in item:
@@ -192,6 +202,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     flush_buffer()
                     section_type = selected_map[directive]
                     section_is_chorus = (directive == "{soc}")   # 🆕
+                    section_is_inline = directive in ("{soi}", "{sod}")   # 🆕
 
             # 🆕 {c:...} / {comment:...} — flush whatever's buffered so the
             # comment renders as its own standalone block, then keep going
@@ -230,11 +241,14 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                 if ph:
                     pad = "_" * (len(chord) + PH_EXTRA)
                     lyric = f'<span class="ph">{pad}</span>' + ph.group(1)
-                
+
                 # 🎨 Preserve color markup tags - don't escape them
                 if chord:
                     start_group_line()
                     if chord_position == "above":
+                        # 🆕 First symbol-only chord on this line starts the pattern tail.
+                        if not in_pattern and PATTERN_RE.match(lyric):
+                            in_pattern = True
                         # Runs of spaces (alignment padding for the inline view) -> one space.
                         lyric = re.sub(r'[ \t]{2,}', ' ', lyric)
                         # Trailing space stays outside the box so it remains a real gap.
@@ -245,6 +259,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                         if ph:
                             width += 1.8   # 🔧 TUNE: extra gap after a chord-only "[G]_"
                         word_cls = "chord-word ph-word" if ph else "chord-word"
+                        if in_pattern:
+                            word_cls += " chord-inline"   # 🆕 drawn inline by CSS
                         current_buffer.append(
                             f'<span class="{word_cls}" style="min-width:{width:.8f}em">'
                             f'<span class="chord-label" data-chord="{chord}">{chord}</span>'
@@ -275,6 +291,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             # LINEBREAK/PARAGRAPHBREAK was silently skipped, causing the
             # next line's lyrics to run on after it.
             if "format" in item:
+                in_pattern = False   # 🆕 LINEBREAK / PARAGRAPHBREAK ends the pattern
                 if item["format"] == "LINEBREAK":
                     if open_group:
                         close_group()   # the block ends the line: no <br/>

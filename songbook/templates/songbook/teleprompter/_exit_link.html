@@ -1,0 +1,9 @@
+{% if exit_url %}
+  <a id="exit-btn" class="exit-btn" href="{{ exit_url }}" title="{{ exit_title }} (Esc)">✕ {{ exit_label }}</a>
+  <script>
+    // Esc = same as tapping Exit (handy on a laptop)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") window.location.href = document.getElementById("exit-btn").href;
+    });
+  </script>
+{% endif %}
