@@ -436,6 +436,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
     section_type = None
     section_instruction = None
     pending_group = None  # vocal group number waiting for its lyric line
+    after_comment = False  # did a standalone comment just print right before this?
     section_label_shown = False  # has this section's "Intro:" label been printed yet?
 
     # Map directives per site
@@ -478,21 +479,26 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
 
     selected_map = directive_map.get(site_name, directive_map["StrumSphere"])
 
-    # 🆕 Style for {c:...} / {comment:...} ChordPro annotations, e.g.
-    # "(repeat chorus x2)" — printed as a small centered italic note, distinct
-    # from section labels and lyric text.
-    comment_style = ParagraphStyle(
-        'SongComment',
-        parent=base_style,
-        fontSize=9,
-        textColor=colors.grey,
-        alignment=TA_CENTER,
-        spaceBefore=4,
-        spaceAfter=4,
-    )
+      # {c:...} / {comment:...} standalone notes: same size as the lyrics of the
+    # current section, red, flush against the left margin.
+    def make_comment_style():
+        lyric_style = (
+            styles_dict.get(section_type.lower(), styles_dict["verse"])
+            if section_type else styles_dict["verse"]
+        )
+        return ParagraphStyle(
+            'SongComment',
+            parent=base_style,
+            fontSize=lyric_style.fontSize,
+            leading=lyric_style.leading,
+            textColor=colors.red,
+            alignment=TA_LEFT,
+            spaceBefore=4,
+            spaceAfter=2,
+        )
 
     def flush_buffer():
-        nonlocal paragraph_buffer, section_type, section_instruction, section_label_shown
+        nonlocal paragraph_buffer, section_type, section_instruction, section_label_shown, after_comment
 
         if not paragraph_buffer:
             return
@@ -500,6 +506,13 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
         paragraph_text = "".join(paragraph_buffer)
         paragraph_text = apply_color_markup(paragraph_text)
         style = styles_dict.get(section_type.lower(), styles_dict["verse"]) if section_type else styles_dict["verse"]
+
+        # Paragraph right after a standalone comment: drop its top spacing so
+        # there's no blank-looking gap under the comment.
+        if after_comment:
+            style = ParagraphStyle(f"{style.name}_tight", parent=style, spaceBefore=0)
+            after_comment = False
+
 
         # Non-verse sections
         if section_type and section_type.lower() != "verse":
@@ -547,6 +560,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
         if isinstance(group, dict) and group.get("type") == "tab":
             flush_buffer()
             pending_group = None
+            after_comment = False
             tab_flowable = build_tab_flowable(group.get("lines", []))
             if tab_flowable is not None:
                 label_html = ""
@@ -630,7 +644,8 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                 flush_buffer()
                 pending_group = None
                 comment_text = apply_color_markup(comment_raw)
-                elements.append(Paragraph(f"<i>{comment_text}</i>", comment_style))
+                elements.append(Paragraph(f"<i>{comment_text}</i>", make_comment_style()))
+                after_comment = True
                 continue
 
             elif "lyric" in item:
