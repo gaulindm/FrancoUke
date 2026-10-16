@@ -7,13 +7,11 @@ import re
 CHORD_REGEX = re.compile(
     r"""
     \[
-    (                                   # capture the chord name
-      [A-G]                             # root note
-      [#b]?                             # optional accidental
-      (?:m(?!aj))?                      # 'm' for minor, but NOT 'maj'
-      (?:M7|maj7|m7|7|sus2|sus4|dim7?|aug|add9|6|9|11|13)?  # extensions
-      (?:/[A-G][#b]?)?                  # optional slash chord (D/F#)
-      /*                                # optional trailing slashes (Em///)
+    (
+      [A-G][#b]?
+      (?: maj|Maj|min|aug|dim|sus|add|m|M|\+|[o°˚º]|ø|-|\d+|[#b]\d+ )*
+      (?:/[A-G][#b]?)?                  # optional slash chord
+      /*                                # optional trailing strum slashes
     )
     \]
     """,

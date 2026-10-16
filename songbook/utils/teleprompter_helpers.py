@@ -3,6 +3,24 @@
 setlist teleprompter view (setlists/views.py), so each is written only once."""
 import re
 
+SUFFIX_ALIASES = {
+    '+': 'aug',  '+7': 'aug7',  '7+': 'aug7',  '#5': 'aug',  '7#5': 'aug7',
+    'o': 'dim',  '°': 'dim',  '˚': 'dim',  'º': 'dim',
+    'o7': 'dim7', '°7': 'dim7', '˚7': 'dim7', 'º7': 'dim7',
+    'ø': 'm7b5', 'ø7': 'm7b5', 'm7-5': 'm7b5', 'm7(b5)': 'm7b5',
+    '-': 'm', '-6': 'm6', '-7': 'm7', '-9': 'm9',
+    'sus': 'sus4',
+    'M': '', 'maj': '',          # CM / Cmaj = plain C major
+}
+
+def _alias_suffix(chord):
+    m = re.match(r'^([A-Ga-g][#b♭]?)(.*)$', chord)
+    if not m:
+        return chord
+    root, suffix = m.groups()
+    return root + SUFFIX_ALIASES.get(suffix, suffix)
+
+
 
 # -----------------------------
 # 🧠 Normalize chord names
@@ -28,6 +46,7 @@ def clean_chord_name(chord: str) -> str:
     chord = re.sub(r"(?<=[A-G#b])M(?=\d)", "maj", chord)
     chord = chord.replace("Δ", "maj").replace("△", "maj")
     chord = re.sub(r"(?i)min", "m", chord)
+    chord = _alias_suffix(chord)
 
     # Standardize capitalization (e.g., fm7 → Fm7)
     chord = chord.strip().replace(" ", "")

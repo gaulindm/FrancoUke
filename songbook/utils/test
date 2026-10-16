@@ -1,18 +1,8 @@
-import time
-from django.db import connection
-from django.test import Client
-from django.test.utils import CaptureQueriesContext
+import json
+from songbook.models import Song
 
-PATH = "/strumsphere/songs/"   # e.g. "/songbook/songs/"
+s = Song.objects.get(pk=2699)          # your song id
+txt = json.dumps(s.lyrics_with_chords, ensure_ascii=False)
+print('chord item:', '"chord": "Co7"' in txt)
+print('left as text:', '[Co7]' in txt)
 
-c = Client()
-c.get(PATH, HTTP_HOST="francouke.pythonanywhere.com")   # warm-up run, ignored
-
-with CaptureQueriesContext(connection) as ctx:
-    t = time.time()
-    r = c.get(PATH, HTTP_HOST="francouke.pythonanywhere.com")
-    print("total:", round(time.time() - t, 2), "status:", r.status_code)
-
-print("queries:", len(ctx), "db time:", round(sum(float(q["time"]) for q in ctx), 3))
-for q in sorted(ctx, key=lambda q: -float(q["time"]))[:5]:
-    print(q["time"], q["sql"][:200])

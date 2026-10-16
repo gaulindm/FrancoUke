@@ -1,13 +1,30 @@
 import re
 
+SUFFIX_ALIASES = {
+    '+': 'aug',  '+7': 'aug7',  '7+': 'aug7',  '#5': 'aug',  '7#5': 'aug7',
+    'o': 'dim',  '°': 'dim',  '˚': 'dim',  'º': 'dim',
+    'o7': 'dim7', '°7': 'dim7', '˚7': 'dim7', 'º7': 'dim7',
+    'ø': 'm7b5', 'ø7': 'm7b5', 'm7-5': 'm7b5', 'm7(b5)': 'm7b5',
+    '-': 'm', '-6': 'm6', '-7': 'm7', '-9': 'm9',
+    'sus': 'sus4',
+    'M': '',            # CM / Cmaj = plain C major
+    'm(M7)': 'mM7',
+}
+
 # ------------------------------------------------------------
 # Helper: normalize maj/min tokens
 # ------------------------------------------------------------
+
 def normalize_maj_tokens(name: str) -> str:
     name = re.sub(r'(?i)maj', 'M', name)
     name = re.sub(r'(?i)Δ', 'M', name)
     name = re.sub(r'(?i)min', 'm', name)
-    return name
+
+    m = re.match(r'^([A-Ga-g][#b♭]?)(.*)$', name)
+    if not m:
+        return name
+    root, suffix = m.groups()
+    return root + SUFFIX_ALIASES.get(suffix, suffix)
 
 # ------------------------------------------------------------
 # Helper: canonicalize enharmonic root

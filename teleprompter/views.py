@@ -60,7 +60,7 @@ def teleprompter_view(request, song_id, beginner=False):
     # 🎸 Extract chords
     # -----------------------------
     chord_pattern = re.compile(
-        r"\[([A-G][#b]?(?:maj|min|add|sus|dim|aug|[mM+]|\d|[#b])*(?:/[A-G#b]*)*/*)\]"
+        r"\[([A-G][#b]?(?:maj|min|add|sus|dim|aug|[mM+\-oø°˚º]|\d|[#b])*(?:/[A-G#b]*)*/*)\]"
     )
     found_chords = chord_pattern.findall(raw_lyrics)
 
