@@ -3,6 +3,7 @@
   .song-header { display: grid; grid-template-columns: 1fr 3fr 1fr; align-items: center;
                  column-gap: .5em; row-gap: .15em; margin: 0 0 1em; text-align: center; }
   .song-header .sh-title   { font-size: 1.6em; font-weight: bold; }
+  .song-header .sh-subtitle { font-size: .55em; font-weight: normal; font-style: italic; opacity: .7; margin-top: 2px; }
   .song-header .sh-writer  { font-size: 1em; }
   .song-header .sh-record  { font-size: .92em; }
   .song-header .sh-side    { font-size: .75em; }
@@ -13,7 +14,9 @@
 </style>
 <div class="song-header">
   <div class="sh-side sh-left sh-ts">{{ h.time_signature }}</div>
-  <div class="sh-title">{{ h.title }}</div>
+  <div class="sh-title">{{ h.title }}
+    {% if h.subtitle %}<div class="sh-subtitle">{{ h.subtitle }}</div>{% endif %}
+  </div>
   <div class="sh-side sh-right sh-strum">{{ h.strumming }}</div>
 
   {% if h.show_row1 %}
@@ -28,3 +31,41 @@
     <div class="sh-side sh-right">{{ h.instruction_2 }}</div>
   {% endif %}
 </div>
+
+{% if h.youtube_id %}
+<style>
+  /* Mini audio player (YouTube). Collapsed = small button only; the video keeps playing. */
+  .yt-mini { position: fixed; top: 70px; right: 12px; z-index: 900; width: 240px;
+             background: var(--bg, #222); border: 1px solid var(--muted, #888);
+             border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  .yt-mini button { width: 100%; padding: 6px 10px; border: 0; cursor: pointer;
+                    background: transparent; color: var(--fg, #eee); font-size: .9rem; text-align: left; }
+  .yt-mini .yt-frame { height: 135px; }
+  .yt-mini.collapsed { width: auto; }
+  .yt-mini.collapsed .yt-frame { height: 0; }
+  .yt-mini iframe { width: 240px; height: 135px; border: 0; display: block; }
+  @media (max-width: 800px) { .yt-mini { top: auto; bottom: 8px; right: 8px; } }
+</style>
+<div class="yt-mini collapsed" id="yt-mini">
+  <button type="button" id="yt-toggle" aria-expanded="false">🎵 Listen</button>
+  <div class="yt-frame" id="yt-frame"></div>
+</div>
+<script>
+  (function () {
+    var box = document.getElementById("yt-mini"),
+        btn = document.getElementById("yt-toggle"),
+        frame = document.getElementById("yt-frame"),
+        loaded = false;
+    btn.addEventListener("click", function () {
+      var open = box.classList.toggle("collapsed") === false;
+      btn.setAttribute("aria-expanded", open);
+      btn.textContent = open ? "🎵 Hide player" : "🎵 Listen";
+      if (open && !loaded) {            // load the video only when asked
+        loaded = true;
+        frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/{{ h.youtube_id }}?rel=0&playsinline=1" ' +
+          'referrerpolicy="strict-origin-when-cross-origin" title="Song recording" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+      }
+    });
+  })();
+</script>
+{% endif %}

@@ -1,4 +1,5 @@
 {% extends "songbook/teleprompter_base.html" %}
+{% load song_header %}
 
 {% block extra_styles %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -54,91 +55,6 @@
   pointer-events: auto; /* always interactive */
 }
 
-/* ===== METADATA TABLE STYLES ===== */
-.metadata-table {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto 30px auto;
-  border-collapse: collapse;
-}
-
-.metadata-table td {
-  padding: 8px 10px;
-  vertical-align: middle;
-  text-align: center;
-}
-
-/* Left column (time signature, 1st note, count in) */
-.metadata-table td:first-child {
-  width: 250px;
-  font-size: 0.9em;
-  color: var(--muted);
-}
-
-/* Center column (title, songwriter, artist) */
-.metadata-table td:nth-child(2) {
-  width: auto;
-  font-weight: bold;
-}
-
-/* Right column (instructions) */
-.metadata-table td:last-child {
-  width: 250px;
-  font-size: 0.85em;
-  color: var(--muted);
-  font-style: italic;
-}
-
-/* First row special styling */
-.metadata-table tr:first-child td:first-child,
-.metadata-table tr:first-child td:last-child {
-  vertical-align: bottom;
-}
-
-.metadata-table tr:first-child td:nth-child(2) {
-  font-size: 1.3em;
-  color: var(--fg);
-}
-
-/* {st:...} / {subtitle:...} — quieter line directly under the title */
-.metadata-table .song-subtitle {
-  font-size: 0.6em;
-  font-weight: normal;
-  font-style: italic;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
-/* Songwriter row */
-.metadata-table tr:nth-child(2) td:nth-child(2) {
-  font-size: 1em;
-  color: #ccc;
-  font-weight: normal;
-}
-
-/* Artist/Recording row */
-.metadata-table tr:nth-child(3) td:nth-child(2) {
-  font-size: 0.95em;
-  color: var(--muted);
-  font-weight: normal;
-}
-
-/* Mobile responsive */
-@media (max-width: 800px) {
-  .metadata-table {
-    font-size: 0.8em;
-  }
-  
-  .metadata-table td:first-child,
-  .metadata-table td:last-child {
-    width: 100px;
-    font-size: 0.75em;
-  }
-  
-  .metadata-table tr:first-child td:nth-child(2) {
-    font-size: 1.1em;
-  }
-}
 body.chords-right .lyrics-container {
   padding-left: 8px;
   padding-right: calc(140px * var(--diagram-scale) + 55px);
@@ -173,40 +89,7 @@ body.chords-right .lyrics-container {
 {% endblock %}
 
 {% block lyrics_header %}
-  <table class="metadata-table">
-    <tr>
-      <td>{{ metadata.timeSignature|default:"" }}</td>
-      <td>
-        {{ song.songTitle|default:"Untitled Song" }}
-        {% if metadata.subtitle %}
-          <div class="song-subtitle">{{ metadata.subtitle }}</div>
-        {% endif %}
-      </td>
-      <td>{% if has_slash_chord %}(/ = one strum){% endif %}</td>
-    </tr>
-    <tr>
-      <td>
-        {% with first_note=metadata.1stnote %}
-          {% if first_note %}1st vocal note: {{ first_note }}{% endif %}
-        {% endwith %}
-      </td>
-      <td>{{ metadata.songwriter|default:"" }}</td>
-      <td>{{ metadata.short_instruction_1|default:"" }}</td>
-    </tr>
-    <tr>
-      <td>
-        {% with count=metadata.count_in %}
-          {% if count %}Count in: {{ count }}{% endif %}
-        {% endwith %}
-      </td>
-      <td>
-        {% if metadata.artist %}
-          {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
-        {% endif %}
-      </td>
-      <td>{{ metadata.short_instruction_2|default:"" }}</td>
-    </tr>
-  </table>
+  {% song_header song %}
 {% endblock %}
 
 {% block after_main %}

@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ["*"]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # Allows embedding on the same domain
 
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 # Application definition
 

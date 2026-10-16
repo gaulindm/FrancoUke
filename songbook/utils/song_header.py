@@ -9,7 +9,27 @@ Layout (3 columns):
     Row 2:  count in       | recorded-by     | short_instruction_2
 Row 1 / Row 2 are only shown when at least one of their cells has content.
 """
+import re
+
 from songbook.utils.chords.loader import extract_used_chords
+
+_YT_ID = r"[A-Za-z0-9_-]{11}"
+_YT_PATTERNS = (
+    re.compile(rf"^({_YT_ID})$"),                                   # bare id
+    re.compile(rf"youtu\.be/({_YT_ID})"),                           # short link
+    re.compile(rf"[?&]v=({_YT_ID})"),                               # watch?v=
+    re.compile(rf"youtube(?:-nocookie)?\.com/(?:embed|shorts|live|v)/({_YT_ID})"),
+)
+
+
+def extract_youtube_id(value):
+    """Accept a full YouTube URL or a bare 11-character id; return the id or ''."""
+    value = _clean(value)
+    for pat in _YT_PATTERNS:
+        m = pat.search(value)
+        if m:
+            return m.group(1)
+    return ""
 
 
 def _clean(value):
@@ -59,6 +79,8 @@ def build_song_header(song, show_strumming=True):
 
     header = {
         "title": song.songTitle or "Untitled Song",
+        "youtube_id": extract_youtube_id(metadata.get("youtube")),  # teleprompter only
+        "subtitle": _clean(metadata.get("subtitle")),  # teleprompter only; the PDF does not print it
         "time_signature": _clean(metadata.get("timeSignature")),
         "strumming": strumming,
         "songwriter": songwriter,
