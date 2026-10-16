@@ -1,4 +1,5 @@
 {% extends "songbook/teleprompter_base.html" %}
+{% load song_header %}
 
 {% block exit_link %}
   {% url 'songbook:chord_sheet' pk=song.id as exit_url %}
@@ -6,18 +7,5 @@
 {% endblock %}
 
 {% block lyrics_header %}
-  <div class="metadata">
-    <h1>{{ song.songTitle }}</h1>
-    {% if metadata.subtitle %}
-      <div class="song-subtitle">{{ metadata.subtitle }}</div>
-    {% endif %}
-    {% if metadata.songwriter %}
-      <div class="songwriter">{{ metadata.songwriter }}</div>
-    {% endif %}
-    {% if metadata.artist %}
-      <div class="recording">
-        {{ metadata.artist }}{% if metadata.year %} ({{ metadata.year }}){% endif %}
-      </div>
-    {% endif %}
-  </div>
+  {% song_header song %}
 {% endblock %}

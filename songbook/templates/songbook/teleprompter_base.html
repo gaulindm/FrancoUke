@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static song_header %}<!DOCTYPE html>
 <!--Shared teleprompter page. Song page and setlist page both extend this.
    Child templates fill in: title, controls_left, controls_right_extra,
    extra_styles, lyrics_header, after_main, extra_scripts. #}-->
@@ -75,7 +75,7 @@
   <div class="tp-main">
     <div class="lyrics-container">
       <div class="lyrics">
-        {% block lyrics_header %}{% endblock %}
+        {% block lyrics_header %}{% song_header song %}{% endblock %}
         {{ lyrics_with_chords|safe }}
       </div>
     </div>

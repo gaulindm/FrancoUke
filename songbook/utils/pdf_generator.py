@@ -13,6 +13,7 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from songbook.utils.chords.loader import extract_used_chords, load_relevant_chords
 from songbook.utils.chords.drawer import draw_footer, compute_footer_min_bottom_margin
+from songbook.utils.song_header import build_song_header
 
 
 import json
@@ -201,91 +202,28 @@ def build_song_elements(song, styles, styles_dict, site_name,
         spaceAfter=2,
     )
 
-    # --- Capo & Recording Info ---
-    capo_value = metadata.get('capo')
-    # Treat missing, None, and whitespace-only values all as "blank".
-    artist = str(metadata.get('artist') or '').strip()
-    songwriter = str(metadata.get('songwriter') or '').strip()
-    year = metadata.get('year')
-
-    # With no artist there is no recording to refer to, so the line is left
-    # empty and omitted from the header entirely (see header_data below).
-    recorded_by_text = ""
-    if artist:
-        if isinstance(capo_value, str) and capo_value.lower() == "based":
-            recorded_by_text = f"Based on clip by {artist}"
-        else:
-            try:
-                capo_value = int(capo_value)
-            except (TypeError, ValueError):
-                capo_value = 0
-
-            if capo_value > 0:
-                recorded_by_text = f"Capo ({capo_value}) to match the recording by {artist}"
-            else:
-                recorded_by_text = f"Matches the recording by {artist}"
-
-        if year:
-            recorded_by_text += f" ({year})"
-
-    # --- Slash chord detection ---
-    def contains_slash_chord(lyrics_with_chords):
-        used_chords = extract_used_chords(lyrics_with_chords)
-        return any('/' in chord for chord in used_chords)
-
-    has_slash_chord = contains_slash_chord(song.lyrics_with_chords)
-
-    # --- Normalize metadata ---
-    for key, value in metadata.items():
-        if value is None:
-            metadata[key] = ""
-
-    # --- Strumming pattern (row 0, right) ---
-    strumming_pattern = (getattr(song, 'default_strumming_pattern', '') or '').strip()
-    top_right_html = f"<b>{strumming_pattern}</b>" if (show_strumming and strumming_pattern) else ""
-
-    # --- Row 1, right: short_instruction_1 takes priority; slash-chord note is a fallback ---
-    short_instruction_1 = metadata.get('short_instruction_1', '')
-    slash_note = "(/ = one strum)" if has_slash_chord else ""
-    row1_right_text = short_instruction_1 if short_instruction_1 else slash_note
-
-    # --- Header table content ---
-    first_vocal_note_text = (
-        f"1st vocal note: {metadata.get('1stnote', '')}" if metadata.get('1stnote') else ""
-    )
-    count_in_text = (
-        f"Count in: {metadata.get('count_in', '')}" if metadata.get('count_in') else ""
-    )
-    short_instruction_2 = str(metadata.get('short_instruction_2') or '').strip()
+    # --- Header content (shared with the teleprompter) ---
+    h = build_song_header(song, show_strumming=show_strumming)
 
     header_data = [
         # Row 0: time signature | title | strumming pattern (always present)
         [
-            Paragraph(f"{metadata.get('timeSignature', '')}", first_vocal_note_style),
-            Paragraph(f"<b>{song.songTitle or 'Untitled Song'}</b>", styles['Title']),
-            Paragraph(top_right_html, header_instruction_style)
-            if top_right_html else Paragraph("", header_instruction_style),
+            Paragraph(h["time_signature"], first_vocal_note_style),
+            Paragraph(f"<b>{h['title']}</b>", styles['Title']),
+            Paragraph(f"<b>{h['strumming']}</b>" if h["strumming"] else "", header_instruction_style),
         ],
     ]
-
-    # Row 1: 1st vocal note | songwriter | instruction / slash-chord note
-    # Row 2: count in       | recorded by | short_instruction_2
-    # A row is only added if at least one of its cells has content, so songs
-    # with no songwriter/artist (e.g. preschool songs) don't get blank lines.
-    # If a side cell (1st note, count in, instructions) has content, the row
-    # stays and just leaves the centre blank, so that info isn't lost.
-    if songwriter or first_vocal_note_text or row1_right_text:
+    if h["show_row1"]:
         header_data.append([
-            Paragraph(first_vocal_note_text, first_vocal_note_style),
-            Paragraph(songwriter, songwriter_style),
-            Paragraph(row1_right_text, header_instruction_style),
+            Paragraph(h["first_note_text"], first_vocal_note_style),
+            Paragraph(h["songwriter"], songwriter_style),
+            Paragraph(h["row1_right"], header_instruction_style),
         ])
-
-    if recorded_by_text or count_in_text or short_instruction_2:
+    if h["show_row2"]:
         header_data.append([
-            Paragraph(count_in_text, count_in_style),
-            Paragraph(recorded_by_text, recording_style),
-            Paragraph(short_instruction_2, header_instruction_style),
+            Paragraph(h["count_in_text"], count_in_style),
+            Paragraph(h["recorded_by"], recording_style),
+            Paragraph(h["instruction_2"], header_instruction_style),
         ])
 
     # --- Header table layout ---
