@@ -1,9 +1,10 @@
-{% load user_extras %}
-{% with vid=song.metadata.youtube|youtube_id %}
+{% load user_extras youtube_tags %}
+{% with vid=song.metadata.youtube|youtube_id start=song.metadata.youtube|youtube_start %}
     {% if vid %}
         <button type="button" class="btn btn-sm btn-outline-danger"
                 data-bs-toggle="modal" data-bs-target="#videoModal"
                 data-video-id="{{ vid }}"
+                data-start="{{ start }}"
                 data-song-title="{{ song.songTitle }}"
                 title="{% if site_name == 'FrancoUke' %}Voir la vidéo{% else %}Watch video{% endif %}">
             🎥

@@ -26,7 +26,9 @@
     videoModal.addEventListener("show.bs.modal", function (event) {
         const button = event.relatedTarget;  // the 🎥 button that opened the modal
         document.getElementById("videoModalLabel").textContent = button.dataset.songTitle;
-        videoFrame.src = "https://www.youtube-nocookie.com/embed/" + button.dataset.videoId + "?autoplay=1";
+        var start = parseInt(button.dataset.start, 10);
+        videoFrame.src = "https://www.youtube-nocookie.com/embed/" + button.dataset.videoId + "?autoplay=1" +
+            (start > 0 ? "&start=" + start : "");
     });
 
     // Clearing src on close stops the video from playing in the background

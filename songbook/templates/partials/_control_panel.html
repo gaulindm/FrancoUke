@@ -1,5 +1,6 @@
 {% load static %}
 {% load user_extras %}
+{% load youtube_tags %}
 
 <div class="content-section">
     {% if user.is_authenticated %}
@@ -290,10 +291,10 @@
     <hr>
 
    <!-- 🎥 YouTube Player Section -->
-{% with video_id=chord_sheet.metadata.youtube|youtube_id %}
-{% if video_id %}
+{% with embed_url=chord_sheet.metadata.youtube|youtube_embed_url %}
+{% if embed_url %}
     <div class="ratio ratio-16x9 mb-2" style="max-width: 320px;">
-        <iframe src="https://www.youtube-nocookie.com/embed/{{ video_id }}"
+        <iframe src="{{ embed_url }}"
                 title="YouTube video player"
                 class="rounded shadow-sm"
                 loading="lazy"

@@ -1,7 +1,7 @@
-{% load user_extras %}
-{% with vid=song.metadata.youtube|youtube_id popup_name=site_namespace|add:':video_popup' %}
+{% load user_extras youtube_tags %}
+{% with vid=song.metadata.youtube|youtube_id start=song.metadata.youtube|youtube_start popup_name=site_namespace|add:':video_popup' %}
     {% if vid %}
-        <a href="{% url popup_name vid %}?title={{ song.songTitle|urlencode }}"
+        <a href="{% url popup_name vid %}?title={{ song.songTitle|urlencode }}{% if start %}&start={{ start }}{% endif %}"
            class="btn btn-sm btn-outline-danger"
            target="ukeVideo"
            onclick="window.open(this.href, 'ukeVideo', 'popup=yes,width=480,height=300,left=40,top=40,resizable=yes'); return false;"

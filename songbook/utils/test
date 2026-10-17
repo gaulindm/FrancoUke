@@ -6,3 +6,16 @@ txt = json.dumps(s.lyrics_with_chords, ensure_ascii=False)
 print('chord item:', '"chord": "Co7"' in txt)
 print('left as text:', '[Co7]' in txt)
 
+
+
+
+
+python manage.py shell -c "
+from songbook.models import Song
+from songbook.utils.song_header import build_song_header
+s = Song.objects.get(pk=2696)
+print('stored    :', repr((s.metadata or {}).get('youtube')))
+h = build_song_header(s)
+print('video id  :', h['youtube_id'])
+print('start (s) :', h['youtube_start'])
+"

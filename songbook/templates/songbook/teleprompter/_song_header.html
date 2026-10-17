@@ -62,7 +62,7 @@
       btn.textContent = open ? "🎵 Hide player" : "🎵 Listen";
       if (open && !loaded) {            // load the video only when asked
         loaded = true;
-        frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/{{ h.youtube_id }}?rel=0&playsinline=1" ' +
+        frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/{{ h.youtube_id }}?rel=0&playsinline=1{% if h.youtube_start %}&start={{ h.youtube_start }}{% endif %}" ' +
           'referrerpolicy="strict-origin-when-cross-origin" title="Song recording" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
       }
     });

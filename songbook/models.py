@@ -16,26 +16,25 @@ from songbook.utils.transposer import extract_chords
 
 def normalize_strumming_pattern(raw):
     """
-    Normalize a strumming pattern into a consistent campfire-friendly format.
+    Normalize a strumming pattern, preserving case to mark beat strength.
 
-    - Uppercases letters (d -> D, u -> U, x -> X)
+    - Uppercase = strong beat (D, U, X), lowercase = light beat (d, u, x)
     - Collapses any whitespace into a single '-' group separator
-    - Strips anything that isn't D, U, X, '.' (rest), or '-' (group separator)
+    - Strips anything that isn't D, U, X (any case), '.' (rest), or '-'
     - Collapses repeated dashes and trims leading/trailing dashes
 
     Examples:
-        "d du udu"   -> "D-DU-UDU"
-        "D--DU-UDU-" -> "D-DU-UDU"
-        "d.du udu!!" -> "D.DU-UDU"
+        "D du udu"   -> "D-du-udu"
+        "D--du-udu-" -> "D-du-udu"
+        "D.du udu!!" -> "D.du-udu"
     """
     if not raw:
         return ""
-    pattern = raw.strip().upper()
+    pattern = raw.strip()
     pattern = re.sub(r'\s+', '-', pattern)
-    pattern = re.sub(r'[^DUX.\-]', '', pattern)
+    pattern = re.sub(r'[^DUXdux.\-]', '', pattern)
     pattern = re.sub(r'-{2,}', '-', pattern).strip('-')
     return pattern
-
 
 class Song(models.Model):
     SITE_CHOICES = [

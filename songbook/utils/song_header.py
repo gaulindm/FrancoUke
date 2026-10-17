@@ -22,6 +22,22 @@ _YT_PATTERNS = (
 )
 
 
+_YT_START = re.compile(r"[?&#](?:t|start)=([0-9hms]+)")
+_YT_HMS = re.compile(r"^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$")
+
+
+def extract_youtube_start(value):
+    """Start offset in seconds from ?t=90, ?t=1m30s, &start=90, #t=90 ... or 0."""
+    m = _YT_START.search(_clean(value))
+    if not m:
+        return 0
+    parts = _YT_HMS.match(m.group(1))
+    if not parts:
+        return 0
+    h, mi, sec = (int(x) if x else 0 for x in parts.groups())
+    return h * 3600 + mi * 60 + sec
+
+
 def extract_youtube_id(value):
     """Accept a full YouTube URL or a bare 11-character id; return the id or ''."""
     value = _clean(value)
@@ -80,6 +96,7 @@ def build_song_header(song, show_strumming=True):
     header = {
         "title": song.songTitle or "Untitled Song",
         "youtube_id": extract_youtube_id(metadata.get("youtube")),  # teleprompter only
+        "youtube_start": extract_youtube_start(metadata.get("youtube")),
         "subtitle": _clean(metadata.get("subtitle")),  # teleprompter only; the PDF does not print it
         "time_signature": _clean(metadata.get("timeSignature")),
         "strumming": strumming,
