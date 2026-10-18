@@ -21,6 +21,7 @@ from songbook.context_processors import site_context
 from django.http import Http404
 from django.utils.text import slugify
 from .setlist_pdf import build_setlist_pdf
+from ratings.utils import rating_data
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,17 @@ def setlist_list(request, group_slug):
 def setlist_detail(request, group_slug, pk):
     group = request.group
     setlist = get_object_or_404(SetList, pk=pk, group=group)
-    songs = setlist.songs.select_related("song").order_by("order")
+    songs = list(setlist.songs.select_related("song").order_by("order"))
+
+    # ⭐ ratings: two queries for the whole page, then attach to each row
+    summaries, mine = rating_data([item.song_id for item in songs], request.user)
+    for item in songs:
+        s = summaries.get(item.song_id)
+        item.avg_rating = s["avg"] if s else None
+        item.rating_count = s["n"] if s else 0
+        item.avg_play = s["avg_play"] if s else None
+        item.avg_sing = s["avg_sing"] if s else None
+        item.my_rating = mine.get(item.song_id)
 
     return render(request, "setlists/detail.html", {
         "setlist": setlist,

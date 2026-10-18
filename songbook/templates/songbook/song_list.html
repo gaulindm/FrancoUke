@@ -28,12 +28,24 @@
         <thead>
             <tr>
                 {% if site_name == 'FrancoUke' %}
-                    <th>Partitions</th><th>Status</th><th>Interprètes</th><th>Année</th><th>Balises</th>
+                    <th>Partitions</th><th>Status</th><th>Interprètes</th><th>Année</th>
+                    {# ⭐ sortable rating column #}
+                    <th class="text-center text-nowrap">
+                        {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Retour à l'ordre alphabétique">Évaluation ▼</a>
+                        {% else %}<a href="{{ sort_by_rating_url }}" title="Les mieux notées d'abord">Évaluation</a>{% endif %}
+                    </th>
+                    <th>Balises</th>
                     <th class="text-center">Accords jouées</th>
                     <th class="text-center">PDF</th>
                     <th class="text-center">Téléprompteur</th>
                 {% else %}
-                    <th>Songs</th><th>Status</th><th>Artists</th><th>Year</th><th>Tags</th>
+                    <th>Songs</th><th>Status</th><th>Artists</th><th>Year</th>
+                    {# ⭐ sortable rating column #}
+                    <th class="text-center text-nowrap">
+                        {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Back to A-Z">Rating ▼</a>
+                        {% else %}<a href="{{ sort_by_rating_url }}" title="Best rated first">Rating</a>{% endif %}
+                    </th>
+                    <th>Tags</th>
                     <th class="text-center">Chords played</th>
                     <th class="text-center">PDF</th>
                     <th class="text-center">Teleprompter</th>
@@ -86,6 +98,7 @@
                 <td>{% if item.is_formatted %}✅{% else %}❌{% endif %}</td>
                 <td>{{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
                 <td class="text-center">{{ item.song.metadata.year|default_if_none:"" }}</td>
+                {% include "songbook/_song_rating_cell.html" with row=item %}
                 <td>
                     {% for tag in item.song.tags.all %}
                         <small>{{ tag }}</small>{% if not forloop.last %}, {% endif %}
@@ -120,7 +133,7 @@
                 </td>
             </tr>
 
-            {# 🆕 One full row per alternate version, same 8 columns as the primary row above, so PDF and Teleprompter links work for every version #}
+            {# 🆕 One full row per alternate version, same 9 columns as the primary row above, so PDF and Teleprompter links work for every version #}
             {% for v in item.other_versions %}
             <tr class="collapse version-group-{{ item.song.id }} bg-light">
                 <td>
@@ -144,6 +157,7 @@
                 <td>{% if v.is_formatted %}✅{% else %}❌{% endif %}</td>
                 <td>{{ v.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
                 <td class="text-center">{{ v.song.metadata.year|default_if_none:"" }}</td>
+                {% include "songbook/_song_rating_cell.html" with row=v %}
                 <td>
                     {% for tag in v.song.tags.all %}
                         <small>{{ tag }}</small>{% if not forloop.last %}, {% endif %}
@@ -169,7 +183,7 @@
             </tr>
             {% endfor %}
             {% empty %}
-            <tr><td colspan="8" class="text-center">No songs found matching your search.</td></tr>
+            <tr><td colspan="9" class="text-center">No songs found matching your search.</td></tr>
             {% endfor %}
         </tbody>
     </table>

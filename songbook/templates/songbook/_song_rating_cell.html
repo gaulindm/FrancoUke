@@ -1,0 +1,12 @@
+{# ⭐ One table cell showing a song's average rating. Use:  {% include "songbook/_song_rating_cell.html" with row=item %} #}
+<td class="text-center text-nowrap">
+    {% if row.rating_count %}
+        <span title="{% if site_name == 'FrancoUke' %}Jouabilité{% else %}Playability{% endif %} {{ row.avg_play|floatformat:1|default:'–' }} · {% if site_name == 'FrancoUke' %}Chantabilité{% else %}Singability{% endif %} {{ row.avg_sing|floatformat:1|default:'–' }}">
+            <i class="bi {{ row.rating_face }}"></i>
+            {{ row.avg_rating|floatformat:1 }}
+            <small class="text-muted">({{ row.rating_count }})</small>
+        </span>
+    {% else %}
+        <span class="text-muted">–</span>
+    {% endif %}
+</td>

@@ -20,6 +20,7 @@ from songbook.models import Song, SongFormatting
 from songbook.utils.transposer import extract_chords
 from taggit.models import Tag
 from users.models import UserPreference
+from ratings.utils import face_icon, rating_summaries  # ⭐ song ratings (optional 'ratings' app)
 
 User = get_user_model()
 
@@ -575,7 +576,42 @@ class SongListView(SiteContextMixin, ListView):
                 "other_versions": other_versions,
                 "version_count": len(songs_in_family),
             })
-        family_list.sort(key=lambda f: (f["primary"].songTitle or "").strip().lower())
+        def title_key(f):
+            return (f["primary"].songTitle or "").strip().lower()
+
+        # ⭐ Optional sort: ?sort=rating puts the best-rated songs first.
+        # Unrated songs go last; ties are broken by number of votes, then title.
+        # Only here do we need ratings for EVERY song (one grouped query);
+        # otherwise just the current page's songs are looked up further down.
+        sort = "rating" if self.filter_params.get("sort") == "rating" else ""
+        all_summaries = None
+        if sort == "rating":
+            all_summaries = rating_summaries()
+
+            def rating_key(f):
+                summary = all_summaries.get(f["primary"].id)
+                avg = summary["avg"] if summary else None
+                votes = summary["n"] if summary else 0
+                return (avg is None, -(avg or 0), -votes, title_key(f))
+
+            family_list.sort(key=rating_key)
+        else:
+            family_list.sort(key=title_key)
+
+        # ⭐ Links for the sortable "Rating" column header (keep every other filter)
+        def sort_url(value):
+            params = self.filter_params.copy()
+            if "page" in params:
+                del params["page"]
+            if value:
+                params["sort"] = value
+            elif "sort" in params:
+                del params["sort"]
+            return "?" + params.urlencode()
+
+        context["sort"] = sort
+        context["sort_by_rating_url"] = sort_url("rating")
+        context["sort_by_title_url"] = sort_url("")
 
         # 🆕 "Learn one more chord" suggestions (almost mode only): for each
         # missing chord, how many song FAMILIES it would unlock. Counted per
@@ -625,6 +661,11 @@ class SongListView(SiteContextMixin, ListView):
             ).values_list("song_id", flat=True)
         )
 
+        # ⭐ Ratings for the songs on this page: one query (already have them if sorting)
+        summaries = all_summaries if all_summaries is not None else rating_summaries(
+            [s.id for s in page_songs]
+        )
+
         def build_row_data(song):
             parsed_data = song.lyrics_with_chords or ""
             chords = extract_chords(parsed_data, unique=True) if parsed_data else []
@@ -638,6 +679,12 @@ class SongListView(SiteContextMixin, ListView):
                 "missing_chords": ", ".join(self.almost_missing.get(song.id, [])),
                 "tags": ", ".join(tags),
                 "is_formatted": is_formatted,
+                # ⭐ ratings (average, number of votes, nearest face icon)
+                "avg_rating": (summaries.get(song.id) or {}).get("avg"),
+                "rating_count": (summaries.get(song.id) or {}).get("n", 0),
+                "rating_face": face_icon((summaries.get(song.id) or {}).get("avg")),
+                "avg_play": (summaries.get(song.id) or {}).get("avg_play"),
+                "avg_sing": (summaries.get(song.id) or {}).get("avg_sing"),
             }
 
         # Song data — only for this page's families. Each entry carries its

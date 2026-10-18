@@ -10,7 +10,7 @@ from core.views import landing_page
 urlpatterns = [
     path("admin/assets/", include("assets.urls")),
     path("admin/", admin.site.urls),
-
+    path("ratings/", include("ratings.urls")),
     path("users/", include("users.urls")),
 
     path('', landing_page, name='landing'),

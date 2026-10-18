@@ -2,7 +2,7 @@
 {% load static %}
 
 {# songbook/song_list_simple.html: the SIMPLE song list. Formatted songs only. #}
-{# Columns: Title (opens the PDF view) | Teleprompter | Video | Artist (year) | Chords played #}
+{# Columns: Title (opens the PDF view) | Teleprompter | Video | Artist (year) | Rating | Chords played #}
 {# The filter bar, chord modal, switch button, "learn one more chord" box, pagination and video modal are shared includes. #}
 
 {% block content %}
@@ -30,12 +30,22 @@
                     <th class="text-center">Téléprompteur</th>
                     <th class="text-center">Vidéo</th>
                     <th>Interprète (année)</th>
+                    {# ⭐ sortable rating column #}
+                    <th class="text-center text-nowrap">
+                        {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Retour à l'ordre alphabétique">Évaluation ▼</a>
+                        {% else %}<a href="{{ sort_by_rating_url }}" title="Les mieux notées d'abord">Évaluation</a>{% endif %}
+                    </th>
                     <th class="text-center">Accords jouées</th>
                 {% else %}
                     <th>Songs</th>
                     <th class="text-center">Teleprompter</th>
                     <th class="text-center">Video</th>
                     <th>Artist (year)</th>
+                    {# ⭐ sortable rating column #}
+                    <th class="text-center text-nowrap">
+                        {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Back to A-Z">Rating ▼</a>
+                        {% else %}<a href="{{ sort_by_rating_url }}" title="Best rated first">Rating</a>{% endif %}
+                    </th>
                     <th class="text-center">Chords played</th>
                 {% endif %}
             </tr>
@@ -88,6 +98,7 @@
                 <td>
                     {{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if item.song.metadata.year %} ({{ item.song.metadata.year }}){% endif %}
                 </td>
+                {% include "songbook/_song_rating_cell.html" with row=item %}
                 <td class="text-center">
                     {% if item.chords|length > 55 %}
                         {{ item.chords|slice:":55" }}...
@@ -100,7 +111,7 @@
                 </td>
             </tr>
 
-            {# One full row per alternate version, same 5 columns #}
+            {# One full row per alternate version, same 6 columns #}
             {% for v in item.other_versions %}
             <tr class="collapse version-group-{{ item.song.id }} bg-light">
                 <td>
@@ -129,6 +140,7 @@
                 <td>
                     {{ v.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if v.song.metadata.year %} ({{ v.song.metadata.year }}){% endif %}
                 </td>
+                {% include "songbook/_song_rating_cell.html" with row=v %}
                 <td class="text-center">
                     {% if v.chords|length > 55 %}{{ v.chords|slice:":55" }}...{% else %}{{ v.chords }}{% endif %}
                     {% if v.missing_chords %}
@@ -139,7 +151,7 @@
             {% endfor %}
             {% empty %}
             <tr>
-                <td colspan="5" class="text-center">
+                <td colspan="6" class="text-center">
                     {% if site_name == 'FrancoUke' %}Aucune chanson formatée ne correspond à votre recherche.{% else %}No formatted songs found matching your search.{% endif %}
                 </td>
             </tr>
