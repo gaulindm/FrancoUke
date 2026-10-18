@@ -20,7 +20,7 @@ from songbook.models import Song, SongFormatting
 from songbook.utils.transposer import extract_chords
 from taggit.models import Tag
 from users.models import UserPreference
-from ratings.utils import face_icon, rating_summaries  # ⭐ song ratings (optional 'ratings' app)
+from ratings.utils import face_icon, rating_mine, rating_summaries  # ⭐ song ratings (optional 'ratings' app)
 
 User = get_user_model()
 
@@ -662,9 +662,9 @@ class SongListView(SiteContextMixin, ListView):
         )
 
         # ⭐ Ratings for the songs on this page: one query (already have them if sorting)
-        summaries = all_summaries if all_summaries is not None else rating_summaries(
-            [s.id for s in page_songs]
-        )
+        page_ids = [s.id for s in page_songs]
+        summaries = all_summaries if all_summaries is not None else rating_summaries(page_ids)
+        mine = rating_mine(page_ids, self.request.user)  # the logged-in user's own ratings
 
         def build_row_data(song):
             parsed_data = song.lyrics_with_chords or ""
@@ -685,6 +685,7 @@ class SongListView(SiteContextMixin, ListView):
                 "rating_face": face_icon((summaries.get(song.id) or {}).get("avg")),
                 "avg_play": (summaries.get(song.id) or {}).get("avg_play"),
                 "avg_sing": (summaries.get(song.id) or {}).get("avg_sing"),
+                "my_rating": mine.get(song.id),
             }
 
         # Song data — only for this page's families. Each entry carries its

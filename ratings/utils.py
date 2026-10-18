@@ -45,10 +45,13 @@ def rating_summaries(song_ids=None):
     }
 
 
+def rating_mine(song_ids, user):
+    """{song_id: this user's own SongRating} (empty for visitors who are not logged in)."""
+    if not user.is_authenticated:
+        return {}
+    return {r.song_id: r for r in SongRating.objects.filter(user=user, song_id__in=song_ids)}
+
+
 def rating_data(song_ids, user):
-    """For the setlist page: (everyone's summaries, {song_id: this user's own SongRating})."""
-    summaries = rating_summaries(song_ids)
-    mine = {}
-    if user.is_authenticated:
-        mine = {r.song_id: r for r in SongRating.objects.filter(user=user, song_id__in=song_ids)}
-    return summaries, mine
+    """For the setlist page: (everyone's summaries, the user's own ratings)."""
+    return rating_summaries(song_ids), rating_mine(song_ids, user)

@@ -2,7 +2,6 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-from core.group_access import group_member_required
 from songbook.models import Song
 
 from .models import SongRating
@@ -19,10 +18,24 @@ def _score(value):
     return number
 
 
-@group_member_required
+def _display_name(user):
+    """What other members see next to a comment: first name, else the username
+    (and never an email address, in case people register with one)."""
+    name = user.first_name.strip() or user.get_username()
+    return name.split("@")[0]
+
+
+def _login_needed():
+    # A clean 401 for the page's JavaScript (a redirect to the login page would
+    # just come back as HTML that the script can't read).
+    return JsonResponse({"error": "login required"}, status=401)
+
+
 @require_POST
-def rate_song(request, group_slug, song_id):
-    """Save (or clear) the logged-in member's rating and comment for one song."""
+def rate_song(request, song_id):
+    """Save (or clear) the logged-in user's rating and comment for one song."""
+    if not request.user.is_authenticated:
+        return _login_needed()
     song = get_object_or_404(Song, pk=song_id)
     try:
         stars = _score(request.POST.get("stars"))
@@ -49,9 +62,10 @@ def rate_song(request, group_slug, song_id):
     return JsonResponse({"ok": True})
 
 
-@group_member_required
-def song_comments(request, group_slug, song_id):
-    """The latest comments on one song, as JSON for the rating modal."""
+def song_comments(request, song_id):
+    """The latest comments on one song, as JSON for the rating pop-up (logged-in users only)."""
+    if not request.user.is_authenticated:
+        return _login_needed()
     rows = (
         SongRating.objects.filter(song_id=song_id)
         .exclude(comment="")
@@ -61,7 +75,7 @@ def song_comments(request, group_slug, song_id):
     return JsonResponse({
         "comments": [
             {
-                "who": r.user.get_full_name() or r.user.get_username(),
+                "who": _display_name(r.user),
                 "stars": r.stars,
                 "comment": r.comment,
                 "when": r.updated.strftime("%b %d, %Y"),

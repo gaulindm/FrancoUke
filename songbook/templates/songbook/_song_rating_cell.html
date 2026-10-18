@@ -1,6 +1,26 @@
 {# ⭐ One table cell showing a song's average rating. Use:  {% include "songbook/_song_rating_cell.html" with row=item %} #}
+{# Logged-in users get a button that opens the rating pop-up; visitors just see the average. #}
 <td class="text-center text-nowrap">
-    {% if row.rating_count %}
+    {% if user.is_authenticated %}
+        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none text-reset"
+                data-bs-toggle="modal" data-bs-target="#rateModal"
+                data-song-id="{{ row.song.id }}"
+                data-song-title="{{ row.song.songTitle }}"
+                data-stars="{{ row.my_rating.stars|default:'' }}"
+                data-playability="{{ row.my_rating.playability|default:'' }}"
+                data-singability="{{ row.my_rating.singability|default:'' }}"
+                data-comment="{{ row.my_rating.comment|default:'' }}"
+                title="{% if site_name == 'FrancoUke' %}Évaluer cette chanson{% else %}Rate this song{% endif %}{% if row.rating_count %} · {% if site_name == 'FrancoUke' %}Jouabilité{% else %}Playability{% endif %} {{ row.avg_play|floatformat:1|default:'–' }} · {% if site_name == 'FrancoUke' %}Chantabilité{% else %}Singability{% endif %} {{ row.avg_sing|floatformat:1|default:'–' }}{% endif %}">
+            {% if row.rating_count %}
+                <i class="bi {{ row.rating_face }}"></i>
+                {{ row.avg_rating|floatformat:1 }}
+                <small class="text-muted">({{ row.rating_count }})</small>
+            {% else %}
+                <i class="bi bi-emoji-smile text-muted"></i>
+                <small class="text-muted">{% if site_name == 'FrancoUke' %}Évaluer{% else %}Rate{% endif %}</small>
+            {% endif %}
+        </button>
+    {% elif row.rating_count %}
         <span title="{% if site_name == 'FrancoUke' %}Jouabilité{% else %}Playability{% endif %} {{ row.avg_play|floatformat:1|default:'–' }} · {% if site_name == 'FrancoUke' %}Chantabilité{% else %}Singability{% endif %} {{ row.avg_sing|floatformat:1|default:'–' }}">
             <i class="bi {{ row.rating_face }}"></i>
             {{ row.avg_rating|floatformat:1 }}
