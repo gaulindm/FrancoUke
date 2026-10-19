@@ -649,7 +649,6 @@
       let startY = 0;
       let startX = 0;
       let tapTimer = null;
-      const SWIPE_THRESHOLD = 50;  // px minimum swipe distance
       const TAP_MAX_MOVE = 10;     // px: less movement than this counts as a tap
       const TAP_ZONE_RATIO = 0.3;  // left/right 30% = prev/next song (setlist page only)
       const DOUBLE_TAP_MS = 300;   // 🔧 TUNE: how long to wait for a possible second tap
@@ -685,18 +684,9 @@
         const absY = Math.abs(diffY);
         const absX = Math.abs(diffX);
 
-        // --- Swipe Up/Down to Adjust Speed ---
-        if (absY > SWIPE_THRESHOLD && absY > absX) {
-          if (diffY < 0) {
-            scrollSpeed = Math.min(1000, scrollSpeed + 1);   // Swipe Up → faster
-          } else {
-            scrollSpeed = Math.max(1, scrollSpeed - 1);      // Swipe Down → slower
-          }
-          updateSpeedDisplay();
-          return;
-        }
-
-        // Moved too far to be a tap (small drag or sideways swipe): nothing to do.
+        // Swiping up/down no longer changes the speed (use the − and + buttons);
+        // the page just scrolls. Anything that moved too far to be a tap
+        // (a drag or a swipe in any direction): nothing to do.
         if (absX >= TAP_MAX_MOVE || absY >= TAP_MAX_MOVE) return;
 
         // --- Tap. A second tap soon after = double tap (toggle chord diagrams). ---

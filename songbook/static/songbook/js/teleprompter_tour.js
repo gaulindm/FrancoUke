@@ -157,7 +157,7 @@
             "On a phone or tablet, use the lyrics area:" +
             "<ul style='padding-left:1.2em;margin:.5em 0 0'>" +
             "<li><b>Tap</b> the middle: start or pause the scroll</li>" +
-            "<li><b>Swipe up or down</b>: scroll faster or slower</li>" +
+            "<li><b>Swipe up or down</b>: scroll the lyrics by hand (change the auto-scroll speed with the − and + buttons)</li>" +
             "<li><b>Drag</b> the lyrics: pauses the scroll so you can look around</li>" +
             "</ul>" +
             "<div style='margin-top:.5em'>With a mouse, clicking or using the wheel on the lyrics pauses the scroll.</div>",
