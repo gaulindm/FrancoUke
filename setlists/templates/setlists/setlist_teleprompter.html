@@ -7,7 +7,8 @@
         .nav-btn {
       background: transparent;
       border: none;
-      font-size: 1.8rem;
+      font-size: 1.3rem;      /* 🔧 TUNE: was 1.8rem, too wide for one row */
+      padding: 2px 6px;
       cursor: pointer;
       color: var(--fg);
     }
@@ -68,8 +69,12 @@ body.chords-right .lyrics-container {
   {% include "songbook/teleprompter/_exit_link.html" with exit_url=exit_url exit_label="Setlist" exit_title="Back to setlist" %}
 {% endblock %}
 
-{% block controls_left %}
-  <span class="song-title">Setlist {{ setlist.id }} – {{ setlist.name }}</span>
+{# Top row: nothing here, so the title doesn't take space next to the Exit button #}
+{% block controls_left %}{% endblock %}
+
+{# Setlist name and Hide Chords live in the second row (⋯) to keep the top row short #}
+{% block controls_more_extra %}
+  <span class="song-title"><span class="sl-num">Setlist {{ setlist.id }} – </span>{{ setlist.name }}</span>
   <button id="toggle-chords">Hide Chords</button>
 {% endblock %}
 

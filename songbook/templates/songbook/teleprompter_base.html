@@ -1,7 +1,7 @@
 {% load static song_header %}<!DOCTYPE html>
 <!--Shared teleprompter page. Song page and setlist page both extend this.
    Child templates fill in: title, controls_left, controls_right_extra,
-   extra_styles, lyrics_header, after_main, extra_scripts. #}-->
+   extra_styles, lyrics_header, after_main, extra_scripts, controls_more_extra. #}-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -34,12 +34,6 @@
         <span id="speed-value">3</span>
         <button id="speed-up">+</button>
       </div>
-      <div class="control-inline" id="transpose-control">
-        <span>Transpose</span>
-        <button id="transpose-down">−</button>
-        <span id="transpose-value">0</span>
-        <button id="transpose-up">+</button>
-      </div>
     </div>
     <div class="right">
       <div class="control-inline" id="fontsize-control">
@@ -47,6 +41,24 @@
         <button id="fontsize-down" title="Smaller text">A−</button>
         <span id="fontsize-value">100%</span>
         <button id="fontsize-up" title="Larger text">A+</button>
+      </div>
+      <div class="layout-toggle" id="tour-chord-style" role="group" aria-label="Chord style">
+        <button type="button" id="chord-style-above" aria-pressed="true">Above</button>
+        <button type="button" id="chord-style-inline" aria-pressed="false">Inline</button>
+      </div>
+      <button id="scroll-reset">⏹ Reset</button>
+      {% block controls_right_extra %}{% endblock %}
+      <button type="button" id="tp-more-toggle" title="More controls: transpose, chord color, theme"
+              aria-expanded="false" aria-controls="controls-more">⋯</button>
+    </div>
+
+    <!-- Second row: things that rarely change during a set. Shown/hidden by the ⋯ button. -->
+    <div class="controls-more" id="controls-more" hidden>
+      <div class="control-inline" id="transpose-control">
+        <span>Transpose</span>
+        <button id="transpose-down">−</button>
+        <span id="transpose-value">0</span>
+        <button id="transpose-up">+</button>
       </div>
       <div class="control-inline" id="chordcolor-control">
         <label for="chord-color-picker">Chord color</label>
@@ -56,22 +68,7 @@
         <button type="button" id="theme-light" aria-pressed="true">☀️ Light</button>
         <button type="button" id="theme-dark" aria-pressed="false">🌙 Dark</button>
       </div>
-      <div class="layout-toggle" id="tour-chord-style" role="group" aria-label="Chord style">
-        <button type="button" id="chord-style-above" aria-pressed="true">Above</button>
-        <button type="button" id="chord-style-inline" aria-pressed="false">Inline</button>
-      </div>
-      <div class="layout-toggle" id="tour-diagram-position" role="group" aria-label="Chord diagram position">
-        <button type="button" id="chord-layout-bottom" aria-pressed="true">Bottom</button>
-        <button type="button" id="chord-layout-right" aria-pressed="false">Right</button>
-      </div>
-      <div class="layout-toggle" role="group" aria-label="Chord diagram size" id="diagram-size-control">
-        <button type="button" data-diagram-scale="0.6"  aria-pressed="false" title="Small diagrams (songs with many chords)">S</button>
-        <button type="button" data-diagram-scale="0.85" aria-pressed="true"  title="Medium diagrams">M</button>
-        <button type="button" data-diagram-scale="1.15" aria-pressed="false" title="Large diagrams">L</button>
-        <button type="button" data-diagram-scale="1.5"  aria-pressed="false" title="Extra large (learn-to-play groups)">XL</button>
-      </div>
-      <button id="scroll-reset">⏹ Reset</button>
-      {% block controls_right_extra %}{% endblock %}
+      {% block controls_more_extra %}{% endblock %}
     </div>
   </div>
 
@@ -91,6 +88,20 @@
 
   <!-- Chord Section (diagrams at the bottom or right, toggled by the layout buttons) -->
   <div id="chord-section">
+    <!-- Diagram position + size live here, next to the diagrams they control
+         (kept OUTSIDE #chord-diagrams so redrawing the diagrams doesn't wipe them) -->
+    <div class="diagram-tools" id="diagram-tools">
+      <div class="layout-toggle" id="tour-diagram-position" role="group" aria-label="Chord diagram position">
+        <button type="button" id="chord-layout-bottom" aria-pressed="true">Bottom</button>
+        <button type="button" id="chord-layout-right" aria-pressed="false">Right</button>
+      </div>
+      <div class="layout-toggle" role="group" aria-label="Chord diagram size" id="diagram-size-control">
+        <button type="button" data-diagram-scale="0.6"  aria-pressed="false" title="Small diagrams (songs with many chords)">S</button>
+        <button type="button" data-diagram-scale="0.85" aria-pressed="true"  title="Medium diagrams">M</button>
+        <button type="button" data-diagram-scale="1.15" aria-pressed="false" title="Large diagrams">L</button>
+        <button type="button" data-diagram-scale="1.5"  aria-pressed="false" title="Extra large (learn-to-play groups)">XL</button>
+      </div>
+    </div>
     <div id="chord-diagrams"></div>
   </div>
 
@@ -102,6 +113,37 @@
   <!-- Guided tour (Driver.js) -->
   <script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
   <script src="{% static 'songbook/js/teleprompter_tour.js' %}"></script>
+  <script>
+  /* ⋯ button shows/hides the second controls row; remembers the last state */
+  (function () {
+    var KEY = 'tpMoreControlsOpen';
+    var bar = document.getElementById('controls-more');
+    var btn = document.getElementById('tp-more-toggle');
+    if (!bar || !btn) return;
+
+    function setOpen(open, save) {
+      bar.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (save !== false) { try { localStorage.setItem(KEY, open ? '1' : '0'); } catch (e) {} }
+    }
+    btn.addEventListener('click', function () { setOpen(bar.hidden); });
+
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    setOpen(saved === '1', false);
+
+    // Lets the guided tour open the bar before pointing at things inside it
+    window.tpShowMoreControls = function (open) { setOpen(open, false); };
+
+    // Keeps --controls-height current, in case the lyrics offset needs it
+    var controls = document.querySelector('.controls');
+    if (controls && window.ResizeObserver) {
+      new ResizeObserver(function () {
+        document.documentElement.style.setProperty('--controls-height', controls.offsetHeight + 'px');
+      }).observe(controls);
+    }
+  })();
+  </script>
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

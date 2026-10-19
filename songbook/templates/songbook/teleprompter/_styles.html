@@ -252,4 +252,62 @@
     font-weight: 600;
     white-space: nowrap;
   }
+  /* ===== Second controls row (⋯ button toggles it) ===== */
+  .controls { flex-wrap: wrap; }              /* lets the second row drop below */
+  .controls .controls-more {
+    flex: 1 0 100%;                           /* full-width row under the main bar */
+    order: 99;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 24px;                            /* 🔧 TUNE: row gap / column gap */
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--controls-border);
+  }
+  .controls .controls-more[hidden] { display: none; }   /* display:flex would otherwise override [hidden] */
+  #tp-more-toggle { font-weight: 700; letter-spacing: 0.1em; }
+  #tp-more-toggle[aria-expanded="true"] { outline: 2px solid var(--accent); }
+  /* ===== Diagram position + size controls, inside the diagram panel ===== */
+  #chord-section .diagram-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px 12px;
+    padding: 2px 6px;
+    font-size: 0.8rem;                        /* 🔧 TUNE: size of the little buttons */
+  }
+  #chord-section .layout-toggle { display: inline-flex; }
+  #chord-section .layout-toggle button {
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid var(--controls-border);
+    padding: 2px 8px;
+    font-size: inherit;
+    cursor: pointer;
+  }
+  #chord-section .layout-toggle button[aria-pressed="true"] {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+  }
+  /* ===== Keep the top row on one line (iPad etc.) ===== */
+  .controls .left { min-width: 0; }
+  .controls .song-title {
+    display: inline-block;
+    max-width: 28vw;                          /* 🔧 TUNE: how much room the title gets */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  @media (max-width: 1100px) {                /* 🔧 TUNE: below this width, drop the extras */
+    .sl-num { display: none; }                /* "Setlist 12 – " prefix on the setlist page */
+    #fontsize-control > span:first-child { display: none; }   /* the word "Size" */
+  }
+  /* In the second row there is room: show the full setlist name and number */
+  .controls .controls-more .song-title { max-width: none; }
+  .controls .controls-more .sl-num { display: inline; }
 </style>
