@@ -5,7 +5,9 @@
 
 <link rel="stylesheet" href="{% static 'songbook/song_list.css' %}">
 
-{% include "songbook/_song_filter_bar.html" %}
+<div id="tour-filters">
+    {% include "songbook/_song_filter_bar.html" %}
+</div>
 
 <!-- 🎤 Artist Filtered Title -->
 {% if selected_artist %}
@@ -16,7 +18,14 @@
 {% else %}
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
         <h2 class="mb-0">{% if site_name == 'FrancoUke' %}Toutes les partitions{% else %}All Songs{% endif %}</h2>
-        {% include "songbook/_view_switch.html" %}
+    <div class="d-flex align-items-center gap-2">
+        <div id="tour-switch-view">
+            {% include "songbook/_view_switch.html" %}
+        </div>
+        <button type="button" id="start-tour" data-tour="extended" class="btn btn-sm btn-outline-secondary">
+            {% if site_name == 'FrancoUke' %}? Visite guidée{% else %}? Take the tour{% endif %}
+        </button>
+    </div>
     </div>
 {% endif %}
 
@@ -33,7 +42,7 @@
         <thead>
             <tr>
                 {% if site_name == 'FrancoUke' %}
-                    <th>Partitions</th><th>Status</th><th>Interprètes</th><th>Année</th>
+                    <th>Partitions</th><th id="tour-status-col">Status</th><th>Interprètes</th><th>Année</th>
                     {# ⭐ sortable rating column #}
                     <th class="text-center text-nowrap">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Retour à l'ordre alphabétique">Évaluation ▼</a>
@@ -44,7 +53,7 @@
                     <th class="text-center">PDF</th>
                     <th class="text-center">Téléprompteur</th>
                 {% else %}
-                    <th>Songs</th><th>Status</th><th>Artists</th><th>Year</th>
+                    <th>Songs</th><th id="tour-status-col">Status</th><th>Artists</th><th>Year</th>
                     {# ⭐ sortable rating column #}
                     <th class="text-center text-nowrap">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Back to A-Z">Rating ▼</a>
@@ -61,7 +70,8 @@
             {% for item in song_data %}
             <tr>
                 <td>
-                    <a href="{% url site_namespace|add:':chord_sheet' item.song.id %}" 
+                    <a {% if forloop.first %}id="tour-first-title"{% endif %}
+                       href="{% url site_namespace|add:':chord_sheet' item.song.id %}" 
                        class="song-link"
                        title="{{ item.song.songTitle }}"
                        aria-label="Chord sheet for {{ item.song.songTitle }}">
@@ -253,5 +263,10 @@
 
 {# ⭐ shared rating pop-up #}
 {% include "ratings/_rating_modal.html" %}
+
+{# 🧭 Guided tour (Driver.js) #}
+<link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
+<script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
+<script src="{% static 'songbook/js/song_list_tour.js' %}"></script>
 
 {% endblock content %}

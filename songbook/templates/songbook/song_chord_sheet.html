@@ -22,9 +22,10 @@
 <div class="col-md-4 col-12 p-3 bg-white border-start">
 
     {# Jump to the teleprompter view of this same song #}
-    <div class="mb-3">
-        <a href="{% url 'teleprompter:teleprompter' song_id=chord_sheet.id %}"
-           class="btn btn-primary w-100">
+    <div class="mb-3 d-flex gap-2">
+        <a id="tour-chord-teleprompter"
+           href="{% url 'teleprompter:teleprompter' song_id=chord_sheet.id %}"
+           class="btn btn-primary flex-grow-1">
             <i class="bi bi-display me-2"></i>
             {% if site_name == "FrancoUke" %}
                 Ouvrir dans le téléprompteur
@@ -32,6 +33,12 @@
                 Open in Teleprompter
             {% endif %}
         </a>
+
+        {# 🧭 Starts the guided tour #}
+        <button type="button" id="start-tour" data-tour="chordsheet"
+                class="btn btn-outline-secondary text-nowrap">
+            {% if site_name == "FrancoUke" %}? Visite guidée{% else %}? Take the tour{% endif %}
+        </button>
     </div>
 
     {% include "partials/_control_panel.html" %}
@@ -59,4 +66,9 @@
             document.title = songTitle;
         }
     </script>
+
+    {# 🧭 Guided tour (Driver.js) #}
+    <link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
+    <script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
+    <script src="{% static 'songbook/js/chord_sheet_tour.js' %}"></script>
 {% endblock %}

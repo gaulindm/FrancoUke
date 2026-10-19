@@ -1,12 +1,20 @@
 {% extends base_template %}
+{% load static %}
 {% block content %}
 
 <div class="container">
     <div class="row">
         <!-- Left Section (Form) - 8 columns -->
         <div class="col-md-8">
-            <h2>{% if site_name == "FrancoUke" %} Modifier le formatage {% else %} Edit Song Formatting {% endif %}</h2>
-            <form method="POST" class="formatting-form" action="?site={{ site_name }}">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <h2 class="mb-0">{% if site_name == "FrancoUke" %} Modifier le formatage {% else %} Edit Song Formatting {% endif %}</h2>
+                {# 🧭 Starts the guided tour #}
+                <button type="button" id="start-tour" data-tour="formatting"
+                        class="btn btn-sm btn-outline-secondary mt-0 text-nowrap">
+                    {% if site_name == "FrancoUke" %}? Visite guidée{% else %}? Take the tour{% endif %}
+                </button>
+            </div>
+            <form id="tour-formatting-form" method="POST" class="formatting-form" action="?site={{ site_name }}">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group">
@@ -17,7 +25,7 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-                <button type="submit">
+                <button type="submit" id="tour-save">
                     {% if site_name == "FrancoUke" %} Enregistrer les modifications {% else %} Save Changes {% endif %}
                 </button>
             </form>
@@ -25,7 +33,7 @@
 
         <!-- Right Section (Guide) - 4 columns -->
         <div class="col-md-4">
-            <div class="card">
+            <div id="tour-guide" class="card">
                 <div class="card-header">
                     <h4>{% if site_name == "FrancoUke" %} Guide de formatage {% else %} Formatting Guide {% endif %}</h4>
                 </div>
@@ -33,7 +41,7 @@
                     {% if site_name == "FrancoUke" %}
                         <p>Vous n'avez besoin d'inclure que les valeurs que vous souhaitez modifier.</p>
                         <p>Les valeurs absentes utiliseront les paramètres par défaut ci-dessous.</p>
-                        <ul>
+                        <ul id="tour-settings-list">
                             <li><strong>font_size</strong> : Taille du texte (Défaut : <code>13</code>).</li>
                             <li><strong>text_color</strong> : Couleur du texte (Défaut : <code>"#000000"</code>).</li>
                             <li><strong>alignment</strong> : <code>"left"</code>, <code>"center"</code>, <code>"right"</code> (Défaut : <code>"left"</code>).</li>
@@ -42,18 +50,18 @@
                             <li><strong>spaceAfter</strong> : Espace après une section (Défaut : <code>12</code>).</li>
                         </ul>
                         <p>✅ Exemple : Si vous souhaitez seulement modifier la taille du texte, entrez :</p>
-                        <pre>
+                        <pre id="tour-example">
 {
     "font_size": 16
 }
                         </pre>
                         <p>⚠️ Toutes les autres valeurs resteront par défaut.</p>
-                        <p><strong>⚠️ Important :</strong> Ne supprimez pas entièrement les <code>{}</code> !</p>
+                        <p id="tour-braces"><strong>⚠️ Important :</strong> Ne supprimez pas entièrement les <code>{}</code> !</p>
                         <p>Si vous ne souhaitez pas apporter de modifications, laissez le champ vide ou conservez <code>{}</code>.</p>
                     {% else %}
                         <p>You only need to include values you want to change.</p>
                         <p>Any missing values will use the defaults below.</p>
-                        <ul>
+                        <ul id="tour-settings-list">
                             <li><strong>font_size</strong>: Adjusts text size (Default: <code>13</code>).</li>
                             <li><strong>text_color</strong>: Changes text color (Default: <code>"#000000"</code>).</li>
                             <li><strong>alignment</strong>: Can be <code>"left"</code>, <code>"center"</code>, or <code>"right"</code> (Default: <code>"left"</code>).</li>
@@ -62,13 +70,13 @@
                             <li><strong>spaceAfter</strong>: Space after a section (Default: <code>12</code>).</li>
                         </ul>
                         <p>✅ Example: If you only want to change the font size, enter:</p>
-                        <pre>
+                        <pre id="tour-example">
 {
     "font_size": 16
 }
                         </pre>
                         <p>⚠️ All other values will remain at their defaults.</p>
-                        <p><strong>⚠️ Important:</strong> Do <u>not</u> delete the <code>{}</code> completely!</p>
+                        <p id="tour-braces"><strong>⚠️ Important:</strong> Do <u>not</u> delete the <code>{}</code> completely!</p>
                         <p>If you don’t need any changes, leave the field <code>{}</code> or empty—it will be automatically handled.</p>
                     {% endif %}
                 </div>
@@ -132,5 +140,11 @@
         background-color: #0056b3;
     }
 </style>
+
+
+{# 🧭 Guided tour (Driver.js) #}
+<link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
+<script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
+<script src="{% static 'songbook/js/formatting_tour.js' %}"></script>
 
 {% endblock %}

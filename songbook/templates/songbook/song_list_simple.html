@@ -10,12 +10,21 @@
 <link rel="stylesheet" href="{% static 'songbook/song_list.css' %}">
 
 <!-- 🔎 Search / Filters (shared) -->
-{% include "songbook/_song_filter_bar.html" %}
+<div id="tour-filters">
+    {% include "songbook/_song_filter_bar.html" %}
+</div>
 
 <!-- 🎤 Heading + Simple | Extended switch -->
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
     <h2 class="mb-0">{% if site_name == 'FrancoUke' %}Toutes les partitions{% else %}All Songs{% endif %}</h2>
-    {% include "songbook/_view_switch.html" %}
+    <div class="d-flex align-items-center gap-2">
+        <div id="tour-switch-view">
+            {% include "songbook/_view_switch.html" %}
+        </div>
+        <button type="button" id="start-tour" data-tour="simple" class="btn btn-sm btn-outline-secondary">
+            {% if site_name == 'FrancoUke' %}? Visite guidée{% else %}? Take the tour{% endif %}
+        </button>
+    </div>
 </div>
 
 {% include "songbook/_unlock_suggestions.html" %}
@@ -36,22 +45,22 @@
                     <th class="text-center">Vidéo</th>
                     <th>Interprète (année)</th>
                     {# ⭐ sortable rating column #}
-                    <th class="text-center text-nowrap">
+                    <th class="text-center text-nowrap" id="tour-rating-col">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Retour à l'ordre alphabétique">Évaluation ▼</a>
                         {% else %}<a href="{{ sort_by_rating_url }}" title="Les mieux notées d'abord">Évaluation</a>{% endif %}
                     </th>
-                    <th class="text-center">Accords jouées</th>
+                    <th class="text-center" id="tour-chords-col">Accords jouées</th>
                 {% else %}
                     <th>Songs</th>
                     <th class="text-center">Teleprompter</th>
                     <th class="text-center">Video</th>
                     <th>Artist (year)</th>
                     {# ⭐ sortable rating column #}
-                    <th class="text-center text-nowrap">
+                    <th class="text-center text-nowrap" id="tour-rating-col">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Back to A-Z">Rating ▼</a>
                         {% else %}<a href="{{ sort_by_rating_url }}" title="Best rated first">Rating</a>{% endif %}
                     </th>
-                    <th class="text-center">Chords played</th>
+                    <th class="text-center" id="tour-chords-col">Chords played</th>
                 {% endif %}
             </tr>
         </thead>
@@ -60,7 +69,8 @@
             <tr>
                 <td>
                     {# Title opens the PDF view #}
-                    <a href="{% url site_namespace|add:':generate_single_song_pdf' item.song.id %}"
+                    <a {% if forloop.first %}id="tour-first-title"{% endif %}
+                       href="{% url site_namespace|add:':generate_single_song_pdf' item.song.id %}"
                        class="song-link"
                        title="{{ item.song.songTitle }}">
                         {{ item.song.songTitle }}
@@ -90,14 +100,15 @@
                     {% endif %}
                 </td>
                 <td class="text-center">
-                    <a href="{% url teleprompter_url_name item.song.pk %}"
+                    <a {% if forloop.first %}id="tour-first-teleprompter"{% endif %}
+                       href="{% url teleprompter_url_name item.song.pk %}"
                        class="btn btn-sm btn-outline-primary"
                        target="_blank" rel="noopener"
                        title="{% if teleprompter_style == 'beginner' %}{% if site_name == 'FrancoUke' %}Téléprompteur (diagrammes){% else %}Teleprompter (diagrams){% endif %}{% else %}{% if site_name == 'FrancoUke' %}Téléprompteur (symboles d'accords){% else %}Teleprompter (chord symbols){% endif %}{% endif %}">
                         🎤
                     </a>
                 </td>
-                <td class="text-center">
+                <td class="text-center" {% if forloop.first %}id="tour-first-video"{% endif %}>
                     {% include "songbook/_video_button.html" with song=item.song %}
                 </td>
                 <td>
@@ -174,5 +185,10 @@
 
 {# ⭐ shared rating pop-up #}
 {% include "ratings/_rating_modal.html" %}
+
+{# 🧭 Guided tour (Driver.js) #}
+<link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
+<script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
+<script src="{% static 'songbook/js/song_list_tour.js' %}"></script>
 
 {% endblock content %}

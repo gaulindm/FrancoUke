@@ -1,9 +1,17 @@
 {% extends "groups/base.html" %}
+{% load static %}
 {% load board_extras %}
 
 {% block content %}
 <link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox-plus-jquery.min.js"></script>
+
+{# 🧭 Starts the guided tour #}
+<div class="d-flex justify-content-end mb-2">
+  <button type="button" id="start-tour" data-tour="board"
+          data-tour-role="{% if request.is_group_leader %}leader{% else %}member{% endif %}"
+          class="btn btn-sm btn-outline-secondary">? Take the tour</button>
+</div>
 
 <div class="board-row">
   {% include 'partials/_other_board_columns.html' %}
@@ -128,4 +136,10 @@
     
     
   
+
+{# 🧭 Guided tour (Driver.js) #}
+<link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
+<script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
+<script src="{% static 'songbook/js/board_tour.js' %}"></script>
+
 {% endblock %}

@@ -1,5 +1,6 @@
 {% extends base_template|default:"base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% block content %}
 <style>
     body {
@@ -18,12 +19,17 @@
                     <form method="POST" id="song-form">
                         {% csrf_token %}
                         <fieldset class="form-group">
-                            <legend class="border-bottom mb-4">
-                                {% if form.instance.pk %}
-                                    Edit Song
-                                {% else %}
-                                    New Song
-                                {% endif %}
+                            <legend class="border-bottom mb-4 d-flex justify-content-between align-items-center">
+                                <span>
+                                    {% if form.instance.pk %}
+                                        Edit Song
+                                    {% else %}
+                                        New Song
+                                    {% endif %}
+                                </span>
+                                {# 🧭 Starts the guided tour #}
+                                <button type="button" id="start-tour" data-tour="chordpro"
+                                        class="btn btn-sm btn-outline-secondary">? Take the tour</button>
                             </legend>
 
                             <!-- 🆕 Render fields in specific order, checking if they exist in the form -->
@@ -110,6 +116,9 @@
             </div>
          <!-- Right Column: Guide -->
         <div class="col-md-4">
+            {# 📖 ChordPro cheat sheet (collapsible, sits above the Guide) #}
+            {% include "songbook/_chordpro_cheatsheet.html" %}
+
             {% if site_name == "FrancoUke" %}
             {% verbatim %}
 
@@ -124,88 +133,7 @@
                     <li><strong>CTRL-Y</strong> - Redo</li>
                     <li><strong>CTRL-F</strong> - Find</li>
                 </ul>
-                <p>Voici les balises à utiliser pour identifier les chansons:</p>
-                
-                    <table class="table table-striped">
-                        <tr>
-                            <th>Champ</th>
-                            <th>Description</th>
-                        </tr>
-                        <tr>
-                            <td>{title:}</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>{artist:}</td>
-                            <td><i>Éviter l'usage du / pour séparer le noms des artistes</i></td>
-                        </tr>
-                        <tr>
-                            <td>{youtube:}</td>
-                            <td><i>url du clip youtube</i></td>
-                        </tr>
-                        <tr>
-                            <td>{songwriter:}</td>
-                            <td>Éviter l'usage du / pour séparer le noms des artistes</td>
-                        </tr>
-                        <tr>
-                            <td>{capo:}</td>
-                            <td><i>Correspond</i> ou <i>Position du Capo pour Correspond</i></td>
-                        </tr>
-                        <tr>
-                            <td>{year:}</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>{1stnote:}</td>
-                            <td><i>Optionnel - Permet de commencer en groupe sur la bonne note</i></td>
-                        </tr>
-                        <tr>
-                            <td>{timeSignature:}</td>
-                            <td><i>Optionnel</i></td>
-                        </tr>
-                        <tr>
-                            <td>{count_in:}</td>
-                            <td><i>Optionnel</i></td>
-                        </tr>
-                    </table>
-                    
-                            <!-- Copy button -->
-                    <button onclick="copyMetaTags()">📋 Copier les balises</button>
-
-                    <script>
-                    function copyMetaTags() {
-                        // Define the tags as a clean list without extra spaces
-                        let metaTags = [
-                            "{title:}",
-                            "{artist:}",
-                            "{youtube:}",
-                            "{songwriter:}",
-                            "{capo:}",
-                            "{year:}",
-                            "{1stnote:}",
-                            "{timeSignature:}"
-                        ].join("\n"); // Ensures proper newlines without spaces
-
-                        // Copy to clipboard
-                        navigator.clipboard.writeText(metaTags);
-                    }
-                    </script>
-  
-                    
-                    
-                
-                <p>Vous pouvez séparer votre contribution en section.  Les sections seront placées dans un tableau avec bordure invisible.  Il est possible de choisir l'alignement des paroles dans le codage.  <strong>Ne struturez pas les couplets!</strong></p>
-                <ul>
-                    <li>{soi}Intro {eoi}</li>
-                    <li>{soc}Refrain {eoc}</li>
-                    <li>{sob}Pont(bridge) {eob}</li>
-                    <li>{sod}Interlude {eod}</li>
-                    <li>{soo}Outro {eoo}</li>
-                    
-                </ul>
-                <p>Veuillez reconnaitre la provennance de vos chansons dans le champs "acknowledgement"</p>
-                <p>Pour des commentaires ou des suggestion, veuillez communiquer avec gaulindm@gmail.com.</p>
-            </div>
+    </div>
             
             {% endverbatim %}
             {% else %}
@@ -220,101 +148,6 @@
             <li><strong>CTRL-Y</strong> - Redo</li>
             <li><strong>CTRL-F</strong> - Find</li>
         </ul>
-        <p>Here are the tags to use for identifying songs:</p>
-
-        <table class="table table-striped">
-            <tr>
-                <th>Field</th>
-                <th>Description</th>
-            </tr>
-            <tr>
-                <td>{title:}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>{artist:}</td>
-                <td><i>Avoid using / to separate artist names</i></td>
-            </tr>
-            <tr>
-                <td>{youtube:}</td>
-                <td><i>YouTube video URL</i></td>
-            </tr>
-            <tr>
-                <td>{songwriter:}</td>
-                <td>Avoid using / to separate artist names</td>
-            </tr>
-            <tr>
-                <td>{capo:}</td>
-                <td><i>Corresponds to</i> or <i>Capo position for Correspond</i></td>
-            </tr>
-            <tr>
-                <td>{year:}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>{1stnote:}</td>
-                <td><i>Optional - Helps a group start on the correct note</i></td>
-            </tr>
-            <tr>
-                <td>{timeSignature:}</td>
-                <td><i>Optional</i></td>
-            </tr>
-            <tr>
-                <td>{count_in:}</td>
-                <td><i>Optional</i></td>
-            </tr>
-            <tr>
-                <td>{short_instruction_1:}</td>
-                <td><i>Optional - Below (/=one strum)</i></td>
-            </tr>
-            <tr>
-                <td>{short_instruction_2:}</td>
-                <td><i>Optional - Below short_instruction_1</i></td>
-            </tr>
-            <tr>
-                <td>{instruction:}</td>
-                <td><i>Optional - Special instruction below structure section</i></td>
-            </tr>
-            <tr>
-                <td>{page}</td>
-                <td><i>Page break (starts a new page)</i></td>
-            </tr>
-        </table>
-
-        <!-- Copy button -->
-        <button onclick="copyMetaTags()">📋 Copy Tags</button>
-
-        <script>
-        function copyMetaTags() {
-            // Define the tags as a clean list without extra spaces
-            let metaTags = [
-                "{title:}",
-                "{artist:}",
-                "{youtube:}",
-                "{songwriter:}",
-                "{capo:}",
-                "{year:}",
-                "{1stnote:}",
-                "{timeSignature:}",
-                "{count_in:}",
-            ].join("\n"); // Ensures proper newlines without spaces
-
-            // Copy to clipboard
-            navigator.clipboard.writeText(metaTags);
-        }
-        </script>
-
-        <p>You can divide your contribution into sections. The sections will be placed in a table with an invisible border. It is possible to choose the alignment of the lyrics in the coding. <strong>Do not structure the verses!</strong></p>
-        <ul>
-            <li>{soi}Intro {eoi}</li>
-            <li>{soc}Chorus {eoc}</li>
-            <li>{sob}Bridge {eob}</li>
-            <li>{sod}Interlude {eod}</li>
-            <li>{soo}Outro {eoo}</li>
-            <li>{sos}Center (without heading) {eos}</li>
-        </ul>
-        <p>Please acknowledge the source of your songs in the "acknowledgement" field.</p>
-        <p>For comments or suggestions, please contact gaulindm@gmail.com.</p>
     </div>
     {% endverbatim %}
         {% endif %}
@@ -418,4 +251,9 @@ href="https://cdn.jsdelivr.net/npm/codemirror@5.65.10/addon/dialog/dialog.css"
         // Prevent the form from using native validation for hidden inputs
         document.getElementById("song-form").setAttribute("novalidate", "true");
     </script>
+
+    {# 🧭 Guided tour (Driver.js) #}
+    <link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
+    <script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
+    <script src="{% static 'songbook/js/chordpro_tour.js' %}"></script>
 {% endblock content %}

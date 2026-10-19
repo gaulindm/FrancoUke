@@ -1,0 +1,261 @@
+{# songbook/_chordpro_cheatsheet.html                                        #}
+{# ChordPro cheat sheet: include it beside the ChordPro editor, e.g.         #}
+{#     {% include "songbook/_chordpro_cheatsheet.html" %}                    #}
+{# Built from parsers.py, pdf_generator.py and song_header.py.               #}
+{# Tags are shown inside <code>; "<" and ">" are written as &lt; and &gt;.    #}
+
+<div id="tour-cheatsheet" class="card mb-3">
+  <div class="card-header">
+    <h5 class="mb-0">ChordPro cheat sheet</h5>
+  </div>
+  <div class="card-body p-2">
+    <p class="small text-muted mb-2">
+      Tags go on their own line, between curly braces. Click a title to open it.
+    </p>
+
+    <div class="accordion accordion-flush" id="chordproCheatAccordion">
+
+      {# ---------------- HEADER ---------------- #}
+      <div class="accordion-item" id="tour-cheat-header">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed py-2" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#cheat-header">
+            📋 Header tags
+          </button>
+        </h2>
+        <div id="cheat-header" class="accordion-collapse collapse" data-bs-parent="#chordproCheatAccordion">
+          <div class="accordion-body small">
+            <p><strong>The more of these you fill in, the better the header looks</strong>,
+               in the PDF and in the teleprompter. A line is left out when it has nothing to show.</p>
+            <table class="table table-sm table-borderless mb-2">
+              <tbody>
+                <tr><td><code>title</code> (or <code>t</code>)</td><td>The song title, centre of the top row. The tag only fills in the title when the song has no title yet</td></tr>
+                <tr><td><code>timeSignature</code></td><td>Top row, left, for example 4/4</td></tr>
+                <tr><td><code>strumming</code></td><td>Top row, right. Use <b>D</b> (down), <b>U</b> (up), <b>X</b> (mute), a dot for a rest and a dash between beat groups. A capital letter is a strong beat, a small letter a light beat, for example <code>D-du-udu</code></td></tr>
+                <tr><td><code>1stnote</code></td><td>Second row, left: "1st vocal note"</td></tr>
+                <tr><td><code>songwriter</code></td><td>Second row, centre</td></tr>
+                <tr><td><code>short_instruction_1</code></td><td>Second row, right. If empty and the song has a slash chord, "(/ = one strum)" is shown</td></tr>
+                <tr><td><code>count_in</code></td><td>Third row, left: "Count in"</td></tr>
+                <tr><td><code>artist</code>, <code>year</code>, <code>capo</code></td><td>Third row, centre: "Matches the recording by …". With a capo number it reads "Capo (2) to match the recording by …", and <code>{capo: based}</code> gives "Based on clip by …". Needs an artist. The year must be four digits</td></tr>
+                <tr><td><code>short_instruction_2</code></td><td>Third row, right</td></tr>
+                <tr><td><code>key</code></td><td>Overrides the key that is detected automatically from the chords (used when songs are shown or filtered by key)</td></tr>
+                <tr><td><code>tempo</code>, <code>album</code></td><td>Kept with the song, but not shown in the header</td></tr>
+              </tbody>
+            </table>
+            <button type="button" id="copy-header-tags" class="btn btn-sm btn-outline-primary mb-2">
+              📋 Copy all header tags
+            </button>
+            <div id="copy-header-tags-msg" class="small mb-2" role="status" aria-live="polite" style="min-height:1.3em"></div>
+            <p class="text-muted mb-2">Paste them at the top of the song, then fill in the ones you need. Tags left empty are simply ignored.</p>
+            <pre class="mb-0">{artist: The Beatles}
+{year: 1967}
+{capo: 2}
+{count_in: 1 2 3 4}</pre>
+          </div>
+        </div>
+      </div>
+
+      {# ---------------- SECTIONS ---------------- #}
+      <div class="accordion-item" id="tour-cheat-sections">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed py-2" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#cheat-sections">
+            🎼 Sections
+          </button>
+        </h2>
+        <div id="cheat-sections" class="accordion-collapse collapse" data-bs-parent="#chordproCheatAccordion">
+          <div class="accordion-body small">
+            <p>Start a section with the first tag and end it with the second. Write each tag exactly like this, with nothing after the name.</p>
+            <table class="table table-sm table-borderless mb-2">
+              <tbody>
+                <tr><td><code>{soi}</code> … <code>{eoi}</code></td><td>Intro</td></tr>
+                <tr><td><code>{sov}</code> … <code>{eov}</code></td><td>Verse (Couplet in French). A verse has no label in the PDF</td></tr>
+                <tr><td><code>{soc}</code> … <code>{eoc}</code></td><td>Chorus (Refrain in French)</td></tr>
+                <tr><td><code>{sob}</code> … <code>{eob}</code></td><td>Bridge (Pont in French)</td></tr>
+                <tr><td><code>{sod}</code> … <code>{eod}</code></td><td>Interlude</td></tr>
+                <tr><td><code>{soo}</code> … <code>{eoo}</code></td><td>Outro</td></tr>
+                <tr><td><code>{sos}</code> … <code>{eos}</code></td><td>Centered (no label)</td></tr>
+                <tr><td><code>{page}</code></td><td>Starts a new page in the PDF</td></tr>
+                <tr><td><code>{sot}</code> … <code>{eot}</code></td><td>Tab lines, shown in a grey box</td></tr>
+              </tbody>
+            </table>
+            <p>Intro, Chorus, Bridge, Outro and Interlude get a label in the margin of the PDF. Verse and Centered do not.</p>
+            <p class="mb-1"><code>{instruction: ...}</code> adds a small grey italic note under that label, for example "Play softly". Because a verse has no label, the note is not shown on a verse.</p>
+          </div>
+        </div>
+      </div>
+
+      {# ---------------- COMMENTS ---------------- #}
+      <div class="accordion-item" id="tour-cheat-comments">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed py-2" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#cheat-comments">
+            💬 Notes and comments
+          </button>
+        </h2>
+        <div id="cheat-comments" class="accordion-collapse collapse" data-bs-parent="#chordproCheatAccordion">
+          <div class="accordion-body small">
+            <p><code>{c: ...}</code> and <code>{comment: ...}</code> are the same tag. What you see depends on what is inside:</p>
+            <table class="table table-sm table-borderless mb-2">
+              <tbody>
+                <tr>
+                  <td><code>{c: Slow down}</code><br>on its own line</td>
+                  <td>A red italic note on its own line</td>
+                </tr>
+                <tr>
+                  <td><code>Hello {c: softly}</code><br>inside a lyric line</td>
+                  <td>A small grey italic note in the line</td>
+                </tr>
+                <tr>
+                  <td><code>{c:(234)}</code></td>
+                  <td>A <b><i>count cue</i></b> at the end of the line. Only digits, spaces and commas inside the brackets</td>
+                </tr>
+                <tr>
+                  <td><code>{c:(Two Parts)}</code></td>
+                  <td>Any other words in brackets stay an ordinary note</td>
+                </tr>
+                <tr>
+                  <td><code>{c:VG1}</code><br><code>{c:VG2}</code></td>
+                  <td>Puts "Vocal Group 1:" or "Vocal Group 2:" in front of the next sung line (<code>{c:1}</code> and <code>{c:2}</code> also work)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {# ---------------- STYLES ---------------- #}
+      <div class="accordion-item" id="tour-cheat-styles">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed py-2" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#cheat-styles">
+            🎨 Colours and styles
+          </button>
+        </h2>
+        <div id="cheat-styles" class="accordion-collapse collapse" data-bs-parent="#chordproCheatAccordion">
+          <div class="accordion-body small">
+            <p>Put the tags around the words you want to change. They work in lyrics and in notes.</p>
+            <table class="table table-sm table-borderless mb-2">
+              <tbody>
+                <tr><td><code>&lt;b&gt;word&lt;/b&gt;</code> or <code>&lt;strong&gt;</code></td><td>Bold</td></tr>
+                <tr><td><code>&lt;i&gt;word&lt;/i&gt;</code> or <code>&lt;em&gt;</code></td><td>Italic</td></tr>
+                <tr><td><code>&lt;u&gt;word&lt;/u&gt;</code></td><td>Underline</td></tr>
+                <tr><td><code>&lt;red&gt;word&lt;/red&gt;</code></td><td>Colour. Also: <code>grey</code>, <code>blue</code>, <code>green</code>, <code>yellow</code>, <code>orange</code>, <code>pink</code>, <code>purple</code></td></tr>
+                <tr><td><code>&lt;r&gt;</code> <code>&lt;g&gt;</code> <code>&lt;y&gt;</code></td><td>Short forms for red, green and yellow</td></tr>
+                <tr><td><code>&lt;h&gt;word&lt;/h&gt;</code></td><td>Yellow highlight</td></tr>
+                <tr><td><code>&lt;highlight color="pink"&gt;word&lt;/highlight&gt;</code></td><td>Highlight in another colour</td></tr>
+              </tbody>
+            </table>
+            <p class="mb-0">Colour and highlight tags are applied in the PDF.</p>
+          </div>
+        </div>
+      </div>
+
+      {# ---------------- OPTIONAL CHORDS ---------------- #}
+      <div class="accordion-item" id="tour-cheat-optional">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed py-2" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#cheat-optional">
+            🎸 Chords
+          </button>
+        </h2>
+        <div id="cheat-optional" class="accordion-collapse collapse" data-bs-parent="#chordproCheatAccordion">
+          <div class="accordion-body small">
+            <p>Put a chord in square brackets, right before the word or syllable where it changes:</p>
+            <pre>[C]Hello, [G]world</pre>
+            <p><strong>Optional chords</strong> (ones players may leave out) go inside <code>&lt;opt&gt;</code> tags. They are printed in grey italic:</p>
+            <pre class="mb-0">&lt;opt&gt;[Em]&lt;/opt&gt;</pre>
+          </div>
+        </div>
+      </div>
+
+      {# ---------------- YOUTUBE ---------------- #}
+      <div class="accordion-item" id="tour-cheat-youtube">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed py-2" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#cheat-youtube">
+            ▶️ YouTube video
+          </button>
+        </h2>
+        <div id="cheat-youtube" class="accordion-collapse collapse" data-bs-parent="#chordproCheatAccordion">
+          <div class="accordion-body small">
+            <p>The <code>youtube</code> tag is what <strong>drives the video players</strong>. Without it, there is no video.</p>
+            <p>Paste the full YouTube link. It must start with <code>https://</code>. To start the video part-way, add the time to the link, for example <code>?t=90</code> or <code>?t=1m30s</code>.</p>
+            <pre class="mb-0">{youtube: https://youtu.be/XXXXXXXXXXX?t=1m30s}</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // The header tags, one per line, empty and ready to fill in.
+  // 🔧 TUNE: add or remove tags here (keep the same spelling as the table above).
+  var HEADER_TAGS = [
+    "{title:}",
+    "{artist:}",
+    "{songwriter:}",
+    "{year:}",
+    "{capo:}",
+    "{youtube:}",
+    "{strumming:}",
+    "{timeSignature:}",
+    "{1stnote:}",
+    "{count_in:}",
+    "{short_instruction_1:}",
+    "{short_instruction_2:}"
+  ].join("\n") + "\n";
+
+  var btn = document.getElementById("copy-header-tags");
+  if (!btn) return;
+  var msg = document.getElementById("copy-header-tags-msg");
+  var label = btn.textContent.trim();
+
+  // Show the result on the button AND in a line of text under it, for 4 seconds.
+  function done(ok) {
+    btn.textContent = ok ? "✅ Copied!" : "Could not copy";
+    btn.classList.remove("btn-outline-primary");
+    btn.classList.add(ok ? "btn-success" : "btn-danger");
+    if (msg) {
+      msg.textContent = ok
+        ? "Copied! Now click in the song text and paste (Ctrl+V)."
+        : "Could not copy. Please try again.";
+      msg.className = "small mb-2 " + (ok ? "text-success" : "text-danger");
+    }
+    setTimeout(function () {
+      btn.textContent = label;
+      btn.classList.remove("btn-success", "btn-danger");
+      btn.classList.add("btn-outline-primary");
+      if (msg) msg.textContent = "";
+    }, 4000);
+  }
+
+  // Older browsers, or a page that is not on https: copy through a temporary text box.
+  function fallbackCopy() {
+    var box = document.createElement("textarea");
+    box.value = HEADER_TAGS;
+    box.style.position = "fixed";
+    box.style.opacity = "0";
+    document.body.appendChild(box);
+    box.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(box);
+    done(ok);
+  }
+
+  btn.addEventListener("click", function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(HEADER_TAGS).then(
+        function () { done(true); },
+        fallbackCopy
+      );
+    } else {
+      fallbackCopy();
+    }
+  });
+})();
+</script>

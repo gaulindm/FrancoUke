@@ -6,7 +6,7 @@
     {% if user.is_authenticated %}
         <!-- 🔒 Privacy Status & Actions (Leaders/Owner only) -->
         {% if user == chord_sheet.contributor or user.is_superuser %}
-        <div class="alert {% if chord_sheet.is_public %}alert-success{% else %}alert-warning{% endif %} mb-3">
+        <div id="tour-privacy" class="alert {% if chord_sheet.is_public %}alert-success{% else %}alert-warning{% endif %} mb-3">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                 <div>
                     {% if chord_sheet.is_public %}
@@ -97,7 +97,7 @@
             <h3>Song Editor</h3>
         {% endif %}
 
-        <div class="d-flex gap-2 flex-wrap">
+        <div id="tour-editor-area" data-tour-role="{% if can_edit %}editor{% else %}viewer{% endif %}" class="d-flex gap-2 flex-wrap">
             {% if can_edit %}
                 {# Owner / Songbook Editor / staff: Show the edit button #}
                 <p class="text-muted small mb-2 w-100">
@@ -191,7 +191,7 @@
         </div>
         {% endif %}
         
-        <p class="text-muted small">
+        <p id="tour-editor-area" data-tour-role="anonymous" class="text-muted small">
             {% if site_name == "FrancoUke" %}
                 Connectez-vous pour modifier vos chansons.
             {% else %}
@@ -256,7 +256,7 @@
         {% endif %}
     </p>
 
-    <div class="me-3">
+    <div id="tour-formatting-area" class="me-3" data-tour-role="{% if user.is_authenticated %}{% if perms.songbook.change_songformatting %}editor{% else %}viewer{% endif %}{% else %}anonymous{% endif %}">
         {% if user.is_authenticated %}
             {% with site_namespace|add:':edit_formatting' as edit_url_name %}
                 {% if perms.songbook.change_songformatting %}
@@ -293,7 +293,7 @@
    <!-- 🎥 YouTube Player Section -->
 {% with embed_url=chord_sheet.metadata.youtube|youtube_embed_url %}
 {% if embed_url %}
-    <div class="ratio ratio-16x9 mb-2" style="max-width: 320px;">
+    <div id="tour-video" class="ratio ratio-16x9 mb-2" style="max-width: 320px;">
         <iframe src="{{ embed_url }}"
                 title="YouTube video player"
                 class="rounded shadow-sm"
