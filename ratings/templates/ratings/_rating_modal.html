@@ -2,7 +2,9 @@
 {# ⭐ The one shared rating pop-up. Include it once per page: {% include "ratings/_rating_modal.html" %} #}
 <div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="rate-title" aria-hidden="true"
      data-rate-url-template="{% url 'ratings:rate_song' song_id=0 %}"
-     data-comments-url-template="{% url 'ratings:song_comments' song_id=0 %}">
+     data-comments-url-template="{% url 'ratings:song_comments' song_id=0 %}"
+     data-delete-url-template="{% url 'ratings:delete_note' rating_id=0 %}"
+     data-notes-url="{% url 'ratings:notes_inbox' %}">
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       {% csrf_token %}
@@ -26,8 +28,11 @@
           <div class="face-row d-flex justify-content-between" data-field="singability"></div>
           <div class="d-flex justify-content-between text-muted small"><span>Hard to sing</span><span>Great to sing</span></div>
         </div>
+        <label for="rate-comment" class="form-label small mb-1">
+          Note for the song editors <span class="text-muted">(optional; only they will see it)</span>
+        </label>
         <textarea id="rate-comment" class="form-control" rows="3" maxlength="500"
-                  placeholder="Optional comment"></textarea>
+                  placeholder="For example: a chord looks wrong in the bridge"></textarea>
         <div id="rate-error" class="text-danger small mt-2"></div>
         <div class="text-muted small mt-1">Click the selected face again to clear it. Clearing everything removes your rating.</div>
         <div id="rate-comments" class="mt-3"></div>
@@ -87,6 +92,13 @@
     }
   });
 
+  function deleteNote(ratingId, card) {
+    if (!window.confirm("Delete this note?")) return;
+    const url = modal.dataset.deleteUrlTemplate.replace("/0/", "/" + ratingId + "/");
+    fetch(url, { method: "POST", headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" } })
+      .then(function (r) { if (r.ok) card.remove(); });
+  }
+
   function loadComments(id) {
     const box = document.getElementById("rate-comments");
     box.replaceChildren();
@@ -95,19 +107,30 @@
     fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (thisRequest !== latest || !data.comments.length) return;  // ignore out-of-date answers
-        box.appendChild(el("div", "fw-bold small mb-2", "Comments"));
+        // Only song editors get notes back; for everyone else this section stays empty
+        if (thisRequest !== latest || !data.can_review) return;
+        box.appendChild(el("div", "fw-bold small mb-2", "Notes from members (only song editors see these)"));
+        if (!data.comments.length) box.appendChild(el("div", "text-muted small mb-2", "No notes for this song yet."));
         data.comments.forEach(function (c) {
           const card = el("div", "border rounded p-2 mb-2");
+          const head = el("div", "d-flex justify-content-between align-items-start gap-2");
           const line = el("div", "text-muted small");
           if (c.stars) line.appendChild(el("i", "bi " + FACES[c.stars - 1] + " me-1"));
           line.appendChild(document.createTextNode(c.who + " · " + c.when));
-          card.appendChild(line);
-          card.appendChild(el("div", "", c.comment));
+          const del = el("button", "btn btn-sm btn-outline-danger py-0", "Delete");
+          del.type = "button";
+          del.addEventListener("click", function () { deleteNote(c.id, card); });
+          head.appendChild(line);
+          head.appendChild(del);
+          card.appendChild(head);
+          card.appendChild(el("div", "", c.comment));   // textContent: a note can never inject HTML
           box.appendChild(card);
         });
+        const all = el("a", "small", "All member notes →");
+        all.href = modal.dataset.notesUrl;
+        box.appendChild(all);
       })
-      .catch(function () { /* comments are a bonus; stay quiet if they fail to load */ });
+      .catch(function () { /* notes are a bonus; stay quiet if they fail to load */ });
   }
 
   modal.addEventListener("show.bs.modal", function (e) {

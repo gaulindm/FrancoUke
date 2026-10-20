@@ -1,0 +1,170 @@
+{% if user.is_authenticated %}
+{# ⭐ The one shared rating pop-up. Include it once per page: {% include "ratings/_rating_modal.html" %} #}
+<div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="rate-title" aria-hidden="true"
+     data-rate-url-template="{% url 'ratings:rate_song' song_id=0 %}"
+     data-comments-url-template="{% url 'ratings:song_comments' song_id=0 %}"
+     data-delete-url-template="{% url 'ratings:delete_note' rating_id=0 %}"
+     data-notes-url="{% url 'ratings:notes_inbox' %}">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      {% csrf_token %}
+      <div class="modal-header">
+        <h5 class="modal-title" id="rate-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <div>Overall</div>
+          <div class="face-row d-flex justify-content-between" data-field="stars"></div>
+          <div class="d-flex justify-content-between text-muted small"><span>Not at all satisfied</span><span>Very satisfied</span></div>
+        </div>
+        <div class="mb-3">
+          <div>Playability</div>
+          <div class="face-row d-flex justify-content-between" data-field="playability"></div>
+          <div class="d-flex justify-content-between text-muted small"><span>Very hard to play</span><span>Easy to play</span></div>
+        </div>
+        <div class="mb-3">
+          <div>Singability</div>
+          <div class="face-row d-flex justify-content-between" data-field="singability"></div>
+          <div class="d-flex justify-content-between text-muted small"><span>Hard to sing</span><span>Great to sing</span></div>
+        </div>
+        <label for="rate-comment" class="form-label small mb-1">
+          Note for the song editors <span class="text-muted">(optional; only they will see it)</span>
+        </label>
+        <textarea id="rate-comment" class="form-control" rows="3" maxlength="500"
+                  placeholder="For example: a chord looks wrong in the bridge"></textarea>
+        <div id="rate-error" class="text-danger small mt-2"></div>
+        <div class="text-muted small mt-1">Click the selected face again to clear it. Clearing everything removes your rating.</div>
+        <div id="rate-comments" class="mt-3"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="rate-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ⭐ Rating modal: fills itself from the clicked button's data- attributes
+(function () {
+  const modal = document.getElementById("rateModal");
+  if (!modal) return;
+
+  const csrf = modal.querySelector("[name=csrfmiddlewaretoken]").value;
+  const errorBox = document.getElementById("rate-error");
+  const values = { stars: 0, playability: 0, singability: 0 };
+  let songId = null;
+  let latest = 0;
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;   // textContent keeps comments from being read as HTML
+    return node;
+  }
+
+  // 🔧 The five faces, worst (saved as 1) to best (saved as 5). Bootstrap Icons names.
+  const FACES = ["bi-emoji-dizzy", "bi-emoji-frown", "bi-emoji-neutral", "bi-emoji-smile", "bi-emoji-laughing"];
+
+  // The chosen face is drawn solid and gold; the others are plain outlines
+  function paint(row, n) {
+    row.querySelectorAll("button").forEach(function (b, i) {
+      const chosen = (i + 1 === n);
+      b.firstChild.className = "bi " + FACES[i] + (chosen ? "-fill text-warning" : " text-secondary") + " fs-2";
+    });
+  }
+
+  // Build five face buttons in each row
+  modal.querySelectorAll(".face-row").forEach(function (row) {
+    const field = row.dataset.field;
+    for (let i = 1; i <= 5; i++) {
+      const b = el("button", "btn btn-link p-1 text-decoration-none");
+      b.type = "button";
+      b.title = i + " of 5";
+      b.setAttribute("aria-label", i + " of 5");
+      b.appendChild(el("i"));
+      b.addEventListener("click", function () {
+        values[field] = (values[field] === i) ? 0 : i;   // click the same face again to clear
+        paint(row, values[field]);
+      });
+      row.appendChild(b);
+    }
+  });
+
+  function deleteNote(ratingId, card) {
+    if (!window.confirm("Delete this note?")) return;
+    const url = modal.dataset.deleteUrlTemplate.replace("/0/", "/" + ratingId + "/");
+    fetch(url, { method: "POST", headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" } })
+      .then(function (r) { if (r.ok) card.remove(); });
+  }
+
+  function loadComments(id) {
+    const box = document.getElementById("rate-comments");
+    box.replaceChildren();
+    const thisRequest = ++latest;
+    const url = modal.dataset.commentsUrlTemplate.replace("/0/", "/" + id + "/");
+    fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        // Only song editors get notes back; for everyone else this section stays empty
+        if (thisRequest !== latest || !data.can_review) return;
+        box.appendChild(el("div", "fw-bold small mb-2", "Notes from members (only song editors see these)"));
+        if (!data.comments.length) box.appendChild(el("div", "text-muted small mb-2", "No notes for this song yet."));
+        data.comments.forEach(function (c) {
+          const card = el("div", "border rounded p-2 mb-2");
+          const head = el("div", "d-flex justify-content-between align-items-start gap-2");
+          const line = el("div", "text-muted small");
+          if (c.stars) line.appendChild(el("i", "bi " + FACES[c.stars - 1] + " me-1"));
+          line.appendChild(document.createTextNode(c.who + " · " + c.when));
+          const del = el("button", "btn btn-sm btn-outline-danger py-0", "Delete");
+          del.type = "button";
+          del.addEventListener("click", function () { deleteNote(c.id, card); });
+          head.appendChild(line);
+          head.appendChild(del);
+          card.appendChild(head);
+          card.appendChild(el("div", "", c.comment));   // textContent: a note can never inject HTML
+          box.appendChild(card);
+        });
+        const all = el("a", "small", "All member notes →");
+        all.href = modal.dataset.notesUrl;
+        box.appendChild(all);
+      })
+      .catch(function () { /* notes are a bonus; stay quiet if they fail to load */ });
+  }
+
+  modal.addEventListener("show.bs.modal", function (e) {
+    const d = e.relatedTarget.dataset;
+    songId = d.songId;
+    document.getElementById("rate-title").textContent = d.songTitle;
+    values.stars = parseInt(d.stars, 10) || 0;
+    values.playability = parseInt(d.playability, 10) || 0;
+    values.singability = parseInt(d.singability, 10) || 0;
+    document.getElementById("rate-comment").value = d.comment || "";
+    errorBox.textContent = "";
+    modal.querySelectorAll(".face-row").forEach(function (row) {
+      paint(row, values[row.dataset.field]);
+    });
+    loadComments(songId);
+  });
+
+  document.getElementById("rate-save").addEventListener("click", function () {
+    const body = new FormData();
+    body.append("stars", values.stars);
+    body.append("playability", values.playability);
+    body.append("singability", values.singability);
+    body.append("comment", document.getElementById("rate-comment").value);
+    const url = modal.dataset.rateUrlTemplate.replace("/0/", "/" + songId + "/");
+    fetch(url, { method: "POST", headers: { "X-CSRFToken": csrf }, body: body })
+      .then(function (r) {
+        if (r.ok) { window.location.reload(); }   // simple first version
+        else if (r.status === 401) { errorBox.textContent = "Please log in to rate songs."; }
+        else { errorBox.textContent = "Sorry, that could not be saved. Please try again."; }
+      })
+      .catch(function () {
+        errorBox.textContent = "Sorry, that could not be saved. Please try again.";
+      });
+  });
+})();
+</script>
+{% endif %}

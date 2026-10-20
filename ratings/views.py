@@ -1,10 +1,14 @@
-from django.http import HttpResponseBadRequest, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.contrib.auth.views import redirect_to_login
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView
 
+from songbook.mixins import SiteContextMixin
 from songbook.models import Song
 
 from .models import SongRating
+from .utils import can_review_notes, face_icon
 
 
 def _score(value):
@@ -63,9 +67,15 @@ def rate_song(request, song_id):
 
 
 def song_comments(request, song_id):
-    """The latest comments on one song, as JSON for the rating pop-up (logged-in users only)."""
+    """The private notes members left on one song, as JSON for the rating pop-up.
+
+    Notes are for the song editors only: anyone else gets an empty list (they
+    still see their OWN note, because their own rating fills the pop-up).
+    """
     if not request.user.is_authenticated:
         return _login_needed()
+    if not can_review_notes(request.user):
+        return JsonResponse({"can_review": False, "comments": []})
     rows = (
         SongRating.objects.filter(song_id=song_id)
         .exclude(comment="")
@@ -73,8 +83,10 @@ def song_comments(request, song_id):
         .order_by("-updated")[:50]
     )
     return JsonResponse({
+        "can_review": True,
         "comments": [
             {
+                "id": r.pk,
                 "who": _display_name(r.user),
                 "stars": r.stars,
                 "comment": r.comment,
@@ -83,3 +95,54 @@ def song_comments(request, song_id):
             for r in rows
         ]
     })
+
+
+@require_POST
+def delete_note(request, rating_id):
+    """A song editor removes a member's note. The member's scores are kept."""
+    if not request.user.is_authenticated:
+        return _login_needed()
+    if not can_review_notes(request.user):
+        return JsonResponse({"error": "song editors only"}, status=403)
+    rating = get_object_or_404(SongRating, pk=rating_id)
+    rating.comment = ""
+    if rating.stars is None and rating.playability is None and rating.singability is None:
+        rating.delete()  # a note with no scores at all would leave an empty row behind
+    else:
+        rating.save(update_fields=["comment"])
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"ok": True})
+    return redirect("ratings:notes_inbox")
+
+
+class NotesInboxView(SiteContextMixin, TemplateView):
+    """One page listing the latest member notes across all songs (song editors only)."""
+    template_name = "ratings/notes_inbox.html"
+    MAX_NOTES = 100
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        if not can_review_notes(request.user):
+            return HttpResponseForbidden("Only the song editors can read member notes.")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        rows = (
+            SongRating.objects.exclude(comment="")
+            .select_related("song", "user")
+            .order_by("-updated")[: self.MAX_NOTES]
+        )
+        context["notes"] = [
+            {
+                "id": r.pk,
+                "song": r.song,
+                "who": _display_name(r.user),
+                "face": face_icon(r.stars),
+                "comment": r.comment,
+                "updated": r.updated,
+            }
+            for r in rows
+        ]
+        return context

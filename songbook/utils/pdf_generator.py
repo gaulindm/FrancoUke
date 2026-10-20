@@ -290,7 +290,7 @@ VOCAL_GROUP_RE = re.compile(r'^(?:VG\s*)?(\d+)$', re.IGNORECASE)
 
 # Label printed in front of the line. Colour helps on screen; the text
 # keeps it readable when printed in black and white.
-VOCAL_GROUP_LABEL = "Vocal Group {n}:"
+VOCAL_GROUP_LABEL = "VG {n}:"
 VOCAL_GROUP_COLORS = {"1": "#1f5fbf", "2": "#c2410c"}
 VOCAL_GROUP_DEFAULT_COLOR = "#555555"
 

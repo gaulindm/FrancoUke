@@ -83,7 +83,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     )
     # 🔧 TUNE: text shown in the badge for numbered groups ({n} = 1, 2, 1+2).
     # Use "VG{n}" for a shorter badge, e.g. on a projector with big text.
-    VOCAL_GROUP_LABEL = "Vocal Group {n}"
+    VOCAL_GROUP_LABEL = "VG {n}"
     # 🆕 Hold cue: {c:(23)} at the end of a line = keep strumming the last
     # chord through those beats (2 and 3). Rendered inline, in orange.
     HOLD_RE = re.compile(r'^\s*\(\s*([\d,\s]+?)\s*\)\s*$')

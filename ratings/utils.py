@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Avg, Count
 
 from .models import SongRating
@@ -55,3 +56,17 @@ def rating_mine(song_ids, user):
 def rating_data(song_ids, user):
     """For the setlist page: (everyone's summaries, the user's own ratings)."""
     return rating_summaries(song_ids), rating_mine(song_ids, user)
+
+
+def can_review_notes(user):
+    """May this user read (and delete) the private notes members leave for the song editors?
+
+    Superusers and members of the Django group named by settings.RATINGS_REVIEWER_GROUP
+    (default "SongbookEditor", the song-editors group).
+    """
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    group_name = getattr(settings, "RATINGS_REVIEWER_GROUP", "SongbookEditor")
+    return user.groups.filter(name=group_name).exists()
