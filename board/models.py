@@ -267,6 +267,12 @@ class Event(models.Model):
     # 👇 NEW
     is_public = models.BooleanField(default=False)
 
+    # Untick for drop-in events (Strum & Sing, jam sessions) that need no RSVP
+    requires_availability = models.BooleanField(
+        default=True,
+        help_text="Untick for drop-in events where members don't need to give availability."
+    )
+
     cover_asset = models.ForeignKey(
         Asset,
         null=True,

@@ -129,7 +129,7 @@ class EventAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            "fields": ("title", "event_type", "status", "cover_asset", "gallery_assets", "rich_description")
+            "fields": ("title", "event_type", "status", "requires_availability", "cover_asset", "gallery_assets", "rich_description")
         }),
         ("Scheduling", {
             "fields": ("event_date", "start_time", "end_time", "arrive_by", "chairs", "attire", "location")

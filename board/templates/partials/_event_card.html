@@ -49,14 +49,16 @@
         {% endif %}
       </td>
       <td rowspan="2" class="text-end">
-        {% if event.my_availability == "yes" %}
-          <span class="badge bg-success" title="Available">Y</span>
-        {% elif event.my_availability == "no" %}
-          <span class="badge bg-danger" title="Not Available">N</span>
-        {% elif event.my_availability == "maybe" %}
-          <span class="badge bg-warning text-dark" title="Maybe">M</span>
-        {% else %}
-          <span class="badge bg-secondary" title="Unknown">–</span>
+        {% if event.requires_availability and not event.is_rehearsal %}
+          {% if event.my_availability == "yes" %}
+            <span class="badge bg-success" title="Available">Y</span>
+          {% elif event.my_availability == "no" %}
+            <span class="badge bg-danger" title="Not Available">N</span>
+          {% elif event.my_availability == "maybe" %}
+            <span class="badge bg-warning text-dark" title="Maybe">M</span>
+          {% else %}
+            <span class="badge bg-secondary" title="Unknown">–</span>
+          {% endif %}
         {% endif %}
       </td>
     </tr>
@@ -137,7 +139,7 @@
           </div>
         {% endif %}
 
-        {% if event.event_type != "rehearsal" %}
+        {% if event.event_type != "rehearsal" and event.requires_availability %}
           <hr class="my-3">
           {% if request.group %}
           <!-- 📅 Availability Form -->
