@@ -106,6 +106,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     # From that chord to the end of the line, chords are drawn inline so the
     # symbols stay level with them instead of dropping below.
     PATTERN_RE = re.compile(r'^[\s\-()]*[-()][\s\-()]*$')
+    # 🆕 Strum-only text under a chord, e.g. "//" or "////": gets extra room via CSS
+    STRUM_ONLY_RE = re.compile(r'^[/\\]+$')
     in_pattern = False   # True from the first pattern chord to the end of the line
 
 
@@ -280,6 +282,8 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                         word_cls = "chord-word ph-word" if ph else "chord-word"
                         if in_pattern:
                             word_cls += " chord-inline"   # 🆕 drawn inline by CSS
+                        elif STRUM_ONLY_RE.match(body):
+                            word_cls += " chord-strum"    # 🆕 slash-only box: wider gaps via CSS
                         current_buffer.append(
                             f'<span class="{word_cls}" style="min-width:{width:.8f}em">'
                             f'<span class="chord-label" data-chord="{chord}">{chord}</span>'

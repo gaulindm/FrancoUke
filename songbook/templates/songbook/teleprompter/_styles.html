@@ -96,7 +96,10 @@
     left: 0;
     font-size: 0.85em;
   }
-
+/* Strum lines like [G]//  [C]//  [G]////: more room between chords and groups */
+html[data-chord-style="above"] .chord-word.chord-strum {
+  margin-right: 0.8em;        /* 🔧 TUNE: 0.4em = a touch wider, 1em = much wider */
+}
   /* ===== Chords INLINE, e.g. [C]One, two, [CM7]three, four ===== */
   html[data-chord-style="inline"] .chord-word {
     display: inline;
