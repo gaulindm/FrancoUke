@@ -303,6 +303,23 @@ def render_count_cue_html(text):
 INLINE_COMMENT_RE = re.compile(r'\{\s*(?:c|comment)\s*:\s*(.*?)\s*\}', re.IGNORECASE)
 
 
+# {c:echo: words} -> an echo sung at the same time as the line above.
+# Printed directly under that line, indented, in italics and parentheses.
+ECHO_RE = re.compile(r'^\s*echo\s*:\s*(.*?)\s*$', re.IGNORECASE | re.DOTALL)
+ECHO_COLOR = "black"        # 🔧 TUNE: e.g. "#555555" for a softer grey
+ECHO_INDENT_SPACES = 8      # 🔧 TUNE: how far the echo is indented (in spaces)
+
+
+def render_echo_html(text):
+    """Indented italic echo in parentheses (the parentheses are added here)."""
+    text = text.strip()
+    if text.startswith("(") and text.endswith(")"):
+        text = text[1:-1].strip()
+    indent = "&nbsp;" * ECHO_INDENT_SPACES
+    return f'{indent}<font color="{ECHO_COLOR}"><i>({text})</i></font>'
+
+
+
 def convert_inline_comments(text):
     """Convert {c:...} / {comment:...} found inside a lyric line.
 
@@ -375,6 +392,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
     section_instruction = None
     pending_group = None  # vocal group number waiting for its lyric line
     after_comment = False  # did a standalone comment just print right before this?
+    echo_line_open = False  # an echo was just added and its line has not been ended yet
     section_label_shown = False  # has this section's "Intro:" label been printed yet?
 
     # Map directives per site
@@ -499,6 +517,7 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             flush_buffer()
             pending_group = None
             after_comment = False
+            echo_line_open = False
             tab_flowable = build_tab_flowable(group.get("lines", []))
             if tab_flowable is not None:
                 label_html = ""
@@ -530,6 +549,19 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             continue
 
         for item in group:
+            # An echo line must be ended before anything else is printed after
+            # it. A separate LINEBREAK item does that by itself; otherwise
+            # (the parser may drop the newline after a {c:...} line) add the
+            # break here, so the next line, or the blank line, still follows.
+            if echo_line_open:
+                echo_line_open = False
+                is_plain_break = (item.get("format") == "LINEBREAK"
+                                  and not any(k in item for k in ("lyric", "chord", "comment", "directive")))
+                if not is_plain_break and ("lyric" in item or "chord" in item or "comment" in item):
+                    paragraph_buffer.append("<br/>")
+
+
+
             if "directive" in item:
                 directive = item["directive"].lower()
 
@@ -564,6 +596,26 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                 if group_match:
                     pending_group = group_match.group(1)
                     continue
+
+                # Echo ({c:echo: words}): stays inside the current paragraph,
+                # on the line right under the lyrics it is sung with, so
+                # there is no gap (the break that ended the lyric line is
+                # replaced by the break in front of the echo).
+                echo_match = ECHO_RE.match(comment_raw)
+                if echo_match:
+                    while paragraph_buffer and paragraph_buffer[-1] == "<br/>":
+                        paragraph_buffer.pop()
+                    if paragraph_buffer:
+                        paragraph_buffer.append("<br/>")
+                    paragraph_buffer.append(render_echo_html(echo_match.group(1)))
+                    if item.get("format") == "LINEBREAK":
+                        paragraph_buffer.append("<br/>")   # the break that ends the echo line
+                    else:
+                        echo_line_open = True              # ended later, see top of the loop
+
+                    continue
+
+
 
                 # Count cue ({c:(234)}): attach to the end of the current
                 # line in bold italic. If it sits on its own line, slide it

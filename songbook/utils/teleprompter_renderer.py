@@ -92,6 +92,10 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
     HOLD_INLINE_RE = re.compile(r'\s*\{c:\s*\(\s*([\d,\s]+?)\s*\)\s*\}', re.I)
     # 🆕 "[C]_" = chord strummed before singing. The underscore only exists so
     # the chord has something to sit on; it is invisible but still takes up space.
+    # 🆕 Echo: {c:echo: words} = sung at the same time as the line above.
+    ECHO_RE = re.compile(r'^\s*echo\s*:\s*(.*?)\s*$', re.I | re.S)
+
+
     PLACEHOLDER_RE = re.compile(r'^_+(\s*)$')
     # 🔧 TUNE: how many invisible underscores sit after a chord-only "[G]_".
     # Total = chord-name length + this number. Each one is about half a letter wide.
@@ -224,6 +228,21 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     # LINEBREAK attached to the marker item itself.
                     pending_group = GROUP_RE.match(text).group(1).strip()
                     continue
+                elif ECHO_RE.match(text):
+                    # 🆕 Echo line: stays in the current block (no flush), so it
+                    # sits directly under the lyric line above with no gap.
+                    echo_text = ECHO_RE.match(text).group(1)
+                    # The parentheses are added here, so drop any typed ones.
+                    if echo_text.startswith("(") and echo_text.endswith(")"):
+                        echo_text = echo_text[1:-1].strip()
+                    # Remove the <br/> that ended the lyric line above.
+                    if current_buffer and current_buffer[-1] == "<br/>":
+                        current_buffer.pop()
+                    current_buffer.append(
+                        f'<div class="echo-line">({html_escape(echo_text, quote=False)})</div>'
+                    )
+                    if item.get("format") == "LINEBREAK":
+                        continue   # the div already ends the line; a <br/> would add a blank line
                 else:
                     flush_buffer()
                     html.append(f'<div class="song-comment">{item["comment"]}</div>')

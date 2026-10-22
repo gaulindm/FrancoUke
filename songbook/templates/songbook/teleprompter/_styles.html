@@ -310,4 +310,18 @@
   /* In the second row there is room: show the full setlist name and number */
   .controls .controls-more .song-title { max-width: none; }
   .controls .controls-more .sl-num { display: inline; }
+    /* ===== Echo lines: {c:echo: words} sung over the line above ===== */
+    .lyrics .echo-line {
+    font-style: italic;
+    font-size: 1em;                  /* inherits the lyric size, so A-/A+ scales it */
+    color: var(--echo-color, inherit);   /* 🔧 TUNE: set --echo-color later to change the colour */
+    margin: 0 0 0.5em 2em;           /* 🔧 TUNE: 2em = indent; last number = space below */
+    line-height: 1.3;
+    text-align: left;
+  }
+  /* In chords-above mode the lyric line above has line-height 2.2, which leaves
+     empty space under its text. Pull the echo up into it. */
+  html[data-chord-style="above"] .lyrics .echo-line {
+    margin-top: -0.5em;              /* 🔧 TUNE: -0.3em = looser, -0.7em = tighter */
+  }
 </style>
