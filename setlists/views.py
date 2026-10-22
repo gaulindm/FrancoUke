@@ -22,6 +22,8 @@ from django.http import Http404
 from django.utils.text import slugify
 from .setlist_pdf import build_setlist_pdf
 from ratings.utils import rating_data
+from django.utils.html import linebreaks
+from board.rehearsal_notes import RehearsalDetails, SongRehearsalNote
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +61,20 @@ def setlist_detail(request, group_slug, pk):
         item.avg_play = s["avg_play"] if s else None
         item.avg_sing = s["avg_sing"] if s else None
         item.my_rating = mine.get(item.song_id)
+
+    # 📝 Rehearsal notes for these songs, limited to THIS club's rehearsals
+    notes_by_song = {}
+    notes = (
+        SongRehearsalNote.objects
+        .filter(song_id__in=[item.song_id for item in songs],
+                rehearsal__event__group=group)
+        .select_related("rehearsal__event", "created_by")
+        .order_by("-rehearsal__event__event_date", "-created_at")
+    )
+    for note in notes:
+        notes_by_song.setdefault(note.song_id, []).append(note)
+    for item in songs:
+        item.notes = notes_by_song.get(item.song_id, [])
 
     return render(request, "setlists/detail.html", {
         "setlist": setlist,
@@ -612,4 +628,48 @@ def review_suggestion(request, group_slug, pk):
         messages.success(request, f"“{song_to_add.songTitle}” was already on {setlist.name}. Marked as approved.")
     else:
         messages.success(request, f"“{song_to_add.songTitle}” was added to {setlist.name}.")
+    return back
+
+
+# ----------------------------
+# 📝 Rehearsal notes (leader adds a note for one song)
+# ----------------------------
+@group_leader_required
+@require_POST
+def add_song_note(request, group_slug, pk):
+    """A leader adds a rehearsal note for one song in a rehearsal's setlist."""
+    setlist = get_object_or_404(
+        SetList.objects.select_related("event"), pk=pk, group=request.group
+    )
+    back = redirect("setlists:detail", group_slug=group_slug, pk=setlist.pk)
+
+    event = setlist.event
+    if event is None or event.event_type != "rehearsal":
+        messages.error(request, "Song notes can only be added to a setlist linked to a rehearsal.")
+        return back
+
+    # The song must really be in this setlist
+    raw_song = request.POST.get("song_id", "")
+    item = (
+        setlist.songs.select_related("song").filter(song_id=raw_song).first()
+        if raw_song.isdigit() else None
+    )
+    if item is None:
+        messages.error(request, "That song is not in this setlist.")
+        return back
+
+    text = request.POST.get("notes", "").strip()[:2000]
+    if not text:
+        messages.error(request, "Please write a note before saving.")
+        return back
+
+    details, _ = RehearsalDetails.objects.get_or_create(event=event)
+    SongRehearsalNote.objects.create(
+        rehearsal=details,
+        song=item.song,
+        # Notes are shown with |safe elsewhere, so escape the typed text and keep line breaks
+        notes=linebreaks(text, autoescape=True),
+        created_by=request.user,
+    )
+    messages.success(request, f"Note saved for “{item.song.songTitle}”.")
     return back

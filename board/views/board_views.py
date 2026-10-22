@@ -89,50 +89,62 @@ def performer_event_list(request, group_slug):
         "group": group,
     })
 
-
 @group_member_required
 def availability_matrix(request, group_slug):
     """
-    Matrix of performer availabilities for upcoming events, for ONE group.
+    Matrix of performer availabilities for upcoming events that need
+    availability, for ONE group.
     """
     group = request.group
     today = timezone.localdate()
 
-    events = Event.objects.select_related("venue").filter(
-        group=group, event_date__gte=today
-    ).order_by("event_date", "start_time")
+    events = list(
+        Event.objects
+        .select_related("venue")
+        .filter(
+            group=group,
+            event_date__gte=today,
+            requires_availability=True,
+        )
+        .order_by("event_date", "start_time")
+    )
 
     # Only members of THIS group appear in the matrix.
-    players = (
+    players = list(
         User.objects
         .filter(group_memberships__group=group)
         .order_by("username")
+        .distinct()
     )
+
+    # One query for all responses: {(user_id, event_id): status}
+    status_by_cell = {
+        (a.user_id, a.event_id): a.status
+        for a in EventAvailability.objects.filter(
+            event__in=events,
+            user__in=players,
+        )
+    }
+
+    icons = {"yes": "✅", "maybe": "🤔", "no": "❌"}
 
     matrix = []
     for player in players:
-        row = []
-        for event in events:
-            availability = EventAvailability.objects.filter(event=event, user=player).first()
-            if availability:
-                if availability.status == "yes":
-                    row.append("✅")
-                elif availability.status == "maybe":
-                    row.append("🤔")
-                elif availability.status == "no":
-                    row.append("❌")
-                else:
-                    row.append("–")
-            else:
-                row.append("–")
+        row = [
+            icons.get(status_by_cell.get((player.id, event.id)), "–")
+            for event in events
+        ]
         matrix.append((player, row))
 
+    # Summary counts only the players shown in the matrix
     summary = []
     for event in events:
-        yes_count = EventAvailability.objects.filter(event=event, status="yes").count()
-        maybe_count = EventAvailability.objects.filter(event=event, status="maybe").count()
-        no_count = EventAvailability.objects.filter(event=event, status="no").count()
-        summary.append(f"✅ {yes_count} / 🤔 {maybe_count} / ❌ {no_count}")
+        statuses = [status_by_cell.get((p.id, event.id)) for p in players]
+        summary.append(
+            f"✅ {statuses.count('yes')} / "
+            f"🤔 {statuses.count('maybe')} / "
+            f"❌ {statuses.count('no')}"
+        )
 
     return render(request, "board/availability_matrix.html", {
         "events": events,
@@ -140,8 +152,6 @@ def availability_matrix(request, group_slug):
         "summary": summary,
         "group": group,
     })
-
-
 @group_member_required
 def board_item_gallery_view(request, group_slug, item_id):
     group = request.group

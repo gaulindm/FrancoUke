@@ -1,4 +1,5 @@
 {% extends 'groups/base.html' %}
+{% load user_tags %}
 
 {% block content %}
 <div class="container mt-4">
@@ -60,7 +61,7 @@
         <div class="flex-grow-1 ms-3">
           <strong>{{ item.song.songTitle }}</strong>
 
-          {% with item.song.rehearsal_notes.count as note_count %}
+          {% with item.notes|length as note_count %}
             {% if note_count > 0 %}
               <button type="button" 
                       class="btn btn-sm btn-outline-secondary ms-2"
@@ -96,12 +97,25 @@
           {% endif %}
         </div>
 
-        <a href="{% url 'songbook:chord_sheet' item.song.pk %}" 
-           class="btn btn-sm btn-outline-primary"
-           target="_blank"
-           rel="noopener noreferrer">
-          🎼 View
-        </a>
+        <div class="d-flex gap-2 flex-shrink-0 ms-2">
+          {% if can_edit and event and event.event_type == "rehearsal" %}
+          <button type="button"
+                  class="btn btn-sm btn-outline-success"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addNoteModal"
+                  data-song-id="{{ item.song.id }}"
+                  data-song-title="{{ item.song.songTitle }}"
+                  title="Add a rehearsal note for {{ item.song.songTitle }}">
+            ➕ Note
+          </button>
+          {% endif %}
+          <a href="{% url 'songbook:chord_sheet' item.song.pk %}" 
+             class="btn btn-sm btn-outline-primary"
+             target="_blank"
+             rel="noopener noreferrer">
+            🎼 View
+          </a>
+        </div>
       </li>
     {% empty %}
       <li class="list-group-item text-muted">No songs in this setlist yet.</li>
@@ -148,7 +162,7 @@
 
 <!-- 📝 REHEARSAL NOTES MODALS -->
 {% for item in songs %}
-  {% with item.song.rehearsal_notes.all as notes %}
+  {% with item.notes as notes %}
     {% if notes %}
       <div class="modal fade" id="notesModal{{ item.song.id }}" tabindex="-1" 
            aria-labelledby="notesModalLabel{{ item.song.id }}" aria-hidden="true">
@@ -165,9 +179,10 @@
                 <div class="card mb-3">
                   <div class="card-header bg-light">
                     <small class="text-muted">
-                      {{ note.date|date:"D, M d, Y" }}
-                      {% if note.event %}
-                        • {{ note.event.title }}
+                      {{ note.rehearsal.event.event_date|date:"D, M d, Y" }}
+                      • {{ note.rehearsal.event.title }}
+                      {% if note.created_by %}
+                        • by {{ note.created_by|get_user_display_name }}
                       {% endif %}
                     </small>
                   </div>
@@ -198,6 +213,39 @@
   {% endwith %}
 {% endfor %}
 
+{# 📝 shared "add rehearsal note" pop-up (leaders, rehearsal setlists only) #}
+{% if can_edit and event and event.event_type == "rehearsal" %}
+<div class="modal fade" id="addNoteModal" tabindex="-1"
+     aria-labelledby="addNoteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="post" class="modal-content"
+          action="{% url 'setlists:add_song_note' group_slug=group.slug pk=setlist.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="song_id" id="addNoteSongId">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addNoteModalLabel">
+          📝 Rehearsal note: <span id="addNoteSongTitle"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="addNoteText" class="visually-hidden">Note</label>
+        <textarea id="addNoteText" name="notes" class="form-control" rows="6"
+                  maxlength="2000" required
+                  placeholder="What should we remember about this song?"></textarea>
+        <div class="form-text">
+          Saved to {{ event.title }}{% if event.event_date %}, {{ event.event_date|date:"M d" }}{% endif %}.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-success">Save note</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
 {# ⭐ shared rating pop-up #}
 {% include "ratings/_rating_modal.html" %}
 
@@ -215,6 +263,24 @@
     padding-left: 1.2rem;
   }
 </style>
+
+<script>
+(function () {
+  // Fill the shared "add note" pop-up with the song whose button was tapped
+  const modal = document.getElementById("addNoteModal");
+  if (!modal) return;
+  modal.addEventListener("show.bs.modal", function (e) {
+    const btn = e.relatedTarget;
+    if (!btn) return;
+    document.getElementById("addNoteSongId").value = btn.dataset.songId;
+    document.getElementById("addNoteSongTitle").textContent = btn.dataset.songTitle;
+    document.getElementById("addNoteText").value = "";
+  });
+  modal.addEventListener("shown.bs.modal", function () {
+    document.getElementById("addNoteText").focus();
+  });
+})();
+</script>
 
 <script>
 (function () {

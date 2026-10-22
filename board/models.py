@@ -364,4 +364,4 @@ class EventAvailability(models.Model):
         ],
     )
 
-from .rehearsal_notes import RehearsalDetails, SongRehearsalNote
+from .rehearsal_notes import RehearsalDetails, SongRehearsalNote  # noqa: E402,F401

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 import nested_admin
 from tinymce.widgets import TinyMCE
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Q
 
 from .rehearsal_notes import (
     RehearsalDetails,
@@ -34,6 +34,8 @@ class RehearsalDetailsForm(forms.ModelForm):
         }
 
 
+# admin_rehearsal.py
+
 class SongRehearsalNoteForm(forms.ModelForm):
     class Meta:
         model = SongRehearsalNote
@@ -43,17 +45,36 @@ class SongRehearsalNoteForm(forms.ModelForm):
         }
 
 
-# ---- Inline ----
+class SongChoiceField(forms.ModelChoiceField):
+    """Show 'Title (origin)' instead of the default label."""
+    def label_from_instance(self, song):
+        origin = song.origin  # if origin has choices, use song.get_origin_display()
+        return f"{song.songTitle} ({origin})" if origin else song.songTitle
 
 class SongRehearsalNoteInline(nested_admin.NestedStackedInline):
     model = SongRehearsalNote
     form = SongRehearsalNoteForm
-    autocomplete_fields = ["song"]
     extra = 0
     readonly_fields = ("created_at",)
     fieldsets = (
         (None, {"fields": ("song", "notes", ("created_by", "created_at"))}),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "song":
+            qs = Song.objects.none()
+
+            object_id = request.resolver_match.kwargs.get("object_id")
+            if object_id:
+                details = RehearsalDetails.objects.select_related("event").get(pk=object_id)
+                qs = Song.objects.filter(
+                    setlistsong__setlist__event=details.event
+                ).distinct()
+
+            kwargs["queryset"] = qs.order_by("songTitle")
+            kwargs["form_class"] = SongChoiceField
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 
 # ---- Main Admin (Editable) ----
@@ -67,10 +88,13 @@ class RehearsalDetailsAdmin(nested_admin.NestedModelAdmin):
     readonly_fields = ("created_at",)
     search_fields = ("event__title",)
 
+    def has_add_permission(self, request):
+        # Rehearsal details are created from the Event admin ("Rehearsal Notes" button)
+        return False
+
     def event_date(self, obj):
         return obj.event.event_date if obj.event else None
     event_date.short_description = "Event Date"
-
 
 # ---- Read-only Songs with Rehearsal Notes ----
 

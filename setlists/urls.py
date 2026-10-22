@@ -13,7 +13,7 @@ urlpatterns = [
     path("suggestions/note/<int:suggester_id>/", views.edit_suggestion_note, name="edit_suggestion_note"),
     path("suggestions/", views.suggestion_queue, name="suggestion_queue"),
     path("suggestions/<int:pk>/review/", views.review_suggestion, name="review_suggestion"),
-
+    path("<int:pk>/song-note/", views.add_song_note, name="add_song_note"),
     path("<int:pk>/", views.setlist_detail, name="detail"),
     path("<int:pk>/pdf/", views.setlist_pdf, name="setlist_pdf"),
     path(
