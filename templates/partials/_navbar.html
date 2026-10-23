@@ -82,6 +82,19 @@
             </a>
           {% endif %}
 
+          {# Editors only: staff, or anyone with the change_song permission (the Songbook Editors group) #}
+          {% if user.is_staff or perms.songbook.change_song %}
+            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'songs_to_format' %}active{% endif %}"
+               href="{% url 'songbook:songs_to_format' %}">
+              <i class="bi bi-pencil-square me-1"></i>
+              {% if site_name == "FrancoUke" %}
+                À formater
+              {% else %}
+                To Format
+              {% endif %}
+            </a>
+          {% endif %}
+
           <a
             class="nav-item nav-link"
             href="#"

@@ -5,6 +5,7 @@ from django.http import QueryDict
 from django.views.generic import TemplateView, ListView, DetailView
 from django.db.models import Q, prefetch_related_objects
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.cache import cache
 from django.utils import timezone
 from types import SimpleNamespace
@@ -422,7 +423,13 @@ class SongListView(SiteContextMixin, ListView):
         # 🆕 PERFORMANCE: no .distinct(). Nothing above can produce duplicate
         # rows (formatted uses pk__in, tag/exclude match one row per song), and
         # DISTINCT over full rows (incl. songChordPro + JSON) cost ~1s here.
-        return qs
+        #
+        # 🆕 PERFORMANCE: load only the three columns needed to group songs
+        # into families (id, title, origin). The big fields (songChordPro,
+        # lyrics_with_chords, metadata...) are NOT loaded for the whole
+        # songbook any more; get_context_data loads them again, but only for
+        # the ~20 families shown on the current page.
+        return qs.only("id", "songTitle", "origin")
     
     
 
@@ -466,8 +473,18 @@ class SongListView(SiteContextMixin, ListView):
         else:
             site_songs = Song.objects.filter(site_name=site_name, is_public=True)
 
+        # Same tags as before, but without a subquery on the song table
+        # (this cut the query from ~159 ms to ~4 ms locally). Everything is in
+        # ONE filter() call so the conditions apply to the same song.
+        if self.request.user.is_authenticated:
+            visible = Q(song__is_public=True) | Q(song__contributor=self.request.user)
+        else:
+            visible = Q(song__is_public=True)
+
         all_tags = list(
-            Tag.objects.filter(song__in=site_songs).distinct().values_list("name", flat=True)
+            Tag.objects.filter(visible, song__site_name=site_name)
+            .distinct()
+            .values_list("name", flat=True)
         )
 
         # One lightweight query feeds the chord, decade, key and origin
@@ -698,6 +715,20 @@ class SongListView(SiteContextMixin, ListView):
         context["page_obj"] = page_obj
         context["is_paginated"] = page_obj.has_other_pages()
 
+        # 🆕 PERFORMANCE: the songs grouped above are lightweight (see the end
+        # of get_queryset). Reload FULL rows for only the songs on this page,
+        # in one query, and put them in place of the lightweight ones.
+        shown_ids = []
+        for family in page_obj.object_list:
+            shown_ids.append(family["primary"].id)
+            shown_ids.extend(v.id for v in family["other_versions"])
+        full_songs = Song.objects.in_bulk(shown_ids)
+        for family in page_obj.object_list:
+            family["primary"] = full_songs.get(family["primary"].id, family["primary"])
+            family["other_versions"] = [
+                full_songs.get(v.id, v) for v in family["other_versions"]
+            ]
+
         # 🆕 PERFORMANCE: fetch tags and "is formatted" for ALL songs on this
         # page in two queries, instead of two queries per song.
         page_songs = []
@@ -765,3 +796,31 @@ class SongListSimpleView(SongListView):
     view_mode = "simple"
     list_url_suffix = ":song_list_simple"
     formatted_only = True
+
+
+# -------------------------------------------------------------
+# Editors' to-do list: songs that have no formatting yet.
+# "Not formatted" uses the same rule as the song list's "formatted" filter
+# (no SongFormatting row for the song), just inverted.
+# Login required, and only staff / people with the change_song permission
+# (same rule as editing a song), so crawlers can never reach it.
+# -------------------------------------------------------------
+class SongsToFormatView(LoginRequiredMixin, UserPassesTestMixin, SiteContextMixin, ListView):
+    model = Song
+    template_name = "songbook/songs_to_format.html"
+    context_object_name = "songs"
+    paginate_by = 50
+
+    def test_func(self):
+        user = self.request.user
+        return user.is_staff or user.has_perm("songbook.change_song")
+
+    def get_queryset(self):
+        user = self.request.user
+        return (
+            Song.objects.filter(site_name=self.get_site_name())
+            .filter(Q(is_public=True) | Q(contributor=user))
+            .exclude(pk__in=SongFormatting.objects.values("song_id"))
+            .only("id", "songTitle", "origin", "metadata")
+            .order_by("songTitle")
+        )

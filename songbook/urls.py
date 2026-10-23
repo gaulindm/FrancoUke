@@ -3,7 +3,7 @@ from django.urls import path
 from songbook.views.formatting_views import edit_song_formatting
 from songbook.views.misc_views import about, whats_new, save_scroll_speed, video_popup
 from songbook.views.artist_views import ArtistListView
-
+from songbook.views.song_display_views import (LandingView, UserSongListView, ChordSheetView, SongListView, SongListSimpleView, SongsToFormatView)
 from songbook.views.pdf_views import (
     generate_pdf_response,    # if you expose it
     generate_multi_song_pdf,
@@ -29,7 +29,7 @@ urlpatterns = [
     path("songs/<int:pk>/", ChordSheetView.as_view(), name="chord_sheet"),
     path("songs/<int:pk>/edit/", SongUpdateView.as_view(), name="song_update"),
     path("songs/<int:pk>/delete/", SongDeleteView.as_view(), name="song_delete"),
-
+    path("songs/to-format/", SongsToFormatView.as_view(), name="songs_to_format"),
     # 🔹 Artists
     path("artists/", ArtistListView.as_view(), name="artist_list"),
     path("artists/<str:artist_name>/", SongListView.as_view(), name="songs_by_artist"),

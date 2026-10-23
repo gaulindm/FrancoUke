@@ -1,0 +1,100 @@
+{% extends base_template %}
+{% load static %}
+
+{# songbook/songs_to_format.html: editors' to-do list. Songs that have no formatting yet. #}
+{# Columns: Title (opens the song) | Artist (year) | Origin | "Format" button (opens the formatting editor) #}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'songbook/song_list.css' %}">
+
+<!-- 🎤 Heading + link back to the normal list -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+    <h2 class="mb-0">{% if site_name == 'FrancoUke' %}Chansons à formater{% else %}Songs to format{% endif %}</h2>
+    <a href="{% url site_namespace|add:':song_list_simple' %}" class="btn btn-sm btn-outline-secondary">
+        {% if site_name == 'FrancoUke' %}← Liste des chansons{% else %}← Back to the song list{% endif %}
+    </a>
+</div>
+
+<p class="text-muted">
+    {% if site_name == 'FrancoUke' %}
+        {{ paginator.count }} chanson{{ paginator.count|pluralize }} sans formatage.
+    {% else %}
+        {{ paginator.count }} song{{ paginator.count|pluralize }} still without formatting.
+    {% endif %}
+</p>
+
+<!-- 🎼 Songs Table -->
+<div class="table-responsive">
+    <table class="table table-striped table-hover compact-table">
+        <thead>
+            <tr>
+                {% if site_name == 'FrancoUke' %}
+                    <th>Chanson</th>
+                    <th>Interprète (année)</th>
+                    <th>Origine</th>
+                    <th class="text-center">Formatage</th>
+                {% else %}
+                    <th>Song</th>
+                    <th>Artist (year)</th>
+                    <th>Origin</th>
+                    <th class="text-center">Formatting</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in songs %}
+            <tr>
+                <td>
+                    <a href="{% url site_namespace|add:':chord_sheet' song.id %}"
+                       class="song-link"
+                       title="{{ song.songTitle }}">
+                        {{ song.songTitle }}
+                    </a>
+                </td>
+                <td>
+                    {{ song.metadata.artist|default_if_none:"Unknown Artist" }}{% if song.metadata.year %} ({{ song.metadata.year }}){% endif %}
+                </td>
+                <td>
+                    {% if song.origin %}
+                        <span class="badge bg-secondary">{{ song.origin }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url site_namespace|add:':edit_formatting' song.id %}"
+                       class="btn btn-sm btn-outline-primary">
+                        {% if site_name == 'FrancoUke' %}Formater{% else %}Format{% endif %}
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">
+                    {% if site_name == 'FrancoUke' %}Bravo ! Toutes les chansons sont formatées.{% else %}All done! Every song has been formatted.{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 🔄 Pagination -->
+{% if is_paginated %}
+<nav aria-label="Pages">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock content %}
