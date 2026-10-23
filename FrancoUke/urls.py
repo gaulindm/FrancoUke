@@ -4,14 +4,23 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
-from core.views import landing_page 
+from core.views import landing_page
 #from public import views as public_views
+
+from django.http import HttpResponse
+
+def robots_txt(request):
+    body = "User-agent: *\nDisallow: /*?\nCrawl-delay: 10\n"
+    return HttpResponse(body, content_type="text/plain")
+
+
 
 urlpatterns = [
     path("admin/assets/", include("assets.urls")),
     path("admin/", admin.site.urls),
     path("ratings/", include("ratings.urls")),
     path("users/", include("users.urls")),
+    path("robots.txt", robots_txt),
 
     path('', landing_page, name='landing'),
 

@@ -5,6 +5,7 @@ from django.http import QueryDict
 from django.views.generic import TemplateView, ListView, DetailView
 from django.db.models import Q, prefetch_related_objects
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.utils import timezone
 from types import SimpleNamespace
 import re
@@ -210,8 +211,23 @@ class SongListView(SiteContextMixin, ListView):
     SEASONAL_TAG = "Xmas"
     SEASONAL_MONTH = 12  # December
 
+    # 🆕 PERFORMANCE / BOTS: crawlers don't keep cookies, so saving "last used
+    # filters" for them just fills the django_session table with junk rows
+    # (one per request). Any user agent containing one of these words is
+    # treated as a bot and doesn't get a session saved.
+    BOT_MARKERS = ("bot", "crawler", "spider", "externalagent")
+
+    # 🆕 PERFORMANCE: how long the filter-button data (chords, decades, keys,
+    # origins, tags) is cached. A newly added song shows up in the buttons
+    # within this many seconds.
+    FILTER_OPTIONS_CACHE_SECONDS = 600  # 10 minutes
+
     def _in_season(self):
         return timezone.now().month == self.SEASONAL_MONTH
+
+    def _looks_like_bot(self):
+        ua = self.request.META.get("HTTP_USER_AGENT", "").lower()
+        return any(marker in ua for marker in self.BOT_MARKERS)
 
     def get_queryset(self):
         # -------------------------------------------------------------
@@ -223,7 +239,8 @@ class SongListView(SiteContextMixin, ListView):
         #   1. ?reset=1        -> explicit "Clear Filter" click: wipe the
         #                          saved filters and show everything.
         #   2. any other GET   -> the user just changed a filter/search/
-        #                          page: save it as the new "last used".
+        #                          page: save it as the new "last used"
+        #                          (but not for bots - see BOT_MARKERS).
         #   3. no GET at all   -> bare visit: fall back to whatever was
         #                          last saved for this site (or nothing).
         # -------------------------------------------------------------
@@ -239,7 +256,10 @@ class SongListView(SiteContextMixin, ListView):
             self.request.session.pop(session_key, None)
             self.filter_params = QueryDict("")
         elif self.request.GET:
-            self.request.session[session_key] = self.request.GET.urlencode()
+            # 🆕 Bots still get the filtered page, but nothing is written
+            # to the session table for them.
+            if not self._looks_like_bot():
+                self.request.session[session_key] = self.request.GET.urlencode()
             self.filter_params = self.request.GET
         else:
             self.filter_params = QueryDict(self.request.session.get(session_key, ""))
@@ -418,6 +438,85 @@ class SongListView(SiteContextMixin, ListView):
             )
         return response
 
+    # -------------------------------------------------------------
+    # 🆕 PERFORMANCE: data for the filter buttons (tags, chords, decades,
+    # keys, origins). It only changes when songs are added or edited, so it
+    # is built once and cached instead of being rebuilt on every page load.
+    #
+    # The cache key includes the site and the user, because logged-in
+    # members also see their own private songs (so their buttons can differ).
+    # -------------------------------------------------------------
+    def get_filter_options(self, site_name):
+        if self.request.user.is_authenticated:
+            user_part = f"user{self.request.user.id}"
+        else:
+            user_part = "anon"
+        safe_site = str(site_name).replace(" ", "_")
+        cache_key = f"songlist_filter_options:{safe_site}:{user_part}"
+
+        options = cache.get(cache_key)
+        if options is not None:
+            return options
+
+        # Cache miss: build everything (this is the old per-request code)
+        if self.request.user.is_authenticated:
+            site_songs = Song.objects.filter(site_name=site_name).filter(
+                Q(is_public=True) | Q(contributor=self.request.user)
+            )
+        else:
+            site_songs = Song.objects.filter(site_name=site_name, is_public=True)
+
+        all_tags = list(
+            Tag.objects.filter(song__in=site_songs).distinct().values_list("name", flat=True)
+        )
+
+        # One lightweight query feeds the chord, decade, key and origin
+        # buttons. values_list() fetches only these four columns, so we
+        # never load songChordPro / lyrics_with_chords JSON here.
+        all_chords = set()
+        all_decades = set()
+        all_keys = set()
+        all_origins = set()
+        for chords_used, metadata, detected_key, origin in site_songs.values_list(
+            "chords_used", "metadata", "detected_key", "origin"
+        ):
+            metadata = metadata or {}
+
+            # Origins (clubs)
+            if origin:
+                all_origins.add(origin)
+
+            # Chords
+            if chords_used:
+                for chord in chords_used.split(","):
+                    chord = chord.strip()
+                    if is_valid_chord(chord):
+                        all_chords.add(chord)
+
+            # Decades
+            year_str = metadata.get("year")
+            if year_str:
+                try:
+                    all_decades.add((int(year_str) // 10) * 10)
+                except (ValueError, TypeError):
+                    pass
+
+            # Keys: manual {key:} tag if set, else auto-detected
+            # (same rule as Song.effective_key)
+            effective_key = metadata.get("key") or detected_key
+            if effective_key:
+                all_keys.add(effective_key)
+
+        options = {
+            "all_tags": all_tags,
+            "all_chords": sorted(all_chords),
+            "all_decades": sorted(all_decades),
+            "all_keys": sorted(all_keys),
+            "all_origins": sorted(all_origins),
+        }
+        cache.set(cache_key, options, self.FILTER_OPTIONS_CACHE_SECONDS)
+        return options
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -464,58 +563,15 @@ class SongListView(SiteContextMixin, ListView):
         context["alphabet_filter"] = list(string.ascii_uppercase) + ["#"]
         context["selected_letter"] = self.filter_params.get("letter", "").strip().upper()
 
-        # Tags
-        if self.request.user.is_authenticated:
-            site_songs = Song.objects.filter(site_name=site_name).filter(
-                Q(is_public=True) | Q(contributor=self.request.user)
-            )
-        else:
-            site_songs = Song.objects.filter(site_name=site_name, is_public=True)
+        # 🆕 PERFORMANCE: tags, chords, decades, keys and origins for the
+        # filter buttons come from the cache (see get_filter_options above).
+        options = self.get_filter_options(site_name)
+        context["all_tags"] = options["all_tags"]
+        context["all_chords"] = options["all_chords"]
+        context["all_decades"] = options["all_decades"]
+        context["all_keys"] = options["all_keys"]
+        context["all_origins"] = options["all_origins"]
 
-        all_tags = Tag.objects.filter(song__in=site_songs).distinct().values_list("name", flat=True)
-        context["all_tags"] = all_tags
-
-        # 🆕 All unique chords across the site for the clickable buttons
-        # In get_context_data():
-        # 🆕 PERFORMANCE: one lightweight query feeds the chord, decade and
-        # key filter buttons below. values_list() fetches only these three
-        # columns, so we no longer load every visible song in full
-        # (songChordPro + lyrics_with_chords JSON) three separate times.
-        all_chords = set()
-        all_decades = set()
-        all_keys = set()
-        all_origins = set()
-        for chords_used, metadata, detected_key, origin in site_songs.values_list(
-            "chords_used", "metadata", "detected_key", "origin"
-        ):
-            metadata = metadata or {}
-
-            # Origins (clubs)
-            if origin:
-                all_origins.add(origin)
-
-            # Chords
-            if chords_used:
-                for chord in chords_used.split(","):
-                    chord = chord.strip()
-                    if is_valid_chord(chord):
-                        all_chords.add(chord)
-
-            # Decades
-            year_str = metadata.get("year")
-            if year_str:
-                try:
-                    all_decades.add((int(year_str) // 10) * 10)
-                except (ValueError, TypeError):
-                    pass
-
-            # Keys: manual {key:} tag if set, else auto-detected
-            # (same rule as Song.effective_key)
-            effective_key = metadata.get("key") or detected_key
-            if effective_key:
-                all_keys.add(effective_key)
-
-        context["all_chords"] = sorted(all_chords)
         context["chord_filter"] = self.filter_params.get("chords", "")
         # 🆕 URL-safe copy for building filter links: a raw "F#m" in an href
         # starts a URL fragment at "#" and silently drops every later parameter.
@@ -532,20 +588,14 @@ class SongListView(SiteContextMixin, ListView):
         ]
         context["chord_count_filter"] = self.filter_params.get("chord_count", "")
 
-        # 🆕 Decade filter — only offer decades that actually have songs
-        # (all_decades is collected in the single pass above)
-        context["all_decades"] = sorted(all_decades)
+        # 🆕 Decade filter — only offers decades that actually have songs
         context["decade_filter"] = self.filter_params.get("decade", "")
 
-        # 🆕 Key filter — only offer keys that actually appear (using effective_key:
+        # 🆕 Key filter — only offers keys that actually appear (using effective_key:
         # manual {key:} tag if set, else the auto-detected key)
-        # (all_keys is collected in the single pass above)
-        context["all_keys"] = sorted(all_keys)
         context["key_filter"] = self.filter_params.get("key", "")
 
-        # 🆕 Origin (club) filter — only offer origins that actually have songs
-        # (all_origins is collected in the single pass above)
-        context["all_origins"] = sorted(all_origins)
+        # 🆕 Origin (club) filter — only offers origins that actually have songs
         context["origin_filter"] = self.filter_params.get("origin", "")
 
         # 🆕 Group songs into "families" — one row per distinct title, with
