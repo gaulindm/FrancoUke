@@ -27,6 +27,18 @@ from board.rehearsal_notes import RehearsalDetails, SongRehearsalNote
 
 logger = logging.getLogger(__name__)
 
+# Group whose members may edit songs (the ✏️ link on the teleprompter).
+# Same rule as in the song teleprompter view; keep the two in step.
+SONG_EDITOR_GROUP = "SongbookEditor"
+
+
+def _user_can_edit_songs(user):
+    """True for superusers and members of the SongbookEditor group."""
+    return user.is_authenticated and (
+        user.is_superuser
+        or user.groups.filter(name=SONG_EDITOR_GROUP).exists()
+    )
+
 
 # ----------------------------
 # 📋 List of all setlists
@@ -234,6 +246,8 @@ def setlist_teleprompter(request, group_slug, setlist_id, order):
             "full_chord_library_json": json.dumps(full_library),
             "user_preferences_json": json.dumps(user_preferences),
             "initial_scroll_speed": initial_scroll_speed,
+            # ✏️ Shows the pencil (edit ChordPro) link, editors only
+            "can_edit_song": _user_can_edit_songs(request.user),
              "group": request.group,
             **context_data,
         },

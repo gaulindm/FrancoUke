@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.utils.http import url_has_allowed_host_and_scheme
 from songbook.models import Song
 from songbook.context_processors import site_context
 from songbook.parsers import parse_song_data
@@ -125,6 +126,18 @@ class SongUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return context
 
     def get_success_url(self):
+        # 🔙 Go back to the page that sent the editor here (teleprompter,
+        # setlist teleprompter, chord sheet...). The link carries ?next=...,
+        # and the form posts to its own URL, so it is still in the query string.
+        next_url = self.request.GET.get("next") or self.request.POST.get("next")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return next_url
+
+        # No (or unsafe) next: previous behaviour, back to the chord sheet
         site_name = self.object.site_name or site_context(self.request)["site_name"]
         return reverse(f"{site_name.lower()}:chord_sheet", kwargs={"pk": self.object.pk})
 

@@ -37,8 +37,8 @@
       <button type="button" id="start-tour" data-tour="teleprompter" title="Take the tour">? Take the tour</button>
       {# ✏️ Editors only: jump to the ChordPro edit page for this song #}
       {% if can_edit_song and song %}
-        <a href="{% url 'songbook:song_update' song.pk %}" class="tp-edit-link"
-           title="Edit ChordPro" aria-label="Edit ChordPro">✏️</a>
+      <a href="{% url 'songbook:song_update' song.pk %}?next={{ request.get_full_path|urlencode }}" class="tp-edit-link"
+      title="Edit ChordPro" aria-label="Edit ChordPro">✏️</a>
       {% endif %}
       {% block controls_left %}<span class="song-title">{{ song.songTitle }}</span>{% endblock %}
     </div>
