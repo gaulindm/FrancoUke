@@ -15,6 +15,20 @@ from songbook.context_processors import site_context
 
 logger = logging.getLogger(__name__)
 
+# Group whose members may edit songs (the ✏️ link on the teleprompter).
+SONG_EDITOR_GROUP = "SongbookEditor"
+
+
+def _user_can_edit_songs(user):
+    """True for superusers and members of the SongbookEditor group.
+    If you already have a can_edit helper elsewhere, import and use that
+    instead so there is only one definition of "who is an editor"."""
+    return user.is_authenticated and (
+        user.is_superuser
+        or user.groups.filter(name=SONG_EDITOR_GROUP).exists()
+    )
+
+
 # -----------------------------
 # 🎵 Main Teleprompter View (WITH COLOR MARKUP SUPPORT)
 # -----------------------------
@@ -163,6 +177,8 @@ def teleprompter_view(request, song_id, beginner=False):
         "full_chord_library_json": json.dumps(full_library),
         "user_preferences_json": json.dumps(user_preferences),
         "initial_scroll_speed": song.scroll_speed or 40,
+        # ✏️ Shows the pencil (edit ChordPro) link, editors only
+        "can_edit_song": _user_can_edit_songs(request.user),
         **context_data,
     }
 
