@@ -3,6 +3,7 @@
 
 {# songbook/songs_to_format.html: editors' to-do list. Songs that have no formatting yet. #}
 {# Columns: Title (opens the song) | Artist (year) | Origin | "Format" button (opens the formatting editor) #}
+{# Filters: origin + number of chords (each choice shows how many songs it has) #}
 
 {% block content %}
 
@@ -16,11 +17,49 @@
     </a>
 </div>
 
+<!-- 🔎 Filters: origin + number of chords -->
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label for="origin" class="form-label mb-0 small">
+            {% if site_name == 'FrancoUke' %}Origine{% else %}Origin{% endif %}
+        </label>
+        <select name="origin" id="origin" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">{% if site_name == 'FrancoUke' %}Toutes{% else %}All{% endif %}</option>
+            {% for o in origin_choices %}
+                <option value="{{ o.value }}" {% if o.value|lower == origin_filter|lower %}selected{% endif %}>
+                    {% if o.value == 'none' %}{% if site_name == 'FrancoUke' %}(aucune){% else %}(none){% endif %}{% else %}{{ o.label }}{% endif %} ({{ o.count }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label for="chord_count" class="form-label mb-0 small">
+            {% if site_name == 'FrancoUke' %}Nombre d'accords{% else %}Number of chords{% endif %}
+        </label>
+        <select name="chord_count" id="chord_count" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">{% if site_name == 'FrancoUke' %}Tous{% else %}Any{% endif %}</option>
+            {% for c in chord_count_choices %}
+                <option value="{{ c.value }}" {% if c.value == chord_count_filter %}selected{% endif %}>
+                    {{ c.label }} ({{ c.count }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <noscript><button type="submit" class="btn btn-sm btn-primary">OK</button></noscript>
+        {% if filters_active %}
+            <a href="{% url site_namespace|add:':songs_to_format' %}?reset=1" class="btn btn-sm btn-outline-secondary">
+                {% if site_name == 'FrancoUke' %}Effacer les filtres{% else %}Clear filters{% endif %}
+            </a>
+        {% endif %}
+    </div>
+</form>
+
 <p class="text-muted">
     {% if site_name == 'FrancoUke' %}
-        {{ paginator.count }} chanson{{ paginator.count|pluralize }} sans formatage.
+        {{ paginator.count }} chanson{{ paginator.count|pluralize }}{% if filters_active %} sur {{ total_to_format }}{% endif %} sans formatage.
     {% else %}
-        {{ paginator.count }} song{{ paginator.count|pluralize }} still without formatting.
+        {{ paginator.count }} song{{ paginator.count|pluralize }}{% if filters_active %} of {{ total_to_format }}{% endif %} still without formatting.
     {% endif %}
 </p>
 
@@ -70,7 +109,11 @@
             {% empty %}
             <tr>
                 <td colspan="4" class="text-center">
-                    {% if site_name == 'FrancoUke' %}Bravo ! Toutes les chansons sont formatées.{% else %}All done! Every song has been formatted.{% endif %}
+                    {% if filters_active %}
+                        {% if site_name == 'FrancoUke' %}Aucune chanson ne correspond à ces filtres.{% else %}No songs match these filters.{% endif %}
+                    {% else %}
+                        {% if site_name == 'FrancoUke' %}Bravo ! Toutes les chansons sont formatées.{% else %}All done! Every song has been formatted.{% endif %}
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -78,18 +121,18 @@
     </table>
 </div>
 
-<!-- 🔄 Pagination -->
+<!-- 🔄 Pagination (filter_qs keeps the chosen filters when changing page) -->
 {% if is_paginated %}
 <nav aria-label="Pages">
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+            <li class="page-item"><a class="page-link" href="?{{ filter_qs }}page={{ page_obj.previous_page_number }}">&laquo;</a></li>
         {% else %}
             <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
         {% endif %}
         <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ paginator.num_pages }}</span></li>
         {% if page_obj.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            <li class="page-item"><a class="page-link" href="?{{ filter_qs }}page={{ page_obj.next_page_number }}">&raquo;</a></li>
         {% else %}
             <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
         {% endif %}

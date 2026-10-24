@@ -11,7 +11,7 @@ from django.utils import timezone
 from types import SimpleNamespace
 import re
 import string
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from collections import Counter, OrderedDict
 from django.core.paginator import Paginator
@@ -811,16 +811,131 @@ class SongsToFormatView(LoginRequiredMixin, UserPassesTestMixin, SiteContextMixi
     context_object_name = "songs"
     paginate_by = 50
 
+    # value used in the URL -> label shown in the dropdown
+    CHORD_COUNT_CHOICES = [
+        ("le1", "0–1"),
+        ("2", "2"),
+        ("3", "3"),
+        ("4", "4"),
+        ("5", "5"),
+        ("gt5", ">5"),
+    ]
+    NO_ORIGIN = "none"  # URL value for songs that have no origin
+
     def test_func(self):
         user = self.request.user
         return user.is_staff or user.has_perm("songbook.change_song")
 
+    @staticmethod
+    def _chord_bucket(chords_used):
+        """Number of real chords in the song, as one of the choice values."""
+        count = len({
+            c.strip() for c in (chords_used or "").split(",")
+            if is_valid_chord(c.strip())
+        })
+        if count <= 1:
+            return "le1"
+        if count > 5:
+            return "gt5"
+        return str(count)
+
     def get_queryset(self):
         user = self.request.user
-        return (
+        base = (
             Song.objects.filter(site_name=self.get_site_name())
             .filter(Q(is_public=True) | Q(contributor=user))
             .exclude(pk__in=SongFormatting.objects.values("song_id"))
-            .only("id", "songTitle", "origin", "metadata")
-            .order_by("songTitle")
         )
+
+        # Filter persistence: remember the last filters used on this site, so
+        # coming back to the bare URL (e.g. after formatting a song) restores them.
+        #   ?reset=1                  -> "Clear filters": forget the saved ones
+        #   ?origin=... / ?chord_count=... -> the user just changed a filter: save it
+        #   anything else (bare URL, or only ?page=2) -> use the saved filters
+        session_key = f"songs_to_format_filters:{self.get_site_name()}"
+        GET = self.request.GET
+        if GET.get("reset") == "1":
+            self.request.session.pop(session_key, None)
+            filter_params = QueryDict("")
+        elif "origin" in GET or "chord_count" in GET:
+            filter_params = GET
+            self.request.session[session_key] = urlencode({
+                "origin": GET.get("origin", ""),
+                "chord_count": GET.get("chord_count", ""),
+            })
+        else:
+            filter_params = QueryDict(self.request.session.get(session_key, ""))
+
+        origin = filter_params.get("origin", "").strip()
+        chord_count = filter_params.get("chord_count", "").strip()
+        if chord_count not in dict(self.CHORD_COUNT_CHOICES):
+            chord_count = ""  # ignore junk in the URL
+
+
+
+
+
+        self.origin_filter = origin
+        self.chord_count_filter = chord_count
+
+        # One lightweight query (3 columns, no lyrics) feeds the filtering AND
+        # the numbers shown in the dropdowns.
+        origin_display = {}          # lowercase origin -> spelling to show
+        origin_counts = Counter()    # songs per origin (respecting the chord filter)
+        chord_counts = Counter()     # songs per chord bucket (respecting the origin filter)
+        matching_pks = []
+        total = 0
+
+        for pk, song_origin, chords_used in base.values_list("pk", "origin", "chords_used"):
+            total += 1
+            song_origin = (song_origin or "").strip()
+            origin_key = song_origin.lower() or self.NO_ORIGIN
+            origin_display.setdefault(origin_key, song_origin or "—")
+            bucket = self._chord_bucket(chords_used)
+
+            origin_ok = not origin or origin_key == origin.lower()
+            chords_ok = not chord_count or bucket == chord_count
+
+            if chords_ok:
+                origin_counts[origin_key] += 1
+            if origin_ok:
+                chord_counts[bucket] += 1
+            if origin_ok and chords_ok:
+                matching_pks.append(pk)
+
+        self.total_to_format = total
+        self.origin_choices = [
+            {"value": origin_display[k], "label": origin_display[k], "count": origin_counts.get(k, 0)}
+            for k in sorted(origin_display, key=lambda k: origin_display[k].lower())
+        ]
+        # the "no origin" entry needs a URL value that can't clash with a real club
+        for choice in self.origin_choices:
+            if choice["value"] == "—":
+                choice["value"] = self.NO_ORIGIN
+        self.chord_count_choices = [
+            {"value": v, "label": label, "count": chord_counts.get(v, 0)}
+            for v, label in self.CHORD_COUNT_CHOICES
+        ]
+
+        qs = base
+        if origin or chord_count:
+            qs = qs.filter(pk__in=matching_pks)
+        return qs.only("id", "songTitle", "origin", "metadata").order_by("songTitle")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["origin_filter"] = self.origin_filter
+        context["chord_count_filter"] = self.chord_count_filter
+        context["origin_choices"] = self.origin_choices
+        context["chord_count_choices"] = self.chord_count_choices
+        context["total_to_format"] = self.total_to_format
+        context["filters_active"] = bool(self.origin_filter or self.chord_count_filter)
+
+        # Keeps the filters when moving between pages: href="?{{ filter_qs }}page=2"
+        params = {}
+        if self.origin_filter:
+            params["origin"] = self.origin_filter
+        if self.chord_count_filter:
+            params["chord_count"] = self.chord_count_filter
+        context["filter_qs"] = (urlencode(params) + "&") if params else ""
+        return context
