@@ -21,7 +21,7 @@ class UserPreferenceInline(admin.StackedInline):
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     inlines = (UserPreferenceInline,)
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser','last_login')
     search_fields = ('username', 'email', 'first_name', 'last_name')
 
 # Optional: Clean up this if Profile is unused
