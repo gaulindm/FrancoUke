@@ -1,6 +1,7 @@
 {% extends base_template|default:"base.html" %}
 {% load crispy_forms_tags %}
 {% load static %}
+
 {% block content %}
 <style>
     body {
@@ -198,6 +199,7 @@
 rel="stylesheet"
 href="https://cdn.jsdelivr.net/npm/codemirror@5.65.10/addon/dialog/dialog.css"
 />
+<script src="{% static 'songbook/js/chordpro_tags.js' %}"></script>
     <script>
         // Initialize CodeMirror for the songChordPro field
         var editor = CodeMirror.fromTextArea(document.getElementById("id_songChordPro"), {
@@ -237,6 +239,7 @@ href="https://cdn.jsdelivr.net/npm/codemirror@5.65.10/addon/dialog/dialog.css"
 
     // Adjust initial height to be taller
     editor.setSize(null, "500px"); // Set the height to 500px or adjust as needed
+    ChordProTags.attach(editor);
         
         // Sync CodeMirror content with the textarea on form submission
         document.getElementById("song-form").addEventListener("submit", function(event) {
