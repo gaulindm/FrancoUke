@@ -1,6 +1,7 @@
 #setlist/views.py
 import json
 import logging
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 import re
@@ -64,15 +65,18 @@ def setlist_detail(request, group_slug, pk):
     setlist = get_object_or_404(SetList, pk=pk, group=group)
     songs = list(setlist.songs.select_related("song").order_by("order"))
 
-    # ⭐ ratings: two queries for the whole page, then attach to each row
-    summaries, mine = rating_data([item.song_id for item in songs], request.user)
-    for item in songs:
-        s = summaries.get(item.song_id)
-        item.avg_rating = s["avg"] if s else None
-        item.rating_count = s["n"] if s else 0
-        item.avg_play = s["avg_play"] if s else None
-        item.avg_sing = s["avg_sing"] if s else None
-        item.my_rating = mine.get(item.song_id)
+    # ⭐ ratings: two queries for the whole page, then attach to each row.
+    # 🙈 Hidden for now: set SHOW_RATINGS = True in settings.py to bring them back.
+    show_ratings = getattr(settings, "SHOW_RATINGS", False)
+    if show_ratings:
+        summaries, mine = rating_data([item.song_id for item in songs], request.user)
+        for item in songs:
+            s = summaries.get(item.song_id)
+            item.avg_rating = s["avg"] if s else None
+            item.rating_count = s["n"] if s else 0
+            item.avg_play = s["avg_play"] if s else None
+            item.avg_sing = s["avg_sing"] if s else None
+            item.my_rating = mine.get(item.song_id)
 
     # 📝 Rehearsal notes for these songs, limited to THIS club's rehearsals
     notes_by_song = {}
@@ -94,6 +98,7 @@ def setlist_detail(request, group_slug, pk):
         "event": setlist.event,  # might be None
         "can_edit": request.is_group_leader,
         "group": group,
+        "show_ratings": show_ratings,
     })
 
 @group_member_required

@@ -73,7 +73,7 @@
             {% endif %}
           {% endwith %}
 
-          {% if group %}
+          {% if show_ratings and group %}
           <button type="button"
                   class="btn btn-sm btn-outline-warning ms-2"
                   data-bs-toggle="modal"
@@ -247,7 +247,7 @@
 {% endif %}
 
 {# ⭐ shared rating pop-up #}
-{% include "ratings/_rating_modal.html" %}
+{% if show_ratings %}{% include "ratings/_rating_modal.html" %}{% endif %}
 
 <style>
   .list-group-item {
