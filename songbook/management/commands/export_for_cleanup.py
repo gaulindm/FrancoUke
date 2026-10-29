@@ -21,6 +21,9 @@ def chord_tokens(text):
     return out
 
 
+def chord_count(chords_used):
+    return len({c.strip() for c in (chords_used or "").split(",") if is_valid_chord(c.strip())})
+
 def chord_bucket(chords_used):
     count = len({c.strip() for c in (chords_used or "").split(",") if is_valid_chord(c.strip())})
     if count <= 1:
@@ -39,6 +42,7 @@ class Command(BaseCommand):
         parser.add_argument("--origin", help="e.g. SOUP, or 'none' for songs without origin")
         parser.add_argument("--size", type=int, default=12)
         parser.add_argument("--out", default="cleanup_batches")
+        parser.add_argument("--exact-chords", type=int, help="only songs with exactly this many chords, e.g. 10")
         parser.add_argument("--include-private", action="store_true",
                             help="also include songs that are not public")
 
@@ -55,6 +59,8 @@ class Command(BaseCommand):
             if want_origin and origin_key != want_origin:
                 continue
             if o["chord_count"] and chord_bucket(s.chords_used) != o["chord_count"]:
+                continue
+            if o["exact_chords"] is not None and chord_count(s.chords_used) != o["exact_chords"]:
                 continue
             songs.append(s)
 

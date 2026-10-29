@@ -1,0 +1,178 @@
+=== SONG 2056 | Hey! Baby! ===
+{title:}
+{artist:Bruce Channel}
+{youtube:}
+{songwriter:Bruce Channel & Margaret Cobb}
+{capo:2}
+{year:1961}
+{1stnote:D}
+{timeSignature:Cut time}
+ 
+{soi}
+[G - E7] [A7 - D7] [G - E7] [A7 - D7] x2
+{eoi}
+{soc}
+[G//]Hey! [E7//] [A7//] [D7]Hey-ey, [G]ba-by, [E7//]
+[A7//] [D7]I want to [G]kno-o-o-[E7//]ow
+[A7] if you’ll [D7]be my [G//]girl. [E7//] [A7 - D7]
+[G//]Hey! [E7//] [A7//] [D7]Hey-ey, [G]ba-by, [E7//]
+[A7//] [D7]I want to [G]kno-o-o-[E7//]ow
+[A7] if you’ll [D7]be my [G//]girl. [C//] [G//] [G7//]
+{eoc}
+[C] When I saw you walk-in’ down the [C9//]street
+I [G]said that’s the kind of gal [G9]I like to [G9//]meet.
+[C]She’s so pret-ty. [C] La-wd, she’s fi-i-ine.
+[A7] [N.C.] I’m gon-na make her mine a-ll mi-i-i-ine.
+{soc}
+[G//]Hey! [E7//] [A7//] [D7]Hey-ey, [G]ba-by, [E7//]
+[A7//] [D7]I want to [G]kno-o-o-[E7//]ow
+[A7] if you’ll [D7]be my [G//]girl. [C//] ([G//] - [F#/] - [F/])
+{eoc}
+[E7] When you turned and walked a-[E7//]way
+[A7] [A7//]that’s when I want to [A7//]say,
+[D7] come o-on, ba-by, give me a-a whi-rl.
+[G]I [N.C.] wan-na know if you’ll be my girl.
+{soc}
+[G//]Hey! [E7//] [A7//] [D7]Hey-ey, [G]ba-by, [E7//]
+[A7//] [D7]I want to [G]kno-o-o-[E7//]ow
+[A7] if you’ll [D7]be my [G//]girl. [C//]([G//] - [F#/] - [F/])
+{eoc}
+[E7] When you turned and walked a-[E7//]way
+[A7] [A7//]that’s when I want to [A7//]say,
+[D7] come o-on, ba-by, give me a-a whi-rl.
+[G]I [N.C.] wan-na know if you’ll be my girl.
+{soc}
+[G//]Hey! [E7//] [A7//] [D7]Hey-ey, [G]ba-by, [E7//]
+[A7//] [D7]I want to [G]kno-o-o-[E7//]ow
+[A7] if you’ll [D7]be my [G//]girl. [E7//] [A7 - D7]
+[G//]Hey! [E7//] [A7]Hey-ey-[D7]ey-ey, [G]ba-by, [E7//]
+[A7//] [D7]I want to [G]kno-o-o-[E7//]ow
+[A7] if you’ll [D7]be my [G//]girl. [C//] [G/ - / - / - /]
+{eoc}
+
+=== SONG 1852 | Sing ===
+{artist:Carpenters}
+{youtube:https://www.youtube.com/watch?v=1kvc_dWs1f4}
+{songwriter:Joe Raposo}
+{year:1973}
+{title: Sing}  
+
+{soi}
+[G]La, la-la, la-la. La, [GM7]la, la-la, la-la.
+La, [Am7]la, la, la-la-la-[Am7]la.
+{eoi}
+[G]Sing! [G//] Sing a [Am7]song. [Am7//]
+Sing out [G]loud, [G//] sing out [Dm7]strong. [G7]
+[CM7] [CM7//]Sing of good [CM7//]things, not [G]bad; [G]
+[Em7] [Em7//]sing of [A9]hap-[A9//]py, not [Am7]sad. [D7]
+[G]Sing! [G//] Sing a [Am7]song. [Am7//]
+Make it [G]sim-[G//]ple to [GM7]last your whole life [Dm7]long. [G7///]
+Don't [CM7]wor-ry that it's not [B7]good e-[B7//]nough
+for [Em7]an-y-one else to [A9///]hear.
+Just [Am7]sing! [D7//] Sing a [G]song! [G - D7]
+{sod}
+[G]La, la-la, la-la. La, [GM7]la, la-la, la-la.
+La, [Am7]la, la, la-la-la-[Am7]la.
+{eod}
+[G]Sing! [G//] Sing a [Am7]song. [Am7//]
+Let the [G]world [G//] sing a-[Dm7]long. [G7]
+[CM7] [CM7//]Sing of love [CM7//]there could [G]be; [G]
+[Em7] [Em7//]sing for [A9]you [A9//]and for [Am7]me. [D7]
+
+[G]Sing! [G//] Sing a [Am7]song. [Am7//]
+Make it [G]sim-[G//]ple to [GM7]last your whole life [Dm7]long. [G7///]
+Don't [CM7]wor-ry that it's not [B7]good e-[B7//]nough
+for [Em7]an-y-one else to [A9///]hear.
+
+Just [Am7]sing! [D7//] Sing a [G]song. [G///]
+Just [Am7]sing! [D7//] Sing a [G]song. [G///]
+Just [Am7]sing! [D7//] Sing a [G]song. [G - D7]
+{soo}
+[G]La, la-la, la-la. La, [GM7]la, la-la, la-la.
+La, [Am7]la, la, la-la-la-[Am7]la.
+[G]La, la-la, la-la. La, [GM7]la, la-la, la-la.
+La, [Am7]la, la, la-la-la-[Am7]la. repeat & fade
+{eoo}
+
+=== SONG 584 | Were-not-going-to-take-it ===
+{youtube:https://youtu.be/x-daFaXTfAQ?si=4qfZkRFufpBpCxAF}
+{capo: }
+{songwriter: }
+{key: }
+{recording: }
+{year: }
+{1stnote: }
+{tempo: }
+{timeSignature: }
+
+
+{t:We're not going to take it}
+{artist:Lucky Uke}
+{key: A}
+
+
+Originally performed by Twister Sister
+
+Intro:[A][E][A][D][A][E][A]
+
+[A]We're not gonna [E]take it
+[A]No, we ain't gonna [D]take it
+[A]We're not gonna [E]take it anymo[A]re[G#][F#][E]  [A][G#][F#][E]
+
+[A]  We've got the [E]right to choose and
+[A]  There ain't no [D]way we'll lose it
+[A]  This is our [E]life, this is our son[A]g
+
+[E]  [A]We'll fight a [E]thousand legions
+[A]  Don't pick our [D]destiny 'cause
+[A]  You don't know [E]us, you don't be[A]long[E]
+{start_of_chorus}
+[A]We're not gonna [E]take it
+[A]No, we ain't gonn[D]a take it
+[A]We're not gonna [E]take it any[A]mo[G#]re[F#]
+{end_of_chorus}
+[A]  Oh you're so[E]condescending
+[A]  Your gall is [D]never ending
+[A]  We don't want [E]nothin', not a thing from [A]you
+[E]  [A]Your life is [E]trite and jaded
+[A]  Boring and [D]confiscated
+[A]  If that's your[E] best, your best won't[A] [E]do
+{comment: Bridge}
+[G5]  oh......[F#5]oh..[E5].oh...........
+[G5]  oh......[F#5]oh..[E5].oh...........
+We're [A]right/yeah
+We're [Bb]free/yeah
+We'll [B]fight/yeah
+You'll [E]see/yeah
+{start_of_chorus}
+[A]We're not gonna [E]take it
+[A]No, we ain't gonna [D]take it
+[A]We're not gonna [E]take it anymo[A]re[E]
+{end_of_chorus}
+
+[A]We're not gonna [E]take it
+[A]No, we ain't gonna [D]take it
+[A]We're not gonna[E] take it an[A]ym[G#]ore[F#]
+
+No way!
+
+{comment: Solo}
+[A][E][A][D][A][E][A][D]
+
+{comment: Bridge}
+[G5]Oh [F#5]Oh O[E5]h
+[G5]Oh [F#5]Oh O[E5]h
+We're [A]right/yeah
+We're [Bb]free/yeah
+We'll [B]fight/yeah
+You'll [E]see/yeah
+
+N.C.
+We're not gonna take it
+No, we ain't gonna take it
+We're not gonna take it anymore[E]
+[A]We're not gonna [E]take it
+[A]No, we ain't gonna [D]take it
+[A]We're not gonna [E]take it any[A]more[E]
+
+(Repeat and fade)

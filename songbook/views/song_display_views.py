@@ -818,7 +818,12 @@ class SongsToFormatView(LoginRequiredMixin, UserPassesTestMixin, SiteContextMixi
         ("3", "3"),
         ("4", "4"),
         ("5", "5"),
-        ("gt5", ">5"),
+        ("6", "6"),
+        ("7", "7"),
+        ("8", "8"),
+        ("9", "9"),
+        ("10", "10"),
+        ("gt10", ">10"),
     ]
     NO_ORIGIN = "none"  # URL value for songs that have no origin
 
@@ -835,8 +840,8 @@ class SongsToFormatView(LoginRequiredMixin, UserPassesTestMixin, SiteContextMixi
         })
         if count <= 1:
             return "le1"
-        if count > 5:
-            return "gt5"
+        if count > 10:
+            return "gt10"
         return str(count)
 
     def get_queryset(self):

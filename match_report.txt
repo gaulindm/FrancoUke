@@ -1,0 +1,398 @@
+
+== ok: will be copied (28)
+  prod #4183   Christmas in Killarney                        local #2358 'CHRISTMAS IN KILLARNEY' | similarity 0.99
+  prod #2486   Everyday                                      local #1005 'Everyday' | similarity 0.90
+  prod #3174   Frosty The Snowman                            local #2072 'Frosty The Snowman' | similarity 0.93
+  prod #3150   Grandma Got Run Over By A Reindeer            local #2073 'Grandma Got Run Over By A Reindeer' | similarity 1.00
+  prod #2623   Happy Together                                local #1931 'Happy Together' | similarity 0.88
+  prod #2604   Happy Trails                                  local #2057 'Happy Trails' | similarity 0.89
+  prod #1128   Happy-Xmas-War-Is-Over                        local #1128 'Happy-Xmas-War-Is-Over' | similarity 0.85
+  prod #2598   Hey! Baby!                                    local #2056 'Hey! Baby!' | similarity 0.82
+  prod #2715   I Only Want To Be With You                    local #1927 'I Only Want To Be With You' | similarity 0.99
+  prod #4169   I'm into Something Good                       local #2255 "I'M INTO SOMETHING GOOD" | similarity 1.00
+  prod #2775   Let Me Be There                               local #1950 'Let Me Be There' | similarity 0.95
+  prod #2742   Let The Rest Of The World Go By               local #2141 'Let The Rest Of The World Go By' | similarity 0.89
+  prod #4206   Little Drummer Boy                            local #2362 'LITTLE DRUMMER BOY' | similarity 1.00
+  prod #4240   Little Drummer Boy                            local #2362 'LITTLE DRUMMER BOY' | similarity 1.00
+  prod #3171   Mele Kalikimaka                               local #2064 'Mele Kalikimaka (October 20, 2022)' | similarity 0.80
+  prod #4244   Must Be Santa                                 local #2373 'MUST BE SANTA' | similarity 1.00
+  prod #2869   On The Sunny Side Of The Street               local #1954 'On The Sunny Side Of The Street' | similarity 0.80
+  prod #2868   One Fine Day (in D)                           local #1934 'One Fine Day' | similarity 0.91
+  prod #2978   San Francisco Bay Blues                       local #1938 'San Francisco Bay Blues' | similarity 0.95
+  prod #3131   Santa Baby                                    local #2077 'Santa Baby (October 23, 2024)' | similarity 1.00
+  prod #4247   Santa Baby                                    local #2365 'SANTA BABY' | similarity 1.00
+  prod #3148   Santa Claus Is Comin' To Town                 local #2091 "Santa Claus Is Comin' To Town" | similarity 0.89
+  prod #3033   Sh-Boom (Life Could Be A Dream)               local #1899 'Sh-Boom (Life Could Be A Dream)' | similarity 0.91
+  prod #1852   Sing                                          local #1852 'Sing' | similarity 1.00
+  prod #3018   Sing                                          local #1852 'Sing' | similarity 0.82
+  prod #3193   Song For A Winter's Night                     local #2062 "Song For A Winter's Night (Oct. 30, 2017)" | similarity 0.99
+  prod #3553   Summer Camp Praise Medley                     local #2154 'Summer Camp Praise Medley' | similarity 0.88
+  prod #3065   Till We Meet Again                            local #1922 'Till We Meet Again' | similarity 0.78
+
+== identical: same text already (nothing to copy) (19)
+  prod #3164   Do You Hear What I Hear                       local #2065 'Do You Hear What I Hear' | similarity 1.00
+  prod #4166   Dream Baby                                    local #2700 'Dream Baby' | similarity 1.00
+  prod #2120   Fly Me To The Moon                            local #2120 'Fly Me To The Moon' | similarity 1.00
+  prod #1898   From Me To You                                local #1898 'From Me To You' | similarity 1.00
+  prod #3254   Have You Ever Seen The Rain                   local #1893 'Have You Ever Seen The Rain' | similarity 1.00
+  prod #494    Hooked on a Feeling                           local #494 'Hooked on a Feeling' | similarity 1.00
+  prod #2074   It's Beginning To Look A Lot Like Christmas   local #2074 "It's Beginning To Look A Lot Like Christmas" | similarity 1.00
+  prod #1950   Let Me Be There                               local #1950 'Let Me Be There' | similarity 1.00
+  prod #3116   Mary, Did You Know                           local #2069 'Mary, Did You Know' | similarity 1.00
+  prod #1396   Merry-Christmas-Everyone                      local #1396 'Merry-Christmas-Everyone' | similarity 1.00
+  prod #1493   Merry-Xmas-Everybody                          local #1493 'Merry-Xmas-Everybody' | similarity 1.00
+  prod #1944   Oh, Pretty Woman                              local #1944 'Oh, Pretty Woman' | similarity 1.00
+  prod #1934   One Fine Day                                  local #1934 'One Fine Day' | similarity 1.00
+  prod #2068   Rockin' Around The Christmas Tree             local #2068 "Rockin' Around The Christmas Tree" | similarity 1.00
+  prod #2038   Take Me Home Country Roads                    local #2038 'Take Me Home Country Roads' | similarity 1.00
+  prod #2083   We Wish You a Merry Christmas                 local #2083 'We Wish You a Merry Christmas' | similarity 1.00
+  prod #1453   Well-Meet-Again                               local #1453 'Well-Meet-Again' | similarity 1.00
+  prod #2094   White Christmas (September 25, 2024)          local #2094 'White Christmas (September 25, 2024)' | similarity 1.00
+  prod #2122   You're Sixteen                                local #2122 "You're Sixteen" | similarity 1.00
+
+== no_local_match: no song with this title locally (276)
+  prod #2312   Beautiful Boy (Darling Boy)                   
+  prod #1903   Blue Moon Of Kentucky                         
+  prod #3459   Christmas Wishes                              
+  prod #2864   Don't Throw It All Away (Our Love)            
+  prod #2489   Eternal Flame                                 
+  prod #3113   Even Santa Gets The Blues                     
+  prod #2476   Every Breath You Take                         
+  prod #2481   Everybody Knows                               
+  prod #2490   Everybody's Talkin' (Echoes)                  
+  prod #2523   Fifty Ways To Leave Your Lover                
+  prod #2516   Fire And Rain                                 
+  prod #2503   First We Take Manhatten                       
+  prod #2530   Footloose                                     
+  prod #2496   For All We Know (2 versions in G)             
+  prod #2498   For The Good Times                            
+  prod #2520   For Whom The Bell Tolls                       
+  prod #2525   Forever In Blue Jeans                         
+  prod #2522   From A Distance                               
+  prod #2547   Gentle On My Mind                             
+  prod #2561   Georgy Girl                                   
+  prod #4142   Georgy Girl                                   
+  prod #3118   Go Tell It On The Mountain                    
+  prod #2559   God Only Knows                                
+  prod #2541   Golden Slumbers                               
+  prod #2542   Good Day Sunshine                             
+  prod #2535   Good Mother                                   
+  prod #2536   Good Vibrations                               
+  prod #2546   Goody, Goody                                  
+  prod #2537   Grease                                        
+  prod #2553   Groovin'                                      
+  prod #2556   Grow Old With Me                              
+  prod #2549   Guilty                                        
+  prod #1131   HO-HO-HO--Who-Would-Be-A-Turkey-At-Christmas  
+  prod #2593   Hallelujah, I Love Her So                     
+  prod #3153   Hard Candy Christmas                          
+  prod #3128   Hark! The Herald Angels Sing                  
+  prod #2603   Have You Ever Been Lonely (Have You Ever Bee 
+  prod #3122   Have Yourself A Merry Little Christmas        
+  prod #2567   He Don't Love You (Like I Love You)           
+  prod #2616   Heartache Tonight                             
+  prod #2590   Heartaches                                    
+  prod #2579   Heartbreaker                                  
+  prod #2585   Heaven                                        
+  prod #2569   Help!                                         
+  prod #2591   Here You Come Again                           
+  prod #2611   Homeward Bound                                
+  prod #2565   Honey, Honey                                  
+  prod #2580   Honky Tonk Angels' Medley                     
+  prod #2574   House On Pooh Corner                          
+  prod #2587   How Can You Mend A Broken Heart               
+  prod #2584   Hurt                                          
+  prod #2613   Hurting Each Other                            
+  prod #2637   I Am A Rock                                   
+  prod #2672   I Do, I Do, I Do, I Do, I Do                  
+  prod #2717   I Fall To Pieces                              
+  prod #2705   I Get Around                                  
+  prod #2696   I Go To Pieces                                
+  prod #3120   I Heard The Bells On Christmas Day            
+  prod #3155   I Saw Mommy Kissing Santa Claus               
+  prod #3194   I Want A Hippopotamus For Christmas           
+  prod #2664   I Want To Dance With Somebody                 
+  prod #2627   I Want You, I Need You, I Love You            
+  prod #2688   I Won't Last A Day Without You                
+  prod #3196   I'll Be Home For Christmas                    
+  prod #2691   I'll Never Find Another You                   
+  prod #2636   I'll See You In My Dreams                     
+  prod #2635   I'm Gonna Getcha Good                         
+  prod #2698   I'm Like A Bird                               
+  prod #2666   I'm Looking Over A Four Leaf Clover           
+  prod #2712   I'm Only Sleeping                             
+  prod #2660   I'm Your Man                                  
+  prod #2638   I've Been Working On The Railroad             
+  prod #2646   I've Gotta Get A Message To You               
+  prod #1243   I-Believe-in-Father-Christmas                 
+  prod #1250   I-Want-A-Hippopotamus-For-Christmas           
+  prod #2647   Ice Cream                                     
+  prod #2674   If I Can't Have You                           
+  prod #2645   Immortality                                   
+  prod #2693   In The Good Old Summertime                    
+  prod #2668   Insensitive                                   
+  prod #3125   It Came Upon A Midnight Clear                 
+  prod #2707   It Had To Be You                              
+  prod #2702   It's All Been Done                            
+  prod #2644   It's My Party                                 
+  prod #2653   It's Still Rock & Roll To Me                  
+  prod #2725   Johnny Angel                                  
+  prod #1886   Jolene                                        
+  prod #1910   Jolene                                        
+  prod #1868   Killing Me Softly                             
+  prod #2749   Lady In Red, The                              
+  prod #2790   Lady Madonna                                  
+  prod #2740   Last Farewell, The                            
+  prod #2763   Lazy Song, The                                
+  prod #2761   Let It Be Me (in both F & G)                  
+  prod #2787   Let It Rain                                   
+  prod #2766   Lipstick On Your Collar                       
+  prod #3195   Little Drummer Boy & Peace On Earth, The      
+  prod #2762   Longer                                        
+  prod #2748   Longest Time, The                             
+  prod #2765   Losing You                                    
+  prod #2794   Lost In Love                                  
+  prod #2786   Love Grows (Where My Rosemary Goes)           
+  prod #2751   Love Hurts                                    
+  prod #2789   Love Is Blue                                  
+  prod #2745   Lovesick Blues                                
+  prod #2782   Lyin' Eyes                                    
+  prod #2833   Mack The Knife                                
+  prod #3183   Magic Of Christmas Day, The (God Bless Us Eve 
+  prod #2807   Make You Feel My Love                         
+  prod #2812   Margie                                        
+  prod #2796   Maxwell's Silver Hammer                       
+  prod #3180   Maybe This Christmas                          
+  prod #3169   Merry Christmas, Darling                      
+  prod #1746   Merry-Christmas-I-Dont-Want-To-Fight-Tonight  
+  prod #2834   Midnight Train To Georgia                     
+  prod #2822   Miss Chatelaine                               
+  prod #2823   Mister Bojangles                              
+  prod #2818   Mister Sandman                                
+  prod #2804   More Than A Woman                             
+  prod #3177   Most Wonderful Time Of The Year, The          
+  prod #2813   Mother's Little Helper                        
+  prod #2799   My Favorite Things                            
+  prod #2815   My Guy                                        
+  prod #2798   My Love                                       
+  prod #2828   My Town                                       
+  prod #2837   My Way                                        
+  prod #2878   Name Of The Game, The                         
+  prod #2888   New Kid In Town                               
+  prod #2883   New York, New York                            
+  prod #2890   Night Fever                                   
+  prod #2893   Night They Drove Old Dixie Down, The          
+  prod #2875   Nights On Broadway                            
+  prod #2892   No One Needs To Know                          
+  prod #2882   Nobody Knows You When You're Down And Out     
+  prod #3142   Nuttin' For Christmas                         
+  prod #3170   O Come, All Ye Faithful                       
+  prod #3146   O Come, O Come Emmanuel                       
+  prod #3144   O Little Town Of Bethlehem                    
+  prod #2865   Oh, You Beautiful Doll                        
+  prod #2848   Ol' 55                                        
+  prod #2873   Old Cape Cod                                  
+  prod #2850   On And On (2 versions in C)                   
+  prod #2861   Only Love Can Break Your Heart                
+  prod #2847   Only You (And You Alone)                      
+  prod #2871   Our House                                     
+  prod #2857   Outside Of A Small Circle Of Friends          
+  prod #2856   Over The Rainbow & What A Wonderful World     
+  prod #2905   Passionate Kisses                             
+  prod #2910   Patricia The Stripper                         
+  prod #3173   Please Come Home For Christmas                
+  prod #2898   Poems, Prayers And Promises                   
+  prod #2908   Precious Friend, You Will Be There            
+  prod #2909   Puppy Love                                    
+  prod #2907   Put Your Head On My Shoulder                  
+  prod #2948   Rainy Days And Mondays                        
+  prod #2944   Reason To Believe                             
+  prod #2945   Rest Your Love On Me                          
+  prod #2924   Return To Sender                              
+  prod #2923   Ribbon Of Darkness                            
+  prod #2939   Right Before My Eyes                          
+  prod #2919   Right Field                                   
+  prod #2943   Rise Again                                    
+  prod #2938   River                                         
+  prod #2917   Rocket Man (I Think It’s Going To Be A Long,  
+  prod #2932   Rocky Mountain High                           
+  prod #2941   Ruby's Arms                                   
+  prod #2930   Run For The Roses                             
+  prod #2950   Run To Me                                     
+  prod #2965   S.O.S.                                        
+  prod #4174   Santa B Goode                                 
+  prod #4154   Santa Claus is Coming to Town                 
+  prod #2974   Saved By The Bell                             
+  prod #2985   Say, Has Anybody Seen My Sweet Gypsy Rose?    
+  prod #3134   Scarlet Ribbons                               
+  prod #2994   Sealed With A Kiss                            
+  prod #3045   Secret Love                                   
+  prod #2967   She Loves You                                 
+  prod #3002   Sherry                                        
+  prod #2977   Shine On, Harvest Moon (in F#m and Em keys)   
+  prod #3003   Since I Don’t Have You                        
+  prod #3139   Sleigh Ride                                   
+  prod #2984   Smoke Gets In Your Eyes                       
+  prod #3024   So Long, Marianne                             
+  prod #3013   Solitaire                                     
+  prod #3041   Someday                                       
+  prod #3004   Someday (You'll Want Me To Want You)          
+  prod #2997   Something To Talk About                       
+  prod #3043   Sometimes When We Touch                       
+  prod #3011   Somewhere Out There                           
+  prod #1731   Song-Of-Christmas-The                         
+  prod #2952   Space Oddity                                  
+  prod #3031   Spinning Wheel                                
+  prod #2958   Stand By Your Man                             
+  prod #3047   Stand Tall                                    
+  prod #3029   Stayin' Alive (in Em & Dm)                    
+  prod #2992   Stop! In The Name Of Love                     
+  prod #2975   Straight From The Heart                       
+  prod #3036   Stray Cat Strut                               
+  prod #3046   Summer Of '69                                 
+  prod #3001   Sunny Afternoon                               
+  prod #2971   Sunny Days                                    
+  prod #3008   Sunshine, Lollipops & Rainbows (2 versions in 
+  prod #2988   Super Trouper                                 
+  prod #2968   Superstar                                     
+  prod #2956   Surfer Girl                                   
+  prod #3006   Suspicious Minds                              
+  prod #2996   Sweet Baby James                              
+  prod #3076   Take Me Out To The Ball Game                  
+  prod #3110   Tell Her About It                             
+  prod #3109   There But For Fortune                         
+  prod #3117   There's A New Kid In Town                     
+  prod #3132   There's No Place Like Home For The Holidays   
+  prod #3097   These Dreams                                  
+  prod #3100   Those Were The Days                           
+  prod #3071   Ticket To Ride                                
+  prod #3049   Times They Are A-Changin', The                
+  prod #3085   Tiptoe Through The Tulips                     
+  prod #3066   To Sir, With Love                             
+  prod #3105   Too Much Heaven (in key of D & C)             
+  prod #3081   Total Eclipse Of The Heart                    
+  prod #3052   Tragedy                                       
+  prod #3075   Travelin' Man                                 
+  prod #3056   True Love                                     
+  prod #3186   Twelve Days Of Christmas, The                 
+  prod #3108   Twilight Time                                 
+  prod #3068   Two Out Of Three Ain't Bad                    
+  prod #3203   Un Canadien Errant                            
+  prod #3207   Unchained Melody                              
+  prod #3201   Unforgettable (in C & F)                      
+  prod #3199   Universal Soldier                             
+  prod #3200   Up Where We Belong                            
+  prod #3205   Up!                                           
+  prod #3204   Uptown Girl                                   
+  prod #3209   Vincent (Starry, Starry Night)                
+  prod #3210   Vincent (Starry, Starry Night)                
+  prod #3297   Walk Like A Man                               
+  prod #3263   Waterloo                                      
+  prod #3306   Way, The                                      
+  prod #3264   We'll Sing In The Sunshine                    
+  prod #3137   Welcome Christmas (Fah Who Foraze!)           
+  prod #3256   Wendy                                         
+  prod #3295   What Becomes Of The Broken Hearted            
+  prod #3165   What Child Is This                           
+  prod #3269   What Kind Of Fool                             
+  prod #3312   When I Fall In Love                           
+  prod #3280   When I'm Sixty-Four                           
+  prod #3294   When You Wish Upon A Star                     
+  prod #3289   When You Wore A Tulip (And I Wore A Big Red R 
+  prod #3313   Where The Boys Are                            
+  prod #3198   While Shepherds Watch Their Flocks By Night   
+  prod #3287   Whispering                                    
+  prod #3086   White Cliffs Of Dover (There'll Be Blue Birds 
+  prod #3277   Who's Sorry Now                               
+  prod #3279   Why Do Fools Fall In Love                     
+  prod #3299   Will You Still Love Me Tomorrow              
+  prod #3261   Wind Beneath My Wings, The                    
+  prod #3303   Windy                                         
+  prod #3558   With A Little Help From My Friends            
+  prod #3275   World                                         
+  prod #3270   Wouldn't It Be Nice                           
+  prod #3227   Yesterday                                     
+  prod #3241   Yesterday Once More                           
+  prod #3217   You Are The Sunshine Of My Life               
+  prod #3211   You Belong To Me                              
+  prod #3238   You Don't Know Me                             
+  prod #3228   You Got It                                    
+  prod #3214   You Light Up My Life                          
+  prod #3234   You Needed Me                                 
+  prod #3219   You Win Again                                 
+  prod #3242   You Won't See Me                              
+  prod #3212   You'll Never Know                             
+  prod #3215   You're A Strange Animal                       
+  prod #3229   You're Only Lonely                            
+  prod #3236   You're So Vain                                
+  prod #3245   You've Got The Magic Touch                    
+  prod #3243   You've Lost That Lovin' Feelin'               
+
+== low_similarity: title matches but the lyrics are too different (45)
+  prod #1921   Bye Bye Love                                  local #2217 'BYE BYE LOVE' | similarity 0.47
+  prod #3557   Drunken Sailor                                local #2419 'DRUNKEN SAILOR' | similarity 0.55
+  prod #4156   Feliz Navidad                                 local #2097 'Feliz Navidad' | similarity 0.18
+  prod #4167   Feliz Navidad                                 local #2097 'Feliz Navidad' | similarity 0.18
+  prod #2493   Follow Me                                     local #2435 'FOLLOW ME' | similarity 0.73
+  prod #2534   Glory Of Love, The                            local #2626 'THE GLORY OF LOVE' | similarity 0.65
+  prod #3147   Happy Xmas (War Is Over)                      local #1128 'Happy-Xmas-War-Is-Over' | similarity 0.52
+  prod #1889   Harvest Moon                                  local #2178 'HARVEST MOON' | similarity 0.70
+  prod #2610   Hooked On A Feeling                           local #494 'Hooked on a Feeling' | similarity 0.63
+  prod #2661   I Can See Clearly Now                         local #1884 'I Can See Clearly Now' | similarity 0.38
+  prod #2649   I'll Be Seeing You                            local #2494 "I'LL BE SEEING YOU" | similarity 0.41
+  prod #2713   I'll Follow The Sun                           local #2496 "I'LL FOLLOW THE SUN" | similarity 0.67
+  prod #2655   I'm Into Something Good                       local #2255 "I'M INTO SOMETHING GOOD" | similarity 0.66
+  prod #2676   If You Could Read My Mind                     local #2510 'IF YOU COULD READ MY MIND' | similarity 0.60
+  prod #2678   In My Life                                    local #2511 'IN MY LIFE' | similarity 0.47
+  prod #2656   It's A Sin To Tell A Lie                      local #2123 'It’s A Sin To Tell A Lie' | similarity 0.55
+  prod #2743   Leader Of The Band                            local #2527 'LEADER OF THE BAND' | similarity 0.51
+  prod #2757   Let Me Call You Sweetheart                    local #1900 'Let Me Call You Sweetheart' | similarity 0.69
+  prod #2733   Losing My Religion                            local #2541 'Losing My Religion' | similarity 0.46
+  prod #2785   Love Letters In The Sand                      local #1340 'Love-Letters-In-The-Sand' | similarity 0.53
+  prod #2803   Mamma Mia                                     local #2275 'MAMMA MIA' | similarity 0.55
+  prod #2801   Manic Monday                                  local #1883 'Manic Monday' | similarity 0.56
+  prod #2810   Mrs. Robinson                                 local #2186 'MRS. ROBINSON' | similarity 0.48
+  prod #2877   Night The Lights Went Out In Georgia, The     local #1763 'Night-The-Lights-Went-Out-In-Georgia-The' | similarity 0.56
+  prod #3159   O Holy Night                                  local #2087 'O Holy Night' | similarity 0.61
+  prod #2846   Over The Rainbow                              local #2570 'OVER THE RAINBOW (original)' | similarity 0.61
+  prod #2906   Puff, The Magic Dragon (in D & C)             local #2580 'PUFF THE MAGIC DRAGON' | similarity 0.46
+  prod #2934   Rhythm Of The Rain                            local #2225 'RHYTHM OF THE RAIN' | similarity 0.59
+  prod #2936   Rose, The                                     local #2116 'The Rose' | similarity 0.66
+  prod #4157   Rudolph the Red Nosed Reindeer                local #2079 'Rudolph The Red-Nosed Reindeer' | similarity 0.43
+  prod #4184   Santa Claus Is Comin' To Town (My Version)    local #2091 "Santa Claus Is Comin' To Town" | similarity 0.37
+  prod #3035   Smile                                         local #2603 'SMILE' | similarity 0.56
+  prod #3042   Summer Nights                                 local #1638 'Summer-Nights' | similarity 0.62
+  prod #3073   Tennessee Waltz                               local #2622 'TENNESSEE WALTZ' | similarity 0.31
+  prod #3050   Tequila Sunrise                               local #2226 'TEQUILA SUNRISE' | similarity 0.38
+  prod #3069   Time After Time                               local #2645 'TIME AFTER TIME' | similarity 0.67
+  prod #4133   Top Of The World                              local #1929 'Top Of The World' | similarity 0.61
+  prod #3206   Ukulele Lady                                  local #2654 'UKULELE LADY' | similarity 0.40
+  prod #3310   We'll Meet Again                              local #1453 'Well-Meet-Again' | similarity 0.69
+  prod #4246   White Christmas                               local #2094 'White Christmas (September 25, 2024)' | similarity 0.54
+  prod #3271   Wild World                                    local #2679 'Wild World' | similarity 0.60
+  prod #3154   Winter Wonderland                             local #2076 'Winter Wonderland (Dec. 5, 2018)' | similarity 0.57
+  prod #4151   Yellow Submarine                              local #2680 'YELLOW SUBMARINE' | similarity 0.66
+  prod #3235   You've Got A Friend In Me                     local #2689 "YOU'VE GOT A FRIEND IN ME" | similarity 0.50
+  prod #3220   You've Got To Hide Your Love Away             local #2239 'YOU’VE GOT TO HIDE YOUR LOVE AWAY' | similarity 0.64
+
+== chords_differ: chords differ between the two versions (20)
+  prod #4208   Deck the Halls                                local #2376 'DECK THE HALLS' | similarity 0.88 | only on production: Am F G7 | only local: A7 D Em
+  prod #4186   Do You Hear What I Hear? (My Version)         local #2409 'DO YOU HEAR WHAT I HEAR' | similarity 0.94 | only on production: F | only local: -
+  prod #4141   Flowers                                       local #2245 'FLOWERS' | similarity 0.85 | only on production: Cmaj7 | only local: -
+  prod #2524   Fly Me To The Moon                            local #2120 'Fly Me To The Moon' | similarity 0.85 | only on production: C# | only local: Fm
+  prod #3129   Here Comes Santa Claus                        local #2084 'Here Comes Santa Claus' | similarity 0.95 | only on production: G#o7 | only local: G#dim
+  prod #4187   Hey Good Lookin’ (I-Ukes Version)             local #2466 "HEY GOOD LOOKIN'" | similarity 0.89 | only on production: - | only local: G
+  prod #3157   It's Beginning To Look A Lot Like Christmas   local #2074 "It's Beginning To Look A Lot Like Christmas" | similarity 0.89 | only on production: G#o | only local: Ebdim G#dim
+  prod #3191   Jingle-Bell Rock                              local #2081 'Jingle-Bell Rock' | similarity 0.91 | only on production: - | only local: C#dim F#dim
+  prod #2750   L-O-V-E                                       local #1926 'L-O-V-E' | similarity 0.90 | only on production: Ebo7 F#o7 | only local: Ebdim7 F#dim7
+  prod #3149   Let It Snow! Let It Snow! Let It Snow!        local #2070 'Let It Snow! Let It Snow! Let It Snow! (September 24, 2025)' | similarity 0.93 | only on production: Abo Bo C C7 Dm7 F G7 Gm | only local: A7 Am Bbo D D#o E7 Em7 G
+  prod #2859   Oh, Pretty Woman                              local #1944 'Oh, Pretty Woman' | similarity 0.86 | only on production: A7 G | only local: B E F# G# G7
+  prod #3167   Rockin' Around The Christmas Tree             local #2068 "Rockin' Around The Christmas Tree" | similarity 0.87 | only on production: Am7 | only local: -
+  prod #3197   Rudolph The Red-Nosed Reindeer                local #2079 'Rudolph The Red-Nosed Reindeer' | similarity 0.89 | only on production: G7sus4 | only local: -
+  prod #4155   Silent Night                                  local #2367 'SILENT NIGHT' | similarity 1.00 | only on production: G7 | only local: -
+  prod #4209   Silver Bells                                  local #2368 'SILVER BELLS' | similarity 0.92 | only on production: D7 Dm | only local: -
+  prod #3067   Tin Pan Alley Medley                          local #2126 'Tin Pan Alley Medley' | similarity 0.92 | only on production: - | only local: C#dim
+  prod #4150   Try a Little Kindness                         local #2211 'TRY A LITTLE KINDNESS' | similarity 0.90 | only on production: Em F | only local: A Bm
+  prod #4241   We Wish You A Merry Christmas                 local #2666 'WE WISH YOU A MERRY CHRISTMAS' | similarity 0.92 | only on production: F | only local: A
+  prod #3184   White Christmas                               local #2094 'White Christmas (September 25, 2024)' | similarity 0.96 | only on production: B7 Bb Bbm C7 Dm F7 FM7 Gm7 | only local: C C9 CM7 D7 Dm7 F# Fm G Go7
+  prod #3189   You're A Mean One, Mr. Grinch                 local #2071 "You're A Mean One, Mr. Grinch (October 30, 2024)" | similarity 1.00 | only on production: Bb7 | only local: Bb

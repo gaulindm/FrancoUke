@@ -1,0 +1,461 @@
+=== SONG 2488 | End Of The World, The | revised_on=2019-07-29 ===
+{title:End Of The World, The}
+{artist:Skeeter Davis}
+{youtube:}
+{songwriter:Sylvia Dee & Arthur Kent}
+{capo:3}
+{year:1962}
+{1stnote:B}
+{timeSignature:4/4}
+
+{c:/ = one strum}
+{c:Capo on fret 3 to match Skeeter Davis recording}
+
+[G]Why does the sun go on [D]shin-ing?
+[Em]Why does the sea rush to [Bm7]shore?
+[C]Don’t they [Am7]know it’s the [Bm7]end of the [E7]world,
+’cause [Am7]you don’t love me an-y-[Cm6//]more? [Dsus4/] [D/]
+[G]Why do the birds go on [D]sing-ing?
+[Em]Why do the stars glow a-[Bm7]bove?
+[C]Don’t they [Am7]know it’s the [Bm7]end of the [E7]world?
+It [Am7]end-ed when I [D]lost your [G//]love. [G7//]
+I [C]wake up in the morn-ing and I [G]won-der
+why [Am7]ev-’ry-thing’s the [Dsus4]same [D] as it [G]was.
+I [Bm7]can’t un-der-stand, no I [E7]can’t un-der-stand
+how [Am7]life goes on the way it [Cm6//]does? [Dsus4/] [D/]
+[G]Why does my heart go on [D]beat-ing?
+[Em]Why do these eyes of mine [Bm7]cry?
+[C]Don’t they [Am7]know it’s the [Bm7]end of the [E7]world?
+It [Am7]end-ed when you [D]said good-[G//]bye. [G7//]
+I [C]wake up in the morn-ing and I [G]won-der
+why [Am7]ev-’ry-thing’s the [Dsus4]same [D] as it [G]was.
+I [Bm7]can’t un-der-stand, no I [E7]can’t un-der-stand
+how [Am7]life goes on the way it [Cm6//]does? [Dsus4/] [D/]
+[G]Why does my heart go on [D]beat-ing?
+[Em]Why do these eyes of mine [Bm7]cry?
+[C]Don’t they [Am7]know it’s the [Bm7]end of the [E7]world?
+It [Am7]end-ed when you [D]said good-[G/]bye.
+
+=== SONG 2555 | Goodbye To Love | revised_on=2025-02-24 ===
+{title:Goodbye To Love}
+{artist:Carpenters}
+{youtube:}
+{songwriter:John Bettis & Richard Carpenter}
+{capo:3}
+{year:1972}
+{1stnote:G}
+{timeSignature:4/4}
+
+{c:/ = one strum}
+{c:Capo on fret 3 to match Carpenters recording in Bb}
+
+& 2/4
+I’ll say good-[G//]bye to [G//]love.
+[C]No one ev-er [D]cared if I should [G//]live or [D//]die.
+[C]Time and time a-[D]gain the chance for [B7sus4]love has [B7]passed me
+[Em]by and (C#m7-5)all I [G]know of love is [C]how to live with-[G]out it.
+I [B7sus4]just can’t [B7]seem to [Em]find it. (C#m7-5//)
+[G] So I’ve made my [C]mind up I must [GM7]live my life a [Am7//]lone,
+and [G]though it’s not the [C]ea-sy way I [GM7]guess I’ve al-ways [Am7]known
+I’d say good-[G//]bye to [G//]love.
+[C]There are no to-[D]mor-rows for this [G//]heart of [D//]mine.
+[C]Sure-ly time will [D]lose these bit-ter [B7sus4]mem-’ries [B7]and I’ll
+[Em]find that (C#m7-5)there is [G]some-one to be-[C]lieve in and to [G]live for,
+[B7sus4]some-thing [B7]I could [Em]live for. (C#m7-5//)
+[G] All the years of [C]use-less search have [GM7]fin-’lly reached an [Am7//]end.
+[G]Lone-li-ness and [C]emp-ty days will [GM7]be my on-ly [Am7]friend.
+From this [Bm7]day love is for-[E7]got-ten;
+I’ll go (Am7-5)on as best I [Dsus4//]can. [D//]
+{c:Interlude}
+[G] [C - D] [G - D]
+[C - D] (B7sus4 - B7 - Em - C#m7-5)
+[G - C] [G// - B7sus4/ - B7/] (Em - C#m7-5)
+[G]What lies in the [C]fu-ture is a [GM7]mys-t’ry to us [Am7//]all;
+[G]no one can pre-[C]dict the wheel of [GM7]for-tune as it [Am7//]falls.
+[G]There may come a [C]time when I will [GM7]see that I’ve been [Am7]wrong.
+But for [G]now this is my [Am7///]song,
+and it’s good-[G//]bye to [G//]love. [Dsus4//] [D/]
+I’ll say good-[G//]bye to [G//]love. [Dsus4//] [D]
+[G//]Ah, [D//]ah, [G//]ah, ah-ah, [C//]ah,
+(Am7-5//)ah, [G//]ah, (C#m7-5//)ah, [Dsus4/]ah, [D/]ah.
+[G//]Ah, [D//]ah, [G//]ah, ah-ah, [C//]ah,
+(Am7-5//)ah, [G//]ah, [C/]ah, [D/]ah, [G//]ah.
+{c:Repeat and fade}
+
+=== SONG 2562 | Green, Green Grass Of Home | revised_on=2018-11-15 ===
+{title:Green, Green Grass Of Home}
+{artist:Curly Putman}
+{youtube:}
+{songwriter:grey chords optional}
+{capo:1}
+{year:1966}
+{1stnote:D}
+{timeSignature:4/4}
+
+{c:Capo on fret 1 to match Tom Jones recording}
+
+The [G]old home-town [Go]looks the [G7]same as I [C]step down from the [G]train,
+and there to meet me is my ma-ma and [D7]pa-pa.
+[C]Down [D]the [G]road I look and [G7]there runs Mar-y,
+[C] hair of [Ebo]gold and [C]lips like [Bm]cher-[Am]ries.
+It’s [G]good to touch the [D7]green, green [Am7]grass [D7]of [G]home.
+[C]Yes, [D]they’ll [G]all come to [G7]meet me,
+arms [C]reach-ing, smil-ing sweet-ly.
+[Am]It’s [G]good to touch the [D7]green, green [Am7]grass [D7]of [G]home.
+The old house [Go]is still [G7]stand-ing tho’ the [C]paint is cracked and [G]dry,
+and there’s that old oak tree that I used to [D7]play on.
+[C]Down [D]the [G]lane I walk with [G7]my sweet Mar-y,
+[C] hair [Ebo]gold and [C]lips like [Bm]cher-[Am]ries.
+It’s [G]good to touch the [D7]green, green [Am7]grass [D7]of [G]home.
+(spoken) Then I wake and look a-round me at four gray walls that sur-round me,
+and I re-al-ize that I was on-ly dream-ing.
+For [C]there’s [D]a [G]guard and there’s a [G7]sad old pad-re,
+[C] arm in [Ebo]arm we’ll [C]walk at [Bm]day-[Am]break.
+A-[G]gain I’ll touch the [D7]green, green [Am7]grass [D7]of [G]home.
+[C]Yes, [D]they’ll [G]all come to [G7]see me
+in the [C]shade of that old oak tree
+[Am]as they [G]lay me ’neath the [D7]green, green [Am7]grass [D7]of [G]home.
+
+=== SONG 2618 | Head Over Feet | revised_on=2019-05-16 ===
+{title:Head Over Feet}
+{artist:Alanis Morissette}
+{youtube:}
+{songwriter:Alanis Morissette & Glen Ballard}
+{capo:}
+{year:1995}
+{1stnote:G}
+{timeSignature:4/4}
+
+{c:/ = one strum}
+{c:Key matches Alanis Morissette recording}
+
+[C] I [G]had no [Am7]choice [Fadd9]but to hear [C]you.
+You [G]stat-ed [Am7]your case [Fadd9]time and a-[C]gain.
+I [G]thought a-[Am7]bout it. [Fadd9//]
+[C] You [G]treat me [Am7]like [Fadd9]I’m a prin-[C]cess.
+[C] I’m [G]not used [Am]to [Fadd9]lik-ing tha-a-[C]at.
+[C] You [G]ask how my [Am7]day was. [Fadd9/]
+You’ve al-read-y [D]won me o-[Bm]ver [G]in spite of [A]me.
+And don’t be a-[D]larmed if I [Bm]fa-all [Bb]head ov-er [A]feet.
+And don’t be sur-[D]prised if I [Bm]love you for [G]all that you [A]are,
+[F]I could-n’t [C]help it, [G]it’s all your [D]fault.
+[C] Your [G]love is [Am7]thick and it [Fadd9]swal-lowed me [C]whole.
+[C] You’re [G]so much [Am7]brav-er than [Fadd9]I give you cred-it [C]for.
+[C] That’s [G]not lip [Am7]ser-vice. [Fadd9]
+You’ve al-read-y [D]won me o-[Bm]ver [G]in spite of [A]me.
+And don’t be a-[D]larmed if I [Bm]fa-all [Bb]head ov-er [A]feet.
+And don’t be sur-[D]prised if I [Bm]love you for [G]all that you [A]are,
+[F]I could-n’t [C]help it, [G]it’s all your [D]fault.
+[C] You [G]are the [Am7]bear-er of un-[Fadd9]con-di-tion-al [C]things.
+[C] You [G]held your [Am7]breath [Fadd9]and the door for [C]me.
+[C] Thanks [G]for your [Am7]pa-tience.
+[C] You’re [G]the best [Am7]lis-t’ner that [Fadd9]I’ve ev-er [C]met.
+[C] You’re [G]my best [Am7]friend, best [Fadd9]friend with be-ne-[C]fits.
+[C] What [G]took me [Am7]so long? [Fadd9]
+[C] I’ve [G]nev-er [Am7]felt this [Fadd9]health-y be-[C]fore.
+I’ve [G]nev-er [Am7]want-ed [Fadd9]some-thing ration-[C]al.
+[C] I [G]am a-[Am7]ware now, [Fadd9]oh,
+[C] I [G]am a-[Am7]ware now. [Fadd9]
+You’ve al-read-y [D]won me o-[Bm]ver, [G]in spite of [A]me.
+And don’t be a-[D]larmed if I [Bm]fa-all [Bb]head ov-er [A]feet.
+And don’t be sur-[D]prised if I [Bm]love you for [G]all that you [A]are,
+[F]I could-n’t [C]help it, [G]it’s all your fault. x2
+
+=== SONG 2611 | Homeward Bound | revised_on=2019-02-25 ===
+{title:Homeward Bound}
+{artist:Simon & Garfunkel}
+{youtube:}
+{songwriter:Paul Simon}
+{capo:}
+{year:1966}
+{1stnote:G}
+{timeSignature:4/4}
+
+{c:Key matches Simon & Garfunkel recording}
+
+I’m [C]sit-tin’ in the rail-way sta-tion,
+got a [Em]tick-et for my dest-in-a-[Gm6]tion. Mm-m-[A7]mm.
+[Dm]On a tour of one night stands, my [Bb]suit-case and gui-tar in hand
+and [C]ev-’ry stop is neat-ly planned for a po-et and a one man [G7]ba-a-[C]and.
+Home-ward [F]bound, I wish I [C]was, home-ward [F]bound.
+[C]Home, where my [Dm]thought’s [C]es-[Bb]cap-[F]ing,
+[C]home, where my [Dm]mu-[C]sic’s [Bb]play-[F]ing,
+[C]home, where my [Dm]love [C]lies [Bb]wait-[F]ing [G7]si-lent-ly [C]for me.
+Ev-’ry day’s an end-less stream
+of [Em]cig-a-rettes and mag-a-[Gm6]zines. Mm-m-[A7]mm.
+And [Dm]each town looks the same to me, the [Bb]mov-ies and the fac-tor-ies
+and [C]ev-’ry strang-er’s face I see re-minds me that I long to [G7]be-e-[C]e,
+Home-ward [F]bound, I wish I [C]was, home-ward [F]bound.
+[C]Home, where my [Dm]thought’s [C]es-[Bb]cap-[F]ing,
+[C]home, where my [Dm]mu-[C]sic’s [Bb]play-[F]ing,
+[C]home, where my [Dm]love [C]lies [Bb]wait-[F]ing [G7]si-lent-ly [C]for me.
+To-night I’ll sing my songs a-gain,
+I’ll [Em]play the game and pre-[Gm6]tend. Mm-m-[A7]mm.
+But [Dm]all my words come back to me in [Bb]shades of me-di-oc-ri-ty
+like [C]emp-ti-ness and har-mon-y I need some-one to com-fort [G7]me-e-[C]e.
+Home-ward [F]bound, I wish I [C]was, home-ward [F]bound.
+[C]Home, where my [Dm]thought’s [C]es-[Bb]cap-[F]ing,
+[C]home, where my [Dm]mu-[C]sic’s [Bb]play-[F]ing,
+[C]home, where my [Dm]love [C]lies [Bb]wait-[F]ing [G7]si-lent-ly [C]for me. [CM7]
+Sil-lent-ly [C7]for me. [C]
+
+=== SONG 2613 | Hurting Each Other | revised_on=2025-02-24 ===
+{title:Hurting Each Other}
+{artist:Carpenters}
+{youtube:}
+{songwriter:Gary Geld & Peter Udell}
+{capo:4}
+{year:1971}
+{1stnote:G}
+{timeSignature:4/4}
+
+{c:/ = one strum}
+{c:Capo on fret 4 to match Carpenters recording in E}
+
+[Dm7]No one in the [Dm7//]world
+e-ver had a love as sweet as [C]my-y-y [C//]love. [C]
+For [Gm7]no-where in the [Gm7//]world
+could there be a boy as true as [F]you-ou-ou, [F//]love.
+[F///] All my [Fm///]love I give glad-ly to you;
+all your [CM9///]love you give [D]glad-ly to me.
+Tell me [FM7//]why [C//]then, oh, [Dm7]why should it be that
+[C]we go-o [C//]on [Dm7]hurt-ing each oth-er?
+[C]We go-o [C//]on [Dm7]hurt-ing each oth-er.
+Mak-ing each [C]oth-er cry, [Dm7]hurt-ing each [C]oth-er
+with-[Bb]out ev-er [F]know-ing [F]
+[C///]why-y-y-[C]y.
+[Dm7]Clos-er than the [Dm7//]leaves
+on a weep-in’ wil-low, ba-by, [C]we-e-e [C//]are. [C]
+[Gm7]Clos-er, dear, are [Gm7//]we,
+than the sim-ple let-ters “A” and [F]“B”-ee-ee [F//]are.
+[F///] All my [Fm///]love I could love on-ly you,
+all your [CM9///]life you could [D]love on-ly me.
+Tell me [FM7//]why [C//]then, oh, [Dm7]why should it be that
+[C]we go-o [C//]on [Dm7]hurt-ing each oth-er?
+[C]We go-o [C//]on [Dm7]hurt-ing each oth-er.
+Mak-ing each [C]oth-er cry, [Dm7]hurt-ing each [C]oth-er
+with-[Bb]out ev-er [F]know-ing [F]
+[C///]why-y-y-[C]y.
+[C]Can’t we [C//]stop [Dm7]hurt-ing each oth-er!
+[C]Got-ta [C//]stop [Dm7]hurt-ing each oth-er!
+Mak-ing each [C]oth-er cry.
+[Dm7]Break-ing each [C]oth-er’s heart.
+[Dm7]Tear-ing each [C]oth-er a-[Bb//]part. [G//]
+{c:Repeat and fade}
+
+=== SONG 3120 | I Heard The Bells On Christmas Day ===
+{title:I Heard The Bells On Christmas Day}
+{artist:Burl Ives}
+{youtube:}
+{songwriter:Henry Longfellow & Johnny Marks}
+{capo:}
+{year:1965}
+{1stnote:C}
+{timeSignature:4/4}
+
+{c:/ = one strum}
+{c:Key matches Burl Ives recording in F}
+
+I [F//]heard the [F+]bells on [Bb]Christ-mas [C7]day,
+their [Dm//]old fa-[Dm7]mil-iar [E7]car-ols [Am]play:
+and [Gm//]wild and [C7]sweet the [Cm//]words re-[D7]peat,
+of [Gm]peace [D7]on [Gm]earth, [D7]good [Dm//]will [C7]to men.
+I [F//]thought, as [F+]now this [Bb]day had [C7]come,
+the [Dm//]bel-fries [Dm7]of all [E7]Chris-ten-[Am]dom
+had [Gm//]rung so [C7]long the un-[Cm//]brok-en [D7]song
+of [Gm]peace [D7]on [Gm]earth, [D7]good [Dm//]will [C7]to [F]men.
+And [F//]in des-[F+]pair, I [Bb]bowed my [C7]head,
+“There [Dm//]is no [Dm7]peace on [E7]earth,” I [Am]said,
+“For [Gm//]hate is [C7]strong and [Cm//]mocks the [D7]song
+of [Gm]peace [D7]on [Gm]earth, [D7]good [Dm//]will [C7]to men.”
+Then [F//]pealed the [F+]bells more [Bb]loud and [C7]deep,
+“God [Dm//]is not [Dm7]dead, nor [E7]doth He [Am]sleep,
+the [Gm//]wrong shall [C7]fail, the [Cm//]right pre-[D7]vail,
+with [Gm]peace [D7]on [Gm]earth, [D7]good [Dm//]will [C7]to [F/]men.”
+
+=== SONG 2707 | It Had To Be You | revised_on=2023-03-01 ===
+{title:It Had To Be You}
+{artist:Cliff “Ukulele Ike” Edwards}
+{youtube:}
+{songwriter:Gus Kahn & Isham Jones}
+{capo:}
+{year:}
+{1stnote:C}
+{timeSignature:4/4}
+
+{c:/ = one strum}
+{c:Key matches Cliff “Ukulele Ike” Edwards recording}
+
+It had to be [F//]you; [C+//]
+[F] it had to be [D7]you.
+[D7] I wan-dered a-[G7//]round and fi-nal-ly [G7//]found
+the some-bod-y [G7]who
+[G7] could make me be [C7]true,
+[C7] could [C#o7]make me be [Dm]blue,
+[Dm] or e-ven be [G7//]glad just to be [G7//]sad,
+think-ing of [C7]you.
+[C7] Some [C+]oth-ers I’ve [F//]seen [C+//]
+[F] might nev-er be [D7]mean,
+[D7] might nev-er be [G7//]cross or try to be [G7//]boss,
+but they would-n’t [G7]do.
+[G7] For [Dm]no-bod-y [Gm//]else gave me a [Bbm//]thrill;
+with all your [F//]faults, [A7]I love you [Dm]still.
+It [Abo7]had to be [C7//]you, [Abo7]won-der-ful [C7//]you,
+it had to be [F]you. [F/]
+
+=== SONG 1868 | Killing Me Softly ===
+{title:Killing Me Softly}
+{artist:Roberta Flack}
+{youtube:https://www.youtube.com/watch?v=qMzzw6IXH1s}
+{songwriter:Charles Fox, Norman Gimbel}
+{capo:}
+{year:1973}
+{1stnote:}
+{timeSignature:}
+{key:Am}
+
+[Am] Strumming my pain with his [Dm] fingers
+[G7] Singing my life with his [C]words
+[Am] Killing me softly with [D]his song, Killing me [G] softly with [F] his song
+Telling my [C]whole life with [F]his words, Killing me [Asus4]softly with his [A]song
+[Dm] I heard he [G7] sang a good song, [C] I heard he [F] had a style
+[Dm] And so I [G7] came to see him, And [Am] listen for a while
+[Dm] And there he [G7] was this young boy, [C] A stranger [E7] to my eyes
+[Am] Strumming my pain with his [Dm] fingers
+[G7] Singing my life with his [C]words
+[Am] Killing me softly with [D]his song, Killing me [G] softly with [F] his song
+Telling my [C]whole life with [F]his words, Killing me [Asus4]softly with his [A]song
+[Dm] I felt all [G7] flushed with fever, [C] Embarrassed [F] by the crowd
+[Dm] I felt he [G7] found my letters, And [Am] read each one out loud
+[Dm] I prayed that [G7] he would finish, [C] But he just [E7] kept right on
+[Am] Strumming my pain with his [Dm] fingers
+[G7] Singing my life with his [C]words
+[Am] Killing me softly with [D]his song, Killing me [G] softly with [F] his song
+Telling my [C]whole life with [F]his words, Killing me [Asus4]softly with his [A]song
+[Dm] He sang as [G7] if he knew me, [C] In all my [F] dark despair
+[Dm] And then he [G7] looked right through me, As [Am] if I wasn't there
+[Dm] And he just [G7] kept on singing, [C] Singing [E7] clear and strong
+[Am] Strumming my pain with his [Dm] fingers
+[G7] Singing my life with his [C]words
+[Am] Killing me softly with [D]his song, Killing me [G] softly with [F] his song
+Telling my [C]whole life with [F]his words, Killing me [Asus4]softly with his [A]song
+
+=== SONG 3149 | Let It Snow! Let It Snow! Let It Snow! | revised_on=2022-12-13 ===
+{title:Let It Snow! Let It Snow! Let It Snow!}
+{artist:}
+{youtube:}
+{songwriter:Sammy Cahn & Jule Styne}
+{capo:}
+{year:}
+{1stnote:C}
+{timeSignature:Cut time}
+
+{c:/ = one strum}
+
+Oh, the [F]weath-er out-[C7]side is [F]fright-[F//]ful,
+but the [F//]fire is [Abo//]so de-[C7]light-[C7//]ful,
+and [Gm]since we’ve no [D7]place to [Gm///]go,
+[Bo]let it [C7]snow, let it snow, let it [F///]snow.
+It [F]does-n’t show [C7]signs of [F]stop-[F//]ping,
+and I [F//]brought some [Abo//]corn for [C7]pop-[C7//]ping;
+the [Gm]lights are turned [D7]way down [Gm///]low,
+[Bo]let it [C7]snow, let it snow, let it [F///]snow.
+When we [C]fi-nal-ly kiss good [C///]night,
+[C#o]how I’ll [Dm7]hate go-ing [G7]out in the [C///]storm;
+but if you’ll real-ly hold me [C]tight,
+[D7]all the way [G7]home I’ll be [C7///]warm.
+Oh, the [F]fire is [C7]slow-ly [F]dy-[F//]ing,
+and, my [F//]dear, we’re [Abo//]still good-[C7]bye-[C7//]ing,
+but as [Gm]long as you [D7]love me [Gm///]so,
+[Bo]let it [C7]snow, let it snow, let it [F///]snow.
+[Bo]Let it [C7]snow, let it snow, let it [F///]snow.
+[Bo]Let it [C7]snow, let it snow, let it [F///]snow.
+C#o
+
+=== SONG 2757 | Let Me Call You Sweetheart | revised_on=2017-10-30 ===
+{title:Let Me Call You Sweetheart}
+{artist:The Mills Brothers}
+{youtube:}
+{songwriter:Leo Friedman & Beth Slater Whitson}
+{capo:3}
+{year:}
+{1stnote:A}
+{timeSignature:3/4}
+
+{c:Capo on fret 3 to match The Mills Brothers recording}
+
+[F]Let me [Dm]call you [F]sweet-heart,
+[F7]I’m in [Bb]love [D7]with [G7]you.
+[C7]Let me [Fo]hear you [C7]whis-per
+that you [F]love [Co]me, [C7]too. [C+]
+[F]Keep that [Dm]love-light [F]glow-ing
+[F7]in your [Bb]eyes [D7]so [G7]true.
+[Bb]Let me [E7]call you [F]sweet-heart,
+[D7]I’m in [G7]love [C7]with [F]you.
+[F]Let me [Dm]call you [F]sweet-heart,
+[F7]I’m in [Bb]love [D7]with [G7]you.
+[C7]Let me [Fo]hear you [C7]whis-per
+that you [F]love [Co]me, [C7]too. [C+]
+[F]Keep that [Dm]love-light [F]glow-ing
+[F7]in your [Bb]eyes [D7]so [G7]true.
+[Bb]Let me [E7]call you [F]sweet-heart,
+[D7]I’m in [G7]love [C7]with [F]you.
+
+=== SONG 2794 | Lost In Love | revised_on=2025-10-27 ===
+{title:Lost In Love}
+{artist:Air Supply}
+{youtube:}
+{songwriter:Graham Russell}
+{capo:}
+{year:1979}
+{1stnote:D}
+{timeSignature:4/4}
+
+{c:/ = one strum}
+{c:Key matches Air Supply recording}
+
+[Gadd9 - G] [Gadd9 - G] [CM7 - C6] [CM7 - C6]
+[Am9 - Am7] [Am9 - Am7] [Gadd9] [G]
+I [Gadd9]re-al-[G]ize the [Gadd9]best part of [G]love
+is the [CM7]thin-nest [C6]slice and it [CM7]don’t count for [C6]much.
+But I’m [Am9]not let-ting [Am7]go. I be-[Am9]lieve there’s still [Am7]much
+to be-[Gadd9]lieve in. [G//] [Gadd9//] [G/]
+So [Gadd9]lift your [G]eyes if you [Gadd9]feel you [G//]can.
+[CM7]Reach for a [C6]star and I'll [CM7]show you a [C6//]plan.
+I’ve [Am9]fig-ured it [Am7]out: what I [Am9]need-ed was [Am7]some-one
+to [Gadd9]show me. [G//] [G]
+{c:Pre-chorus}
+[Am7] You know you can't [Bm7]fool [Bm7//]me
+I've been [C]lov-ing you too [G]long.
+[Em] It start-ed so [Am7]eas-y. [Am7//]
+You [A7]want to car-ry on, [A7///] car-ry [C]on. [C]
+[Gadd9]Lost in [G]love and I [Gadd9]don’t know [G]much.
+Was I [CM7]think-ing a-[C6]loud and [CM7]fell out of [C6]touch?
+But I'm [Am9]back on my [Am7//]feet, [Am9]ea-ger to [Am7]be
+what you [Gadd9]want-ed. [G//] [Gadd9//] [G/]
+So [Gadd9]lift your [G]eyes if you [Gadd9]feel you [G//]can.
+[CM7]Reach for a [C6]star and I'll [CM7]show you a [C6//]plan.
+I’ve [Am9]fig-ured it [Am7]out: what I [Am9]need-ed was [Am7]some-one
+to [Gadd9]show me. [G//] [G]
+{c:Pre-chorus}
+[Am7] You know you can't [Bm7]fool [Bm7//]me
+I've been [C]lov-ing you too [G]long.
+[Em] It start-ed so [Am7]eas-y. [Am7//]
+You [A7]want to car-ry on, [A7///] car-ry [C]on. [C]
+[Gadd9]Lost in [G]love and I [Gadd9]don’t know [G]much.
+Was I [CM7]think-ing a-[C6]loud and [CM7]fell out of [C6]touch?
+But I’m [Am9]back on my [Am7//]feet, and [Am9]ea-ger to [Am7]be
+what you [Gadd9]want-ed. [G//]
+{c:Interlude}
+[Gadd9 - G] [Gadd9 - G] [CM7 - C6] [CM7 - C6]
+[Am9 - Am7] [Am9 - Am7] [Gadd9 - G] [G]
+{c:Pre-chorus}
+[Am7] You know you can't [Bm7]fool [Bm7//]me
+I've been [C]lov-ing you too [G]long.
+[Em] It start-ed so [Am7]eas-y. [Am7//]
+You [A7]want to car-ry on, [A7///] car-ry [C]on. [C]
+[Gadd9]Lost in [G]love and I [Gadd9]don’t know [G]much.
+Was I [CM7]think-ing a-[C6]loud and [CM7]fell out of [C6]touch.
+But I'm [Am9]back on my [Am7//]feet, [Am9]ea-ger to [Am7]be
+what you [Gadd9]want-ed. [G//] [Gadd9//]
+{c:Repeat and fade}
