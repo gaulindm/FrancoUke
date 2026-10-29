@@ -30,7 +30,7 @@
 {% include "songbook/_unlock_suggestions.html" %}
 
 {# ⭐ Visitors who are not logged in can see ratings but not give them #}
-{% if not user.is_authenticated %}
+{% if show_ratings and not user.is_authenticated %}
 <p class="text-muted small mb-2">{% if site_name == 'FrancoUke' %}Connectez-vous pour évaluer les chansons.{% else %}Log in to rate songs.{% endif %}</p>
 {% endif %}
 
@@ -44,22 +44,26 @@
                     <th class="text-center">Téléprompteur</th>
                     <th class="text-center">Vidéo</th>
                     <th>Interprète (année)</th>
+                    {% if show_ratings %}
                     {# ⭐ sortable rating column #}
                     <th class="text-center text-nowrap" id="tour-rating-col">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Retour à l'ordre alphabétique">Évaluation ▼</a>
                         {% else %}<a href="{{ sort_by_rating_url }}" title="Les mieux notées d'abord">Évaluation</a>{% endif %}
                     </th>
+                    {% endif %}
                     <th class="text-center" id="tour-chords-col">Accords jouées</th>
                 {% else %}
                     <th>Songs</th>
                     <th class="text-center">Teleprompter</th>
                     <th class="text-center">Video</th>
                     <th>Artist (year)</th>
+                    {% if show_ratings %}
                     {# ⭐ sortable rating column #}
                     <th class="text-center text-nowrap" id="tour-rating-col">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Back to A-Z">Rating ▼</a>
                         {% else %}<a href="{{ sort_by_rating_url }}" title="Best rated first">Rating</a>{% endif %}
                     </th>
+                    {% endif %}
                     <th class="text-center" id="tour-chords-col">Chords played</th>
                 {% endif %}
             </tr>
@@ -114,7 +118,7 @@
                 <td>
                     {{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if item.song.metadata.year %} ({{ item.song.metadata.year }}){% endif %}
                 </td>
-                {% include "songbook/_song_rating_cell.html" with row=item %}
+                {% if show_ratings %}{% include "songbook/_song_rating_cell.html" with row=item %}{% endif %}
                 <td class="text-center">
                     {% if item.chords|length > 55 %}
                         {{ item.chords|slice:":55" }}...
@@ -127,7 +131,7 @@
                 </td>
             </tr>
 
-            {# One full row per alternate version, same 6 columns #}
+            {# One full row per alternate version, same columns #}
             {% for v in item.other_versions %}
             <tr class="collapse version-group-{{ item.song.id }} bg-light">
                 <td>
@@ -156,7 +160,7 @@
                 <td>
                     {{ v.song.metadata.artist|default_if_none:"Unknown Artist" }}{% if v.song.metadata.year %} ({{ v.song.metadata.year }}){% endif %}
                 </td>
-                {% include "songbook/_song_rating_cell.html" with row=v %}
+                {% if show_ratings %}{% include "songbook/_song_rating_cell.html" with row=v %}{% endif %}
                 <td class="text-center">
                     {% if v.chords|length > 55 %}{{ v.chords|slice:":55" }}...{% else %}{{ v.chords }}{% endif %}
                     {% if v.missing_chords %}
@@ -167,7 +171,7 @@
             {% endfor %}
             {% empty %}
             <tr>
-                <td colspan="6" class="text-center">
+                <td colspan="{% if show_ratings %}6{% else %}5{% endif %}" class="text-center">
                     {% if site_name == 'FrancoUke' %}Aucune chanson ne correspond à votre recherche.{% else %}No songs found matching your search.{% endif %}
                 </td>
             </tr>
@@ -184,7 +188,7 @@
 
 
 {# ⭐ shared rating pop-up #}
-{% include "ratings/_rating_modal.html" %}
+{% if show_ratings %}{% include "ratings/_rating_modal.html" %}{% endif %}
 
 {# 🧭 Guided tour (Driver.js) #}
 <link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">

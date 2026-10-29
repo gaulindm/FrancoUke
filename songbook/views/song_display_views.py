@@ -6,6 +6,7 @@ from django.views.generic import TemplateView, ListView, DetailView
 from django.db.models import Q, prefetch_related_objects
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from types import SimpleNamespace
@@ -650,7 +651,10 @@ class SongListView(SiteContextMixin, ListView):
         # Unrated songs go last; ties are broken by number of votes, then title.
         # Only here do we need ratings for EVERY song (one grouped query);
         # otherwise just the current page's songs are looked up further down.
-        sort = "rating" if self.filter_params.get("sort") == "rating" else ""
+        # 🙈 Ratings are hidden for now: set SHOW_RATINGS = True in settings.py
+        # to bring back the column, the sort and the rating queries.
+        show_ratings = getattr(settings, "SHOW_RATINGS", False)
+        sort = "rating" if (show_ratings and self.filter_params.get("sort") == "rating") else ""
         all_summaries = None
         if sort == "rating":
             all_summaries = rating_summaries()
@@ -676,6 +680,7 @@ class SongListView(SiteContextMixin, ListView):
                 del params["sort"]
             return "?" + params.urlencode()
 
+        context["show_ratings"] = show_ratings
         context["sort"] = sort
         context["sort_by_rating_url"] = sort_url("rating")
         context["sort_by_title_url"] = sort_url("")
@@ -739,8 +744,11 @@ class SongListView(SiteContextMixin, ListView):
 
         # ⭐ Ratings for the songs on this page: one query (already have them if sorting)
         page_ids = [s.id for s in page_songs]
-        summaries = all_summaries if all_summaries is not None else rating_summaries(page_ids)
-        mine = rating_mine(page_ids, self.request.user)  # the logged-in user's own ratings
+        if show_ratings:
+            summaries = all_summaries if all_summaries is not None else rating_summaries(page_ids)
+            mine = rating_mine(page_ids, self.request.user)  # the logged-in user's own ratings
+        else:
+            summaries, mine = {}, {}  # hidden: skip both rating queries
 
         def build_row_data(song):
             parsed_data = song.lyrics_with_chords or ""
