@@ -1,7 +1,7 @@
 {% extends base_template %}
 {% load static %}
 
-{# songbook/song_list_simple.html: the SIMPLE song list. Formatted songs only. #}
+{# songbook/song_list_simple.html: the SIMPLE song list. #}
 {# Columns: Title (opens the PDF view) | Teleprompter | Video | Artist (year) | Rating | Chords played #}
 {# The filter bar, chord modal, switch button, "learn one more chord" box, pagination and video modal are shared includes. #}
 
@@ -168,7 +168,7 @@
             {% empty %}
             <tr>
                 <td colspan="6" class="text-center">
-                    {% if site_name == 'FrancoUke' %}Aucune chanson formatée ne correspond à votre recherche.{% else %}No formatted songs found matching your search.{% endif %}
+                    {% if site_name == 'FrancoUke' %}Aucune chanson ne correspond à votre recherche.{% else %}No songs found matching your search.{% endif %}
                 </td>
             </tr>
             {% endfor %}

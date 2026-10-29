@@ -42,7 +42,7 @@
         <thead>
             <tr>
                 {% if site_name == 'FrancoUke' %}
-                    <th>Partitions</th><th id="tour-status-col">Status</th><th>Interprètes</th><th>Année</th>
+                    <th>Partitions</th><th>Interprètes</th><th>Année</th>
                     {# ⭐ sortable rating column #}
                     <th class="text-center text-nowrap">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Retour à l'ordre alphabétique">Évaluation ▼</a>
@@ -53,7 +53,7 @@
                     <th class="text-center">PDF</th>
                     <th class="text-center">Téléprompteur</th>
                 {% else %}
-                    <th>Songs</th><th id="tour-status-col">Status</th><th>Artists</th><th>Year</th>
+                    <th>Songs</th><th>Artists</th><th>Year</th>
                     {# ⭐ sortable rating column #}
                     <th class="text-center text-nowrap">
                         {% if sort == 'rating' %}<a href="{{ sort_by_title_url }}" title="Back to A-Z">Rating ▼</a>
@@ -110,7 +110,6 @@
                         </button>
                     {% endif %}
                 </td>
-                <td>{% if item.is_formatted %}✅{% else %}❌{% endif %}</td>
                 <td>{{ item.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
                 <td class="text-center">{{ item.song.metadata.year|default_if_none:"" }}</td>
                 {% include "songbook/_song_rating_cell.html" with row=item %}
@@ -148,7 +147,7 @@
                 </td>
             </tr>
 
-            {# 🆕 One full row per alternate version, same 9 columns as the primary row above, so PDF and Teleprompter links work for every version #}
+            {# 🆕 One full row per alternate version, same 8 columns as the primary row above, so PDF and Teleprompter links work for every version #}
             {% for v in item.other_versions %}
             <tr class="collapse version-group-{{ item.song.id }} bg-light">
                 <td>
@@ -169,7 +168,6 @@
                         <span class="badge bg-info ms-2"><i class="bi bi-files"></i></span>
                     {% endif %}
                 </td>
-                <td>{% if v.is_formatted %}✅{% else %}❌{% endif %}</td>
                 <td>{{ v.song.metadata.artist|default_if_none:"Unknown Artist" }}</td>
                 <td class="text-center">{{ v.song.metadata.year|default_if_none:"" }}</td>
                 {% include "songbook/_song_rating_cell.html" with row=v %}
@@ -198,7 +196,7 @@
             </tr>
             {% endfor %}
             {% empty %}
-            <tr><td colspan="9" class="text-center">No songs found matching your search.</td></tr>
+            <tr><td colspan="8" class="text-center">No songs found matching your search.</td></tr>
             {% endfor %}
         </tbody>
     </table>

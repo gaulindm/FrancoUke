@@ -191,7 +191,7 @@ class SongListView(SiteContextMixin, ListView):
 
     # 🆕 Two flavours of this page share all the filtering code below:
     #   extended view (this class): every column, every song
-    #   simple view   (SongListSimpleView): fewer columns, formatted songs only
+    #   simple view   (SongListSimpleView): fewer columns, same songs
     # Subclasses only change these three attributes + the template.
     view_mode = "extended"            # used by the templates (switch button, hidden controls)
     list_url_suffix = ":song_list"    # URL name (without namespace) of THIS view, for "Clear Filter" links
@@ -729,18 +729,13 @@ class SongListView(SiteContextMixin, ListView):
                 full_songs.get(v.id, v) for v in family["other_versions"]
             ]
 
-        # 🆕 PERFORMANCE: fetch tags and "is formatted" for ALL songs on this
-        # page in two queries, instead of two queries per song.
+        # 🆕 PERFORMANCE: fetch tags for ALL songs on this page in one query,
+        # instead of one query per song.
         page_songs = []
         for family in page_obj.object_list:
             page_songs.append(family["primary"])
             page_songs.extend(family["other_versions"])
         prefetch_related_objects(page_songs, "tags")
-        formatted_ids = set(
-            SongFormatting.objects.filter(
-                song_id__in=[s.id for s in page_songs]
-            ).values_list("song_id", flat=True)
-        )
 
         # ⭐ Ratings for the songs on this page: one query (already have them if sorting)
         page_ids = [s.id for s in page_songs]
@@ -752,14 +747,12 @@ class SongListView(SiteContextMixin, ListView):
             chords = extract_chords(parsed_data, unique=True) if parsed_data else []
             chords = [c for c in chords if is_valid_chord(c)]  # 🆕 drop N.C. and other non-chord tokens
             tags = [tag.name for tag in song.tags.all()]  # prefetched above
-            is_formatted = song.id in formatted_ids
             return {
                 "song": song,
                 "chords": ", ".join(chords),
                 # 🆕 "almost" mode only: chords the player still needs for this song
                 "missing_chords": ", ".join(self.almost_missing.get(song.id, [])),
                 "tags": ", ".join(tags),
-                "is_formatted": is_formatted,
                 # ⭐ ratings (average, number of votes, nearest face icon)
                 "avg_rating": (summaries.get(song.id) or {}).get("avg"),
                 "rating_count": (summaries.get(song.id) or {}).get("n", 0),
@@ -788,14 +781,14 @@ class SongListView(SiteContextMixin, ListView):
 
 
 # -------------------------------------------------------------
-# Simple view: same filters as SongListView, but fewer columns and
-# ONLY formatted songs — the friendly list for everyday members.
+# Simple view: same filters and songs as SongListView, but fewer columns —
+# the friendly list for everyday members. (Unformatted songs are tracked on
+# the editors' songs_to_format page, not by hiding them here.)
 # -------------------------------------------------------------
 class SongListSimpleView(SongListView):
     template_name = "songbook/song_list_simple.html"
     view_mode = "simple"
     list_url_suffix = ":song_list_simple"
-    formatted_only = True
 
 
 # -------------------------------------------------------------
