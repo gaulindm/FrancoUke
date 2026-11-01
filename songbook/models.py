@@ -12,6 +12,8 @@ from django.conf import settings
 from django.utils import timezone
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 from songbook.utils.transposer import extract_chords
+from songbook.utils.metadata import parse_metadata
+
 
 
 def normalize_strumming_pattern(raw):
@@ -161,35 +163,7 @@ class Song(models.Model):
         super().save(*args, **kwargs)
 
     def parse_metadata_from_chordpro(self):
-        tags = {
-            "title": re.search(r'{(?:title|t):\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "comment": re.search(r'{(?:comment|c):\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "artist": re.search(r'{artist:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "songwriter": re.search(r'{songwriter:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "capo": re.search(r'{capo:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "album": re.search(r'{album:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "year": re.search(r'{year:\s*(\d{4})}', self.songChordPro, re.IGNORECASE),
-            "key": re.search(r'{key:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
-            "1stnote": re.search(r'{1stnote:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
-            "tempo": re.search(r'{tempo:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
-            "timeSignature": re.search(r'{timeSignature:\s*(.+?)}', self.songChordPro, re.IGNORECASE),
-            "youtube": re.search(r'{youtube:\s*(https?://[^\s\}]+)}', self.songChordPro, re.IGNORECASE),
-            # 🆕 Default strumming pattern for the whole song, e.g. {strumming: D-DU-UDU}
-            "strumming": re.search(r'{strumming:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            # 🆕 NEW TAGS for header short notes
-            "count_in": re.search(r'{count_in:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "short_instruction_1": re.search(r'{short_instruction_1:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            "short_instruction_2": re.search(r'{short_instruction_2:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-            # NEW TAG  for alternate chord
-            "suggested_alternate": re.search(r'{suggested_alternate:\s*([^\}]+)}', self.songChordPro, re.IGNORECASE | re.UNICODE
-),
-            # 🆕 Optional section-specific strumming override, e.g. {x_strumming: D-DU-UDU}
-            "x_strumming": re.search(r'{x_strumming:\s*(.+?)}', self.songChordPro, re.IGNORECASE | re.UNICODE),
-
-        }
-        metadata = {tag: match.group(1) if match else None for tag, match in tags.items()}
-        title = metadata.pop("title", "Untitled Song")
-        return title, metadata
+        return parse_metadata(self.songChordPro)
 
     def render_lyrics_with_chords_html(self, site_name="StrumSphere", transpose_value=0):
         lyrics_data = self.lyrics_with_chords

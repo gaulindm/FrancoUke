@@ -19,6 +19,142 @@ from songbook.utils.song_header import build_song_header
 import json
 import os
 import re
+from functools import partial
+
+from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfgen import canvas as rl_canvas
+
+
+# =======================
+# PAGE LAYOUT
+# =======================
+# One place for the page geometry (tuned for screens / iPad, not for printing).
+# FRAME_WIDTH is what is really left for content once the margins and
+# ReportLab's frame padding are taken off; the section tables use it.
+PAGE_WIDTH = letter[0]
+TOP_MARGIN = 2              # 🔧 TUNE
+LEFT_MARGIN = 20            # 🔧 TUNE
+RIGHT_MARGIN = 20           # 🔧 TUNE
+FRAME_PADDING = 6           # ReportLab's default padding inside the frame, each side
+FRAME_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN - 2 * FRAME_PADDING   # 560
+
+# Pages 2, 3, ... of a song (started with {page}): the lyrics/chords begin this
+# far below the top edge of the page. The "Page 2 of 3" line sits in this space.
+CONTINUATION_TOP_MARGIN = 54    # 🔧 TUNE: 54pt = 3/4 inch
+
+
+# =======================
+# MULTI-PAGE SONG MARKERS
+# =======================
+# A song that runs over more than one page (because of {page}, or because it
+# is long) gets, on pages 2, 3, ... only:
+#     top right   "Page 2 of 3"
+#     top centre  "Song Title (continued)"
+# The first page of a song, and one-page songs, get nothing at all, so they
+# look exactly as before.
+# The marker sits in the blank 3/4" (CONTINUATION_TOP_MARGIN) that {page}
+# leaves at the top of the new page, so it never covers any lyrics.
+PAGE_MARKER_Y = 20          # 🔧 TUNE: baseline, in points below the top edge of the page
+PAGE_MARKER_SIDE_RESERVE = 90   # room kept free left/right of the centred title
+PAGE_MARKER_TEXT = {
+    # site_name: (page label, continued label)
+    "FrancoUke":   ("Page {k} sur {n}", "{title} (suite)"),
+    "StrumSphere": ("Page {k} of {n}",  "{title} (continued)"),
+}
+
+
+def _fit_text(text, font, size, max_width, min_size=7):
+    """Shrink the font (down to min_size), then trim with '...', to fit max_width."""
+    while size > min_size and stringWidth(text, font, size) > max_width:
+        size -= 0.5
+    while len(text) > 4 and stringWidth(text, font, size) > max_width:
+        text = text[:-4].rstrip() + "..."
+    return text, size
+
+
+class SongStartMarker(Flowable):
+    """Invisible, zero-size flowable placed at the very start of each song.
+
+    When it is drawn it tells the canvas "a song starts on this page", so
+    SongPageCanvas can work out, once layout is finished, which pages belong
+    to which song and how many pages each song has.
+    """
+    def __init__(self, title):
+        super().__init__()
+        self.title = title
+        self.width = self.height = 0
+
+    def wrap(self, avail_width, avail_height):
+        return (0, 0)
+
+    def draw(self):
+        starts = getattr(self.canv, "_song_starts", None)
+        if starts is not None:
+            starts.append((self.canv.getPageNumber(), self.title))
+
+
+class SongPageCanvas(rl_canvas.Canvas):
+    """Canvas that adds the multi-page song markers after layout is done.
+
+    Layout has to be finished first because "Page 1 of 3" needs to know the
+    total, and ReportLab only knows that at the end. Each finished page is
+    held back, then replayed with its marker drawn on top.
+    """
+    def __init__(self, *args, site_name="StrumSphere", **kwargs):
+        super().__init__(*args, **kwargs)
+        self._site_name = site_name
+        self._song_starts = []          # [(page_number, title), ...]
+        self._saved_page_states = []
+
+    def showPage(self):
+        self._saved_page_states.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self):
+        total_pages = len(self._saved_page_states)
+        for state in self._saved_page_states:
+            self.__dict__.update(state)
+            self._draw_song_page_markers(total_pages)
+            rl_canvas.Canvas.showPage(self)
+        rl_canvas.Canvas.save(self)
+
+    def _draw_song_page_markers(self, total_pages):
+        starts = self._song_starts
+        page = self.getPageNumber()
+        idx = None
+        for i, (start_page, _title) in enumerate(starts):
+            if start_page <= page:
+                idx = i
+        if idx is None:
+            return
+
+        first_page, title = starts[idx]
+        last_page = starts[idx + 1][0] - 1 if idx + 1 < len(starts) else total_pages
+        song_pages = last_page - first_page + 1
+        if song_pages < 2:
+            return                       # one-page song: nothing to add
+
+        position = page - first_page + 1
+        if position == 1:
+            return                       # first page of the song: leave it clean
+        page_label, continued_label = PAGE_MARKER_TEXT.get(
+            self._site_name, PAGE_MARKER_TEXT["StrumSphere"])
+        y = self._pagesize[1] - PAGE_MARKER_Y
+
+        self.saveState()
+        self.setFillColor(colors.black)
+
+        self.setFont("Helvetica-Oblique", 9)
+        self.drawRightString(self._pagesize[0] - RIGHT_MARGIN, y,
+                             page_label.format(k=position, n=song_pages))
+
+        text, size = _fit_text(
+            continued_label.format(title=title), "Helvetica-Bold", 10,
+            self._pagesize[0] - 2 * (LEFT_MARGIN + PAGE_MARKER_SIDE_RESERVE))
+        self.setFont("Helvetica-Bold", size)
+        self.drawCentredString(self._pagesize[0] / 2, y, text)
+
+        self.restoreState()
 
 
 # =======================
@@ -239,6 +375,7 @@ def build_song_elements(song, styles, styles_dict, site_name,
         ('TOPPADDING', (0, 0), (-1, -1), 2),
     ]))
 
+    elements.append(SongStartMarker(h["title"]))   # lets the canvas count this song's pages
     elements.append(header_table)
 
     # --- Lyrics ---
@@ -344,12 +481,23 @@ def render_vocal_group_label(group_number):
     return f'<font size="8" color="{color}"><b>{label}</b></font>&nbsp;'
 
 # =======================
+# SECTION LAYOUT (label column + lyrics column)
+# =======================
+# Sections such as Chorus/Bridge are drawn as a 3-column table:
+#     [ label | lyrics | empty spacer ]
+# The empty spacer is the same width as the label column, so the lyrics sit
+# in the true centre of the page instead of being pushed right by the label.
+LABEL_COL_WIDTH = 50       # 🔧 TUNE: wide enough for "Interlude:" in bold
+LYRICS_COL_WIDTH = FRAME_WIDTH - 2 * LABEL_COL_WIDTH   # 460 (FRAME_WIDTH is set under PAGE LAYOUT)
+
+
+# =======================
 # TAB BLOCKS ({sot} ... {eot})
 # =======================
 TAB_FONT = "Courier"
 TAB_MAX_FONT_SIZE = 10          # 🔧 TUNE: normal size for tabs
 TAB_MIN_FONT_SIZE = 5           # never shrink below this
-TAB_COLUMN_WIDTH = 500          # same width as the lyrics column in sections
+TAB_COLUMN_WIDTH = LYRICS_COL_WIDTH   # same width as the lyrics column in sections
 TAB_PADDING = 6
 TAB_BACKGROUND = colors.HexColor("#F2F2F2")
 COURIER_CHAR_WIDTH = 0.6        # Courier is 0.6 x font size wide per character
@@ -485,8 +633,8 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
             lyrics_para = Paragraph(paragraph_text, style)
 
             section_table = Table(
-                [[label_para, lyrics_para]],
-                colWidths=[60, 500],
+                [[label_para, lyrics_para, ""]],
+                colWidths=[LABEL_COL_WIDTH, LYRICS_COL_WIDTH, LABEL_COL_WIDTH],
                 hAlign="CENTER",
             )
 
@@ -530,8 +678,8 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                     section_label_shown = True
 
                 tab_table = Table(
-                    [[Paragraph(label_html, base_style), tab_flowable]],
-                    colWidths=[60, TAB_COLUMN_WIDTH],
+                    [[Paragraph(label_html, base_style), tab_flowable, ""]],
+                    colWidths=[LABEL_COL_WIDTH, TAB_COLUMN_WIDTH, LABEL_COL_WIDTH],
                     hAlign="CENTER",
                 )
                 tab_table.setStyle(TableStyle([
@@ -571,7 +719,9 @@ def build_lyrics_elements(lyrics_with_chords, styles_dict, base_style, site_name
                     mapped = selected_map[directive]
                     if mapped == "PAGEBREAK":
                         elements.append(PageBreak())
-                        elements.append(Spacer(1, 3 * 14))  # ~3 blank lines at 14pt each
+                        # Leave 3/4" at the top of the new page (the page itself
+                        # only has a TOP_MARGIN-point margin, so add the difference).
+                        elements.append(Spacer(1, CONTINUATION_TOP_MARGIN - TOP_MARGIN))
 
                         section_type = None
                     else:
@@ -774,10 +924,10 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     doc = SimpleDocTemplate(
         response,
         pagesize=letter,
-        topMargin=2,
+        topMargin=TOP_MARGIN,
         bottomMargin=bottom_margin,
-        leftMargin=20,
-        rightMargin=20,
+        leftMargin=LEFT_MARGIN,
+        rightMargin=RIGHT_MARGIN,
         title=pdf_title,
     )
 
@@ -788,14 +938,15 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
     styles_dict = get_paragraph_styles(formatting)
 
     # Build elements for all songs
-    for song in songs:
+    for song_index, song in enumerate(songs):
         elements.extend(build_song_elements(
             song, styles, styles_dict, site_name,
             chord_bracket_style=user_prefs.get("chord_bracket_style", "square"),
             chord_color=user_prefs.get("chord_color", "black"),
             show_strumming=user_prefs.get("show_strumming_pattern", True),
         ))
-        elements.append(PageBreak())
+        if song_index < len(songs) - 1:
+            elements.append(PageBreak())
 
     # Format the revision date once, if the song has one. Kept as a plain
     # string here (rather than passing the raw date into draw_footer) so
@@ -829,5 +980,6 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
             is_printing_alternate_chord=bool(user_prefs.get("show_alternate_chords", False)),
             acknowledgement=getattr(songs[0], "acknowledgement", ""),
             revision_date=revision_date,
-        )
+        ),
+        canvasmaker=partial(SongPageCanvas, site_name=site_name),
     )

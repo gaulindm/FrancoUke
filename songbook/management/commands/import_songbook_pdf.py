@@ -17,8 +17,10 @@ WHAT IS NEW (lessons from cleaning the first 538 songs)
   * songTitle no longer contains the date from the file name.
   * Every section gets its closing tag ({eov}, {eoc}...). An empty "Chorus 1:"
     becomes {c:Repeat Chorus 1}.
-  * Songs already in the database (same title + site) are skipped, so a re-run
-    does not make duplicates.
+  * Songs already in the database (same title + site) are still imported, but
+    the new copy's title gets NEWVER_FLAG added ("Title NEWVER") so you can find
+    the old version and delete it afterwards. A re-run does not make a second
+    NEWVER copy.
   * In songs with no section tags, every blank line becomes a line holding one
     space, so the parser shows a gap between groups of lines. Gaps are found from
     the vertical spacing in the PDF (GAP_FACTOR below).
@@ -53,6 +55,10 @@ from django.utils import timezone
 from songbook.models import Song  # adjust app name
 
 ACKNOWLEDGEMENT_TEXT = "Contribution of Heather J. Topps of the North Bay Ukulele Club"
+
+# Added to the end of the title when the song is already in the database.
+# Search for it afterwards to find the old and new versions side by side.
+NEWVER_FLAG = "NEWVER"
 
 # Name of the django-taggit field on the Song model (tags = TaggableManager()).
 TAGS_FIELD = "tags"
@@ -712,7 +718,7 @@ class Command(BaseCommand):
         origin = resolve_origin(options["origin"]) if options["origin"] and options["to_db"] else None
         extra = {ORIGIN_FIELD: origin} if origin else {}
 
-        created = skipped = failed = 0
+        created = skipped = flagged = failed = 0
         for i, pdf_file in enumerate(pdf_files, 1):
             self.stdout.write(f"[{i}/{len(pdf_files)}] Processing {pdf_file.name}...")
             try:
@@ -726,26 +732,41 @@ class Command(BaseCommand):
 
                 if to_db:
                     with transaction.atomic():
-                        song = Song.objects.filter(
-                            songTitle=title, site_name=options["site_name"]
-                        ).first()
+                        site = options["site_name"]
+                        flagged_title = f"{title} {NEWVER_FLAG}"
+                        already_there = Song.objects.filter(songTitle=title, site_name=site).exists()
+                        if already_there:
+                            save_title = flagged_title
+                            song = Song.objects.filter(songTitle=save_title, site_name=site).first()
+                        else:
+                            save_title = title
+                            song = Song.objects.filter(songTitle=title, site_name=site).first()
+
                         if song:
                             skipped += 1
-                            self.stdout.write(f"    Already in the database, not changed: {title}")
+                            self.stdout.write(f"    Already in the database, not changed: {save_title}")
                         else:
                             song = Song.objects.create(
-                                songTitle=title,
+                                songTitle=save_title,
                                 songChordPro=text,
                                 revised_on=revised_on,
                                 metadata={"source": str(pdf_file)},
                                 date_posted=timezone.now(),
                                 contributor_id=options["contributor_id"],
-                                site_name=options["site_name"],  # can be None
+                                site_name=site,  # can be None
                                 acknowledgement=ACKNOWLEDGEMENT_TEXT,
                                 **extra,
                             )
                             created += 1
-                            self.stdout.write(self.style.SUCCESS(f"    Saved to DB: {song.songTitle}"))
+                            if already_there:
+                                flagged += 1
+                                self.stdout.write(
+                                    self.style.WARNING(
+                                        f"    Old version found - saved new copy as: {song.songTitle}"
+                                    )
+                                )
+                            else:
+                                self.stdout.write(self.style.SUCCESS(f"    Saved to DB: {song.songTitle}"))
                         if tags:
                             getattr(song, TAGS_FIELD).add(*tags)
                             self.stdout.write(f"    Tagged: {', '.join(tags)}")
@@ -759,5 +780,8 @@ class Command(BaseCommand):
 
         if to_db:
             self.stdout.write(
-                self.style.SUCCESS(f"Done: {created} saved, {skipped} already there, {failed} failed.")
+                self.style.SUCCESS(
+                    f"Done: {created} saved ({flagged} flagged {NEWVER_FLAG}), "
+                    f"{skipped} already there, {failed} failed."
+                )
             )

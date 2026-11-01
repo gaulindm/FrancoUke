@@ -61,9 +61,16 @@ def build_song_header(song, show_strumming=True):
     year = metadata.get("year")
     capo_value = metadata.get("capo")
 
+    adapted_from = _clean(metadata.get("adapted_from"))
+
     # --- "Recorded by" line (omitted entirely when there is no artist) ---
     recorded_by = ""
-    if artist:
+    if artist and adapted_from:
+        # New words to an existing song: no recording to match, so no capo talk
+        recorded_by = f"Adapted from “{adapted_from}” by {artist}"
+        if year:
+            recorded_by += f" ({year})"
+    elif artist:
         if isinstance(capo_value, str) and capo_value.lower() == "based":
             recorded_by = f"Based on clip by {artist}"
         else:
