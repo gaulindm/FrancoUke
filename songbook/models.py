@@ -220,6 +220,10 @@ class SongFormatting(models.Model):
     outro = models.JSONField(default=dict, blank=True)
     centered = models.JSONField(default=dict, blank=True)
 
+    # Formatting for the "chords above lyrics" PDF. Same shape as the fields above, e.g.
+    # {"verse": {"font_size": 15, "line_spacing": 1.3, "alignment": "left"}, "chorus": {...}}
+    cal = models.JSONField(default=dict, blank=True)
+
 
     class Meta:
         unique_together = ('user', 'song')  # Ensure each user has only one formatting per song

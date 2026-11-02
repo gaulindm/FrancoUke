@@ -41,6 +41,27 @@
         </button>
     </div>
 
+    {# 🎼 Chord placement: chords inside the lyrics [C] (standard) or chords above the lyrics (CAL) #}
+    <div class="mb-3" id="tour-chord-format">
+        <div class="small fw-semibold mb-1">
+            {% if site_name == "FrancoUke" %}Placement des accords{% else %}Chord placement{% endif %}
+        </div>
+        <div class="btn-group w-100" role="group"
+             aria-label="{% if site_name == "FrancoUke" %}Placement des accords{% else %}Chord placement{% endif %}">
+            <input type="radio" class="btn-check" name="sheet-format" id="sheet-format-standard"
+                   value="standard" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="sheet-format-standard">
+                {% if site_name == "FrancoUke" %}Dans le texte{% else %}Inline{% endif %}
+            </label>
+
+            <input type="radio" class="btn-check" name="sheet-format" id="sheet-format-cal"
+                   value="cal" autocomplete="off">
+            <label class="btn btn-outline-primary" for="sheet-format-cal">
+                {% if site_name == "FrancoUke" %}Au-dessus{% else %}Above{% endif %}
+            </label>
+        </div>
+    </div>
+
     {% include "partials/_control_panel.html" %}
 </div>
     </div>
@@ -65,6 +86,59 @@
         if (songTitle) {
             document.title = songTitle;
         }
+    </script>
+
+    <script>
+        // 🎼 Chord placement picker. The choice is sent to the server as ?layout=cal
+        // on the preview URL (nothing extra for the standard format), and is
+        // remembered in this browser so the next song opens in the same format.
+        (function () {
+            const STORAGE_KEY = "chordSheetFormat";
+            const frame = document.getElementById("pdf-preview");
+            const radios = document.querySelectorAll('input[name="sheet-format"]');
+            if (!frame || !radios.length) return;
+
+            function loadChoice() {
+                try { return localStorage.getItem(STORAGE_KEY) === "cal" ? "cal" : "standard"; }
+                catch (e) { return "standard"; }
+            }
+            function saveChoice(value) {
+                try { localStorage.setItem(STORAGE_KEY, value); } catch (e) { /* private mode: ignore */ }
+            }
+
+            let current = loadChoice();
+
+            function withLayout(src, value) {
+                const url = new URL(src, window.location.href);
+                if (value === "cal") { url.searchParams.set("layout", "cal"); }
+                else { url.searchParams.delete("layout"); }
+                return url.toString();
+            }
+
+            function apply() {
+                const next = withLayout(frame.src, current);
+                if (next !== frame.src) { frame.src = next; }
+            }
+
+            // Other scripts on the page (the control panel: transpose, etc.) rebuild
+            // the preview address. Put the chosen layout back on it whenever they do.
+            new MutationObserver(apply).observe(frame, { attributes: true, attributeFilter: ["src"] });
+
+            radios.forEach(function (radio) {
+                radio.checked = (radio.value === current);
+                radio.addEventListener("change", function () {
+                    if (!radio.checked) return;
+                    current = radio.value;
+                    saveChoice(current);
+                    apply();
+                });
+            });
+
+            // Other scripts (download / print buttons) can ask which format is selected.
+            window.getChordSheetLayout = function () { return current; };
+
+            apply();   // first load, in case the saved choice is "cal"
+        })();
     </script>
 
     {# 🧭 Guided tour (Driver.js) #}

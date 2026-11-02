@@ -10,9 +10,18 @@ from django.contrib.auth.decorators import login_required
 from songbook.models import Song
 from songbook.context_processors import site_context
 from songbook.utils.pdf_generator import generate_songs_pdf
+from songbook.utils.cal_pdf_generator import generate_songs_pdf as generate_cal_pdf  # chords above lyrics
 from songbook.utils.transposer import transpose_lyrics
 from django.utils.text import slugify
 from songbook.utils.multi_song_pdf import build_songs_pdf
+
+
+# -------------------------------------------------------------
+# Which PDF layout? (picked on the chord sheet page: ?layout=cal)
+# -------------------------------------------------------------
+def chosen_layout(request):
+    """Return 'cal' (chords above the lyrics) when the page asks for it, else 'standard'."""
+    return "cal" if request.GET.get("layout") == "cal" else "standard"
 
 
 # -------------------------------------------------------------
@@ -26,9 +35,11 @@ def generate_pdf_response(
     formatting=None,
     site_name=None,
     inline=False,
+    layout="standard",
 ):
     """
     Wrap PDF output in an HttpResponse and send it inline or as attachment.
+    layout: "standard" (chords inline in the lyrics) or "cal" (chords above the lyrics).
     """
     content_type = "application/pdf"
     response = HttpResponse(content_type=content_type)
@@ -36,7 +47,8 @@ def generate_pdf_response(
     disposition = "inline" if inline else "attachment"
     response["Content-Disposition"] = f'{disposition}; filename="{filename}.pdf"'
 
-    generate_songs_pdf(
+    generate = generate_cal_pdf if layout == "cal" else generate_songs_pdf
+    generate(
         response,
         songs,
         user=user,
@@ -103,6 +115,7 @@ def generate_single_song_pdf(request, song_id):
         formatting=None,
         site_name=site_name,
         inline=True,
+        layout=chosen_layout(request),
     )
 
 
@@ -134,4 +147,5 @@ def preview_pdf(request, song_id):
         formatting=None,
         site_name=site_name,
         inline=True,
+        layout=chosen_layout(request),
     )

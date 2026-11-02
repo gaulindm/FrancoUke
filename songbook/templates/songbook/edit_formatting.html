@@ -2,6 +2,27 @@
 {% load static %}
 {% block content %}
 
+<script>
+    // 🎼 Open this page in the format the chord sheet was last showing.
+    // The chord sheet remembers its format in this browser (key "chordSheetFormat").
+    // - No ?layout= in the address: use the remembered format ("cal" reloads once as ?layout=cal).
+    // - ?layout= in the address (switch buttons, links): obey it, and remember it, so the
+    //   chord sheet opens in the same format next time.
+    (function () {
+        var KEY = "chordSheetFormat";
+        var params = new URLSearchParams(window.location.search);
+        var asked = params.get("layout");
+        try {
+            if (asked === "cal" || asked === "standard") {
+                localStorage.setItem(KEY, asked);
+            } else if (localStorage.getItem(KEY) === "cal") {
+                params.set("layout", "cal");
+                window.location.replace(window.location.pathname + "?" + params.toString());
+            }
+        } catch (e) { /* storage unavailable (private mode): stay on the standard format */ }
+    })();
+</script>
+
 <div class="container">
     <div class="row">
         <!-- Left Section (Form) - 8 columns -->
@@ -14,7 +35,29 @@
                     {% if site_name == "FrancoUke" %}? Visite guidée{% else %}? Take the tour{% endif %}
                 </button>
             </div>
-            <form id="tour-formatting-form" method="POST" class="formatting-form" action="?site={{ site_name }}">
+
+            {# 🎼 Which PDF format are you formatting? Inline (standard) or chords above the lyrics (CAL) #}
+            <div class="mb-2">
+                {% if site_name == "FrancoUke" %}Vous modifiez le placement des accords :{% else %}You are editing the chord placement:{% endif %}
+                {% if layout == "cal" %}
+                    <span class="badge bg-warning text-dark fs-6">{% if site_name == "FrancoUke" %}Au-dessus{% else %}Above{% endif %}</span>
+                {% else %}
+                    <span class="badge bg-secondary fs-6">{% if site_name == "FrancoUke" %}Dans le texte{% else %}Inline{% endif %}</span>
+                {% endif %}
+            </div>
+            <div id="tour-format-switch" class="btn-group mb-3" role="group"
+                 aria-label="{% if site_name == "FrancoUke" %}Placement des accords{% else %}Chord placement{% endif %}">
+                <a class="btn btn-outline-primary {% if layout != "cal" %}active{% endif %}"
+                   href="?site={{ site_name }}&layout=standard">
+                    {% if site_name == "FrancoUke" %}Dans le texte{% else %}Inline{% endif %}
+                </a>
+                <a class="btn btn-outline-primary {% if layout == "cal" %}active{% endif %}"
+                   href="?site={{ site_name }}&layout=cal">
+                    {% if site_name == "FrancoUke" %}Au-dessus{% else %}Above{% endif %}
+                </a>
+            </div>
+
+            <form id="tour-formatting-form" method="POST" class="formatting-form" action="?site={{ site_name }}&layout={{ layout }}">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group">
@@ -27,6 +70,7 @@
                 {% endfor %}
                 <button type="submit" id="tour-save">
                     {% if site_name == "FrancoUke" %} Enregistrer les modifications {% else %} Save Changes {% endif %}
+                    ({% if layout == "cal" %}{% if site_name == "FrancoUke" %}Au-dessus{% else %}Above{% endif %}{% else %}{% if site_name == "FrancoUke" %}Dans le texte{% else %}Inline{% endif %}{% endif %})
                 </button>
             </form>
         </div>
@@ -39,8 +83,13 @@
                 </div>
                 <div class="card-body">
                     {% if site_name == "FrancoUke" %}
-                        <p>Vous n'avez besoin d'inclure que les valeurs que vous souhaitez modifier.</p>
-                        <p>Les valeurs absentes utiliseront les paramètres par défaut ci-dessous.</p>
+                        {% if layout == "cal" %}
+                            <p>Vous modifiez le placement des accords <strong>Au-dessus</strong>.</p>
+                            <p>N'incluez que les valeurs qui doivent différer de votre formatage « Dans le texte ». Tout ce qui est omis suit le formatage « Dans le texte », puis les valeurs par défaut ci-dessous.</p>
+                        {% else %}
+                            <p>Vous n'avez besoin d'inclure que les valeurs que vous souhaitez modifier.</p>
+                            <p>Les valeurs absentes utiliseront les paramètres par défaut ci-dessous.</p>
+                        {% endif %}
                         <ul id="tour-settings-list">
                             <li><strong>font_size</strong> : Taille du texte (Défaut : <code>13</code>).</li>
                             <li><strong>text_color</strong> : Couleur du texte (Défaut : <code>"#000000"</code>).</li>
@@ -59,8 +108,13 @@
                         <p id="tour-braces"><strong>⚠️ Important :</strong> Ne supprimez pas entièrement les <code>{}</code> !</p>
                         <p>Si vous ne souhaitez pas apporter de modifications, laissez le champ vide ou conservez <code>{}</code>.</p>
                     {% else %}
-                        <p>You only need to include values you want to change.</p>
-                        <p>Any missing values will use the defaults below.</p>
+                        {% if layout == "cal" %}
+                            <p>You are editing the <strong>Above</strong> chord placement.</p>
+                            <p>Only include values that should differ from your Inline formatting. Anything you leave out follows the Inline formatting, then the defaults below.</p>
+                        {% else %}
+                            <p>You only need to include values you want to change.</p>
+                            <p>Any missing values will use the defaults below.</p>
+                        {% endif %}
                         <ul id="tour-settings-list">
                             <li><strong>font_size</strong>: Adjusts text size (Default: <code>13</code>).</li>
                             <li><strong>text_color</strong>: Changes text color (Default: <code>"#000000"</code>).</li>
