@@ -11,7 +11,7 @@ from songbook.views.pdf_views import (
     preview_pdf,
     
 )
-
+from teleprompter.views import save_song_scroll_speed
 from songbook.views.song_crud_views import (SongCreateView, SongUpdateView, SongDeleteView, toggle_privacy, clone_song, make_public, make_private,)
 from songbook.views.song_display_views import (LandingView, UserSongListView, ChordSheetView, SongListView,SongListSimpleView)
 from songbook.views.chord_views import (chord_dictionary, serve_chords_json, get_chord_definition,)
@@ -30,7 +30,7 @@ urlpatterns = [
     path("songs/<int:pk>/edit/", SongUpdateView.as_view(), name="song_update"),
     path("songs/<int:pk>/delete/", SongDeleteView.as_view(), name="song_delete"),
     path("songs/to-format/", SongsToFormatView.as_view(), name="songs_to_format"),
-    # 🔹 Artists
+    path("song/<int:pk>/scroll-speed/", save_song_scroll_speed, name="song_save_scroll_speed"),    # 🔹 Artists
     path("artists/", ArtistListView.as_view(), name="artist_list"),
     path("artists/<str:artist_name>/", SongListView.as_view(), name="songs_by_artist"),
     path("artists/letter/<str:letter>/", ArtistListView.as_view(), name="artist_by_letter"),

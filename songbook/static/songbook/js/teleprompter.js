@@ -23,6 +23,9 @@
   window.scrollPos = 0;
 
   const SLOWER_SCALE = 0.5;
+  // Pixels per second for each speed step (the number stored in Song.scroll_speed).
+  // 6 * 0.5 = 3, so a stored speed of 10 scrolls at 30 px/s.
+  const PX_PER_SPEED_UNIT = 6 * SLOWER_SCALE;
   window.userPreferences = {};
 
   const CHORD_LAYOUT_KEY = "tp-chord-layout"; // "bottom" | "right"
@@ -99,7 +102,7 @@
       return;
     }
 
-    const actualSpeed = Math.max(0.1, scrollSpeed) * 6 * SLOWER_SCALE;
+    const actualSpeed = Math.max(0.1, scrollSpeed) * PX_PER_SPEED_UNIT;
     window.scrollPos += actualSpeed * dt;
 
     const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
@@ -185,7 +188,8 @@
 
   function updateSpeedDisplay() {
     const disp = getSpeedDisplayEl();
-    if (disp) disp.textContent = `${Math.round(scrollSpeed)} px/s`;
+    // Show the real scroll rate, not the raw speed step
+    if (disp) disp.textContent = `${Math.round(scrollSpeed * PX_PER_SPEED_UNIT)} px/s`;
   }
 
   // -----------------------------
@@ -580,6 +584,37 @@
     );
     resetBtn?.addEventListener("click", resetScroll);
     toggleChordsBtn?.addEventListener("click", toggleChordSection);
+
+    // 💾 Editors only: save the current speed as this song's default.
+    // The button is only in the page for editors, so for everyone else
+    // saveSpeedBtn is null and this does nothing.
+    const saveSpeedBtn = $("#save-speed");
+    saveSpeedBtn?.addEventListener("click", async () => {
+      const url = saveSpeedBtn.dataset.url;
+      if (!url) return;
+      const label = saveSpeedBtn.textContent;
+      saveSpeedBtn.disabled = true;
+      try {
+        const resp = await fetch(url, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": saveSpeedBtn.dataset.csrf || getCookie("csrftoken") || "",
+          },
+          body: JSON.stringify({ scroll_speed: Math.max(1, Math.round(scrollSpeed)) }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+        saveSpeedBtn.textContent = `✓ Saved ${Math.round(data.scroll_speed * PX_PER_SPEED_UNIT)} px/s`;
+      } catch (e) {
+        console.warn("Save speed failed:", e);
+        saveSpeedBtn.textContent = "⚠️ Not saved";
+      } finally {
+        saveSpeedBtn.disabled = false;
+        setTimeout(() => { saveSpeedBtn.textContent = label; }, 2000);
+      }
+    });
 
     document.querySelectorAll("[data-diagram-scale]").forEach((btn) =>
       btn.addEventListener("click", () => applyDiagramScale(parseFloat(btn.dataset.diagramScale)))

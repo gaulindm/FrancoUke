@@ -60,7 +60,7 @@ class Song(models.Model):
         default=10,
         null=True,
         blank=True,
-        help_text="Teleprompter scroll speed in pixels per second (default 10 if unset) when viewed on ipad in landscape mode"
+        help_text="Teleprompter speed steps, 3 px/s each (default 10 = 30 px/s), tuned for iPad in landscape mode"
     )
     acknowledgement = models.CharField(max_length=100, blank=True, null=True)
     origin = models.CharField(

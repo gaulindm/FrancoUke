@@ -2,7 +2,10 @@ import json
 import logging
 import re
 from pathlib import Path
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST
 from songbook.models import Song
 from songbook.utils.teleprompter_renderer import render_lyrics_with_chords_html
 from songbook.utils.chord_library import load_chord_dict
@@ -176,7 +179,7 @@ def teleprompter_view(request, song_id, beginner=False):
         # shape up/down the neck.
         "full_chord_library_json": json.dumps(full_library),
         "user_preferences_json": json.dumps(user_preferences),
-        "initial_scroll_speed": song.scroll_speed or 40,
+        "initial_scroll_speed": song.scroll_speed or 10,  # matches Song.scroll_speed default
         # ✏️ Shows the pencil (edit ChordPro) link, editors only
         "can_edit_song": _user_can_edit_songs(request.user),
         **context_data,
@@ -184,3 +187,28 @@ def teleprompter_view(request, song_id, beginner=False):
 
     template_name = "songbook/song_teleprompter.html"
     return render(request, template_name, context)
+
+
+# -----------------------------
+# 💾 Save scroll speed (editors only)
+# -----------------------------
+@login_required
+@require_POST
+def save_song_scroll_speed(request, pk):
+    """Called by the 💾 Save speed button on the teleprompter.
+    Body: {"scroll_speed": <int>}. Returns {"scroll_speed": <int>}."""
+    if not _user_can_edit_songs(request.user):
+        return JsonResponse({"error": "Not allowed"}, status=403)
+
+    try:
+        speed = int(json.loads(request.body)["scroll_speed"])
+    except (ValueError, KeyError, TypeError):
+        return JsonResponse({"error": "Invalid speed"}, status=400)
+    if not 1 <= speed <= 200:
+        return JsonResponse({"error": "Speed out of range"}, status=400)
+
+    # update() writes just this column. Song.save() would re-parse the whole
+    # ChordPro and rebuild lyrics_with_chords for no reason.
+    if not Song.objects.filter(pk=pk).update(scroll_speed=speed):
+        return JsonResponse({"error": "Song not found"}, status=404)
+    return JsonResponse({"scroll_speed": speed})

@@ -25,6 +25,28 @@
       opacity: 0.6;
     }
     .tp-edit-link:hover { opacity: 1; }
+
+    /* Keep the controls on one line on the iPad: a long song title is cut
+       off with "…" (the full title shows as a tooltip) instead of pushing
+       the buttons onto a second row. */
+    .controls .song-title {
+      display: inline-block;
+      vertical-align: middle;
+      max-width: clamp(6rem, 20vw, 14rem);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+
+    /* iPad landscape and narrower: the song title is already shown large at the
+       top of the lyrics, so drop it from the control bar, and shorten the tour
+       button to just "?". This lets the Size / Above-Inline / Reset / ⋯ group
+       stay on the same row as Start, speed and Save. */
+    @media (max-width: 1280px) {
+      .controls .song-title { display: none; }
+      #start-tour .tour-label { display: none; }
+    }
   </style>
   {% block extra_styles %}{% endblock %}
 </head>
@@ -34,22 +56,29 @@
     <div class="left">
       {% block exit_link %}{% endblock %}
       {# 🧭 Starts the guided tour (only when pressed, never automatically) #}
-      <button type="button" id="start-tour" data-tour="teleprompter" title="Take the tour">? Take the tour</button>
+      <button type="button" id="start-tour" data-tour="teleprompter" title="Take the tour" aria-label="Take the tour">?<span class="tour-label"> Take the tour</span></button>
       {# ✏️ Editors only: jump to the ChordPro edit page for this song #}
       {% if can_edit_song and song %}
       <a href="{% url 'songbook:song_update' song.pk %}?next={{ request.get_full_path|urlencode }}" class="tp-edit-link"
       title="Edit ChordPro" aria-label="Edit ChordPro">✏️</a>
       {% endif %}
-      {% block controls_left %}<span class="song-title">{{ song.songTitle }}</span>{% endblock %}
+      {% block controls_left %}<span class="song-title" title="{{ song.songTitle }}">{{ song.songTitle }}</span>{% endblock %}
     </div>
 
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
       <div class="control-inline" id="tour-speed">
         <button id="speed-down">−</button>
-        <span id="speed-value">3</span>
+        <span id="speed-value">30</span>
         <button id="speed-up">+</button>
       </div>
+      {# 💾 Editors only: save the current speed as this song's default #}
+      {% if can_edit_song and song %}
+      <button type="button" id="save-speed"
+              data-url="{% url 'songbook:song_save_scroll_speed' song.pk %}"
+              data-csrf="{{ csrf_token }}"
+              title="Save the current speed as this song's default">💾 Save</button>
+      {% endif %}
     </div>
     <div class="right">
       <div class="control-inline" id="fontsize-control">
