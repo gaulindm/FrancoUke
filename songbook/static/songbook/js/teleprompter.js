@@ -170,7 +170,10 @@
 
     // Mouse: wheel or click still pauses at once (touch taps are handled above).
     c.addEventListener("wheel", pause, { passive: true });
-    c.addEventListener("pointerdown", (e) => { if (e.pointerType !== "touch") pause(); }, { passive: true });
+    c.addEventListener("pointerdown", (e) => {
+      if (e.target.closest(".yt-mini")) return;
+      if (e.pointerType !== "touch") pause();
+    }, { passive: true });
   }
 
   // -----------------------------
@@ -672,12 +675,15 @@
       }
 
       lyrics.addEventListener("touchstart", (e) => {
+        if (e.target.closest(".yt-mini")) return;
         const touch = e.touches[0];
         startY = touch.clientY;
         startX = touch.clientX;
       }, { passive: true });
 
       lyrics.addEventListener("touchend", (e) => {
+          // Taps on the mini YouTube player are for the player, not for scrolling/next song
+        if (e.target.closest(".yt-mini")) return;
         const touch = e.changedTouches[0];
         const diffY = touch.clientY - startY;
         const diffX = touch.clientX - startX;

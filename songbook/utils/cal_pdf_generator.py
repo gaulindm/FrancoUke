@@ -73,8 +73,9 @@ from .pdf_generator import (
 # =======================
 CAL_CHORD_SCALE = 1.0       # 🔧 chord size relative to the lyric size
 CAL_CHORD_GAP = 5           # 🔧 minimum points between two chords on the same line
-CAL_CHORD_ROW_FACTOR = 1.15 # 🔧 height of the chord row = chord size x this
-CAL_LINE_GAP = 3            # 🔧 extra space under each lyric line
+CAL_CHORD_LYRIC_GAP = 2.0   # 🔧 points between the bottom of a chord and the top of the lyric letters under it
+CAL_CHORD_TOP_PAD = 1.0     # 🔧 points between the top of a chord and the line above it
+CAL_LINE_GAP = 0.05         # 🔧 extra space under each lyric line
 CAL_NOTE_GAP = 8            # gap between the lyrics and a count cue / note at the end of the line
 CAL_VG_FONT_SIZE = 8        # size of the "VG 1:" label
 CAL_FALL_BACK_TO_STANDARD = True   # settings missing from SongFormatting.cal come from the standard formatting
@@ -254,8 +255,9 @@ class ChordLyricLine(Flowable):
         height = 0
         for row in self._rows:
             if row["chords"]:
-                height += self.chord_size * CAL_CHORD_ROW_FACTOR
-            height += self.leading if row["has_text"] else self.leading * 0.5
+                height += self._chord_row_h() if row["has_text"] else self._chord_only_h()
+            if row["has_text"]:
+                height += self.leading
         if self.echo:
             height += self.leading
         height += CAL_LINE_GAP
@@ -275,6 +277,24 @@ class ChordLyricLine(Flowable):
         # centre the glyph box (ascent .72 + descent .21 of the size) in the row
         return y_top - (row_h - 0.93 * size) / 2 - 0.72 * size
 
+    def _lead_pad(self):
+        # empty space between the top of a lyric row and the top of its letters
+        return (self.leading - 0.93 * self.size) / 2
+
+    def _chord_row_h(self):
+        """Height of the chord row sitting right above a lyric row.
+
+        The chords are placed relative to the lyric letters below them (not centred
+        in their own row), so the gap between a chord and its words stays small
+        and does not grow with the line spacing.
+        """
+        cap = 0.72 * self.chord_size
+        return max(cap, cap + CAL_CHORD_LYRIC_GAP + CAL_CHORD_TOP_PAD - self._lead_pad())
+
+    def _chord_only_h(self):
+        """Height of a line that has chords but no words (intro, instrumental)."""
+        return 0.93 * self.chord_size + 2 * CAL_CHORD_TOP_PAD + 0.25 * self.leading
+
     def draw(self):
         c = self.canv
         avail = self.width
@@ -284,8 +304,13 @@ class ChordLyricLine(Flowable):
             x_text = x0 + row["lead"]
 
             if row["chords"]:
-                ch_h = self.chord_size * CAL_CHORD_ROW_FACTOR
-                base = self._baseline(y, ch_h, self.chord_size)
+                if row["has_text"]:
+                    ch_h = self._chord_row_h()
+                    # just above the top of the lyric letters that follow
+                    base = (y - ch_h) - self._lead_pad() + CAL_CHORD_LYRIC_GAP
+                else:
+                    ch_h = self._chord_only_h()
+                    base = y - CAL_CHORD_TOP_PAD - 0.72 * self.chord_size
                 for x, name, optional in row["chords"]:
                     if optional:
                         c.setFont(_variant(self.font, "italic"), self.chord_size)
@@ -297,7 +322,6 @@ class ChordLyricLine(Flowable):
                 y -= ch_h
 
             if not row["has_text"]:          # chord-only line: nothing to draw below the chords
-                y -= self.leading * 0.5
                 continue
 
             base = self._baseline(y, self.leading, self.size)

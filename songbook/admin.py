@@ -313,6 +313,7 @@ class SongAdmin(admin.ModelAdmin):
         'get_artist',
         'contributor',
         'origin',
+        'scroll_speed',
         'get_privacy_status',
         'get_is_clone',
         'date_posted',
@@ -322,7 +323,7 @@ class SongAdmin(admin.ModelAdmin):
         'get_tags',
     ]
 
-    list_editable = ['site_name']
+    list_editable = ['site_name','scroll_speed',]
 
     search_fields = [
         'songTitle',
