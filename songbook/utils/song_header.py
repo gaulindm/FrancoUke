@@ -121,3 +121,35 @@ def build_song_header(song, show_strumming=True):
         header["recorded_by"] or header["count_in_text"] or header["instruction_2"]
     )
     return header
+
+_NOTE_RE = re.compile(r"^\s*([A-Ga-g])([#b♯♭]?)(\d)?(?![A-Za-z])")
+_BPM_RE = re.compile(r"\d+")
+
+
+def build_cue(song):
+    """Data for the Cue button: {"tempo": 96, "note": "E4", "beats": 4}, or None."""
+    metadata = song.metadata or {}
+
+    tempo = None
+    m = _BPM_RE.search(_clean(metadata.get("tempo")))
+    if m and 30 <= int(m.group()) <= 240:
+        tempo = int(m.group())
+
+    note = None
+    m = _NOTE_RE.match(_clean(metadata.get("1stnote")))
+    if m:
+        letter, accidental, octave = m.groups()
+        note = letter.upper() + accidental + (octave or "")
+
+    if not tempo and not note:
+        return None
+
+    # Clicks in the count-in come from the time signature (default 4).
+    # Compound times like 6/8 count in dotted-quarter beats (2).
+    beats = 4
+    ts = re.match(r"\s*(\d+)\s*/\s*(\d+)", _clean(metadata.get("timeSignature")))
+    if ts:
+        top, bottom = int(ts.group(1)), int(ts.group(2))
+        beats = top // 3 if (bottom == 8 and top > 3 and top % 3 == 0) else top
+
+    return {"tempo": tempo, "note": note, "beats": beats}

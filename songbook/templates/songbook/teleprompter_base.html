@@ -67,6 +67,8 @@
 
     <div class="center">
       <button id="scroll-toggle">▶️ Start</button>
+      {# 🎵 Plays the first vocal note, then the count-in. Hidden until cue.js finds {tempo:} / {1stnote:} data for this song #}
+      <button id="cue-btn" type="button" hidden title="Cue: play the first note, then the count-in">🎵<span class="cue-label"> Cue</span></button>
       <div class="control-inline" id="tour-speed">
         <button id="speed-down">−</button>
         <span id="speed-value">30</span>
@@ -152,6 +154,9 @@
 
   <!-- Teleprompter engine: must come AFTER window.SONG is set in _data.html -->
   <script src="{% static 'songbook/js/teleprompter.js' %}"></script>
+
+  <!-- Cue tool: first-note tone + count-in. Reads the #cue-data block from _data.html -->
+  <script src="{% static 'songbook/js/cue.js' %}"></script>
 
   {% include "songbook/teleprompter/_scripts.html" %}
 

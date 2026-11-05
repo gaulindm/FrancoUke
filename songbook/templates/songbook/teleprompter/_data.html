@@ -1,9 +1,12 @@
 <!--{% # Data blocks read by teleprompter.js. Needs: relevant_chords_json,
    full_chord_library_json (optional), initial_scroll_speed,
    user_preferences_json, song. #%}-->
+   {% load song_cue %} 
 <script id="chords-data" type="application/json">
   {{ relevant_chords_json|safe }}
 </script>
+
+<script id="cue-data" type="application/json">{% cue_json song %}</script>
 
 <!-- Full per-instrument chord dictionary, used to look up the real diagram
      for a chord after transposing. Empty object if the view doesn't send it. -->

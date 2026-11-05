@@ -54,6 +54,24 @@
     </div>
   {% endif %}
 
+  {% if songs %}
+  <div class="mt-4 text-center">
+    <a href="{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=songs.0.order %}" 
+       class="btn btn-primary btn-lg">
+      🎤 Start Teleprompter
+    </a>
+    <a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}"
+ class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
+🖨️ Printable PDF
+</a>
+<a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}?large=1"
+ class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
+🔍 Large print
+</a>
+  </div>
+<br>
+  {% endif %}
+
   <!-- 🎵 SONG LIST -->
   <ol class="list-group list-group-numbered">
     {% for item in songs %}
@@ -122,22 +140,7 @@
     {% endfor %}
   </ol>
 
-  {% if songs %}
-    <div class="mt-4 text-center">
-      <a href="{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=songs.0.order %}" 
-         class="btn btn-primary btn-lg">
-        🎤 Start Teleprompter
-      </a>
-      <a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}"
-   class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
-  🖨️ Printable PDF
-</a>
-<a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}?large=1"
-   class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
-  🔍 Large print
-</a>
-    </div>
-  {% endif %}
+ 
 
   <!-- 💡 SUGGEST A SONG -->
   {% if group %}
