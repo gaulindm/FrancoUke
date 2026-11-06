@@ -76,7 +76,7 @@
   html[data-chord-style="above"] .lyrics .verse,
   html[data-chord-style="above"] .lyrics .section-body,
   html[data-chord-style="above"] .lyrics .centered {
-    line-height: 2.2;
+    line-height: 2.0;
   }
 
   html[data-chord-style="above"] .chord-word {
@@ -92,9 +92,9 @@
   }
   html[data-chord-style="above"] .chord-label {
     position: absolute;
-    top: -0.8em;
+    top: -0.7em;
     left: 0;
-    font-size: 0.85em;
+    font-size: 0.8em;
   }
 /* Strum lines like [G]//  [C]//  [G]////: more room between chords and groups */
 html[data-chord-style="above"] .chord-word.chord-strum {
@@ -327,4 +327,22 @@ html[data-chord-style="above"] .chord-word.chord-strum {
   html[data-chord-style="above"] .lyrics .echo-line {
     margin-top: -0.5em;              /* 🔧 TUNE: -0.3em = looser, -0.7em = tighter */
   }
+/* ===== Lyrics run full height; the chord panel floats over them, see-through ===== */
+:root { --diagram-veil: 72%; }                       /* 🔧 TUNE (light): higher = more solid panel */
+html[data-theme="dark"] { --diagram-veil: 72%; }     /* 🔧 TUNE (dark) */
+
+/* 1) The lyrics area fills the whole screen (it was 100dvh minus 72px) */
+.tp-main { height: 100vh !important; height: 100dvh !important; }
+.lyrics-container { max-height: none !important; }
+
+/* 2) Room at the end of the song so the last line can scroll up above the panel.
+      Follows the S/M/L/XL diagram size. */
+.lyrics-container { padding-bottom: calc(160px * var(--diagram-scale) + 90px); }
+
+/* 3) The panel: see-through, with a hint of blur */
+#chord-section {
+  background: color-mix(in srgb, var(--bg-color) var(--diagram-veil), transparent);
+  -webkit-backdrop-filter: blur(1.5px);              /* 🔧 TUNE: 0 = sharp, 3px = softer */
+  backdrop-filter: blur(1.5px);
+}
 </style>

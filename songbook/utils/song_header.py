@@ -53,6 +53,17 @@ def _clean(value):
     return str(value if value is not None else "").strip()
 
 
+_BPM_RE = re.compile(r"\d+")
+
+
+def _parse_tempo(metadata):
+    """Tempo in beats per minute from {tempo: 96} (30-240), or None."""
+    m = _BPM_RE.search(_clean(metadata.get("tempo")))
+    if m and 30 <= int(m.group()) <= 240:
+        return int(m.group())
+    return None
+
+
 def build_song_header(song, show_strumming=True):
     metadata = song.metadata or {}
 
@@ -100,12 +111,19 @@ def build_song_header(song, show_strumming=True):
     first_note = _clean(metadata.get("1stnote"))
     count_in = _clean(metadata.get("count_in"))
 
+    # Time signature cell: "4/4 · 96 bpm" (or just "96 bpm" with no time signature)
+    time_signature = _clean(metadata.get("timeSignature"))
+    tempo = _parse_tempo(metadata)
+    if tempo:
+        tempo_text = f"{tempo} bpm"
+        time_signature = f"{time_signature} · {tempo_text}" if time_signature else tempo_text
+
     header = {
         "title": song.songTitle or "Untitled Song",
         "youtube_id": extract_youtube_id(metadata.get("youtube")),  # teleprompter only
         "youtube_start": extract_youtube_start(metadata.get("youtube")),
         "subtitle": _clean(metadata.get("subtitle")),  # teleprompter only; the PDF does not print it
-        "time_signature": _clean(metadata.get("timeSignature")),
+        "time_signature": time_signature,
         "strumming": strumming,
         "songwriter": songwriter,
         "first_note_text": f"1st vocal note: {first_note}" if first_note else "",
@@ -122,23 +140,21 @@ def build_song_header(song, show_strumming=True):
     )
     return header
 
+
 _NOTE_RE = re.compile(r"^\s*([A-Ga-g])([#b♯♭]?)(\d)?(?![A-Za-z])")
-_BPM_RE = re.compile(r"\d+")
 
 
 def build_cue(song):
     """Data for the Cue button: {"tempo": 96, "note": "E4", "beats": 4}, or None."""
     metadata = song.metadata or {}
 
-    tempo = None
-    m = _BPM_RE.search(_clean(metadata.get("tempo")))
-    if m and 30 <= int(m.group()) <= 240:
-        tempo = int(m.group())
+    tempo = _parse_tempo(metadata)
 
     note = None
     m = _NOTE_RE.match(_clean(metadata.get("1stnote")))
     if m:
         letter, accidental, octave = m.groups()
+        accidental = {"♯": "#", "♭": "b"}.get(accidental, accidental)
         note = letter.upper() + accidental + (octave or "")
 
     if not tempo and not note:

@@ -533,18 +533,14 @@
   function updateLyricsContainerHeight() {
     const container = $(".lyrics-container");
     if (!container) return;
-    const controlsH = $(".controls")?.getBoundingClientRect().height || 0;
 
-    // In "right" layout the chord section takes up width (handled purely
-    // in CSS via .lyrics-container padding-right), not page height, so it
-    // should not shrink the scroll container the way the bottom strip does.
-    const isRightLayout = document.body.classList.contains("chords-right");
-    const section = $("#chord-section");
-    const chordH = (!isRightLayout && section && !section.classList.contains("hidden"))
-      ? section.getBoundingClientRect().height
-      : 0;
-
-    const available = Math.max(120, window.innerHeight - controlsH - chordH);
+    // The lyrics area runs from its own top edge to the bottom of the screen.
+    // The chord panel (fixed, see-through) floats over the lyrics, so we no
+    // longer subtract its height. The CSS padding-bottom on .lyrics-container
+    // leaves room at the end of the song so the last line can scroll up clear
+    // of the diagrams.
+    const top = container.getBoundingClientRect().top;
+    const available = Math.max(120, window.innerHeight - top);
     container.style.height = available + "px";
     container.style.overflowY = "auto";
     container.style.WebkitOverflowScrolling = "touch";
