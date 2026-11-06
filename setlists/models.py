@@ -1,9 +1,17 @@
 #setlist/models.py
+import re
+
 from django.db import models
 from django.db.models import Max
 from django.conf import settings
 from songbook.models import Song
 from board.models import Event  # optional, only if you want to attach setlists to events
+
+YOUTUBE_ID_RE = re.compile(
+    r"(?:youtu\.be/|youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|embed/|live/))([A-Za-z0-9_-]{11})"
+)
+BARE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
+
 
 class SetList(models.Model):
     group = models.ForeignKey(
@@ -26,6 +34,20 @@ class SetList(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def youtube_queue_url(self):
+        """Temporary YouTube queue of the setlist's {youtube:} clips, in setlist order."""
+        ids = []
+        for item in self.songs.select_related("song"):
+            raw = ((item.song.metadata or {}).get("youtube") or "").strip()
+            match = YOUTUBE_ID_RE.search(raw)
+            video_id = match.group(1) if match else (raw if BARE_ID_RE.match(raw) else None)
+            if video_id and video_id not in ids:
+                ids.append(video_id)
+        if not ids:
+            return ""
+        return "https://www.youtube.com/watch_videos?video_ids=" + ",".join(ids[:50])
 
 class SetListSong(models.Model):
     setlist = models.ForeignKey("SetList", related_name="songs", on_delete=models.CASCADE)

@@ -68,6 +68,12 @@
  class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
 🔍 Large print
 </a>
+{% if setlist.youtube_queue_url %}
+<a href="{{ setlist.youtube_queue_url }}"
+ class="btn btn-outline-danger btn-lg ms-2" target="_blank" rel="noopener noreferrer">
+▶️ Listen now
+</a>
+{% endif %}
   </div>
 <br>
   {% endif %}
