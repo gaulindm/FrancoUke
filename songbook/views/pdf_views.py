@@ -100,18 +100,42 @@ def generate_multi_song_pdf(request):
     return response
 
 # -------------------------------------------------------------
+# Transposing helpers
+# -------------------------------------------------------------
+def _get_transpose(request):
+    """Read ?transpose=N safely (0 if missing or not a number)."""
+    try:
+        return int(request.GET.get("transpose", "0") or 0)
+    except ValueError:
+        return 0
+
+
+def _transposed_copy(song, steps):
+    """
+    Return an unsaved copy of the song with its chords transposed
+    (the database is never touched). With steps == 0 the song itself is returned.
+    """
+    if not steps or not song.lyrics_with_chords:
+        return song
+    copy = Song(**{field.name: getattr(song, field.name) for field in song._meta.fields})
+    copy.lyrics_with_chords = transpose_lyrics(song.lyrics_with_chords, steps)
+    return copy
+
+
+# -------------------------------------------------------------
 # Single song PDF (inline)
 # -------------------------------------------------------------
 @login_required
 def generate_single_song_pdf(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
+    steps = _get_transpose(request)
     site_name = site_context(request).get("site_name")
 
     return generate_pdf_response(
         filename=song.songTitle,
-        songs=[song],
+        songs=[_transposed_copy(song, steps)],
         user=request.user,
-        transpose_value=0,
+        transpose_value=0,   # lyrics are already transposed; don't transpose the footer twice
         formatting=None,
         site_name=site_name,
         inline=True,
@@ -124,26 +148,14 @@ def generate_single_song_pdf(request, song_id):
 # -------------------------------------------------------------
 def preview_pdf(request, song_id):
     song = get_object_or_404(Song, pk=song_id)
-    transpose_value = int(request.GET.get("transpose", "0") or 0)
-
-    # safe shallow copy for preview
-    preview_song = song
-    if transpose_value != 0 and song.lyrics_with_chords:
-        # avoid mutating DB
-        preview_song = Song(
-            **{field.name: getattr(song, field.name) for field in song._meta.fields}
-        )
-        preview_song.lyrics_with_chords = transpose_lyrics(
-            song.lyrics_with_chords, transpose_value
-        )
-
+    steps = _get_transpose(request)
     site_name = site_context(request).get("site_name")
 
     return generate_pdf_response(
         filename=f"{song.songTitle}_preview",
-        songs=[preview_song],
+        songs=[_transposed_copy(song, steps)],
         user=request.user if request.user.is_authenticated else None,
-        transpose_value=transpose_value,
+        transpose_value=0,   # lyrics are already transposed; don't transpose the footer twice
         formatting=None,
         site_name=site_name,
         inline=True,

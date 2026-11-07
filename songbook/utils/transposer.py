@@ -162,6 +162,12 @@ def transpose_chord(chord, semitones):
     
     #print(f"DEBUG: Received chord='{chord}'")  # 🔍 Debugging statement
 
+    # ✅ Slash chords (D/F#): transpose the bass note too, keep any trailing strum slashes
+    slash = re.match(r"^(.+?)/([A-G][#b]?)(/*)$", chord)
+    if slash:
+        upper, bass, strums = slash.groups()
+        return f"{transpose_chord(upper, semitones)}/{transpose_chord(bass, semitones)}{strums}"
+
     # ✅ Ensure [N.C.] is returned immediately
     if chord.strip().upper() == "[N.C.]":
         
@@ -210,13 +216,14 @@ def calculate_steps(original_key, new_key):
     return new_index - original_index
 
 def transpose_lyrics(parsed_data, steps):
+    """Transpose every chord in parsed lyrics, keeping all other keys
+    (e.g. 'optional', 'lyric') on each item untouched."""
     transposed_data = []
     for section in parsed_data:
         transposed_section = []
         for item in section:
-            if 'chord' in item and item['chord']:
-                transposed_chord = transpose_chord(item['chord'], steps)
-                transposed_section.append({'chord': transposed_chord, 'lyric': item['lyric']})
+            if isinstance(item, dict) and item.get('chord'):
+                transposed_section.append({**item, 'chord': transpose_chord(item['chord'], steps)})
             else:
                 transposed_section.append(item)
         transposed_data.append(transposed_section)

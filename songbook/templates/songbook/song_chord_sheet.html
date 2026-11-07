@@ -141,6 +141,23 @@
         })();
     </script>
 
+    <script>
+        // 🎸 Transpose: reload the PDF preview with the chosen number of semitones.
+        // (The layout picker above re-adds ?layout=cal whenever the src changes.)
+        (function () {
+            const frame  = document.getElementById("pdf-preview");
+            const select = document.getElementById("transpose-select");
+            const button = document.getElementById("update-preview");
+            if (!frame || !select || !button) return;
+
+            button.addEventListener("click", function () {
+                const url = new URL(frame.src, window.location.href);
+                url.searchParams.set("transpose", select.value);
+                frame.src = url.toString();
+            });
+        })();
+    </script>
+
     {# 🧭 Guided tour (Driver.js) #}
     <link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
     <script src="{% static 'songbook/vendor/driver/driver.js.iife.js' %}"></script>
