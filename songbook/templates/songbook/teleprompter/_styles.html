@@ -345,4 +345,8 @@ html[data-theme="dark"] { --diagram-veil: 72%; }     /* 🔧 TUNE (dark) */
   -webkit-backdrop-filter: blur(1.5px);              /* 🔧 TUNE: 0 = sharp, 3px = softer */
   backdrop-filter: blur(1.5px);
 }
+/* ⋯ row: empty space lets clicks through to the Listen mini-player;
+   the controls inside it still work normally */
+   .controls .controls-more { pointer-events: none; }
+.controls .controls-more > * { pointer-events: auto; }
 </style>
