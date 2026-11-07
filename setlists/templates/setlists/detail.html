@@ -84,6 +84,10 @@
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <div class="flex-grow-1 ms-3">
           <strong>{{ item.song.songTitle }}</strong>
+{% if item.song.origin %}
+  <span class="badge bg-secondary origin-badge ms-1" title="Origin: {{ item.song.origin }}">{{ item.song.origin }}</span>
+{% endif %}
+
 
           {% with item.notes|length as note_count %}
             {% if note_count > 0 %}
