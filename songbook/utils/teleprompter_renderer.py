@@ -177,6 +177,18 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
             )
             continue
 
+        # ABC notation block ({start_of_abc}...{end_of_abc}); abcjs draws it in the browser.
+        if isinstance(group, dict) and group.get("type") == "abc":
+            close_group()
+            label = group.get("label") or ""
+            abc_text = "\n".join(group["lines"])
+            current_buffer.append(
+                f'<div class="abc-block" data-abc="{html_escape(abc_text, quote=True)}">'
+                + (f'<div class="abc-label">{html_escape(label)}</div>' if label else '')
+                + '<div class="abc-paper"></div></div>'
+            )
+            continue
+
         group = merge_chord_pieces(group)
         in_pattern = False   # 🆕 a new group never starts mid-pattern
 

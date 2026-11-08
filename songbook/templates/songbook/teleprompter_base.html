@@ -6,6 +6,12 @@
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}{{ song.songTitle }}{% endblock %}</title>
+  <script>
+    /* 🎼 Melody (ABC) blocks stay hidden until the user turns them on with the 🎼 button (saved per device).
+       Done here, before the page paints, so hidden blocks never flash on screen. */
+    try { if (localStorage.getItem('tpAbcVisible') !== '1') document.documentElement.classList.add('abc-off'); }
+    catch (e) { document.documentElement.classList.add('abc-off'); }
+  </script>
   <link rel="stylesheet" href="{% static 'songbook/css/teleprompter.css' %}">
   <!-- Guided tour styles (Driver.js) -->
   <link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">
@@ -47,6 +53,18 @@
       .controls .song-title { display: none; }
       #start-tour .tour-label { display: none; }
     }
+
+    /* 🎼 ABC notation blocks ({start_of_abc}...{end_of_abc}), drawn by abcjs.
+       White "paper" card so black notes stay readable in light and dark themes. */
+    .abc-block { background:#fff; color:#000; padding:.4em .6em; margin:.8em 0; border-radius:6px; max-width:900px; }
+    .abc-label { font-style:italic; color:#555; }
+    /* Dark teleprompter: white notes on a black card (abc-blocks.js sets .abc-dark) */
+    .abc-dark .abc-block { background:#000; color:#fff; }
+    .abc-dark .abc-label { color:#bbb; }
+    .abc-dark .uke-fret { fill:#fff; stroke:#000; }
+    .abc-off .abc-block { display:none; }
+    #abc-toggle[hidden] { display:none !important; }
+    #abc-toggle[aria-pressed="false"] { opacity:.5; }
   </style>
   {% block extra_styles %}{% endblock %}
 </head>
@@ -95,6 +113,8 @@
       </div>
       <button id="scroll-reset">⏹ Reset</button>
       {% block controls_right_extra %}{% endblock %}
+      {# 🎼 Show/hide melody notation; hidden until abc-blocks.js finds melody blocks on this page #}
+      <button type="button" id="abc-toggle" hidden aria-pressed="false" title="Show the melody notation">🎼</button>
       <button type="button" id="tp-more-toggle" title="More controls: transpose, chord color, theme"
               aria-expanded="false" aria-controls="controls-more">⋯</button>
     </div>
@@ -157,6 +177,10 @@
 
   <!-- Cue tool: first-note tone + count-in. Reads the #cue-data block from _data.html -->
   <script src="{% static 'songbook/js/cue.js' %}"></script>
+
+  <!-- ABC notation: abcjs draws every .abc-block (intro/interlude/riff melodies) -->
+  <script src="{% static 'songbook/js/abcjs-basic-min.js' %}"></script>
+  <script src="{% static 'songbook/js/abc-blocks.js' %}"></script>
 
   {% include "songbook/teleprompter/_scripts.html" %}
 

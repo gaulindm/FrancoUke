@@ -12,6 +12,10 @@ _OPT_CHORD_RE = re.compile(r'<opt>\s*\[(.*?)\]\s*</opt>', re.IGNORECASE)
 _SOT_RE = re.compile(r'^\{\s*(?:sot|start_of_tab)\s*(?::.*)?\}$', re.IGNORECASE)
 _EOT_RE = re.compile(r'^\{\s*(?:eot|end_of_tab)\s*\}$', re.IGNORECASE)
 
+# ABC notation block: {start_of_abc: Label} ... {end_of_abc}
+_SOABC_RE = re.compile(r'^\{\s*start_of_abc\s*(?::\s*(.*?))?\s*\}$', re.IGNORECASE)
+_EOABC_RE = re.compile(r'^\{\s*end_of_abc\s*\}$', re.IGNORECASE)
+
 def _mark_optional_chords(line):
     """Replace <opt>[Chord]</chord> with [Chord<marker>] so the existing
     bracket scanner picks it up unchanged, but we can detect it was optional
@@ -24,11 +28,29 @@ def parse_song_data(chordpro_text):
     result = []
     inside_tab_block = False
     tab_lines = []
+    inside_abc_block = False
+    abc_lines = []
+    abc_label = ""
 
     for p_idx, paragraph in enumerate(paragraphs):
         lines = paragraph.splitlines()
         for l_idx, line in enumerate(lines):
             stripped = line.strip()
+
+            # ABC block: raw text, so [..] (e.g. [CEG], [K:G]) is never read as a chord
+            m_abc = _SOABC_RE.match(stripped)
+            if m_abc:
+                inside_abc_block = True
+                abc_label = (m_abc.group(1) or "").strip()
+                abc_lines = []
+                continue
+            if _EOABC_RE.match(stripped):
+                inside_abc_block = False
+                result.append({"type": "abc", "label": abc_label, "lines": abc_lines})
+                continue
+            if inside_abc_block:
+                abc_lines.append(line)
+                continue
 
             # TAB block start
             
