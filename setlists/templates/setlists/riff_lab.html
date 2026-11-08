@@ -1,0 +1,62 @@
+{% extends 'groups/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h1 class="mb-0 h2">🎼 Riff Lab</h1>
+    {% if back_url %}
+      <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary">← Back to {{ setlist.name }}</a>
+    {% else %}
+      <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">← Back</a>
+    {% endif %}
+  </div>
+
+  <p class="text-muted">
+    Melodies from <strong>{{ setlist.name }}</strong>, to practise on your own before we play together.
+    Press ▶ Play to hear a melody; slow it down to 50% or 75%, or tick Repeat to loop it.
+    (Sound needs an internet connection.)
+  </p>
+
+  {% for riff in riffs %}
+    <div class="card mb-3 riff-card" data-abc="{{ riff.abc }}" data-tempo="{{ riff.tempo|default_if_none:'' }}">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ riff.song.songTitle }}</strong>
+          {% if riff.label %}<span class="text-muted"> · {{ riff.label }}</span>{% endif %}
+        </div>
+        <a href="{% url 'songbook:chord_sheet' riff.song.pk %}" class="btn btn-sm btn-outline-primary"
+           target="_blank" rel="noopener noreferrer">🎼 View song</a>
+      </div>
+      <div class="card-body">
+        <div class="riff-paper"></div>
+        <div class="riff-controls d-flex flex-wrap align-items-center gap-3 mt-2">
+          <button type="button" class="btn btn-outline-primary riff-play">▶ Play</button>
+          <div class="btn-group riff-speed" role="group" aria-label="Speed">
+            <button type="button" class="btn btn-outline-secondary" data-f="0.5">50%</button>
+            <button type="button" class="btn btn-outline-secondary" data-f="0.75">75%</button>
+            <button type="button" class="btn btn-outline-secondary on" data-f="1">100%</button>
+          </div>
+          <label class="riff-loop mb-0"><input type="checkbox"> Repeat</label>
+          <span class="riff-msg text-danger small"></span>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-info">There are no melodies in this setlist yet.</div>
+  {% endfor %}
+
+</div>
+
+<style>
+  .riff-paper { background:#fff; color:#000; border-radius:6px; padding:.5rem; }
+  .riff-play.playing { background:#ffd9d9; }
+  .riff-speed .on { background:#2a6f97; color:#fff; border-color:#2a6f97; }
+  .rl-playing, .rl-playing * { fill:#d22 !important; stroke:#d22 !important; }
+</style>
+
+<script src="{% static 'songbook/js/abcjs-basic-min.js' %}"></script>
+<script src="{% static 'songbook/js/abc-tab.js' %}"></script>
+<script src="{% static 'songbook/js/riff-lab.js' %}"></script>
+{% endblock %}

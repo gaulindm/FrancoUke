@@ -24,6 +24,8 @@ from django.utils.text import slugify
 from .setlist_pdf import build_setlist_pdf
 from ratings.utils import rating_data
 from django.utils.html import linebreaks
+from django.urls import reverse
+from songbook.utils.abc_riffs import extract_riffs
 from board.rehearsal_notes import RehearsalDetails, SongRehearsalNote
 
 logger = logging.getLogger(__name__)
@@ -100,6 +102,27 @@ def setlist_detail(request, group_slug, pk):
         "group": group,
         "show_ratings": show_ratings,
     })
+
+# ----------------------------
+# 🎼 Riff Lab: practise the melodies (ABC blocks) of a setlist's songs
+# ----------------------------
+@group_member_required
+def setlist_riff_lab(request, group_slug, pk):
+    group = request.group
+    setlist = get_object_or_404(SetList, pk=pk, group=group)
+
+    riffs = []
+    for item in setlist.songs.select_related("song").order_by("order"):
+        for riff in extract_riffs(item.song.songChordPro or ""):
+            riffs.append({**riff, "song": item.song})
+
+    return render(request, "setlists/riff_lab.html", {
+        "setlist": setlist,
+        "riffs": riffs,
+        "group": group,
+        "back_url": reverse("setlists:detail", kwargs={"group_slug": group_slug, "pk": setlist.pk}),
+    })
+
 
 @group_member_required
 def setlist_pdf(request, group_slug, pk):

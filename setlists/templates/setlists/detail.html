@@ -1,5 +1,5 @@
 {% extends 'groups/base.html' %}
-{% load user_tags %}
+{% load user_tags riff_tags %}
 
 {% block content %}
 <div class="container mt-4">
@@ -72,6 +72,14 @@
 <a href="{{ setlist.youtube_queue_url }}"
  class="btn btn-outline-danger btn-lg ms-2" target="_blank" rel="noopener noreferrer">
 ▶️ Listen now
+</a>
+{% endif %}
+{# 🎼 Only shown when a song in this setlist has an ABC melody block #}
+{% url 'setlists:setlist_riff_lab' group_slug=request.group.slug pk=setlist.id as riff_lab_url %}
+{% if riff_lab_url and songs|has_riffs %}
+<a href="{{ riff_lab_url }}"
+ class="btn btn-outline-secondary btn-lg ms-2">
+🎼 Riff Lab
 </a>
 {% endif %}
   </div>

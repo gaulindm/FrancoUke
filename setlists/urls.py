@@ -16,6 +16,7 @@ urlpatterns = [
     path("<int:pk>/song-note/", views.add_song_note, name="add_song_note"),
     path("<int:pk>/", views.setlist_detail, name="detail"),
     path("<int:pk>/pdf/", views.setlist_pdf, name="setlist_pdf"),
+    path("<int:pk>/riff-lab/", views.setlist_riff_lab, name="setlist_riff_lab"),
     path(
         "<int:setlist_id>/teleprompter/<int:order>/",
         views.setlist_teleprompter,
