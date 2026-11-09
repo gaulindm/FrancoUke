@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4" data-tab-instrument="{{ tab_instrument|default:'ukulele' }}">
 
   <div class="d-flex justify-content-between align-items-center mb-2">
     <h1 class="mb-0 h2">🎼 Riff Lab</h1>
@@ -17,6 +17,10 @@
     Melodies from <strong>{{ setlist.name }}</strong>, to practise on your own before we play together.
     Press ▶ Play to hear a melody; slow it down to 50% or 75%, or tick Repeat to loop it.
     (Sound needs an internet connection.)
+  </p>
+  <p class="text-muted small">
+    Tablature is shown for your <strong>{{ tab_instrument_label|default:'Ukulele' }}</strong>.
+    <a href="{% url 'users:user_preferences' %}">Change it in your Preferences</a>.
   </p>
 
   {% for riff in riffs %}

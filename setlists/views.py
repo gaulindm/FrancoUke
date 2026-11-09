@@ -116,10 +116,14 @@ def setlist_riff_lab(request, group_slug, pk):
         for riff in extract_riffs(item.song.songChordPro or ""):
             riffs.append({**riff, "song": item.song})
 
+    pref = getattr(request.user, "userpreference", None)   # None if the member has no preferences row
+
     return render(request, "setlists/riff_lab.html", {
         "setlist": setlist,
         "riffs": riffs,
         "group": group,
+        "tab_instrument": pref.primary_instrument if pref else "ukulele",
+        "tab_instrument_label": pref.get_primary_instrument_display() if pref else "Ukulele",
         "back_url": reverse("setlists:detail", kwargs={"group_slug": group_slug, "pk": setlist.pk}),
     })
 
