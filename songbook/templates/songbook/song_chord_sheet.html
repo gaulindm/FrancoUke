@@ -41,6 +41,30 @@
         </button>
     </div>
 
+    {# ♥ Favorite: one tap on/off, positive-only. The row only appears when the view
+       supplies favorite_toggle_url (logged-in users, once the favorites app exists). #}
+    {% if favorite_toggle_url %}
+    <div class="mb-3 d-flex align-items-center gap-2" id="tour-chord-favorite">
+        <button type="button" id="favorite-btn"
+                class="btn btn-outline-danger"
+                data-url="{{ favorite_toggle_url }}" data-csrf="{{ csrf_token }}"
+                aria-pressed="{% if is_favorite %}true{% else %}false{% endif %}"
+                title="{% if site_name == "FrancoUke" %}Marquer comme coup de cœur{% else %}Mark as a favorite{% endif %}">
+            <i id="favorite-icon" class="bi {% if is_favorite %}bi-heart-fill{% else %}bi-heart{% endif %} me-1"></i>
+            {% if site_name == "FrancoUke" %}Coup de cœur{% else %}Favorite{% endif %}
+        </button>
+
+        {# Leaders and staff also see how many members hearted this song #}
+        {% if can_see_favorite_counts %}
+            <span class="text-muted small"
+                  title="{% if site_name == "FrancoUke" %}Membres qui aiment cette chanson{% else %}Members who love this song{% endif %}">
+                <i class="bi bi-heart-fill text-danger"></i>
+                <span id="favorite-count">{{ favorite_count }}</span>
+            </span>
+        {% endif %}
+    </div>
+    {% endif %}
+
     {# 🎼 Chord placement: chords inside the lyrics [C] (standard) or chords above the lyrics (CAL) #}
     <div class="mb-3" id="tour-chord-format">
         <div class="small fw-semibold mb-1">
@@ -157,6 +181,8 @@
             });
         })();
     </script>
+
+    <script src="{% static 'favorites/favorite_button.js' %}"></script>
 
     {# 🧭 Guided tour (Driver.js) #}
     <link rel="stylesheet" href="{% static 'songbook/vendor/driver/driver.css' %}">

@@ -1,0 +1,38 @@
+{# favorites/templates/favorites/top_favorites.html #}
+{% extends base_template|default:"base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h3 mb-3"><i class="bi bi-heart-fill text-danger me-2"></i>Favorite songs</h1>
+
+    {# Club filter, only useful when the viewer leads (or is staff over) more than one club #}
+    <form method="get" class="mb-3 d-flex align-items-center gap-2">
+        <label for="group" class="form-label mb-0">Club</label>
+        <select name="group" id="group" class="form-select w-auto" onchange="this.form.submit()">
+            <option value="">All my clubs</option>
+            {% for g in groups %}
+                <option value="{{ g.slug }}" {% if selected_group and selected_group.pk == g.pk %}selected{% endif %}>{{ g.name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if songs %}
+    <table class="table table-sm align-middle">
+        <thead>
+            <tr><th>Song</th><th>Artist</th><th class="text-end"><i class="bi bi-heart-fill text-danger"></i></th></tr>
+        </thead>
+        <tbody>
+        {% for song in songs %}
+            <tr>
+                <td><a href="{% url 'teleprompter:teleprompter' song_id=song.id %}">{{ song.songTitle }}</a></td>
+                <td>{{ song.artist|default:"" }}</td>
+                <td class="text-end">{{ song.hearts }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-muted">No favorites yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

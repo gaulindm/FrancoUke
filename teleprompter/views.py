@@ -16,6 +16,12 @@ from songbook.utils.teleprompter_helpers import (
 )
 from songbook.context_processors import site_context
 
+# ♥ Favorite hearts (optional 'favorites' app). Without it the heart simply stays hidden.
+try:
+    from favorites.utils import favorite_context
+except ImportError:
+    favorite_context = None
+
 logger = logging.getLogger(__name__)
 
 # Group whose members may edit songs (the ✏️ link on the teleprompter).
@@ -184,6 +190,11 @@ def teleprompter_view(request, song_id, beginner=False):
         "can_edit_song": _user_can_edit_songs(request.user),
         **context_data,
     }
+
+    # ♥ favorite_toggle_url, is_favorite, favorite_count, can_see_favorite_counts
+    # (empty for anonymous visitors)
+    if favorite_context:
+        context.update(favorite_context(request.user, song))
 
     template_name = "songbook/song_teleprompter.html"
     return render(request, template_name, context)

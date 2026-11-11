@@ -25,6 +25,12 @@ from taggit.models import Tag
 from users.models import UserPreference
 from ratings.utils import face_icon, rating_mine, rating_summaries  # ⭐ song ratings (optional 'ratings' app)
 
+# ♥ Favorite hearts (optional 'favorites' app). Until it exists the heart row simply stays hidden.
+try:
+    from favorites.utils import favorite_context
+except ImportError:
+    favorite_context = None
+
 User = get_user_model()
 
 
@@ -171,6 +177,11 @@ class ChordSheetView(DetailView):
             or user.has_perm("songbook.change_song")
             or user == self.object.contributor
         )
+
+        # ♥ Favorite heart: favorite_toggle_url, is_favorite, favorite_count and
+        # can_see_favorite_counts (empty for anonymous visitors)
+        if favorite_context:
+            context.update(favorite_context(user, self.object))
 
         return context
 

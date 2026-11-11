@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'teleprompter',
     'setlists',
     'ratings',
+    'favorites',
 ]
 
 

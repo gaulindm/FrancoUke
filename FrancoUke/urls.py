@@ -25,7 +25,7 @@ urlpatterns = [
     path('', landing_page, name='landing'),
 
     path('board/<slug:group_slug>/', include(('board.urls', 'board'), namespace='board')),
-
+    path("favorites/", include("favorites.urls")),
     path('teleprompter/', include('teleprompter.urls', namespace='teleprompter')),
     path('tinymce/', include('tinymce.urls')),
 
