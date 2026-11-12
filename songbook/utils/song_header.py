@@ -145,7 +145,7 @@ _NOTE_RE = re.compile(r"^\s*([A-Ga-g])([#b♯♭]?)(\d)?(?![A-Za-z])")
 
 
 def build_cue(song):
-    """Data for the Cue button: {"tempo": 96, "note": "E4", "beats": 4}, or None."""
+    """Data for the Cue button: {"tempo": 96, "note": "E4", "beats": 4, "time": "4/4"}, or None."""
     metadata = song.metadata or {}
 
     tempo = _parse_tempo(metadata)
@@ -163,9 +163,14 @@ def build_cue(song):
     # Clicks in the count-in come from the time signature (default 4).
     # Compound times like 6/8 count in dotted-quarter beats (2).
     beats = 4
+    time = None
     ts = re.match(r"\s*(\d+)\s*/\s*(\d+)", _clean(metadata.get("timeSignature")))
     if ts:
         top, bottom = int(ts.group(1)), int(ts.group(2))
         beats = top // 3 if (bottom == 8 and top > 3 and top % 3 == 0) else top
+        time = f"{top}/{bottom}"
+    elif _clean(metadata.get("timeSignature")).replace(" ", "").upper() in ("C|", "¢", "CUT"):
+        beats, time = 2, "2/2"   # cut time
 
-    return {"tempo": tempo, "note": note, "beats": beats}
+    # "time" lets the on-screen count-in pick its pattern (2/2 counts "1 & 2 &")
+    return {"tempo": tempo, "note": note, "beats": beats, "time": time}

@@ -159,9 +159,9 @@
       {% block controls_more_extra %}{% endblock %}
     </div>
   </div>
-
+<!--
   {# ♥ Favorite: icon-only. Shown only when the view supplies favorite_toggle_url
-     (logged-in users on a single-song page; the setlist page simply doesn't show it). #}
+     (logged-in users on a single-song page; the setlist page simply doesn't show it). #}-->
   {% block favorite_button %}
   {% if favorite_toggle_url %}
   <button type="button" id="favorite-btn" class="tp-favorite{% if is_favorite %} is-favorite{% endif %}"
