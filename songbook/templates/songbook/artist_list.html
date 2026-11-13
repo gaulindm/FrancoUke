@@ -1,7 +1,7 @@
 {% extends base_template %}
 
 {% block content %}
-<h2 class="mb-4">
+<h2 class="mb-2">
     {% if site_name == "FrancoUke" %}
         Parcourir par artiste
     {% else %}
@@ -9,11 +9,24 @@
     {% endif %}
 </h2>
 
-<!-- ✅ Letter Navigation -->
-<div class="letter-nav-container mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+<!-- 📊 Totals + sort toggle -->
+<p class="text-muted small mb-3">
+    {{ artist_total }} {% if site_name == "FrancoUke" %}artiste{{ artist_total|pluralize }}{% else %}artist{{ artist_total|pluralize }}{% endif %},
+    {{ song_total }} {% if site_name == "FrancoUke" %}partition{{ song_total|pluralize }}{% else %}song{{ song_total|pluralize }}{% endif %}
+    &middot;
+    {% if sort == "count" %}
+        <a href="?">{% if site_name == "FrancoUke" %}Ordre alphabétique{% else %}A–Z{% endif %}</a>
+    {% else %}
+        <a href="?sort=count">{% if site_name == "FrancoUke" %}Plus de partitions d'abord{% else %}Most songs first{% endif %}</a>
+    {% endif %}
+</p>
+
+<!-- ✅ Letter Navigation (sticks to the top while scrolling) -->
+<div class="letter-nav-container position-sticky top-0 bg-body py-2 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
+     style="z-index: 10;">
     <div class="letter-nav d-flex flex-wrap gap-1">
         {% for letter in first_letters %}
-            <a href="{% url site_namespace|add:':artist_by_letter' letter %}"
+            <a href="{% url site_namespace|add:':artist_by_letter' letter %}{% if sort == 'count' %}?sort=count{% endif %}"
                class="btn btn-sm {% if letter == selected_letter %}btn-primary{% else %}btn-outline-primary{% endif %}">
                 {{ letter }}
             </a>
@@ -21,7 +34,8 @@
     </div>
 
     {% if selected_letter %}
-        <a href="{% url site_namespace|add:':artist_list' %}" class="btn btn-secondary all-artists-btn">
+        <a href="{% url site_namespace|add:':artist_list' %}{% if sort == 'count' %}?sort=count{% endif %}"
+           class="btn btn-secondary all-artists-btn">
             {% if site_name == "FrancoUke" %}
                 Afficher tous les artistes
             {% else %}
@@ -31,16 +45,27 @@
     {% endif %}
 </div>
 
+<!-- 🔍 Search (filters the artists shown on this page) -->
+<input type="search" id="artistSearch" class="form-control mb-3"
+       autocomplete="off"
+       placeholder="{% if site_name == 'FrancoUke' %}Rechercher un artiste…{% else %}Search artists…{% endif %}">
+
 <!-- ✅ Artist List -->
 <div class="row row-cols-2 row-cols-md-4 g-3">
     {% for column in artist_columns %}
         <div class="col">
             <ul class="list-unstyled">
                 {% for artist in column %}
-                    <li>
-                        <a href="{% url site_namespace|add:':songs_by_artist' artist %}" 
-                           class="text-decoration-none d-block py-1">
-                            {{ artist }}
+                    <li class="artist-item d-flex align-items-baseline"
+                        data-name="{{ artist.name|lower }}">
+                        <span class="badge rounded-pill bg-light text-muted border me-2 text-center"
+                              style="min-width: 2.2em;"
+                              title="{{ artist.count }} {% if site_name == 'FrancoUke' %}partition{{ artist.count|pluralize }}{% else %}song{{ artist.count|pluralize }}{% endif %}">
+                            {{ artist.count }}
+                        </span>
+                        <a href="{% url site_namespace|add:':songs_by_artist' artist.name %}"
+                           class="text-decoration-none py-1">
+                            {{ artist.name }}
                         </a>
                     </li>
                 {% endfor %}
@@ -48,4 +73,27 @@
         </div>
     {% endfor %}
 </div>
+
+<p id="noArtistMatch" class="text-muted" style="display: none;">
+    {% if site_name == "FrancoUke" %}Aucun artiste trouvé.{% else %}No artists found.{% endif %}
+</p>
+
+<script>
+    (function () {
+        var box = document.getElementById("artistSearch");
+        var items = document.querySelectorAll(".artist-item");
+        var none = document.getElementById("noArtistMatch");
+
+        box.addEventListener("input", function () {
+            var q = box.value.trim().toLowerCase();
+            var shown = 0;
+            items.forEach(function (li) {
+                var match = li.dataset.name.indexOf(q) !== -1;
+                li.style.display = match ? "" : "none";
+                if (match) shown++;
+            });
+            none.style.display = shown === 0 ? "" : "none";
+        });
+    })();
+</script>
 {% endblock %}
