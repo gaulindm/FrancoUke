@@ -86,6 +86,16 @@
     }
     .tp-favorite.is-favorite { background: #fff0f2; border-color: #c0152f; }
     .tp-favorite:disabled { opacity: .6; }
+
+    /* Acknowledgement + last-revised date, shown under the song header (same info as the PDF footer) */
+    .tp-song-credits {
+      margin: 0.3em 0 0.9em;
+      font-size: 0.7em;
+      font-style: italic;
+      opacity: 0.7;
+      text-align: center;
+    }
+    .tp-song-credits span { display: block; }
   </style>
   {% block extra_styles %}{% endblock %}
 </head>
@@ -178,6 +188,15 @@
     <div class="lyrics-container">
       <div class="lyrics">
         {% block lyrics_header %}{% song_header song %}{% endblock %}
+        {# Acknowledgement + last-revised date (same info as the PDF footer) #}
+        {% block song_credits %}
+          {% if song.acknowledgement or song.revised_on or song.date_posted %}
+          <div class="tp-song-credits">
+            {% if song.acknowledgement %}<span class="tp-ack">{{ song.acknowledgement }}</span>{% endif %}
+            <span class="tp-revised">Last revised {{ song.revised_on|default:song.date_posted|date:"F j, Y" }}</span>
+          </div>
+          {% endif %}
+        {% endblock %}
         {{ lyrics_with_chords|safe }}
       </div>
     </div>
