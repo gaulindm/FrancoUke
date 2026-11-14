@@ -23,6 +23,13 @@ class SetList(models.Model):
         on_delete=models.SET_NULL,
         null=True, blank=True
     )
+    copied_from = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="copies",
+        help_text="The base setlist this one was duplicated from.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     event = models.OneToOneField(
     Event,

@@ -16,7 +16,7 @@ class SetListSongInline(admin.TabularInline):
 
 @admin.register(SetList)
 class SetListAdmin(admin.ModelAdmin):
-    list_display = ("name", "group", "created_at")
+    list_display = ("name", "group", "event", "copied_from", "created_at")
     list_filter = ("group",)
     search_fields = ("name",)
     inlines = [SetListSongInline]
@@ -32,6 +32,7 @@ class SetListAdmin(admin.ModelAdmin):
                     name=f"{original.name} (Copy)",
                     group=original.group,
                     created_by=request.user,
+                    copied_from=original,
                 )
                 SetListSong.objects.bulk_create([
                     SetListSong(setlist=copy, song=s.song, order=s.order)
@@ -43,10 +44,7 @@ class SetListAdmin(admin.ModelAdmin):
             f"Duplicated {count} setlist(s). Open the copy to link it to an event.",
         )
 
-    def get_fields(self, request, obj=None):
-        if obj:  # editing existing entry
-            return ("setlist", "song", "order")
-        return ("setlist", "song")  # creating new entry
+
 
 
 class SongSuggesterInline(admin.TabularInline):
