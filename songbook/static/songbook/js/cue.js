@@ -16,6 +16,35 @@
   function freqOf(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
   function nameOf(midi) { return NAMES[((midi % 12) + 12) % 12]; }
 
+  // ---------- strumming patterns: D-DU-UDU, duDu-udu ... ----------
+  // D/d = down, U/u = up, "-" = a miss (the hand moves, no sound).
+  // When a pattern mixes capitals and lowercase, capitals are the strong strokes.
+  function parseStrum(text) {
+    var s = String(text || "").replace(/\s+/g, "");
+    if (!/^[DUdu-]{2,32}$/.test(s)) return null;
+    var mixed = /[a-z]/.test(s) && /[A-Z]/.test(s);
+    var slots = s.split("").map(function (c) {
+      if (c === "-") return { rest: true };
+      return { dir: c.toUpperCase(), strong: mixed ? c === c.toUpperCase() : null };
+    });
+    return { text: s, slots: slots };
+  }
+  // Works out how long each slot lasts. Normally 2 slots per beat (3 in 6/8, 9/8...),
+  // so "D-DU-UDU" is one bar of 4/4 and a 16-slot pattern is two bars.
+  // If the length doesn't fit that, it is shown on screen but the ticks stay plain beats.
+  function strumPlan(text, beat, n, sub) {
+    var sp = parseStrum(text);
+    if (!sp) return null;
+    var len = sp.slots.length, barSlots = n * sub;
+    var plan = { text: sp.text, slots: sp.slots, timed: false, perBeat: sub, barSlots: barSlots, slotDur: beat / sub };
+    if (len % barSlots === 0) plan.timed = true;
+    else if (len < barSlots && len % n === 0) {            // one slot per beat, or similar
+      plan.timed = true;
+      plan.barSlots = len; plan.perBeat = len / n; plan.slotDur = beat * n / len;
+    }
+    return plan;
+  }
+
   // ---------- the timeline: one list drives both the sound and the screen ----------
   // 4/4:  note, then   "1, 2,  1 2 3 4"
   // 2/2:  note, then   "1, 2,  1 & 2 &"
@@ -34,7 +63,10 @@
       var cut = cue.time === "2/2";
       var common = !cue.time || cue.time === "4/4";
       var n = cue.beats || 4;
+      var tm = /^(\d+)\/(\d+)$/.exec(cue.time || "");
+      var compound = !!tm && parseInt(tm[2], 10) === 8 && parseInt(tm[1], 10) % 3 === 0 && parseInt(tm[1], 10) > 3;
       meter = { beat: beat, n: cut ? 2 : n, cut: cut };
+      meter.strum = strumPlan(cue.strum, beat, meter.n, compound ? 3 : 2);
 
       if (!cut && !common) {
         // Two full bars. The first is the "get ready" bar (grey), the second is
@@ -78,10 +110,28 @@
   // that fall before "until" and moves the state forward.
   function nextTicks(meter, state, until) {
     var out = [];
+    var sp = meter.strum && meter.strum.timed ? meter.strum : null;
+    if (sp) {
+      // One tick per slot: downs low, ups high, strong louder than weak, misses silent.
+      // A soft low thump marks beat 1 of every bar so nobody loses the bar.
+      while (state.next < until) {
+        var s = sp.slots[state.i % sp.slots.length];
+        if (state.i % sp.barSlots === 0) out.push({ at: state.next, freq: 220, vol: 0.14, dur: 0.09, type: "sine" });
+        if (!s.rest) {
+          out.push({
+            at: state.next, freq: s.dir === "D" ? 800 : 1300, dur: 0.05, type: "triangle",
+            vol: s.strong === null ? 0.2 : (s.strong ? 0.32 : 0.12)      // 🔧 TUNE: strum tick volumes
+          });
+        }
+        state.next += sp.slotDur;
+        state.i++;
+      }
+      return out;
+    }
     while (state.next < until) {
       var strong = (state.i % meter.n) === 0;
-      out.push({ at: state.next, freq: strong ? 1600 : 1000, vol: 0.25, dur: 0.06 });
-      if (meter.cut) out.push({ at: state.next + meter.beat / 2, freq: 800, vol: 0.12, dur: 0.05 });
+      out.push({ at: state.next, freq: strong ? 1600 : 1000, vol: 0.25, dur: 0.06, type: "square" });
+      if (meter.cut) out.push({ at: state.next + meter.beat / 2, freq: 800, vol: 0.12, dur: 0.05, type: "square" });
       state.next += meter.beat;
       state.i++;
     }
@@ -116,7 +166,7 @@
     var state = { next: startAt, i: 0 };
     function pump() {
       nextTicks(meter, state, ctx.currentTime + 0.3).forEach(function (k) {
-        tone(k.freq, k.at, k.dur, k.vol, "square");
+        tone(k.freq, k.at, k.dur, k.vol, k.type);
       });
     }
     pump();
@@ -139,6 +189,15 @@
     "#cue-overlay .cue-pip{min-width:min(9vw,9vh);padding:0 .4em;text-align:center;border-radius:999px;" +
     "border:3px solid currentColor;opacity:.35;font-size:min(6vw,6vh);font-weight:700;line-height:1.6;}" +
     "#cue-overlay .cue-pip.on{opacity:1;background:var(--accent,#ff8c00);border-color:var(--accent,#ff8c00);color:#000;}" +
+    "#cue-overlay.has-strum .cue-main{font-size:min(34vw,34vh);}" +
+    "#cue-overlay .cue-strum{display:flex;align-items:center;font-size:min(6vw,6vh);line-height:1;}" +
+    "#cue-overlay .cue-strum:empty,#cue-overlay .cue-strumtxt:empty{display:none;}" +
+    "#cue-overlay .cue-sl{min-width:1.1em;text-align:center;font-weight:800;}" +
+    "#cue-overlay .cue-sl.weak{font-size:.75em;font-weight:500;opacity:.55;}" +
+    "#cue-overlay .cue-sl.miss{opacity:.3;}" +
+    "#cue-overlay .cue-sl.g{margin-left:.45em;}" +
+    "#cue-overlay .cue-sl.bar{margin-left:1.2em;}" +
+    "#cue-overlay .cue-strumtxt{font-size:min(3.6vw,3.6vh);opacity:.6;letter-spacing:.08em;}" +
     "#cue-overlay .cue-hint{position:absolute;bottom:3vh;font-size:min(3.5vw,3.5vh);opacity:.5;}" +
     "@keyframes cue-pop{from{transform:scale(1.35);opacity:.35;}to{transform:scale(1);opacity:1;}}" +
     "#cue-overlay .cue-main.pop{animation:cue-pop .22s ease-out;}" +
@@ -156,12 +215,15 @@
     overlay.setAttribute("role", "status");
     overlay.innerHTML =
       '<div class="cue-main"></div><div class="cue-sub"></div>' +
-      '<div class="cue-pips"></div><div class="cue-hint">Tap anywhere to cancel</div>';
+      '<div class="cue-pips"></div><div class="cue-strum"></div><div class="cue-strumtxt"></div>' +
+      '<div class="cue-hint">Tap anywhere to cancel</div>';
     document.body.appendChild(overlay);
     parts = {
       main: overlay.querySelector(".cue-main"),
       sub: overlay.querySelector(".cue-sub"),
       pips: overlay.querySelector(".cue-pips"),
+      strum: overlay.querySelector(".cue-strum"),
+      strumtxt: overlay.querySelector(".cue-strumtxt"),
     };
     overlay.addEventListener("click", stopAll);
   }
@@ -221,6 +283,23 @@
       parts.pips.appendChild(d);
     });
 
+    // the strumming pattern, drawn as arrows (strong = bold, weak = small, miss = dot)
+    parts.strum.innerHTML = "";
+    parts.strumtxt.textContent = "";
+    var sp = seq.meter && seq.meter.strum;
+    if (sp) {
+      sp.slots.forEach(function (sl, i) {
+        var d = document.createElement("span");
+        d.className = "cue-sl" + (sl.rest ? " miss" : sl.strong === false ? " weak" : "");
+        if (sp.timed && i > 0 && i % sp.barSlots === 0) d.className += " bar";
+        else if (sp.timed && i > 0 && i % sp.perBeat === 0) d.className += " g";
+        d.textContent = sl.rest ? "·" : (sl.dir === "D" ? "↓" : "↑");
+        parts.strum.appendChild(d);
+      });
+      parts.strumtxt.textContent = sp.text;
+    }
+    overlay.classList.toggle("has-strum", !!sp);
+
     var base = ctx.currentTime + 0.1, idx = -1;
     schedule(seq.events, base);
     if (seq.meter) startTicks(seq.meter, base + seq.end);   // the ticks carry on after the count
@@ -257,5 +336,5 @@
     });
   });
 
-  if (typeof module !== "undefined") module.exports = { buildSequence: buildSequence, nextTicks: nextTicks };
+  if (typeof module !== "undefined") module.exports = { buildSequence: buildSequence, nextTicks: nextTicks, parseStrum: parseStrum };
 })();

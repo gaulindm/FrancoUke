@@ -145,7 +145,7 @@ _NOTE_RE = re.compile(r"^\s*([A-Ga-g])([#b♯♭]?)(\d)?(?![A-Za-z])")
 
 
 def build_cue(song):
-    """Data for the Cue button: {"tempo": 96, "note": "E4", "beats": 4, "time": "4/4"}, or None."""
+    """Data for the Cue button: {"tempo": 96, "note": "E4", "beats": 4, "time": "4/4", "strum": "D-DU-UDU"}, or None."""
     metadata = song.metadata or {}
 
     tempo = _parse_tempo(metadata)
@@ -173,4 +173,10 @@ def build_cue(song):
         beats, time = 2, "2/2"   # cut time
 
     # "time" lets the on-screen count-in pick its pattern (2/2 counts "1 & 2 &")
-    return {"tempo": tempo, "note": note, "beats": beats, "time": time}
+    # Strumming pattern (D-DU-UDU, duDu-udu ...) for the on-screen cue and the ticks.
+    # Only D U d u and "-" are accepted; anything else is ignored.
+    strum = _clean(getattr(song, "default_strumming_pattern", "")).replace(" ", "")
+    if not re.fullmatch(r"[DUdu-]{2,32}", strum):
+        strum = None
+
+    return {"tempo": tempo, "note": note, "beats": beats, "time": time, "strum": strum}
