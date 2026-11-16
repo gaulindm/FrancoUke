@@ -60,12 +60,6 @@
   {% if user.is_authenticated %}
   {% with user_pref=user.userpreference %}
     {% if user_pref %}
-    <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("{% static 'strumsphere/sw.js' %}");
-      }
-      </script>
-      
       <script>
         window.userPreferences = {
           instrument: "{{ user_pref.primary_instrument }}",
@@ -78,6 +72,12 @@
   {% endwith %}
 {% endif %}
 
+  {# Service worker: registered for every page, served from the site root so it controls the whole site #}
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
+    }
+  </script>
 
 </body>
 </html>

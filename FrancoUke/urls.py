@@ -13,9 +13,18 @@ def robots_txt(request):
     body = "User-agent: *\nDisallow: /*?\nCrawl-delay: 10\n"
     return HttpResponse(body, content_type="text/plain")
 
+import os
+from django.conf import settings
+from django.http import HttpResponse
 
+def service_worker(request):
+    with open(os.path.join(settings.BASE_DIR, "templates", "sw.js"), encoding="utf-8") as f:
+        resp = HttpResponse(f.read(), content_type="application/javascript")
+    resp["Cache-Control"] = "no-cache"
+    return resp
 
 urlpatterns = [
+    path("sw.js", service_worker, name="sw"),   # PWA service worker, must live at the site root
     path("admin/assets/", include("assets.urls")),
     path("admin/", admin.site.urls),
     path("ratings/", include("ratings.urls")),

@@ -1,344 +1,473 @@
 {% extends 'groups/base.html' %}
-{% load static %}
-
-{% block extra_head %}
-  <style>
-    /* Tighten spacing for readability */
-    .list-group-item {
-      padding: 0.4rem 0.6rem;
-    }
-    .drag-handle {
-      cursor: grab;
-      font-size: 1.2rem;
-    }
-    #song-search:focus {
-      outline: none;
-      border-color: #198754;
-      box-shadow: 0 0 0 0.2rem rgba(25,135,84,.25);
-    }
-    #song-list mark {
-      background: #ffeb3b;
-      color: inherit;
-      padding: 0;
-    }
-    .origin-badge {
-      font-size: 0.65rem;
-      vertical-align: middle;
-      letter-spacing: 0.02em;
-    }
-    /* Toast styling */
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #198754;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.3s, transform 0.3s;
-      z-index: 2000;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  </style>
-{% endblock %}
+{% load user_tags riff_tags %}
 
 {% block content %}
 <div class="container mt-4">
-  <h2>🎵 Setlist Builder</h2>
 
-  {% if setlist.event %}
-  <div class="mb-3 p-2 border rounded bg-light">
-    <p class="mb-1">
-      🎤 <strong>{{ setlist.event.title }}</strong>
-      {% if setlist.event.event_type %}
-        <span class="text-muted small">
-          ({{ setlist.event.get_event_type_display }})
-        </span>
-      {% endif %}
-    </p>
-    <p class="mb-1 text-muted small">
-      📅 {{ setlist.event.event_date|date:"D, M d, Y" }}
-      {% if setlist.event.start_time %}
-        at {{ setlist.event.start_time|time:"H:i" }}
-        {% if setlist.event.end_time %}
-          – {{ setlist.event.end_time|time:"H:i" }}
-        {% endif %}
-      {% endif %}
-    </p>
-    {% if setlist.event.location %}
-      <p class="mb-0 text-muted small">📍 {{ setlist.event.location }}</p>
-    {% endif %}
-  </div>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+    {% endfor %}
   {% endif %}
 
-  <form method="post" id="setlist-form">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="setlist-name" class="form-label">Setlist Name</label>
-      <input type="text" id="setlist-name" name="name"
-             value="{{ setlist.name|default:'Untitled Setlist' }}"
-             class="form-control">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">{{ setlist.name }}</h1>
+
+    <div class="btn-group">
+      {% if group %}
+      <a href="{% url 'board:full_board' group_slug=group.slug %}?event={{ setlist.event.id }}" 
+         class="btn btn-outline-primary btn-sm">
+        🎤 View {{ setlist.event.title }}
+      </a>
+      {% endif %}
+
+      {% if group %}
+      <a href="{% url 'setlists:my_suggestions' group_slug=group.slug %}"
+         class="btn btn-sm btn-outline-secondary">
+        💡 My suggestions
+      </a>
+      {% endif %}
+
+      {% if can_edit %}
+        <a href="{% url 'setlists:setlist_builder' group_slug=request.group.slug pk=setlist.id %}" 
+           class="btn btn-sm btn-outline-secondary">
+          ✏️ Edit Setlist
+        </a>
+      {% endif %}
     </div>
+  </div>
 
-    <div class="row">
-      <!-- SONG LIBRARY -->
-      <div class="col-md-6">
-        <h5>Song Library</h5>
+  {% if event %}
+    <div class="mb-3 p-2 border rounded bg-light">
+      <p class="mb-1 text-muted small">
+        📅 {{ event.event_date|date:"D, M d, Y" }}
+        {% if event.start_time %}
+          at {{ event.start_time|time:"H:i" }}
+          {% if event.end_time %}
+            – {{ event.end_time|time:"H:i" }}
+          {% endif %}
+        {% endif %}
+      </p>
+      {% if event.location %}
+        <p class="mb-0 text-muted small">📍 {{ event.location }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
 
-        <!-- Search input + clear button -->
-        <div class="input-group mb-2">
-          <input type="text" id="song-search" placeholder="Search songs…" class="form-control">
-          <button type="button" id="clear-search" class="btn btn-outline-secondary">✖</button>
+  {% if songs %}
+  <div class="mt-4 text-center">
+    <a href="{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=songs.0.order %}" 
+       class="btn btn-primary btn-lg">
+      🎤 Start Teleprompter
+    </a>
+    <a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}"
+ class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
+🖨️ Printable PDF
+</a>
+<a href="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}?large=1"
+ class="btn btn-outline-primary btn-lg ms-2" target="_blank" rel="noopener noreferrer">
+🔍 Large print
+</a>
+{% if setlist.youtube_queue_url %}
+<a href="{{ setlist.youtube_queue_url }}"
+ class="btn btn-outline-danger btn-lg ms-2" target="_blank" rel="noopener noreferrer">
+▶️ Listen now
+</a>
+{% endif %}
+{# 🎼 Only shown when a song in this setlist has an ABC melody block #}
+{% url 'setlists:setlist_riff_lab' group_slug=request.group.slug pk=setlist.id as riff_lab_url %}
+{% if riff_lab_url and songs|has_riffs %}
+<a href="{{ riff_lab_url }}"
+ class="btn btn-outline-secondary btn-lg ms-2">
+🎼 Riff Lab
+</a>
+{% endif %}
+{# 📥 Save this setlist for offline use (gigs without wifi) #}
+<button type="button" id="offline-btn" class="btn btn-outline-success btn-lg ms-2">
+📥 Save for offline
+</button>
+<div id="offline-status" class="small text-muted mt-2" aria-live="polite"></div>
+<ul id="offline-urls" hidden>
+  <li data-url="{{ request.path }}"></li>
+  <li data-url="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}"></li>
+  <li data-url="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}?large=1"></li>
+  {% for item in songs %}
+  <li data-url="{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=item.order %}"></li>
+  <li data-url="{% url 'songbook:chord_sheet' item.song.pk %}"></li>
+  {% endfor %}
+</ul>
+  </div>
+<br>
+  {% endif %}
+
+  <!-- 🎵 SONG LIST -->
+  <ol class="list-group list-group-numbered">
+    {% for item in songs %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="flex-grow-1 ms-3">
+          <strong>{{ item.song.songTitle }}</strong>
+{% if item.song.origin %}
+  <span class="badge bg-secondary origin-badge ms-1" title="Origin: {{ item.song.origin }}">{{ item.song.origin }}</span>
+{% endif %}
+
+
+          {% with item.notes|length as note_count %}
+            {% if note_count > 0 %}
+              <button type="button" 
+                      class="btn btn-sm btn-outline-secondary ms-2"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#notesModal{{ item.song.id }}"
+                      title="View rehearsal notes for {{ item.song.songTitle }}">
+                📝 {{ note_count }} note{{ note_count|pluralize }}
+              </button>
+            {% endif %}
+          {% endwith %}
+
+          {% if show_ratings and group %}
+          <button type="button"
+                  class="btn btn-sm btn-outline-warning ms-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#rateModal"
+                  data-song-id="{{ item.song.id }}"
+                  data-song-title="{{ item.song.songTitle }}"
+                  data-stars="{{ item.my_rating.stars|default:'' }}"
+                  data-playability="{{ item.my_rating.playability|default:'' }}"
+                  data-singability="{{ item.my_rating.singability|default:'' }}"
+                  data-comment="{{ item.my_rating.comment|default:'' }}"
+                  {% if item.rating_count %}title="Playability {{ item.avg_play|floatformat:1|default:'–' }} · Singability {{ item.avg_sing|floatformat:1|default:'–' }}"{% endif %}>
+            {% if item.rating_count %}
+              {% with r=item.avg_rating|floatformat:0 %}
+              <i class="bi {% if r == '1' %}bi-emoji-dizzy{% elif r == '2' %}bi-emoji-frown{% elif r == '3' %}bi-emoji-neutral{% elif r == '4' %}bi-emoji-smile{% else %}bi-emoji-laughing{% endif %}"></i>
+              {% endwith %}
+              {{ item.avg_rating|floatformat:1 }} ({{ item.rating_count }})
+            {% else %}
+              <i class="bi bi-emoji-smile"></i> Rate
+            {% endif %}
+          </button>
+          {% endif %}
         </div>
 
-        <ul id="song-list" class="list-group" style="max-height: 70vh; overflow-y: auto;">
-          {% for song in songs %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <span>{{ song.songTitle }}</span>
-                {% if song.origin %}
-                  <span class="badge bg-secondary origin-badge ms-1" title="Origin: {{ song.origin }}">{{ song.origin }}</span>
-                {% endif %}
-                {% if song.note_count > 0 %}
+        <div class="d-flex gap-2 flex-shrink-0 ms-2">
+          {% if can_edit and event and event.event_type == "rehearsal" %}
+          <button type="button"
+                  class="btn btn-sm btn-outline-success"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addNoteModal"
+                  data-song-id="{{ item.song.id }}"
+                  data-song-title="{{ item.song.songTitle }}"
+                  title="Add a rehearsal note for {{ item.song.songTitle }}">
+            ➕ Note
+          </button>
+          {% endif %}
+          <a href="{% url 'songbook:chord_sheet' item.song.pk %}" 
+             class="btn btn-sm btn-outline-primary"
+             target="_blank"
+             rel="noopener noreferrer">
+            🎼 View
+          </a>
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">No songs in this setlist yet.</li>
+    {% endfor %}
+  </ol>
 
-                {% if group %}
-                  <a href="{% url 'board:song_rehearsal_history' group_slug=group.slug song_id=song.id %}"
-                {% endif %}
+ 
 
-                     class="btn btn-sm btn-outline-info ms-2"
-                     title="View rehearsal notes for {{ song.songTitle }}"
-                     data-bs-toggle="tooltip">
-                    📝 Notes
-                    {% if song.note_count > 1 %}
-                      <span class="badge bg-secondary">{{ song.note_count }}</span>
-                    {% endif %}
-                  </a>
-                {% endif %}
-              </div>
+  <!-- 💡 SUGGEST A SONG -->
+  {% if group %}
+  <div class="card mt-5" id="suggest-card"
+       data-search-url="{% url 'setlists:suggest_song_search' group_slug=group.slug %}"
+       data-suggest-url-template="{% url 'setlists:suggest_song' group_slug=group.slug song_id=0 %}">
+    <div class="card-body">
+      {% csrf_token %}
+      <h2 class="h5">💡 Suggest a song for {{ group.name }}</h2>
+      <p class="text-muted small mb-2">
+        Type part of a title. A club leader reviews every suggestion before it is added to a setlist.
+      </p>
+      <input type="search" id="suggest-q" class="form-control mb-2"
+             placeholder="Search by song title…" autocomplete="off">
+      <input type="text" id="suggest-note" class="form-control form-control-sm mb-2"
+             maxlength="300" placeholder="Optional note for the leader (why this song?)">
+      <div id="suggest-results" class="list-group"></div>
+    </div>
+  </div>
+  {% endif %}
+</div>
 
-              <button type="button"
-                      class="btn btn-sm btn-success add-song"
-                      data-id="{{ song.id }}"
-                      data-title="{{ song.songTitle }}"
-                      data-origin="{{ song.origin|default:'' }}">
-                + Add
-              </button>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
+<!-- 📝 REHEARSAL NOTES MODALS -->
+{% for item in songs %}
+  {% with item.notes as notes %}
+    {% if notes %}
+      <div class="modal fade" id="notesModal{{ item.song.id }}" tabindex="-1" 
+           aria-labelledby="notesModalLabel{{ item.song.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="notesModalLabel{{ item.song.id }}">
+                📝 Rehearsal Notes: {{ item.song.songTitle }}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              {% for note in notes %}
+                <div class="card mb-3">
+                  <div class="card-header bg-light">
+                    <small class="text-muted">
+                      {{ note.rehearsal.event.event_date|date:"D, M d, Y" }}
+                      • {{ note.rehearsal.event.title }}
+                      {% if note.created_by %}
+                        • by {{ note.created_by|get_user_display_name }}
+                      {% endif %}
+                    </small>
+                  </div>
+                  <div class="card-body">
+                    {{ note.notes|safe }}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="modal-footer">
 
-      <!-- CURRENT SETLIST -->
-      <div class="col-md-6">
-        <h5>Current Setlist</h5>
-        <ul id="setlist-songs" class="list-group mb-3" style="max-height: 70vh; overflow-y: auto;">
-          
-          {% for item in setlist.songs.all %}
-          <li class="list-group-item d-flex align-items-center" data-id="{{ item.song.id }}">
-            <span class="drag-handle me-2">☰</span>
-            <strong class="flex-grow-1">
-              {{ item.song.songTitle }}
-              {% if item.song.origin %}
-                <span class="badge bg-secondary origin-badge ms-1" title="Origin: {{ item.song.origin }}">{{ item.song.origin }}</span>
-              {% endif %}
-            </strong>
-            <input type="hidden" name="order[]" value="{{ item.song.id }}">
-
-            <!-- after -->
-              {% if group and item.song.rehearsal_notes.all %}
-              <a href="{% url 'board:song_rehearsal_history' group_slug=group.slug song_id=item.song.id %}"
-                class="btn btn-sm btn-outline-secondary me-2"
-                title="View rehearsal notes for {{ item.song.songTitle }}"
-                data-bs-toggle="tooltip">
-                📝 Notes
+              
+              {% if group %}
+              <a href="{% url 'board:song_rehearsal_history' group_slug=group.slug song_id=item.song.id %}" 
+                class="btn btn-sm btn-outline-primary"
+                target="_blank">
+                View Full History
               </a>
               {% endif %}
 
 
-            <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
-          </li>
-        {% endfor %}
-        
-
-
-        </ul>
-
-        <button type="submit" class="btn btn-primary w-100">💾 Save Setlist</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </form>
+    {% endif %}
+  {% endwith %}
+{% endfor %}
+
+{# 📝 shared "add rehearsal note" pop-up (leaders, rehearsal setlists only) #}
+{% if can_edit and event and event.event_type == "rehearsal" %}
+<div class="modal fade" id="addNoteModal" tabindex="-1"
+     aria-labelledby="addNoteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="post" class="modal-content"
+          action="{% url 'setlists:add_song_note' group_slug=group.slug pk=setlist.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="song_id" id="addNoteSongId">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addNoteModalLabel">
+          📝 Rehearsal note: <span id="addNoteSongTitle"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="addNoteText" class="visually-hidden">Note</label>
+        <textarea id="addNoteText" name="notes" class="form-control" rows="6"
+                  maxlength="2000" required
+                  placeholder="What should we remember about this song?"></textarea>
+        <div class="form-text">
+          Saved to {{ event.title }}{% if event.event_date %}, {{ event.event_date|date:"M d" }}{% endif %}.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-success">Save note</button>
+      </div>
+    </form>
+  </div>
 </div>
+{% endif %}
 
-<!-- Toast notification -->
-<div id="toast">✅ Song added!</div>
-{% endblock %}
+{# ⭐ shared rating pop-up #}
+{% if show_ratings %}{% include "ratings/_rating_modal.html" %}{% endif %}
 
-{% block extra_js %}
-<!-- SortableJS CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<style>
+  .list-group-item {
+    padding: 0.45rem 0.7rem;
+  }
+
+  .list-group-numbered > li::marker {
+    content: counter(list-item) ".    ";
+    font-weight: bold;
+  }
+
+  .list-group-numbered {
+    padding-left: 1.2rem;
+  }
+</style>
 
 <script>
-console.log("🎶 Setlist Builder (AJAX + Sortable) JS loaded!");
-
-document.addEventListener("DOMContentLoaded", function () {
-  const searchInput = document.getElementById("song-search");
-  const clearBtn = document.getElementById("clear-search");
-  const songList = document.getElementById("song-list");
-  const toast = document.getElementById("toast");
-  const setlistEl = document.getElementById("setlist-songs");
-  let currentAjax = null;
-
-  // ✅ Enable drag-and-drop sorting
-  Sortable.create(setlistEl, {
-    handle: ".drag-handle",
-    animation: 150,
+(function () {
+  // Fill the shared "add note" pop-up with the song whose button was tapped
+  const modal = document.getElementById("addNoteModal");
+  if (!modal) return;
+  modal.addEventListener("show.bs.modal", function (e) {
+    const btn = e.relatedTarget;
+    if (!btn) return;
+    document.getElementById("addNoteSongId").value = btn.dataset.songId;
+    document.getElementById("addNoteSongTitle").textContent = btn.dataset.songTitle;
+    document.getElementById("addNoteText").value = "";
   });
-
-  // ✅ Prevent Enter key from submitting
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") e.preventDefault();
+  modal.addEventListener("shown.bs.modal", function () {
+    document.getElementById("addNoteText").focus();
   });
-
-  // ✅ Debounced search
-  let debounceTimer = null;
-  searchInput.addEventListener("input", () => {
-    const query = searchInput.value.trim();
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => fetchSongs(query), 250);
-  });
-
-  // ✅ Clear button resets search
-  clearBtn.addEventListener("click", () => {
-    searchInput.value = "";
-    fetchSongs("");
-    searchInput.focus();
-  });
-
-  // ✅ Fetch filtered songs via AJAX
-  function fetchSongs(query) {
-    if (currentAjax) currentAjax.abort?.();
-    fetch(`{% url 'setlists:ajax_song_search' group_slug=group.slug %}?q=${encodeURIComponent(query)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        songList.innerHTML = "";
-        if (data.songs.length === 0) {
-          songList.innerHTML = `<li class="list-group-item text-muted">No songs found.</li>`;
-          return;
-        }
-        data.songs.forEach(song => {
-          const li = document.createElement("li");
-          li.className = "list-group-item d-flex justify-content-between align-items-center";
-          const originBadge = song.origin
-            ? `<span class="badge bg-secondary origin-badge ms-1" title="Origin: ${song.origin}">${song.origin}</span>`
-            : "";
-          li.innerHTML = `
-            <span>${song.title}${originBadge}</span>
-            <button type="button"
-                    class="btn btn-sm btn-success add-song"
-                    data-id="${song.id}"
-                    data-title="${song.title}"
-                    data-origin="${song.origin || ''}">
-              + Add
-            </button>`;
-          songList.appendChild(li);
-        });
-        bindAddButtons();
-      })
-      .catch((err) => console.error("Search failed:", err));
-  }
-
-// ✅ Add song
-function bindAddButtons() {
-  document.querySelectorAll(".add-song").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      const songId = btn.dataset.id;
-      const songTitle = btn.dataset.title;
-      const songOrigin = btn.dataset.origin || "";
-
-      if (document.querySelector(`#setlist-songs li[data-id="${songId}"]`)) {
-        showToast("⚠️ Already in setlist", "warning");
-        return;
-      }
-
-      const originBadge = songOrigin
-        ? `<span class="badge bg-secondary origin-badge ms-1" title="Origin: ${songOrigin}">${songOrigin}</span>`
-        : "";
-
-      const li = document.createElement("li");
-      li.className = "list-group-item d-flex align-items-center";
-      li.dataset.id = songId;
-      li.innerHTML = `
-        <span class="drag-handle me-2">☰</span>
-        <strong class="flex-grow-1">${songTitle}${originBadge}</strong>
-        <input type="hidden" name="order[]" value="${songId}">
-        <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
-      `;
-      setlistEl.appendChild(li);
-      showToast(`✅ Added "${songTitle}"`);
-    });
-  });
-}
-// ✅ Works for both initial and dynamically added items
-setlistEl.addEventListener("click", (e) => {
-  if (e.target.classList.contains("remove-song")) {
-    e.preventDefault();
-    const li = e.target.closest("li");
-    const songTitle = li.querySelector("strong")?.textContent || "Song";
-    li.remove();
-    showToast(`❌ Removed "${songTitle}"`, "warning");
-    markDirty();  // ⚡ now tracked as an unsaved change
-  }
-});
-
-
-
-
-  // ✅ Toast helper
-  function showToast(message, type="success") {
-    toast.textContent = message;
-    toast.style.background = type === "warning" ? "#dc3545" : "#198754";
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2000);
-  }
-
-  // Load initial songs
-  fetchSongs("");
-
-  // ✅ Track unsaved changes
-  let isDirty = false;
-  function markDirty() {
-    if (!isDirty) {
-      isDirty = true;
-      window.addEventListener("beforeunload", warnUnsaved);
-    }
-  }
-  function markClean() {
-    isDirty = false;
-    window.removeEventListener("beforeunload", warnUnsaved);
-  }
-  function warnUnsaved(e) {
-    e.preventDefault();
-    e.returnValue = "";
-    return "";
-  }
-  document.getElementById("setlist-form").addEventListener("input", markDirty);
-  document.getElementById("setlist-form").addEventListener("change", markDirty);
-  setlistEl.addEventListener("sortupdate", markDirty);
-  document.getElementById("setlist-form").addEventListener("submit", function () {
-    markClean();
-  });
-
-  // ✅ Enable Bootstrap tooltips
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-  tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl)
-  });
-});
+})();
 </script>
+
+<script>
+(function () {
+  const card = document.getElementById("suggest-card");
+  if (!card) return;
+
+  const searchUrl = card.dataset.searchUrl;
+  const suggestUrlTemplate = card.dataset.suggestUrlTemplate;
+  const csrf = card.querySelector("[name=csrfmiddlewaretoken]").value;
+  const input = document.getElementById("suggest-q");
+  const noteInput = document.getElementById("suggest-note");
+  const box = document.getElementById("suggest-results");
+  let timer = null;
+  let latest = 0;
+
+  // Small helper. textContent (not innerHTML) keeps song titles from being read as HTML.
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function actionFor(song) {
+    if (song.state === "mine") return el("span", "text-success small", "✔ You suggested this");
+    if (song.state === "approved") return el("span", "text-success small", "✔ Already approved");
+    if (song.state === "declined") return el("span", "text-muted small", "Reviewed earlier, not added");
+
+    const form = el("form");
+    form.method = "post";
+    form.action = suggestUrlTemplate.replace("/0/", "/" + song.id + "/");
+
+    const fields = {
+      csrfmiddlewaretoken: csrf,
+      next: window.location.pathname + window.location.search,
+      note: "",
+    };
+    for (const name in fields) {
+      const hidden = el("input");
+      hidden.type = "hidden";
+      hidden.name = name;
+      hidden.value = fields[name];
+      form.appendChild(hidden);
+    }
+    // Copy the optional note into this song's form at the moment of sending
+    form.addEventListener("submit", function () {
+      form.querySelector("[name=note]").value = noteInput.value;
+    });
+
+    const label = song.state === "pending" ? "Suggest too" : "Suggest";
+    const button = el("button", "btn btn-sm btn-outline-primary", label);
+    button.type = "submit";
+    form.appendChild(button);
+    return form;
+  }
+
+  function render(songs) {
+    box.replaceChildren();
+    if (!songs.length) {
+      box.appendChild(el("div", "list-group-item text-muted small", "No matching songs."));
+      return;
+    }
+    songs.forEach(function (song) {
+      const row = el("div", "list-group-item d-flex justify-content-between align-items-center");
+      const left = el("div");
+      left.appendChild(el("strong", "", song.title));
+      if (song.origin) left.appendChild(el("span", "badge bg-secondary ms-2", song.origin));
+      if (song.artist) left.appendChild(el("div", "text-muted small", song.artist));
+      row.appendChild(left);
+      row.appendChild(actionFor(song));
+      box.appendChild(row);
+    });
+  }
+
+  input.addEventListener("input", function () {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) {
+      box.replaceChildren();
+      return;
+    }
+    timer = setTimeout(function () {
+      const thisRequest = ++latest;
+      fetch(searchUrl + "?q=" + encodeURIComponent(q), {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (thisRequest === latest) render(data.songs);  // ignore out-of-date answers
+        })
+        .catch(function () {
+          box.replaceChildren(
+            el("div", "list-group-item text-danger small", "Search failed. Please try again.")
+          );
+        });
+    }, 300);
+  });
+})();
+</script>
+
+<script>
+// 📥 Offline: register the service worker, then save this setlist's pages
+(function () {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("/sw.js");
+
+  const btn = document.getElementById("offline-btn");
+  if (!btn) return;
+  const status = document.getElementById("offline-status");
+  const urls = Array.from(document.querySelectorAll("#offline-urls li")).map(function (li) {
+    return li.dataset.url;
+  });
+
+  btn.addEventListener("click", async function () {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) {
+      status.textContent = "Offline mode is starting up. Reload this page once, then tap the button again.";
+      return;
+    }
+    btn.disabled = true;
+    let saved = 0;
+    let failed = 0;
+    const extras = new Set();
+
+    for (let i = 0; i < urls.length; i++) {
+      status.textContent = "Saving " + (i + 1) + " of " + urls.length + "…";
+      try {
+        const r = await fetch(urls[i], { credentials: "same-origin" });
+        if (!r.ok || r.redirected) throw new Error("not saved");
+        saved++;
+        // For pages, also fetch the scripts and stylesheets they use
+        if ((r.headers.get("content-type") || "").indexOf("text/html") !== -1) {
+          const doc = new DOMParser().parseFromString(await r.text(), "text/html");
+          doc.querySelectorAll("script[src], link[rel=stylesheet][href]").forEach(function (n) {
+            extras.add(new URL(n.getAttribute("src") || n.getAttribute("href"), location.href).href);
+          });
+        }
+      } catch (e) {
+        failed++;
+      }
+    }
+
+    for (const u of extras) {
+      try { await fetch(u); } catch (e) { /* a file we could not fetch: ignore */ }
+    }
+
+    btn.disabled = false;
+    status.textContent = failed
+      ? "Saved " + saved + " pages, but " + failed + " failed. Check your connection and try again."
+      : "✅ Saved " + saved + " pages for offline use. Now open the teleprompter once while online, so its fonts and icons are saved too.";
+  });
+})();
+</script>
+
 {% endblock %}
