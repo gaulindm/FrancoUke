@@ -82,6 +82,20 @@
 🎼 Riff Lab
 </a>
 {% endif %}
+{# 📥 Save this setlist for offline use (gigs without wifi) #}
+<button type="button" id="offline-btn" class="btn btn-outline-success btn-lg ms-2">
+📥 Save for offline
+</button>
+<div id="offline-status" class="small text-muted mt-2" aria-live="polite"></div>
+<ul id="offline-urls" hidden>
+  <li data-url="{{ request.path }}"></li>
+  <li data-url="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}"></li>
+  <li data-url="{% url 'setlists:setlist_pdf' group_slug=request.group.slug pk=setlist.id %}?large=1"></li>
+  {% for item in songs %}
+  <li data-url="{% url 'setlists:setlist_teleprompter' group_slug=request.group.slug setlist_id=setlist.id order=item.order %}"></li>
+  <li data-url="{% url 'songbook:chord_sheet' item.song.pk %}"></li>
+  {% endfor %}
+</ul>
   </div>
 <br>
   {% endif %}
@@ -398,6 +412,60 @@
           );
         });
     }, 300);
+  });
+})();
+</script>
+
+<script>
+// 📥 Offline: register the service worker, then save this setlist's pages
+(function () {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("/sw.js");
+
+  const btn = document.getElementById("offline-btn");
+  if (!btn) return;
+  const status = document.getElementById("offline-status");
+  const urls = Array.from(document.querySelectorAll("#offline-urls li")).map(function (li) {
+    return li.dataset.url;
+  });
+
+  btn.addEventListener("click", async function () {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) {
+      status.textContent = "Offline mode is starting up. Reload this page once, then tap the button again.";
+      return;
+    }
+    btn.disabled = true;
+    let saved = 0;
+    let failed = 0;
+    const extras = new Set();
+
+    for (let i = 0; i < urls.length; i++) {
+      status.textContent = "Saving " + (i + 1) + " of " + urls.length + "…";
+      try {
+        const r = await fetch(urls[i], { credentials: "same-origin" });
+        if (!r.ok || r.redirected) throw new Error("not saved");
+        saved++;
+        // For pages, also fetch the scripts and stylesheets they use
+        if ((r.headers.get("content-type") || "").indexOf("text/html") !== -1) {
+          const doc = new DOMParser().parseFromString(await r.text(), "text/html");
+          doc.querySelectorAll("script[src], link[rel=stylesheet][href]").forEach(function (n) {
+            extras.add(new URL(n.getAttribute("src") || n.getAttribute("href"), location.href).href);
+          });
+        }
+      } catch (e) {
+        failed++;
+      }
+    }
+
+    for (const u of extras) {
+      try { await fetch(u); } catch (e) { /* a file we could not fetch: ignore */ }
+    }
+
+    btn.disabled = false;
+    status.textContent = failed
+      ? "Saved " + saved + " pages, but " + failed + " failed. Check your connection and try again."
+      : "✅ Saved " + saved + " pages for offline use. Now open the teleprompter once while online, so its fonts and icons are saved too.";
   });
 })();
 </script>
