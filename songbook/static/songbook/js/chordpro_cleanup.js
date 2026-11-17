@@ -7,7 +7,10 @@
  *
  * What it does:
  *   - gathers the header directives into one block at the top (title and artist
- *     first), in a standard order; KEEPS empty directives
+ *     first), in a standard order; KEEPS empty directives. Header tags handled:
+ *     title, artist, youtube, songwriter, capo, key, year, 1stnote, 1stvocal,
+ *     tempo, timeSignature, strumming, count_in, simple_instruction_1/2,
+ *     short_instruction_1/2, suggested_alternate
  *   - drops an empty directive only when the same directive also has a value
  *   - REMOVES the tags this club never uses: {album:}, {recording:}  ({tempo:} is KEPT)
  *   - moves any YouTube link on its own line (header or body, with or without
@@ -44,8 +47,9 @@
   // Output order of the header block (display names keep their capitals).
   var HEADER_NAMES = [
     "title", "artist", "youtube", "songwriter", "capo", "key",
-    "year", "1stnote", "tempo", "timeSignature",
-    "strumming", "count_in", "short_instruction_1", "short_instruction_2",
+    "year", "1stnote", "1stvocal", "tempo", "timeSignature",
+    "strumming", "count_in",
+    "short_instruction_1", "short_instruction_2",
     "suggested_alternate"
   ];
   var HEADER_LOOKUP = {};
