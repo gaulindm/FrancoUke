@@ -104,12 +104,8 @@
                 {% if song.origin %}
                   <span class="badge bg-secondary origin-badge ms-1" title="Origin: {{ song.origin }}">{{ song.origin }}</span>
                 {% endif %}
-                {% if song.note_count > 0 %}
-
-                {% if group %}
+                {% if song.note_count > 0 and group %}
                   <a href="{% url 'board:song_rehearsal_history' group_slug=group.slug song_id=song.id %}"
-                {% endif %}
-
                      class="btn btn-sm btn-outline-info ms-2"
                      title="View rehearsal notes for {{ song.songTitle }}"
                      data-bs-toggle="tooltip">
@@ -135,7 +131,9 @@
 
       <!-- CURRENT SETLIST -->
       <div class="col-md-6">
-        <h5>Current Setlist</h5>
+        <h5>Current Setlist
+          <span id="setlist-count" class="badge bg-success ms-2">0 songs</span>
+        </h5>
         <ul id="setlist-songs" class="list-group mb-3" style="max-height: 70vh; overflow-y: auto;">
           
           {% for item in setlist.songs.all %}
@@ -193,11 +191,34 @@ document.addEventListener("DOMContentLoaded", function () {
   const setlistEl = document.getElementById("setlist-songs");
   let currentAjax = null;
 
-  // ✅ Enable drag-and-drop sorting
+  // ✅ Enable drag-and-drop sorting (reordering counts as an unsaved change)
   Sortable.create(setlistEl, {
     handle: ".drag-handle",
     animation: 150,
+    onSort: markDirty,
   });
+
+  // ✅ Live song count + position numbers before each title
+  const countEl = document.getElementById("setlist-count");
+  function updateCount() {
+    const items = setlistEl.querySelectorAll("li[data-id]");
+    const n = items.length;
+    countEl.textContent = n === 1 ? "1 song" : `${n} songs`;
+
+    items.forEach((li, i) => {
+      let num = li.querySelector(".song-number");
+      if (!num) {
+        num = document.createElement("span");
+        num.className = "song-number text-muted me-2";
+        num.style.minWidth = "1.6rem";
+        num.style.textAlign = "right";
+        li.querySelector("strong").before(num);
+      }
+      num.textContent = `${i + 1}.`;
+    });
+  }
+  updateCount();  // songs already saved in this setlist
+  new MutationObserver(updateCount).observe(setlistEl, { childList: true });
 
   // ✅ Prevent Enter key from submitting
   searchInput.addEventListener("keydown", (e) => {
@@ -280,6 +301,7 @@ function bindAddButtons() {
         <button type="button" class="btn btn-sm btn-danger remove-song">❌</button>
       `;
       setlistEl.appendChild(li);
+      markDirty();  // ⚡ adding a song is an unsaved change too
       showToast(`✅ Added "${songTitle}"`);
     });
   });
@@ -329,7 +351,6 @@ setlistEl.addEventListener("click", (e) => {
   }
   document.getElementById("setlist-form").addEventListener("input", markDirty);
   document.getElementById("setlist-form").addEventListener("change", markDirty);
-  setlistEl.addEventListener("sortupdate", markDirty);
   document.getElementById("setlist-form").addEventListener("submit", function () {
     markClean();
   });
