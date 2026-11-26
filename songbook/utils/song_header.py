@@ -76,7 +76,11 @@ def build_song_header(song, show_strumming=True):
 
     # --- "Recorded by" line (omitted entirely when there is no artist) ---
     recorded_by = ""
-    if artist and adapted_from:
+    if artist.lower().startswith("arranged by"):
+        # {artist:Arranged by Bob Guz in 2017} - show exactly what was typed,
+        # no year, no capo wording
+        recorded_by = artist
+    elif artist and adapted_from:
         # New words to an existing song: no recording to match, so no capo talk
         recorded_by = f"Adapted from “{adapted_from}” by {artist}"
         if year:
