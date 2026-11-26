@@ -21,7 +21,7 @@
 
   {% if h.show_row1 %}
     <div class="sh-side sh-left">{{ h.first_note_text }}</div>
-    <div class="sh-writer">{{ h.songwriter }}</div>
+    <div class="sh-writer">{% for line in h.songwriter_lines %}<div>{{ line }}</div>{% endfor %}</div>
     <div class="sh-side sh-right">{{ h.row1_right }}</div>
   {% endif %}
 

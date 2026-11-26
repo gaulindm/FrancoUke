@@ -70,13 +70,28 @@ def build_song_header(song, show_strumming=True):
     artist = _clean(metadata.get("artist"))
     songwriter = _clean(metadata.get("songwriter"))
     year = metadata.get("year")
+
+    # "Arranged by ..." songs are usually medleys: one songwriter credit per line.
+    # Separate the credits with ";" (or a new line) in the {songwriter:} tag, e.g.
+    #   {songwriter: Three Little Birds - Bob Marley; Over the Rainbow - Harold Arlen}
+    is_arranged = artist.lower().startswith("arranged by")
+    raw_songwriter = metadata.get("songwriter")
+    if is_arranged:
+        if isinstance(raw_songwriter, (list, tuple)):
+            parts = [_clean(p) for p in raw_songwriter]
+        else:
+            parts = re.split(r"[;\n]+", songwriter)
+        songwriter_lines = [p.strip() for p in parts if p and p.strip()]
+    else:
+        songwriter_lines = [songwriter] if songwriter else []
+    songwriter = "\n".join(songwriter_lines)
     capo_value = metadata.get("capo")
 
     adapted_from = _clean(metadata.get("adapted_from"))
 
     # --- "Recorded by" line (omitted entirely when there is no artist) ---
     recorded_by = ""
-    if artist.lower().startswith("arranged by"):
+    if is_arranged:
         # {artist:Arranged by Bob Guz in 2017} - show exactly what was typed,
         # no year, no capo wording
         recorded_by = artist
@@ -129,7 +144,8 @@ def build_song_header(song, show_strumming=True):
         "subtitle": _clean(metadata.get("subtitle")),  # teleprompter only; the PDF does not print it
         "time_signature": time_signature,
         "strumming": strumming,
-        "songwriter": songwriter,
+        "songwriter": songwriter,            # lines joined with "\n"
+        "songwriter_lines": songwriter_lines,  # same, as a list (one per line)
         "first_note_text": f"1st vocal note: {first_note}" if first_note else "",
         "row1_right": row1_right,
         "count_in_text": f"Count in: {count_in}" if count_in else "",

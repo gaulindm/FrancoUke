@@ -352,7 +352,7 @@ def build_song_elements(song, styles, styles_dict, site_name,
     if h["show_row1"]:
         header_data.append([
             Paragraph(h["first_note_text"], first_vocal_note_style),
-            Paragraph(h["songwriter"], songwriter_style),
+            Paragraph("<br/>".join(h["songwriter_lines"]), songwriter_style),  # one credit per line
             Paragraph(h["row1_right"], header_instruction_style),
         ])
     if h["show_row2"]:
