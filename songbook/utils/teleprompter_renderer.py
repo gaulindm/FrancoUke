@@ -2,6 +2,11 @@ import logging
 import re
 from html import escape as html_escape
 
+try:
+    from .chord_defines import parse_define_directives
+except ImportError:   # file is not inside a package
+    from chord_defines import parse_define_directives
+
 logger = logging.getLogger(__name__)
 
 def merge_chord_pieces(items):
@@ -64,6 +69,7 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
         "year": None,
         "songwriter": None,
         "recording": None,
+        "defines": {},   # 🆕 per-song chord diagrams from {define: ...}
     }
 
     html = []
@@ -214,6 +220,11 @@ def render_lyrics_with_chords_html(lyrics_with_chords, site_name="StrumSphere", 
                     metadata["songwriter"] = val
                 elif key == "recording":
                     metadata["recording"] = val
+
+                # 🆕 {define: F/G frets 0 0 1 0} -> diagram for this song only.
+                # Nothing is rendered; the view passes metadata["defines"] on.
+                elif key == "define":
+                    metadata["defines"].update(parse_define_directives(directive))
 
                 # Section markers
                 elif directive in selected_map:

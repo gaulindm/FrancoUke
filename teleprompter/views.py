@@ -80,6 +80,25 @@ def teleprompter_view(request, song_id, beginner=False):
     raw_lyrics = "".join(raw_lines)
 
     # -----------------------------
+    # 🌐 Site context
+    # -----------------------------
+    context_data = site_context(request)
+    site_name = context_data["site_name"]
+
+    # -----------------------------
+    # 🧾 Render lyrics HTML
+    # (done before the chord lookup so metadata["defines"] is available)
+    # -----------------------------
+    lyrics_html, metadata = render_lyrics_with_chords_html(
+        song.lyrics_with_chords,
+        site_name,
+        chord_position="above",  # the page switches Above/Inline with CSS
+    )
+
+    # 🆕 Chords this song defines itself with {define: F/G frets 0 0 1 0}
+    song_defines = metadata.get("defines", {})
+
+    # -----------------------------
     # 🎸 Extract chords
     # -----------------------------
     chord_pattern = re.compile(
@@ -88,7 +107,13 @@ def teleprompter_view(request, song_id, beginner=False):
     found_chords = chord_pattern.findall(raw_lyrics)
 
     # Normalize BEFORE deduplication
-    normalized_map = {raw: clean_chord_name(raw) for raw in found_chords}
+    # 🆕 A chord defined in the song (e.g. F/G) is used as-is, so it is not
+    # reduced to its plain chord (F) and looked up in the dictionary.
+    # "F/G//" (with strumming slashes) counts as "F/G".
+    defined_raw = {raw for raw in found_chords if raw.rstrip("/") in song_defines}
+    normalized_map = {
+        raw: clean_chord_name(raw) for raw in found_chords if raw not in defined_raw
+    }
     normalized_unique = sorted(set(normalized_map.values()))
 
     # -----------------------------
@@ -126,21 +151,6 @@ def teleprompter_view(request, song_id, beginner=False):
         ]
 
     # -----------------------------
-    # 🌐 Site context
-    # -----------------------------
-    context_data = site_context(request)
-    site_name = context_data["site_name"]
-
-    # -----------------------------
-    # 🧾 Render lyrics HTML
-    # -----------------------------
-    lyrics_html, metadata = render_lyrics_with_chords_html(
-        song.lyrics_with_chords,
-        site_name,
-        chord_position="above",  # the page switches Above/Inline with CSS
-    )
-
-    # -----------------------------
     # 🐛 DEBUG (only runs when the logger is set to DEBUG)
     # -----------------------------
     if logger.isEnabledFor(logging.DEBUG):
@@ -159,6 +169,17 @@ def teleprompter_view(request, song_id, beginner=False):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("After color markup (first 400 chars): %s", lyrics_html[:400])
         logger.debug("Contains <span style=> tags: %s", "<span style=" in lyrics_html)
+
+    # -----------------------------
+    # 🆕 Song-specific {define:} chords
+    # Added AFTER the known-chord filter: they are not in the dictionary,
+    # so the player should always see their diagram.
+    # -----------------------------
+    for key in sorted({raw.rstrip("/") for raw in defined_raw}):
+        relevant_chords.append({
+            "name": key,
+            "variations": [song_defines[key]],
+        })
 
     # -----------------------------
     # 🛠 User prefs (sent to JS)

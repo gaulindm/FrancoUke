@@ -8,6 +8,7 @@ from django.conf import settings
 from songbook.utils.transposer import normalize_chord, clean_chord, transpose_chord
 from songbook.utils.chords.comparison import chord_equivalent
 from songbook.utils.chords.normalize import normalize_variation
+from songbook.utils.chord_defines import parse_define_directives   # 🆕 {define:} chords
 
 
 logger = logging.getLogger(__name__)
@@ -99,6 +100,29 @@ def extract_used_chords(lyrics_with_chords: Any) -> list[str]:
 
     traverse_structure(lyrics_with_chords)
     return sorted(chords)
+
+def extract_song_defines(lyrics_with_chords: Any) -> Dict[str, Dict[str, Any]]:
+    """
+    🆕 Collect the song's {define: F/G frets 0 0 1 0} directives.
+    Returns {chord_name: {"positions": [...], "baseFret": n}}.
+    """
+    lines: List[str] = []
+
+    def traverse_structure(data: Any):
+        if isinstance(data, dict):
+            directive = data.get("directive")
+            if isinstance(directive, str) and directive.strip().lower().startswith("{define"):
+                lines.append(directive.strip())
+            for value in data.values():
+                if isinstance(value, (list, dict)):
+                    traverse_structure(value)
+        elif isinstance(data, list):
+            for item in data:
+                traverse_structure(item)
+
+    traverse_structure(lyrics_with_chords)
+    return parse_define_directives("\n".join(lines))
+
 
 # =======================
 # LOAD RELEVANT CHORDS
@@ -243,6 +267,15 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
     # Extract raw chords from the song
     # ------------------------------------------------------------
     raw_used = extract_used_chords(songs[0].lyrics_with_chords)
+
+    # 🆕 Chords the song defines itself ({define: F/G frets 0 0 1 0}) skip the
+    # dictionary and are added at the end. Only when NOT transposing here: a
+    # define is a fixed shape for the chord as written. (The PDF views transpose
+    # the lyrics first and pass transpose_value=0, so a transposed F/G becomes
+    # G/A, which no longer matches its define and falls back to the dictionary.)
+    song_defines = {} if transpose_value else extract_song_defines(songs[0].lyrics_with_chords)
+    defined_raw = {ch for ch in raw_used if ch.rstrip("/") in song_defines}
+    raw_used = [ch for ch in raw_used if ch not in defined_raw]
     
     # 🐛 DEBUG
     print(f"Raw chords extracted: {raw_used}")
@@ -313,6 +346,16 @@ def load_relevant_chords(songs, user_prefs, transpose_value, suggested_alternate
                 secondary_inst, transposed_chords, requested_variations, show_alternates, added_keys
             )
         )
+
+    # 🆕 Song-specific chords: drawn with the primary instrument's diagrams
+    for key in sorted({ch.rstrip("/") for ch in defined_raw}):
+        relevant_chords.append({
+            "name": key,
+            "variations": [song_defines[key]],
+            "instrument": primary_inst,
+            "requested_name": key,
+            "custom": True,   # tells the footer to print the name as written
+        })
 
     print(f"Final relevant_chords count: {len(relevant_chords)}")
     print("=" * 60)

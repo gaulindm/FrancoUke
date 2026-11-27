@@ -889,7 +889,8 @@ def generate_songs_pdf(response, songs, user, transpose_value=0, formatting=None
         # Filter out known chords UNLESS they were explicitly requested
         relevant_chords = [
             chord for chord in relevant_chords
-            if (normalize_chord(chord["name"]).lower() not in known_set or
+            if (chord.get("custom") or   # 🆕 {define:} chords are never in the player's known list
+                normalize_chord(chord["name"]).lower() not in known_set or
                 normalize_chord(chord["name"]).lower() in explicitly_requested)
         ]
 

@@ -68,6 +68,7 @@ def prepare_chords(chords: List[Dict[str, Any]], is_printing_alternate_chord: bo
                 "name": chord_name,
                 "variation": normalized_var,
                 "variation_index": idx,
+                "custom": bool(chord.get("custom")),   # 🆕 {define:} chord
             })
 
 
@@ -94,7 +95,9 @@ def draw_diagrams(
     for row in rows:
         x_offset = start_x + (canvas._pagesize[0] / 2 - len(row) * chord_spacing / 2)
         for chord in row:
-            display_name = clean_chord(chord.get("name", ""))
+            # 🆕 {define:} chords (e.g. F/G) keep their name; clean_chord could shorten it
+            display_name = (chord.get("name", "") if chord.get("custom")
+                            else clean_chord(chord.get("name", "")))
             diagram_var = chord.get("variation", {})
             diag = ChordDiagram(display_name, diagram_var, scale=0.5, is_lefty=is_lefty, instrument=instrument)
             diag.canv = canvas
@@ -156,7 +159,9 @@ def _draw_diagram_rows(canvas, rows, start_y, center_x, chord_spacing, row_spaci
         x_offset = center_x - row_width / 2  # center row on center_x
 
         for chord in row:
-            display_name = clean_chord(chord.get("name", ""))
+            # 🆕 {define:} chords (e.g. F/G) keep their name; clean_chord could shorten it
+            display_name = (chord.get("name", "") if chord.get("custom")
+                            else clean_chord(chord.get("name", "")))
             diagram_var = chord.get("variation", {})
 
             diag = ChordDiagram(
